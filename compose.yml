@@ -65,7 +65,7 @@ services:
   #   networks:
   #     - cdp-tenant
 
-  cdp-node-backend-template:
+  fcp-dal-upstream-mock:
     build:
       context: .
       target: development
