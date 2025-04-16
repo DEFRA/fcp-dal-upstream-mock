@@ -8,7 +8,6 @@
     "node": ">=22"
   },
   "scripts": {
-    "docker:dev": "NODE_ENV=development npm run server:watch",
     "dev": "NODE_ENV=development npm run server:watch",
     "dev:debug": "NODE_ENV=development npm run server:debug",
     "format": "prettier --write \"**/*.{cjs,js,json,md}\"",
