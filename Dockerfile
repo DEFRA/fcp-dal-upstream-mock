@@ -50,7 +50,6 @@ LABEL uk.gov.defra.ffc.parent-image=gcr.io/distroless/nodejs:${PROD_PARENT_VERSI
 
 # add curl to satisfy platform health check demands
 COPY --from=curl /root/src/curl /usr/bin/curl
-# ENTRYPOINT [ "" ]
 
 ARG PORT
 ENV PORT=${PORT}
@@ -59,5 +58,6 @@ WORKDIR /home/nonroot
 COPY --from=base /home/node/node_modules ./node_modules
 COPY src ./src
 
+ENV NODE_ENV=production
 USER nonroot
 CMD [ "src/index.js" ]
