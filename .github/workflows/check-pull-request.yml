@@ -19,16 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Test code and Create Test Coverage Reports
+      - name: Setup Node and NPM
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: '22'
           cache: npm
-      - run: |
-          npm ci
-          npm run format:check
-          npm run lint
-          npm test
+
+      - name: Install, lint, & test
+        run: npm cit
 
       - name: Test Docker Image Build
         run: |

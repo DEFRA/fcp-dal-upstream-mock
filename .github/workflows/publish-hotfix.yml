@@ -22,14 +22,14 @@ jobs:
         with:
           fetch-depth: 0 # Depth 0 is required for branch-based versioning
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node and NPM
+        uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: '22'
           cache: npm
 
-      # Ensure tests pass. Add more checks if required
-      - run: npm ci
-      - run: npm test
+      - name: Install, lint, & test
+        run: npm cit
 
       - name: Publish Hot Fix
         uses: DEFRA/cdp-build-action/build-hotfix@main
