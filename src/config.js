@@ -64,13 +64,6 @@ const config = convict({
       format: ['ecs', 'pino-pretty'],
       default: isProduction ? 'ecs' : 'pino-pretty',
       env: 'LOG_FORMAT'
-    },
-    redact: {
-      doc: 'Log paths to redact',
-      format: Array,
-      default: isProduction
-        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : ['req', 'res', 'responseTime']
     }
   },
   isSecureContextEnabled: {
