@@ -41,13 +41,7 @@ async function createServer() {
   // secureContext  - loads CA certificates from environment config
   // pulse          - provides shutdown handlers
   // router         - routes used in the app
-  await server.register([
-    requestLogger,
-    requestTracing,
-    secureContext,
-    pulse,
-    router
-  ])
+  await server.register([requestLogger, requestTracing, secureContext, pulse, router])
 
   return server
 }

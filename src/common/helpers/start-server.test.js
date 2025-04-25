@@ -56,14 +56,8 @@ describe('#startServer', () => {
 
       expect(createServerSpy).toHaveBeenCalled()
       expect(hapiServerSpy).toHaveBeenCalled()
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        1,
-        'Custom secure context is disabled'
-      )
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        2,
-        'Server started successfully'
-      )
+      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(1, 'Custom secure context is disabled')
+      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(2, 'Server started successfully')
       expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
         3,
         'Access your backend on http://localhost:3098'
@@ -80,9 +74,7 @@ describe('#startServer', () => {
       await startServerImport.startServer()
 
       expect(mockLoggerInfo).toHaveBeenCalledWith('Server failed to start :(')
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        Error('Server failed to start')
-      )
+      expect(mockLoggerError).toHaveBeenCalledWith(Error('Server failed to start'))
     })
   })
 })

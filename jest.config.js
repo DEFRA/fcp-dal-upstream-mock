@@ -9,11 +9,7 @@ export default {
   reporters: ['default', ['github-actions', { silent: false }], 'summary'],
   setupFiles: ['<rootDir>/.jest/setup-files.js'],
   collectCoverageFrom: ['src/**/*.js'],
-  coveragePathIgnorePatterns: [
-    '<rootDir>/node_modules/',
-    '<rootDir>/.server',
-    'index.js'
-  ],
+  coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.server', 'index.js'],
   coverageDirectory: '<rootDir>/coverage',
   transform: {
     '^.+\\.js$': 'babel-jest'

@@ -1,8 +1,5 @@
 import Boom from '@hapi/boom'
-import {
-  organisationCPH,
-  organisationCPHInfo
-} from '../../plugins/data/organisation-cph.js'
+import { organisationCPH, organisationCPHInfo } from '../../plugins/data/organisation-cph.js'
 
 export const sitiAgri = [
   {
