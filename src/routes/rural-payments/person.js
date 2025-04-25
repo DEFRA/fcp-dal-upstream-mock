@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
-import { personById } from '../../fixtures/person.js'
-import { pagination } from '../../fixtures/pagination.js'
-import { organisationPersonSummary } from '../../fixtures/organisation.js'
+import { personById } from '../../plugins/data/person.js'
+import { pagination } from '../../plugins/data/pagination.js'
+import { organisationPersonSummary } from '../../plugins/data/organisation.js'
 
 export const person = [
   {
