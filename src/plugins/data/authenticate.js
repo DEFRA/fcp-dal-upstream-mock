@@ -1,7 +1,5 @@
-import files from '../../utils/files.js'
-
-const { getJSON } = files(import.meta.url)
+import { loadFromFixtures } from '../../utils/loadFromFixtures.js'
 
 export const authenticateAnswers = (crn) => {
-  return getJSON(`./crn/${crn}/authenticate.json`)
+  return loadFromFixtures(`./crn/${crn}/authenticate.json`)
 }
