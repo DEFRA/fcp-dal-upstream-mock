@@ -1,9 +1,7 @@
-import files from '../../utils/files.js'
-
-const { getJSON } = files(import.meta.url)
+import { loadFromFixtures } from '../../utils/loadFromFixtures.js'
 
 export const messages = (personId, page = 1, size = 3) => {
-  const response = getJSON(`./personId/${personId}/messages.json`)
+  const response = loadFromFixtures(`./personId/${personId}/messages.json`)
   const end = size * page
   const start = end - size
 

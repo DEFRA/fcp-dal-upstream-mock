@@ -1,13 +1,10 @@
-import files from '../../utils/files.js'
+import { loadFromFixtures } from '../../utils/loadFromFixtures.js'
 
-const { getJSON } = files(import.meta.url)
+export const personById = (id) => {
+  return loadFromFixtures(`./personId/${id}/detail.json`)
+}
 
-export const personById = (attributes = {}) => {
-  if (attributes.customerReferenceNumber) {
-    const personIdCrnMap = getJSON(
-      '../../../fixtures/personId/personIdCrnMap.json'
-    )
-    attributes.id = personIdCrnMap[attributes.customerReferenceNumber]
-  }
-  return getJSON(`../../../fixtures/personId/${attributes.id}/detail.json`)
+export const personByCrn = (crn) => {
+  const personIdCrnMap = loadFromFixtures('./personId/personIdCrnMap.json')
+  return personById(personIdCrnMap[crn])
 }

@@ -1,9 +1,7 @@
-import files from '../../utils/files.js'
-
-const { getJSON } = files(import.meta.url)
+import { loadFromFixtures } from '../../utils/loadFromFixtures.js'
 
 export const sitiAgriAuthorisationOrganisation = (attributes = {}) => {
-  return getJSON(
+  return loadFromFixtures(
     `./orgId/${attributes.organisationId}/siti-agri-authorisation-organisation.json`
   )
 }
