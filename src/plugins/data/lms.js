@@ -1,13 +1,11 @@
-import files from '../../utils/files.js'
-
-const { getJSON } = files(import.meta.url)
+import { loadFromFixtures } from '../../utils/loadFromFixtures.js'
 
 export const coversSummary = (orgId) => {
-  return getJSON(`./orgId/${orgId}/covers-summary.json`)
+  return loadFromFixtures(`./orgId/${orgId}/covers-summary.json`)
 }
 
 export const landCovers = (orgId) => {
-  return getJSON(`./orgId/${orgId}/land-covers.json`)
+  return loadFromFixtures(`./orgId/${orgId}/land-covers.json`)
 }
 
 export const landCover = (orgId, sheetId, parcelId) => {
@@ -35,12 +33,12 @@ export const landCover = (orgId, sheetId, parcelId) => {
 }
 
 export const landParcels = (orgId) => {
-  return getJSON(`./orgId/${orgId}/land-parcels.json`)
+  return loadFromFixtures(`./orgId/${orgId}/land-parcels.json`)
 }
 
 export const landParcelDates = (orgId) => {
   const parcels = landParcels(orgId)
-  const parcelsDates = getJSON(
+  const parcelsDates = loadFromFixtures(
     `./orgId/${orgId}/land-parcels-effective-dates.json`
   )
   return parcels.map((parcel) => {
@@ -57,5 +55,5 @@ export const landParcelDates = (orgId) => {
 }
 
 export const landParcelsGeometry = (orgId) => {
-  return getJSON(`./orgId/${orgId}/land-parcels-geometry.json`)
+  return loadFromFixtures(`./orgId/${orgId}/land-parcels-geometry.json`)
 }

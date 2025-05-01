@@ -1,11 +1,9 @@
-import files from '../../utils/files.js'
-
-const { getJSON } = files(import.meta.url)
+import { loadFromFixtures } from '../../utils/loadFromFixtures.js'
 
 export const organisationCPHInfo = (orgId) => {
-  return getJSON(`./orgId/${orgId}/cph-info.json`)
+  return loadFromFixtures(`./orgId/${orgId}/cph-info.json`)
 }
 
 export const organisationCPH = (orgId) => {
-  return getJSON(`./orgId/${orgId}/cph.json`)
+  return loadFromFixtures(`./orgId/${orgId}/cph.json`)
 }
