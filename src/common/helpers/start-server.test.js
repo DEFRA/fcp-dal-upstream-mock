@@ -56,10 +56,9 @@ describe('#startServer', () => {
 
       expect(createServerSpy).toHaveBeenCalled()
       expect(hapiServerSpy).toHaveBeenCalled()
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(1, 'Custom secure context is disabled')
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(2, 'Server started successfully')
+      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(1, 'Server started successfully')
       expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        3,
+        2,
         'Access your backend on http://localhost:3098'
       )
     })

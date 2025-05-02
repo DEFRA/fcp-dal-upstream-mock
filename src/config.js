@@ -57,12 +57,6 @@ const config = convict({
       env: 'LOG_FORMAT'
     }
   },
-  isSecureContextEnabled: {
-    doc: 'Enable Secure Context',
-    format: Boolean,
-    default: isProduction,
-    env: 'ENABLE_SECURE_CONTEXT'
-  },
   isMetricsEnabled: {
     doc: 'Enable metrics reporting',
     format: Boolean,
