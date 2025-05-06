@@ -29,7 +29,4 @@ jobs:
         run: npm cit
 
       - name: Test Docker Image Build
-        run: |
-          set +e
-          docker build --no-cache --tag cdp-node-backend-template .
-          exit $?
+        run: docker build --no-cache --tag fcp-dal-upstream-mock .
