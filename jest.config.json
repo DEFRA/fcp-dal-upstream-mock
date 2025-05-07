@@ -2,7 +2,7 @@
   "testMatch": ["<rootDir>/test/**/*.test.js"],
   "transform": {},
   "collectCoverage": true,
-  "collectCoverageFrom": ["<rootDir>/app/**/*.js"],
+  "collectCoverageFrom": ["<rootDir>/src/**/*.js"],
   "coverageDirectory": "coverage",
   "coverageReporters": ["text-summary", "lcov"],
   "verbose": true,
