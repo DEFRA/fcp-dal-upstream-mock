@@ -10,15 +10,14 @@
   "scripts": {
     "dev": "NODE_ENV=development npm run server:watch",
     "dev:debug": "NODE_ENV=development npm run server:debug",
-    "format": "prettier --write \"**/*.{cjs,js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{cjs,js,json,md}\"",
-    "git:pre-commit-hook": "npm run format:check && npm run lint",
+    "git:pre-commit-hook": "npm run lint",
     "postinstall": "npm run setup:husky",
-    "lint": "eslint --cache --cache-strategy content \"**/*.{cjs,js}\"",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "eslint . && prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
-    "test": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand",
-    "test:watch": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
+    "pretest": "npm run lint",
+    "test": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
     "server:watch": "nodemon --inspect=0.0.0.0 --ext js,json --legacy-watch ./src",
     "server:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,json --legacy-watch ./src",
     "start": "NODE_ENV=production node --use-strict .",
@@ -31,27 +30,27 @@
     "@elastic/ecs-pino-format": "1.5.0",
     "@hapi/boom": "10.0.1",
     "@hapi/hapi": "21.3.12",
-    "aws-embedded-metrics": "4.2.0",
-    "aws4": "1.13.2",
     "convict": "6.2.4",
     "convict-format-with-validator": "6.2.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-jest": "28.11.0",
     "hapi-pino": "12.1.0",
     "hapi-pulse": "3.0.1",
-    "joi": "17.13.3",
     "pino": "9.5.0",
     "pino-pretty": "13.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.26.9",
-    "@babel/preset-env": "7.26.9",
-    "autoprefixer": "10.4.20",
-    "babel-jest": "29.7.0",
-    "babel-plugin-transform-import-meta": "2.3.2",
     "eslint": "9.22.0",
+    "globals": "16.0.0",
     "husky": "9.1.6",
     "jest": "29.7.0",
-    "neostandard": "0.12.1",
     "nodemon": "3.1.7",
     "prettier": "3.3.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint-plugin-import",
+      "eslint-plugin-jest"
+    ]
   }
 }

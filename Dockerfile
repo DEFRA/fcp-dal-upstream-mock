@@ -28,9 +28,10 @@ RUN apk add --no-cache curl
 USER node
 
 COPY package*.json ./
-COPY src ./src
-
 RUN npm ci --omit=dev
+
+COPY fixtures ./fixtures
+COPY src ./src
 
 ARG PORT
 ENV PORT=${PORT}
