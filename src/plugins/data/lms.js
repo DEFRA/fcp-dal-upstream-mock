@@ -38,13 +38,9 @@ export const landParcels = (orgId) => {
 
 export const landParcelDates = (orgId) => {
   const parcels = landParcels(orgId)
-  const parcelsDates = loadFromFixtures(
-    `./orgId/${orgId}/land-parcels-effective-dates.json`
-  )
+  const parcelsDates = loadFromFixtures(`./orgId/${orgId}/land-parcels-effective-dates.json`)
   return parcels.map((parcel) => {
-    const parcelDates = parcelsDates.find(
-      (date) => date.parcelId === parcel.parcelId
-    )
+    const parcelDates = parcelsDates.find((date) => date.parcelId === parcel.parcelId)
     return {
       sheetId: parcel.sheetId,
       parcelId: parcel.parcelId,

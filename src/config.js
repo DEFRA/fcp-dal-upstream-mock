@@ -33,16 +33,7 @@ const config = convict({
   },
   cdpEnvironment: {
     doc: 'The CDP environment the app is running in. With the addition of "local" for local development',
-    format: [
-      'local',
-      'infra-dev',
-      'management',
-      'dev',
-      'test',
-      'perf-test',
-      'ext-test',
-      'prod'
-    ],
+    format: ['local', 'infra-dev', 'management', 'dev', 'test', 'perf-test', 'ext-test', 'prod'],
     default: 'local',
     env: 'ENVIRONMENT'
   },
@@ -65,12 +56,6 @@ const config = convict({
       default: isProduction ? 'ecs' : 'pino-pretty',
       env: 'LOG_FORMAT'
     }
-  },
-  isSecureContextEnabled: {
-    doc: 'Enable Secure Context',
-    format: Boolean,
-    default: isProduction,
-    env: 'ENABLE_SECURE_CONTEXT'
   },
   isMetricsEnabled: {
     doc: 'Enable metrics reporting',
