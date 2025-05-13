@@ -174,7 +174,7 @@ describe('Check basic requests', () => {
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
-      expect(json._data).toHaveLength(5)
+      expect(json._data).toHaveLength(6)
       expect(json._data).toContainEqual({
         confirmed: false,
         customerReference: '1638563942',
