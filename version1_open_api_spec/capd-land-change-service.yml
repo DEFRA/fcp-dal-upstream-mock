@@ -1,0 +1,295 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:9033
+  description: Generated server url
+paths:
+  /land-change/v1/land/change:
+    post:
+      tags:
+      - land-change-controller
+      summary: submits a land change to LMS
+      description: "Endpoint to submit a land change, in case of errors will also\
+        \ return a list of those errors"
+      operationId: submitLandChange
+      parameters:
+      - name: userType
+        in: header
+        required: false
+        schema:
+          type: string
+          enum:
+          - internal
+          - external
+          - ida_no_match
+      requestBody:
+        description: Land change request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LandChangeRequest'
+            examples:
+              Boundary change request:
+                summary: A boundary change request
+                description: Boundary change request
+                value:
+                  changeType: LANDCOVER_CHANGE
+                  organisationId: 123
+                  personId: 567
+                  sbi: 123456789
+                  frn: 99998888
+                  crn: 654321
+                  parcels:
+                  - parcelId: P123
+                    sheetId: SH12
+                    effectiveDate: 20/03/2023
+                    coverChange:
+                      currentCoverTypeName: Permanent Grassland
+                      newCoverTypeName: Arable
+                  - parcelId: P321
+                    sheetId: SH12
+                    effectiveDate: 20/03/2023
+                    coverChange:
+                      currentCoverTypeName: Permanent Grassland
+                      newCoverTypeName: Arable
+                  schemes:
+                  - schemeA
+                  - schemeB
+                  documents:
+                  - doc1a
+                  - doc1b
+        required: true
+      responses:
+        "201":
+          description: Change accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandChangeResponse'
+              examples:
+                Change accepted:
+                  summary: The land change has been accepted
+                  description: Change accepted
+                  value: {}
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandChangeResponse'
+              examples:
+                There was a unexpected service error and the service is unable to submit the change:
+                  summary: Unable to validate
+                  description: There was a unexpected service error and the service
+                    is unable to submit the change
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /land-change/v1/land/cover/types:
+    get:
+      tags:
+      - land-change-controller
+      summary: Returns a list with all the available land cover types
+      description: Endpoint that returns a list with all the available land cover
+        types for a user to change and then submit as a change request to LMS
+      operationId: getLandCoverTypes
+      responses:
+        "200":
+          description: Values returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              examples:
+                Land change types:
+                  summary: A list of land change types
+                  description: Land change types
+                  value:
+                  - Arable Land
+                  - Permanent Crops
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandChangeResponse'
+              examples:
+                There was a unexpected service error and the service is unable to return the land covers:
+                  summary: Unable to return land covers
+                  description: There was a unexpected service error and the service
+                    is unable to return the land covers
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /land-change/v1/history/{organisationId}:
+    get:
+      tags:
+      - history-controller
+      summary: Retrieves submitted land changes
+      description: Endpoint to retrieve all the submitted land changes for a particular
+        person and organisation
+      operationId: getHistory
+      parameters:
+      - name: organisationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Submitted Land change history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandChangeResponse'
+              examples:
+                Submitted land changes:
+                  summary: Submitted land changes
+                  description: Submitted land changes
+                  value:
+                    changeRequest:
+                    - submissionId: "12345"
+                      submissionDate: 20/01/2022
+                      changeType: BOUNDARY
+                      parcelDetails:
+                      - parcelId: id12
+                        sheetId: sheetid12
+                        effectiveDate: 20/01/2022
+                        coverChange:
+                          currentCoverType: ARABLE
+                          newCoverType: PERMANENT_PASTURE
+                      - parcelId: id34
+                        sheetId: sheetid34
+                        effectiveDate: 20/01/2022
+                        coverChange:
+                          currentCoverType: ARABLE
+                          newCoverType: PERMANENT_PASTURE
+                      documents:
+                      - name: postcard.pdf
+                        uploadDate: 20/01/2022
+                      - name: holidays.zip
+                        uploadDate: 20/01/2022
+                    - submissionId: "67890"
+                      submissionDate: 20/01/2022
+                      changeType: BOUNDARY
+                      parcelDetails:
+                      - parcelId: id12
+                        sheetId: sheetid12
+                        effectiveDate: 20/01/2022
+                        coverChange:
+                          currentCoverType: ARABLE
+                          newCoverType: PERMANENT_PASTURE
+                      - parcelId: id34
+                        sheetId: sheetid34
+                        effectiveDate: 20/01/2022
+                        coverChange:
+                          currentCoverType: ARABLE
+                          newCoverType: PERMANENT_PASTURE
+                      documents:
+                      - name: postcard.pdf
+                        uploadDate: 20/01/2022
+                      - name: holidays.zip
+                        uploadDate: 20/01/2022
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandChangeResponse'
+              examples:
+                There was a unexpected service error and the service is unable to return the submitted history:
+                  summary: Unable to return history
+                  description: There was a unexpected service error and the service
+                    is unable to return the submitted history
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+components:
+  schemas:
+    LandChangeRequest:
+      type: object
+      properties:
+        changeType:
+          type: string
+        organisationId:
+          type: integer
+          format: int64
+        personId:
+          type: integer
+          format: int64
+        sbi:
+          type: integer
+          format: int64
+        frn:
+          type: integer
+          format: int64
+        crn:
+          type: integer
+          format: int64
+        azureFolderId:
+          type: string
+        parcels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parcel'
+        schemes:
+          type: array
+          items:
+            type: string
+        documents:
+          type: array
+          items:
+            type: string
+        userType:
+          type: string
+          enum:
+          - internal
+          - external
+          - ida_no_match
+    LandCoverChange:
+      type: object
+      properties:
+        currentCoverTypeName:
+          type: string
+        currentCoverTypeCode:
+          type: string
+        newCoverTypeName:
+          type: string
+        newCoverTypeCode:
+          type: string
+    Parcel:
+      type: object
+      properties:
+        parcelId:
+          type: string
+        sheetId:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+        coverChange:
+          $ref: '#/components/schemas/LandCoverChange'
+    LandChangeResponse:
+      type: object
+      properties:
+        azureId:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        description:
+          type: string

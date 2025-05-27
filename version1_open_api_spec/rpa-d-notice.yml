@@ -1,0 +1,507 @@
+---
+swagger: "2.0"
+info: {}
+tags:
+- name: "d-notice"
+- name: "version"
+schemes:
+- "http"
+paths:
+  /d-notice/{name}:
+    get:
+      tags:
+      - "d-notice"
+      summary: "Get specific toggle from the database by name."
+      description: "Request to get a particular toggle object from the database using\
+        \ name as search value."
+      operationId: "getSpecificToggle"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "name"
+        in: "path"
+        description: "Toggle name"
+        required: true
+        type: "String"
+        x-example: "toggle-name"
+      responses:
+        "200":
+          description: "Toggle found and returned. Returns result inside a CapdResponse\n\
+            \ JSON object contains the following aspects of the toggle: name, description,\
+            \ live, defaultValue."
+          schema:
+            $ref: "#/definitions/Toggle"
+        "404":
+          description: "Toggle not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /d-notice/reload/{name}:
+    get:
+      tags:
+      - "d-notice"
+      summary: "Get specific toggle from the database by name and reloads the cache."
+      description: "Clear specific toggle from the cache, queries the database by\
+        \ toggle name and, if found, saves it to the cache."
+      operationId: "reloadSpecificToggle"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "name"
+        in: "path"
+        description: "Toggle name"
+        required: true
+        type: "String"
+        x-example: "toggle-name"
+      responses:
+        "200":
+          description: "Toggle found and returned inside a CapdResponse. \n JSON object\
+            \ contains the following aspects of the toggle: name, description, live,\
+            \ defaultValue."
+          schema:
+            $ref: "#/definitions/Toggle"
+        "404":
+          description: "Toggle not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /d-notice/all/db:
+    get:
+      tags:
+      - "d-notice"
+      summary: "Get toggles from the database."
+      description: "Request to get all the toggles from the database."
+      operationId: "getAllTogglesFromDB"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns a CapdResponse with a Map of toggles.\n Each object\
+            \ in the JSON has the toggle name and the actual toggle object (name,\
+            \ description, live, defaultValue)."
+          schema:
+            type: "object"
+            additionalProperties:
+              $ref: "#/definitions/Toggle"
+        "404":
+          description: "No toggles in database"
+  /d-notice/all/cache:
+    get:
+      tags:
+      - "d-notice"
+      summary: "Get toggles from the cache."
+      description: "Request to get all the toggles from the cache."
+      operationId: "getAllTogglesFromCache"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Map of toggles in a CapdResponse. \n Each object in the JSON\
+            \ has the toggle name and the actual toggle object (name, description,\
+            \ live, defaultValue)."
+          schema:
+            type: "object"
+            additionalProperties:
+              $ref: "#/definitions/Toggle"
+        "404":
+          description: "No toggle in cache"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /d-notice/{name}/{status}:
+    put:
+      tags:
+      - "d-notice"
+      summary: "Update toggle status in the database."
+      description: "Update live status in the database for the toggle provided."
+      operationId: "setSpecificToggle"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "name"
+        in: "path"
+        description: "Toggle status"
+        required: true
+        type: "String"
+        x-example: "toggle-name"
+      - name: "status"
+        in: "path"
+        description: "Toggle name"
+        required: true
+        type: "Boolean"
+        x-example: "true"
+      responses:
+        "200":
+          description: "Toggle updated in database."
+          schema:
+            type: "string"
+        "404":
+          description: "Toggle not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /d-notice/bulkUpdate:
+    put:
+      tags:
+      - "d-notice"
+      summary: "Bulk update of toggles in the database."
+      description: "Update live status in the database for list of toggles provided."
+      operationId: "bulkUpdate"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "Bulk Update Request"
+        description: "Request containing the list of toggles, each of them has a toggleName\
+          \ and a toggleValue"
+        required: true
+        schema:
+          $ref: "#/definitions/BulkUpdateRequest"
+      responses:
+        "200":
+          description: "Toggles updated in database. Returns result inside a capdResponse\n\
+            \ JSON object contains a list of updatedToggles and a list of missingToggles\
+            \ (meaning the ones not updated)."
+          schema:
+            $ref: "#/definitions/BulkUpdateResult"
+        "404":
+          description: "Toggle not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /version:
+    get:
+      tags:
+      - "version"
+      summary: "Application version check"
+      description: "Checks version."
+      operationId: "getStatus"
+      produces:
+      - "text/plain"
+      parameters: []
+      responses:
+        "200":
+          description: "Application version"
+definitions:
+  CapdResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "object"
+  CapdResponseToggle:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/Toggle"
+  Toggle:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      description:
+        type: "string"
+      live:
+        type: "boolean"
+      defaultValue:
+        type: "boolean"
+  EntityTag:
+    type: "object"
+    properties:
+      value:
+        type: "string"
+      weak:
+        type: "boolean"
+  Link:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      title:
+        type: "string"
+      uri:
+        type: "string"
+        format: "uri"
+      uriBuilder:
+        $ref: "#/definitions/UriBuilder"
+      rel:
+        type: "string"
+      rels:
+        type: "array"
+        items:
+          type: "string"
+      params:
+        type: "object"
+        additionalProperties:
+          type: "string"
+  Locale:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      script:
+        type: "string"
+      country:
+        type: "string"
+      variant:
+        type: "string"
+      extensionKeys:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      unicodeLocaleAttributes:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      unicodeLocaleKeys:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      iso3Language:
+        type: "string"
+      iso3Country:
+        type: "string"
+      displayLanguage:
+        type: "string"
+      displayScript:
+        type: "string"
+      displayCountry:
+        type: "string"
+      displayVariant:
+        type: "string"
+      language:
+        type: "string"
+  MediaType:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      subtype:
+        type: "string"
+      parameters:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      wildcardSubtype:
+        type: "boolean"
+      wildcardType:
+        type: "boolean"
+  NewCookie:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
+      version:
+        type: "integer"
+        format: "int32"
+      path:
+        type: "string"
+      domain:
+        type: "string"
+      comment:
+        type: "string"
+      maxAge:
+        type: "integer"
+        format: "int32"
+      expiry:
+        type: "string"
+        format: "date-time"
+      secure:
+        type: "boolean"
+      httpOnly:
+        type: "boolean"
+  Response:
+    type: "object"
+    properties:
+      lastModified:
+        type: "string"
+        format: "date-time"
+      date:
+        type: "string"
+        format: "date-time"
+      length:
+        type: "integer"
+        format: "int32"
+      location:
+        type: "string"
+        format: "uri"
+      language:
+        $ref: "#/definitions/Locale"
+      allowedMethods:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      cookies:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/NewCookie"
+      statusInfo:
+        $ref: "#/definitions/StatusType"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      entityTag:
+        $ref: "#/definitions/EntityTag"
+      links:
+        type: "array"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/Link"
+      stringHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      entity:
+        type: "object"
+      status:
+        type: "integer"
+        format: "int32"
+      metadata:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "object"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "object"
+  StackTraceElement:
+    type: "object"
+    properties:
+      classLoaderName:
+        type: "string"
+      moduleName:
+        type: "string"
+      moduleVersion:
+        type: "string"
+      methodName:
+        type: "string"
+      fileName:
+        type: "string"
+      lineNumber:
+        type: "integer"
+        format: "int32"
+      className:
+        type: "string"
+      nativeMethod:
+        type: "boolean"
+  StatusType:
+    type: "object"
+    properties:
+      family:
+        type: "string"
+        enum:
+        - "INFORMATIONAL"
+        - "SUCCESSFUL"
+        - "REDIRECTION"
+        - "CLIENT_ERROR"
+        - "SERVER_ERROR"
+        - "OTHER"
+      statusCode:
+        type: "integer"
+        format: "int32"
+      reasonPhrase:
+        type: "string"
+  Throwable:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  UriBuilder:
+    type: "object"
+  WebApplicationException:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      response:
+        $ref: "#/definitions/Response"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  CapdResponseMapStringToggle:
+    type: "object"
+    properties:
+      _data:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/Toggle"
+  CapdResponseString:
+    type: "object"
+    properties:
+      _data:
+        type: "string"
+  BulkUpdateResult:
+    type: "object"
+    properties:
+      updatedToggles:
+        type: "object"
+        additionalProperties:
+          type: "boolean"
+      missingToggles:
+        type: "array"
+        items:
+          type: "string"
+  CapdResponseBulkUpdateResult:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/BulkUpdateResult"
+  BulkUpdateRequest:
+    type: "object"
+    properties:
+      togglesToUpdate:
+        type: "object"
+        additionalProperties:
+          type: "boolean"

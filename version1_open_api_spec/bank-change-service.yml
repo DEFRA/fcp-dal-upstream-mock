@@ -1,0 +1,478 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:9040
+  description: Generated server url
+paths:
+  /bank-change-service/v1/validate:
+    post:
+      tags:
+      - bank-change-controller
+      summary: submits bank change details for validation
+      description: "Endpoint to check if the details of a bank change are valid, in\
+        \ case of errors will also return a list of those errors"
+      operationId: validateBankDetails
+      requestBody:
+        description: Validation details data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationRequest'
+            examples:
+              Validation request:
+                summary: Validation request
+                description: Validation request
+                value:
+                  dateOfBirth: 21/04/2000
+                  account:
+                    name: John Doe
+                    number: 12345678
+                    iban: PT392831273127334616
+                    buildingSocietyRollNumber: 23123414
+                    bank:
+                      sortCode: 123456
+                      swiftCode: 8741236
+                  country:
+                    code: IRL
+                    currency: EUR
+        required: true
+      responses:
+        "200":
+          description: Details validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+              examples:
+                Details validated:
+                  summary: The details have been validated
+                  description: Details validated
+                  value:
+                    status: MATCH
+                    message: All good
+                    attemptsRemaining: 0
+                    account:
+                      iban: PT392831273127334616
+                      bank:
+                        name: Acme bank
+                        sortCode: "04835"
+                        swiftCode: "8741236"
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+              examples:
+                There was a unexpected service error and the service is unable to validate the request:
+                  summary: Unable to validate
+                  description: There was a unexpected service error and the service
+                    is unable to validate the request
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /bank-change-service/v1/submit:
+    post:
+      tags:
+      - bank-change-controller
+      summary: "submits bank change, to be sent to azure service bus"
+      description: "Endpoint to submit a bank change, in case of errors will also\
+        \ return a list of those errors"
+      operationId: submitBankChange
+      requestBody:
+        description: Bank change request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionRequest'
+            examples:
+              Bank change request:
+                summary: A bank change request
+                description: Bank change request
+                value:
+                  sbi: "123456789"
+                  frn: "123456789"
+                  crn: "123456789"
+                  dateOfBirth: 21/04/2000
+                  submissionDateTime: 01/02/2023 14:12:11
+                  account:
+                    name: John Doe
+                    number: 12345678
+                    iban: PT392831273127334616
+                    buildingSocietyRollNumber: 23123414
+                    bank:
+                      sortCode: 123456
+                      swiftCode: 8741236
+                  country:
+                    code: IRL
+                    currency: EUR
+        required: true
+      responses:
+        "200":
+          description: Change processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                Change processed:
+                  summary: The bank change has been processed
+                  description: Change processed
+                  value: {}
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a unexpected service error and the service is unable to submit the change:
+                  summary: Unable to submit
+                  description: There was a unexpected service error and the service
+                    is unable to submit the change
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /bank-change-service/v1/locked-status/{organisationId}/{personId}:
+    get:
+      tags:
+      - bank-change-controller
+      summary: Checks if a account is locked
+      description: Endpoint to check if a person is locked out and not able to make
+        changes
+      operationId: lockedStatus
+      parameters:
+      - name: organisationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: personId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status check is successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockedStatusResponse'
+              examples:
+                Account locked:
+                  summary: The account is locked
+                  description: Account locked
+                  value:
+                    locked: "true"
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockedStatusResponse'
+              examples:
+                There was a unexpected service error and the service is unable to submit the change:
+                  summary: Unable to check locked status
+                  description: There was a unexpected service error and the service
+                    is unable to submit the change
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /bank-change-service/v1/existing-accounts/{frn}:
+    get:
+      tags:
+      - information-controller
+      summary: "Returns a list with the accounts that exist in DAX, will contain the\
+        \ last 4 digits and the currency"
+      description: Endpoint to retrieve a list of accounts and their currency from
+        DAX system
+      operationId: getExistingAccounts
+      parameters:
+      - name: frn
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExistingAccountsResponse'
+              examples:
+                A list of accounts existing in DAX:
+                  summary: A list of accounts existing in DAX
+                  description: A list of accounts existing in DAX
+                  value:
+                    accounts:
+                    - number: "1234"
+                      currency: EUR
+                    - number: "5678"
+                      currency: GBP
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExistingAccountsResponse'
+              examples:
+                There was a unexpected service error and the service is unable return the request:
+                  summary: Unable to retrieve thea accounts due to unexpected error
+                  description: There was a unexpected service error and the service
+                    is unable return the request
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /bank-change-service/v1/country-codes:
+    get:
+      tags:
+      - information-controller
+      summary: Returns a map with country codes and their currency
+      description: Endpoint to retrieve a list of countries and their currency from
+        LexisNexis system
+      operationId: getCountryAndCurrency
+      responses:
+        "200":
+          description: Successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountriesCurrencyResponse'
+              examples:
+                A response with a map of countries and their currency:
+                  summary: A map of countries and their currency (not all values are
+                    present in the example)
+                  description: A response with a map of countries and their currency
+                  value:
+                    countriesCurrency:
+                      GB: GBP
+                      IE: EUR
+                      PT: EUR
+                      US: USD
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountriesCurrencyResponse'
+              examples:
+                There was a unexpected service error and the service is unable return the request:
+                  summary: Unable to retrieve map due to unexpected error
+                  description: There was a unexpected service error and the service
+                    is unable return the request
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /bank-change-service/v1/account-status/{organisationId}:
+    get:
+      tags:
+      - bank-change-controller
+      summary: Checks the status of a account
+      description: "Endpoint to check if a account is new, has been amended or can\
+        \ be changed"
+      operationId: accountStatus
+      parameters:
+      - name: organisationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status check is successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatusResponse'
+              examples:
+                The account details can be changed:
+                  summary: The account details can be changed
+                  description: The account details can be changed
+                  value:
+                    editable: true
+                    submitted: false
+                    updatedRecently: true
+                    new: false
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatusResponse'
+              examples:
+                There was a unexpected service error and the service is unable to check account status:
+                  summary: Unable to check the status
+                  description: There was a unexpected service error and the service
+                    is unable to check account status
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+components:
+  schemas:
+    AccountDetails:
+      type: object
+      properties:
+        accountType:
+          type: string
+          enum:
+          - EU
+          - UK_PERSONAL
+          - UK_BUSINESS
+        name:
+          type: string
+        number:
+          type: string
+        iban:
+          type: string
+        buildingSocietyRollNumber:
+          type: string
+        bank:
+          $ref: '#/components/schemas/BankDetails'
+    BankDetails:
+      type: object
+      properties:
+        name:
+          type: string
+        sortCode:
+          type: string
+        swiftCode:
+          type: string
+    CountryDetails:
+      type: object
+      properties:
+        code:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - GBP
+    ValidationRequest:
+      type: object
+      properties:
+        organisationId:
+          type: string
+        personId:
+          type: string
+        account:
+          $ref: '#/components/schemas/AccountDetails'
+        country:
+          $ref: '#/components/schemas/CountryDetails'
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        description:
+          type: string
+    ValidationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        attemptsRemaining:
+          type: integer
+          format: int32
+        account:
+          $ref: '#/components/schemas/AccountDetails'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    SubmissionRequest:
+      type: object
+      properties:
+        organisationId:
+          type: string
+        personId:
+          type: string
+        sbi:
+          type: string
+        frn:
+          type: string
+        crn:
+          type: string
+        submissionDateTime:
+          type: string
+        account:
+          $ref: '#/components/schemas/AccountDetails'
+        country:
+          $ref: '#/components/schemas/CountryDetails'
+    DefaultResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    LockedStatusResponse:
+      type: object
+      properties:
+        locked:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    Account:
+      type: object
+      properties:
+        number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - GBP
+    ExistingAccountsResponse:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    CountriesCurrencyResponse:
+      type: object
+      properties:
+        countriesCurrency:
+          type: object
+          additionalProperties:
+            type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    AccountStatusResponse:
+      type: object
+      properties:
+        editable:
+          type: boolean
+        submitted:
+          type: boolean
+        updatedRecently:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+        new:
+          type: boolean

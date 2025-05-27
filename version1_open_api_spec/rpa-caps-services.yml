@@ -1,0 +1,6439 @@
+---
+swagger: "2.0"
+info: {}
+tags:
+- name: "auth"
+- name: "agent"
+- name: "alerts"
+- name: "authorisation"
+- name: "case-management"
+- name: "digital-party"
+- name: "eoi"
+- name: "feedback"
+- name: "gdpr"
+- name: "ida-alternative"
+- name: "internal-user"
+- name: "mdm-data-load"
+- name: "notification"
+- name: "organisation"
+- name: "party"
+- name: "person-matches"
+- name: "person"
+- name: "reference"
+- name: "validate-email-service"
+- name: "verify-email"
+schemes:
+- "http"
+paths:
+  /auth/validate:
+    get:
+      tags:
+      - "auth"
+      summary: "Retrieve ExternalTokenHandler."
+      description: "Request to get ExternalTokenHandler."
+      operationId: "validateTokenGET"
+      consumes:
+      - "application/json"
+      produces:
+      - "text/plain"
+      parameters: []
+      responses:
+        "200":
+          description: "returns callerid,usertye,tokentype"
+          schema:
+            $ref: "#/definitions/Response"
+        "401":
+          description: "user context not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    post:
+      tags:
+      - "auth"
+      summary: "Retrieve ExternalTokenHandler."
+      description: "Request to POST ExternalTokenHandler."
+      operationId: "validateTokenPOST"
+      consumes:
+      - "application/x-www-form-urlencoded"
+      produces:
+      - "text/plain"
+      parameters: []
+      responses:
+        "200":
+          description: "returns callerid,usertye,tokentype"
+          schema:
+            $ref: "#/definitions/Response"
+        "401":
+          description: "user context not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /agent/{organisationId}/business-type:
+    get:
+      tags:
+      - "agent"
+      summary: "Gets business type for organisation."
+      description: "Request to get the business type for organisation."
+      operationId: "getBusinessType"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "businessType for organisation. Inside a CapdResponse object"
+          schema:
+            type: "string"
+  /agent/agency/{agencyId}:
+    get:
+      tags:
+      - "agent"
+      summary: "Find Agents By Agency Id."
+      description: "Request to get all the Agents By Agency Id."
+      operationId: "findAgentsByAgencyId"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "agencyId"
+        in: "path"
+        description: "agencyId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "List of Agents. Inside a CapdResponse object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/AgentResponse"
+        "404":
+          description: "No agents found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Incorrect permissions to query this information"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /alerts/create/image:
+    post:
+      tags:
+      - "alerts"
+      summary: "Create new image and return new image ID."
+      description: "Request to create new image and return new image ID."
+      operationId: "createImage"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/FormDataMultiPart"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "400":
+          description: "image is not PNG OR JPG."
+          schema:
+            $ref: "#/definitions/Response"
+        "500":
+          description: "Unable to read image upload or Could not read 22 bytes for\
+            \ the base64 prefixUnable to create error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "image was created."
+          schema:
+            type: "integer"
+  /alerts/{id}/end:
+    put:
+      tags:
+      - "alerts"
+      summary: "Update alert end date."
+      description: "Request to Update alert end date. Alerts are generally read only\
+        \ except can be ended."
+      operationId: "setEndDate"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id"
+        required: true
+        type: "integer"
+      - name: "endDate"
+        in: "query"
+        required: false
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Updating end date for the alert"
+          schema:
+            $ref: "#/definitions/Response"
+        "404":
+          description: "Alert not found for the id"
+          schema:
+            $ref: "#/definitions/Response"
+  /alerts/{id}/image:
+    get:
+      tags:
+      - "alerts"
+      summary: "Find images."
+      description: "Request to get the images by id."
+      operationId: "getImage"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "image found for id."
+          schema:
+            type: "string"
+            format: "byte"
+        "404":
+          description: "NO image found for id."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /alerts:
+    get:
+      tags:
+      - "alerts"
+      summary: "GET the Alert details."
+      description: "Request to GET the Alert details using the timestampMillis."
+      operationId: "getAlertSinceTime"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "timestampMillis"
+        in: "query"
+        required: false
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "if none, then empty response"
+          schema:
+            $ref: "#/definitions/Response"
+  /alerts/all:
+    get:
+      tags:
+      - "alerts"
+      summary: "GET list of all alerts for internal users."
+      description: "Request to GET list of all alerts for internal users to review.\
+        \ Paged response with metadata, not images themselves."
+      operationId: "getAllAlerts"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "page"
+        in: "query"
+        required: false
+        type: "integer"
+        default: 1
+        format: "int32"
+      - name: "pageSize"
+        in: "query"
+        required: false
+        type: "integer"
+        default: 20
+        format: "int32"
+      responses:
+        "200":
+          description: "List of alerts in a response"
+          schema:
+            $ref: "#/definitions/Alert"
+  /alerts/{id}:
+    get:
+      tags:
+      - "alerts"
+      summary: "GET single alert."
+      description: "Request to GET single alert so that internal users can see them\
+        \ for preview purposes."
+      operationId: "getAlert"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{1,20}"
+      responses:
+        "200":
+          description: "Returns Single alert"
+          schema:
+            $ref: "#/definitions/Alert"
+        "404":
+          description: "alert details not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /alerts/create:
+    post:
+      tags:
+      - "alerts"
+      summary: "POST new alert with image attached."
+      description: "Request to POST new alert with image attached as multipart so\
+        \ that users can create new."
+      operationId: "createAlert"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/Alert"
+      responses:
+        "400":
+          description: "alert text length less than 10"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Creates the alert"
+          schema:
+            type: "integer"
+  /alerts/{id}/duplicate/{startTimeMillis}:
+    post:
+      tags:
+      - "alerts"
+      summary: "POST new alert with existing image ID."
+      description: "Request to POST new alert with existing image ID so users can\
+        \ create as duplicate. Return error if image ID supplied doesn't exist, otherwise\
+        \ save new alert."
+      operationId: "duplicateAlert"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id"
+        required: true
+        type: "integer"
+      - name: "startTimeMillis"
+        in: "path"
+        description: "startTimeMillis"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "500":
+          description: "alert or image not found"
+          schema:
+            $ref: "#/definitions/Response"
+        "200":
+          description: "duplicate alert found"
+          schema:
+            type: "integer"
+  /authorisation/organisation/{organisationId}:
+    get:
+      tags:
+      - "authorisation"
+      summary: "Find People By Organisation Id."
+      description: "Request to Find People By Organisation Id - Finds and returns\
+        \ a list of authorised people using the Organisation ID. \" +\n          \
+        \  \"Returns a list containing AuthorisedPersons."
+      operationId: "findPeopleByOrganisationId"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "List of AuthorisedPerson"
+          schema:
+            $ref: "#/definitions/AuthorisedPerson"
+        "404":
+          description: "Organisation Id does not exist"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "error occurred while getting Authorised Persons details."
+          schema:
+            $ref: "#/definitions/WebApplicationTranslatedException"
+  /authorisation/customer/{searchValue}:
+    get:
+      tags:
+      - "authorisation"
+      summary: "Find People By Customer Reference or Personal Identifier."
+      description: "Request to Find People By Customer Reference or Personal Identifier."
+      operationId: "findPeopleBySearchValue"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "searchValue"
+        in: "path"
+        description: "searchValue"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns person summary"
+          schema:
+            $ref: "#/definitions/PersonSummaryResponse"
+        "400":
+          description: "The provided search value is not a valid customer reference\
+            \ and it is not a valid personal identifier."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /authorisation/organisation/{organisationId}/agents:
+    put:
+      tags:
+      - "authorisation"
+      summary: "Assign Agency To Organisation - Assign agent firm to organisation."
+      description: "Request to Assign agent firm to organisation."
+      operationId: "assignAgencyToOrganisation"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/AgentAssignRequest"
+      responses:
+        "500":
+          description: "Attempting to add a firm of agents to a firm of agents."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "organisation not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "assigning Agency To Organisation"
+  /authorisation/user:
+    post:
+      tags:
+      - "authorisation"
+      summary: "Finds Id based on email."
+      description: "Request to get id based on  email."
+      operationId: "findByEmail"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "returning person id if present or else returing zero"
+          schema:
+            type: "integer"
+        "422":
+          description: "There is more than one person with email."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /authorisation/crn:
+    post:
+      tags:
+      - "authorisation"
+      summary: "Finds Id based on crn."
+      description: "Request to get id from the customerReference."
+      operationId: "findByCrn"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "returning person id if present or else returing zero"
+          schema:
+            type: "integer"
+        "422":
+          description: "There is more than one person with email."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /case-management/case/{caseId}/assignCase/{personId}:
+    put:
+      tags:
+      - "case-management"
+      summary: "Assigns a Case to a new owner using the Case Id and the Person Id."
+      description: "Request to Update Case Owner - Updates the Case Owner - assigns\
+        \ a Case to a new owner using the Case Id and the Person Id."
+      operationId: "updateCaseOwner"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "caseId"
+        in: "path"
+        description: "caseId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "assigns a Case to a new owner using the Case Id and the Person\
+            \ Id"
+          schema:
+            $ref: "#/definitions/CaseDetailResponse"
+        "404":
+          description: "Cannot create case note."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /case-management/case/{caseId}:
+    get:
+      tags:
+      - "case-management"
+      summary: "Get Case - Getting case detail."
+      description: "Request to Get Get Case - Getting case detail."
+      operationId: "getCase"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "caseId"
+        in: "path"
+        description: "caseId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "returning casedetails"
+          schema:
+            $ref: "#/definitions/CaseDetailResponse"
+        "500":
+          description: "internal server error."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "capCase not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /case-management/case:
+    get:
+      tags:
+      - "case-management"
+      summary: "Get Cases - Getting case from the specific queue."
+      description: "Request to Get Cases - Getting case from the specific queue."
+      operationId: "getCases"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "queueId"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "caseStatusId"
+        in: "query"
+        required: false
+        type: "integer"
+      - name: "caseOwnerId"
+        in: "query"
+        required: false
+        type: "integer"
+      - name: "partyId"
+        in: "query"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "returning list of casesummary"
+          schema:
+            $ref: "#/definitions/CaseSummaryResponse"
+        "500":
+          description: "Cannot fetch cases."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /case-management/case/{caseId}/notes:
+    get:
+      tags:
+      - "case-management"
+      summary: "Get Case Notes - Getting case notes."
+      description: "Request to Get Case Notes - Getting case notes."
+      operationId: "getCaseNotes"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "caseId"
+        in: "path"
+        description: "caseId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "returning casedetails"
+          schema:
+            $ref: "#/definitions/CaseDetailResponse"
+        "500":
+          description: "internal server error."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "capCase not found."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    post:
+      tags:
+      - "case-management"
+      summary: "Create Case Note - Creates a Case Note."
+      description: "Request to Creates a Case Note."
+      operationId: "createCaseNote"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "caseId"
+        in: "path"
+        description: "caseId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/DefaultCaseNote"
+      responses:
+        "200":
+          description: "Create Case Note"
+          schema:
+            $ref: "#/definitions/NoteResponse"
+        "404":
+          description: "Cannot create case note."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /digital-party:
+    post:
+      tags:
+      - "digital-party"
+      summary: "Update a Digital Party Contact."
+      description: "Request to Update a Digital Party Contact."
+      operationId: "patchDigitalParty"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyDigitalContactRequest"
+      responses:
+        "200":
+          description: "Digital Party Contact updated"
+          schema:
+            type: "string"
+        "401":
+          description: "Missing required Authentication Fields"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Digital Party Contact"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Digital Party Contact not updated"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /eoi/{sbi}:
+    get:
+      tags:
+      - "eoi"
+      summary: "GET the EOI details By using Sbi."
+      description: "Request to GET the EOI details By using Sbi."
+      operationId: "getEOIbySbi"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "sbi"
+        in: "path"
+        description: "sbi"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+        format: "int64"
+      responses:
+        "400":
+          description: "SBI is missing."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Returns ExpressionOfInterest"
+          schema:
+            $ref: "#/definitions/ExpressionOfInterestResponse"
+  /eoi:
+    post:
+      tags:
+      - "eoi"
+      summary: "POST to create new eoi."
+      description: "Request to create new eoi."
+      operationId: "createEOI"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ExpressionOfInterestRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "500":
+          description: "Failed to create EOI"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "EOI was created"
+          schema:
+            $ref: "#/definitions/Response"
+  /eoi/{sbi}/eligible:
+    get:
+      tags:
+      - "eoi"
+      summary: "Is SBI eligible - verification on Abaco side."
+      description: "Request to GET Is SBI eligible - verification on Abaco side."
+      operationId: "isSbiEligible"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "sbi"
+        in: "path"
+        description: "sbi"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "400":
+          description: "Id is missing."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "check for verification of sbi"
+          schema:
+            type: "boolean"
+  /feedback:
+    post:
+      tags:
+      - "feedback"
+      summary: "Save Feedback."
+      description: "Request to Create Feedback."
+      operationId: "saveFeedback"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Couldn't send simple mail message."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Feedback saved"
+  /gdpr/alerts/{daysToRetain}:
+    delete:
+      tags:
+      - "gdpr"
+      summary: "remove older alerts."
+      description: "Request to remove older alerts."
+      operationId: "removeOldAlerts"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "daysToRetain"
+        in: "path"
+        description: "daysToRetain"
+        required: true
+        type: "integer"
+        pattern: "[0-9]+"
+      responses:
+        "500":
+          description: "Failed to remove older alerts."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Rows removed"
+          schema:
+            $ref: "#/definitions/Response"
+        "204":
+          description: "No rows removed"
+          schema:
+            $ref: "#/definitions/Response"
+  /ida-alternative/send-code:
+    post:
+      tags:
+      - "ida-alternative"
+      summary: "Change the password."
+      description: "Request to Change the password."
+      operationId: "sendCode"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "crn"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "401":
+          description: "CRN and email data mismatch."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "3 codes already exists for the customer reference number."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "could not match crn and email. Third-party service error."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "code sent to user"
+  /internal-user:
+    get:
+      tags:
+      - "internal-user"
+      summary: "Search internal user to search for other internal users."
+      description: "Request to Search - Initial purpose is to allow an internal user\
+        \ to search for other internal users so they can assign them to a case."
+      operationId: "search"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Get the List of InternalUserSearch"
+          schema:
+            $ref: "#/definitions/InternalUserSearchResponse"
+  /internal-user/{email}/locked:
+    put:
+      tags:
+      - "internal-user"
+      summary: "lock Internal user."
+      description: "Request to lock Internal user using email Address."
+      operationId: "changeLockedStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "path"
+        description: "email"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ChangeInternalPersonLockedStatusRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "403":
+          description: "user already locked"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "There is more than one person with email"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "internal user locked"
+  /internal-user/locked:
+    get:
+      tags:
+      - "internal-user"
+      summary: "locked Internal users."
+      description: "Request to Get list of locked internal users."
+      operationId: "getLockedUsers"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns a list of the locked internal users. Inside a CapdResponse\
+            \ object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/LockedInternalUserResponse"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /internal-user/all:
+    get:
+      tags:
+      - "internal-user"
+      summary: "Returns all internal users."
+      description: "Request to Find and Returns all internal users"
+      operationId: "findAllInternalUsers"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "Return the List of InternalUserSearch. Inside a CapdResponse\
+            \ object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/InternalUserSearchResponse"
+  /internal-user/email/validate:
+    get:
+      tags:
+      - "internal-user"
+      summary: "Validate Email."
+      description: "Request to Validate internal user email"
+      operationId: "validateEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "email validated. Inside a CapdResponse"
+          schema:
+            type: "boolean"
+  /internal-user/create:
+    post:
+      tags:
+      - "internal-user"
+      summary: "Create internal user."
+      description: "Request to create new internal user."
+      operationId: "createInternalUsers"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PendingUserCreateRequest"
+      responses:
+        "200":
+          description: "created internal user"
+          schema:
+            $ref: "#/definitions/InternalUserLinkListResponse"
+  /mdm-data-load/organisation:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Organisation."
+      description: "Request to Create Organisation."
+      operationId: "createOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMOrganisation"
+      responses:
+        "200":
+          description: "successfully Create Organisation. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    put:
+      tags:
+      - "mdm-data-load"
+      summary: "Update Organisation."
+      description: "Request to Update Organisation."
+      operationId: "updateOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMOrganisation"
+      responses:
+        "200":
+          description: "successfully Update Organisation. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/organisation/{organisationId}:
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Organisation."
+      description: "Request to Delete Organisation."
+      operationId: "deleteOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully Delete Organisation. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/person:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Person."
+      description: "Request to Create Person."
+      operationId: "createPerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPerson"
+      responses:
+        "200":
+          description: "Response code is success. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    put:
+      tags:
+      - "mdm-data-load"
+      summary: "Update Person."
+      description: "Request to Update Person."
+      operationId: "updatePerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPerson"
+      responses:
+        "200":
+          description: "successfully Update Person. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/party-digital-contact:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Party Digital Contact."
+      description: "Request to Create Party Digital Contact."
+      operationId: "createPartyDigitalContact"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPartyDigitalContact"
+      responses:
+        "200":
+          description: "successfully Create Party Digital Contact. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    put:
+      tags:
+      - "mdm-data-load"
+      summary: "Update Party Digital Contact."
+      description: "Request to Update Party Digital Contact."
+      operationId: "updatePartyDigitalContact"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPartyDigitalContact"
+      responses:
+        "200":
+          description: "successfully Update Party Digital Contact. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/person/{personId}:
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Person."
+      description: "Request to Delete Person."
+      operationId: "deletePerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully delete Person. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/party-address:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Party Address."
+      description: "Request to Create Party Address."
+      operationId: "createPartyAddress"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPartyAddress"
+      responses:
+        "200":
+          description: "successfully Create Party Address. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    put:
+      tags:
+      - "mdm-data-load"
+      summary: "Update Party Address."
+      description: "Request to Update Party Address."
+      operationId: "updatePartyAddress"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPartyAddress"
+      responses:
+        "200":
+          description: "successfully Update Party Address. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/party-address/{addressId}:
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Party Address."
+      description: "Request to Delete Party Address."
+      operationId: "deletePartyAddress"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "addressId"
+        in: "path"
+        description: "addressId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully Delete Party Address. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/party-phone-contact:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Party Phone Contact."
+      description: "Request to Create Party Phone Contact."
+      operationId: "createPartyPhoneContact"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPartyPhoneContact"
+      responses:
+        "200":
+          description: "successfully Create Party Phone Contact. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    put:
+      tags:
+      - "mdm-data-load"
+      summary: "Update Party Phone Contact."
+      description: "Request to Update Party Phone Contact."
+      operationId: "updatePartyPhoneContact"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMPartyPhoneContact"
+      responses:
+        "200":
+          description: "successfully Update Party Phone Contact. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/party-phone-contact/{phoneId}:
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Party Phone Contact."
+      description: "Request to Delete Party Phone Contact."
+      operationId: "deletePartyPhoneContact"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "phoneId"
+        in: "path"
+        description: "phoneId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully Delete Party Phone Contact. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/party-digital-contact/{digitalId}:
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Party Digital Contact."
+      description: "Request to Delete Party Digital Contact."
+      operationId: "deletePartyDigitalContact"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "digitalId"
+        in: "path"
+        description: "digitalId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully Delete Party Digital Contact. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/legacy-identifier:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Legacy Identifier."
+      description: "Request to Create Legacy Identifier."
+      operationId: "createLegacyIdentifier"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMLegacyIdentifier"
+      responses:
+        "200":
+          description: "successfully Create Legacy Identifier. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    put:
+      tags:
+      - "mdm-data-load"
+      summary: "Update Legacy Identifier."
+      description: "Request to Update Legacy Identifier."
+      operationId: "updateLegacyIdentifier"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMLegacyIdentifier"
+      responses:
+        "200":
+          description: "successfully Update Legacy Identifier. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/legacy-identifier/{legacyId}:
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Legacy Identifier."
+      description: "Request to Delete Legacy Identifier."
+      operationId: "deleteLegacyIdentifier"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "legacyId"
+        in: "path"
+        description: "legacyId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully Delete Legacy Identifier. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /mdm-data-load/empowerment:
+    post:
+      tags:
+      - "mdm-data-load"
+      summary: "Create Empowerment."
+      description: "Request to Create Empowerment."
+      operationId: "createEmpowerment"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMEmpowerment"
+      responses:
+        "200":
+          description: "successfully Create Empowerment. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+    delete:
+      tags:
+      - "mdm-data-load"
+      summary: "Delete Empowerment."
+      description: "Request to Delete Empowerment."
+      operationId: "deleteEmpowerment"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/MDMEmpowermentDelete"
+      responses:
+        "200":
+          description: "successfully Delete Empowerment. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+        "500":
+          description: "server layer exception. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/CapdMdmResponse"
+  /notification:
+    post:
+      tags:
+      - "notification"
+      summary: "Push Notification."
+      description: "Request to Push Notification To deliver a notification to the\
+        \ capd-system."
+      operationId: "pushNotification"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/Notification"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Notification as been sent"
+  /organisation/{organisationId}/name:
+    get:
+      tags:
+      - "organisation"
+      summary: "Gets business name."
+      description: "Gets business name by using organisation id"
+      operationId: "getName"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns business name. Inside a CapdResponse"
+          schema:
+            type: "string"
+        "400":
+          description: "name must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/business-reference:
+    get:
+      tags:
+      - "organisation"
+      summary: "Gets business reference number."
+      description: "Gets business reference number (also called frn - firm reference\
+        \ number) for organisation."
+      operationId: "getBusinessReference"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns businessReference. Inside a CapdResponse"
+          schema:
+            type: "string"
+        "400":
+          description: "businessReference must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/create/{personId}:
+    post:
+      tags:
+      - "organisation"
+      summary: "Create Organisation For Person."
+      description: "Request to Creates new organisation in capd database, assigns\
+        \ Id and Ref Number to it and later on registers it in SitiAgri."
+      operationId: "createOrganisationForPerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Successfully returns organisation details inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/OrganisationWithAllResponse"
+        "404":
+          description: "Malformed data - id should be null"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "400":
+          description: "Create Unsuccessful Supplied entity was not valid"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/confirmation/details:
+    get:
+      tags:
+      - "organisation"
+      summary: "Find if person has assigned."
+      description: "Request to Find if person has assigned only one not confirmed\
+        \ organisation"
+      operationId: "findOrganisationConfirmationDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "query"
+        required: false
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "success returns organisation conformation inside a CapdResponse"
+  /organisation/{organisationId}:
+    get:
+      tags:
+      - "organisation"
+      summary: "Find an Organisation."
+      description: "Request to Find an Organisation by party Id."
+      operationId: "getByPartyId"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Returns organisation details. Inside a CapdResponse object"
+          schema:
+            $ref: "#/definitions/OrganisationWithAllResponse"
+        "400":
+          description: "userType must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "organisation details not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    put:
+      tags:
+      - "organisation"
+      summary: "Update organisation details."
+      description: "Request to Update organisation details."
+      operationId: "updateOrganisation_1"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Successfully returns updated organisation details inside a\
+            \ CapdResponse"
+          schema:
+            $ref: "#/definitions/OrganisationWithAllResponse"
+        "404":
+          description: "organisation is empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "organisation Update Unsuccessful"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    delete:
+      tags:
+      - "organisation"
+      summary: "Delete Organisation."
+      description: "Request to Delete an Organisation by party Id."
+      operationId: "deleteOrganisation_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "404":
+          description: "Organisation not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully Delete Organisation"
+  /organisation/{organisationId}/deactivate:
+    post:
+      tags:
+      - "organisation"
+      summary: "deactivate Organisation."
+      description: "Request to deactivate an Organisation by party Id."
+      operationId: "deactivateOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "organisationId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Organisation with id could not be found in capd to be deactivated"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully deactivate Organisation"
+  /organisation/{organisationId}/lock:
+    post:
+      tags:
+      - "organisation"
+      summary: "Lock Organisation."
+      description: "Request to Lock an Organisation by party Id."
+      operationId: "lockOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "organisationId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Organisation with id could not be found in capd to be locked"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Organisation with id is locked. It couldn't be locked again"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully locked Organisation"
+  /organisation/{organisationId}/unlock:
+    post:
+      tags:
+      - "organisation"
+      summary: "unlock Organisation."
+      description: "Request to unlock an Organisation by party Id."
+      operationId: "unlockOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "organisationId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Organisation with id could not be found in capd to be unlocked"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Organisation with id isn't locked. It cannot be unlocked"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully unlocked Organisation"
+  /organisation/{organisationId}/reactivate:
+    post:
+      tags:
+      - "organisation"
+      summary: "reactivate Organisation."
+      description: "Request to reactivate an Organisation by party Id."
+      operationId: "reactivateOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "organisationId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Organisation with id is not deactivated and cannot be reactivate"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully reactivate Organisation"
+  /organisation/{organisationId}/additional-business-details:
+    put:
+      tags:
+      - "organisation"
+      summary: "Update additional-business-details."
+      description: "Request to Update additional-business-details."
+      operationId: "updateAdditionalBusinessDetails"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/AdditionalBusinessDetailsRequest"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "400":
+          description: "Unable to validate additional business details"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Organisation with id doesn't exist in the system"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "204":
+          description: "Successfully updated"
+          schema:
+            $ref: "#/definitions/Response"
+  /organisation/unconfirm-not-edited:
+    put:
+      tags:
+      - "organisation"
+      summary: "Updates organisations."
+      description: "Request to Updates organisations that were confirmed date is lower\
+        \ than date."
+      operationId: "updateNotEditedOrganisationEntries"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "integer"
+          format: "int32"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully updated. Returns result inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "422":
+          description: "Validation of organisation fails"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Organisations could not be unconfirmed in CAPD database"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/business-details:
+    put:
+      tags:
+      - "organisation"
+      summary: "Update business-details."
+      description: "Request to Update business-details."
+      operationId: "updateBusinessDetails"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationDetailsRequest"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "400":
+          description: "Unable to validate additional business details"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Organisation with id doesn't exist in the system"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "204":
+          description: "Successfully updated"
+          schema:
+            $ref: "#/definitions/Response"
+  /organisation/search:
+    post:
+      tags:
+      - "organisation"
+      summary: "Find By Partial Business Name."
+      description: "Find an Organisation by a partial business name"
+      operationId: "findOrganisations"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartySearchRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns a list of Organisations inside a CapdPageResponse\
+            \ object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/OrganisationWithAddressResponse"
+        "400":
+          description: "searchFieldType is not eqaul to getPrimarySearchPhrase"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/organisation-list:
+    post:
+      tags:
+      - "organisation"
+      summary: "Gets organisation Ids for given SBIs."
+      description: "Request to Gets organisation Ids for given SBIs."
+      operationId: "getOrganisationIds"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "Successfully provides list of organisations. Returns result\
+            \ inside a CapdResponse"
+          schema:
+            type: "array"
+            items:
+              type: "integer"
+        "500":
+          description: "Dao exception encountered when retrieving complete organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/summary:
+    get:
+      tags:
+      - "organisation"
+      summary: "Find Summary Details By Party Id."
+      description: "Request to Find Summary Details By Party Id - Find an Organisation\
+        \ Summary Details by party Id"
+      operationId: "getSummaryByPartyId"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns Organisation Summary. Inside a CadpResponse object"
+          schema:
+            $ref: "#/definitions/OrganisationWithPostalCodeResponse"
+        "404":
+          description: "organisation must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/agency/{agencyId}/summary:
+    get:
+      tags:
+      - "organisation"
+      summary: "Find Agency."
+      description: "Request to Find Agency By Party Id Summary"
+      operationId: "findAgencyByPartyIdSummary"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "agencyId"
+        in: "path"
+        description: "agencyId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns summary information for given agency. Inside a CapdResponse\
+            \ object"
+          schema:
+            $ref: "#/definitions/OrganisationBaseResponse"
+        "404":
+          description: "Organisation not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/search/sbi:
+    get:
+      tags:
+      - "organisation"
+      summary: "Find By SBI."
+      description: "Request to Find an Organisation by an SBI"
+      operationId: "findBySBI"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sbi"
+        in: "query"
+        required: false
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns Organisation With Address inside a CadpResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/OrganisationWithAddressResponse"
+        "404":
+          description: "Organisation not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/summary:
+    get:
+      tags:
+      - "organisation"
+      summary: "Searching for basic businesses information."
+      description: "Request to Find Summary - Searching for basic businesses information\
+        \ by reference number or partial business name, and business type."
+      operationId: "findSummary"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "referenceNumber"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "businessName"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "businessType"
+        in: "query"
+        required: false
+        type: "integer"
+      - name: "returnDeactivated"
+        in: "query"
+        required: false
+        type: "boolean"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Returns list of Organisation With Address inside a CapdResponse\
+            \ object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/OrganisationWithAddressResponse"
+        "400":
+          description: "Business name and reference number are missing or both have\
+            \ been provided. (only one is required)"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Invalid reference number"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Business name not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "There was a problem retrieving the organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/person/{personId}/summary:
+    get:
+      tags:
+      - "organisation"
+      summary: "Find Organisation Summary List."
+      description: "Request to Find Organisation Summary List - Get all organisations\
+        \ linked to a person Id."
+      operationId: "findOrganisationSummaryList"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      - name: "personId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+      - name: "page"
+        in: "query"
+        required: false
+        type: "integer"
+        default: 1
+        format: "int32"
+      - name: "page-size"
+        in: "query"
+        required: false
+        type: "integer"
+        default: 20
+        format: "int32"
+      - name: "search"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "sort-by"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "order"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "withNotifications"
+        in: "query"
+        required: false
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "Returns list of Organisation inside a CapdPageResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/OrganisationBaseResponse"
+        "400":
+          description: "pageSize must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "No sitiagri organisations found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/confirm-business:
+    put:
+      tags:
+      - "organisation"
+      summary: "Confirm Business Details."
+      description: "Request to Confirm business details of an organisation (setConfirmed\
+        \ is set to true."
+      operationId: "confirmBusinessDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "404":
+          description: "Organisation not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully updated"
+  /organisation/{organisationId}/details/external:
+    put:
+      tags:
+      - "organisation"
+      summary: "Update Business details , Controlbusiness and legallyresponsiblepeople."
+      description: "Request to Update Business details by external user."
+      operationId: "updateOrganisationExternal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully updated organisation details. Returns result\
+            \ inside aCapdResponse"
+          schema:
+            type: "boolean"
+        "404":
+          description: "Duplicated NINO for LPR"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Validation of organisation fails"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Error updating organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/details/internal:
+    put:
+      tags:
+      - "organisation"
+      summary: "Update Business details , Controlbusiness and legallyresponsiblepeople."
+      description: "Request to Update Business details by internal user."
+      operationId: "updateOrganisationInternal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully updated organisation details. Returns result\
+            \ inside aCapdResponse"
+          schema:
+            type: "boolean"
+        "404":
+          description: "Duplicated NINO for LPR"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Validation of organisation fails"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Error updating organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/check/duplicates:
+    post:
+      tags:
+      - "organisation"
+      summary: "Check Duplicate."
+      description: "Request to Check Duplicate of the organisation."
+      operationId: "agentOrganisationDuplicates"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully returns Duplicate organisation details or nothing.\
+            \ Inside a CapdResponse"
+          schema:
+            $ref: "#/definitions/OrganisationDuplicateResponse"
+        "500":
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/check/duplicates/agricultural:
+    post:
+      tags:
+      - "organisation"
+      summary: "Check Duplicate for AgriculturalOrganisation."
+      description: "Request to Check Duplicate for AgriculturalOrganisation."
+      operationId: "getAgriculturalOrganisationDuplicates"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Successfully returns duplicateIds. Inside a CapdResponse"
+          schema:
+            $ref: "#/definitions/OrganisationIsDuplicatesCheckResponse"
+        "500":
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/duplicate/agricultural:
+    post:
+      tags:
+      - "organisation"
+      summary: "create Agricultural Organisation DuplicateCase."
+      description: "Request to create Agricultural Organisation DuplicateCase."
+      operationId: "createAgriculturalOrganisationDuplicateCase"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/DuplicateAgriculturalOrganisationCreateCaseRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully unlocked Organisation. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            type: "boolean"
+        "404":
+          description: "Organisation not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/details/amend:
+    put:
+      tags:
+      - "organisation"
+      summary: "Amend Business Details."
+      description: "Request to Amend Business Details by party Id."
+      operationId: "amendBusinessData"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/OrganisationWithAllRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully unlocked Organisation. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            $ref: "#/definitions/OrganisationWithAllResponse"
+        "404":
+          description: "organisation not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /organisation/{organisationId}/is-deactivated:
+    get:
+      tags:
+      - "organisation"
+      summary: "Verification of the date of deactivation."
+      description: "Request to Verification of the date of deactivation, checking\
+        \ if organisation should be already deactivated in SitiAgri."
+      operationId: "isFullyDeactivated"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      - name: "organisationId"
+        in: "path"
+        description: "organisationId"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "checks the status of the organisation. Returns result inside\
+            \ a CadpResponse"
+          schema:
+            type: "boolean"
+        "422":
+          description: "Validation of organisation fails"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Error updating organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /party/{partyId}/case-notes:
+    get:
+      tags:
+      - "party"
+      summary: "Get Case Notes."
+      description: "Request to Get party Case Notes."
+      operationId: "getCaseNotes_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "partyId"
+        in: "path"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully returns list of Case Notes. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CaseNoteResponse"
+        "400":
+          description: "callerId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Case Notes for party not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /party/{partyId}/notes:
+    get:
+      tags:
+      - "party"
+      summary: "Get Notes."
+      description: "Request to Get party Notes."
+      operationId: "getNotes"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "partyId"
+        in: "path"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "Successfully returns list of party notes. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/PartyNoteResponse"
+        "400":
+          description: "partyId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    post:
+      tags:
+      - "party"
+      summary: "Create Party Note."
+      description: "Request to Create a note against either a person or an organisation\
+        \ using partyId."
+      operationId: "createPartyNote"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "partyId"
+        in: "path"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "partyNoteType must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Party with id not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Party Note created"
+  /party/{partyId}/locked-reason:
+    get:
+      tags:
+      - "party"
+      summary: "Provides the locked reason of the account."
+      description: "Request to Provides the locked reason of the account."
+      operationId: "getLockedReason"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "partyId"
+        in: "path"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully returns the locked reason of the partyId. Returns\
+            \ result inside a CapdResponse"
+          schema:
+            type: "string"
+        "404":
+          description: "Party with given party id doesn't exist"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "error occured while getting locked reason"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /party/{partyId}/has-email-code:
+    get:
+      tags:
+      - "party"
+      summary: "Check for valid email code."
+      description: "Request to Check for valid email code."
+      operationId: "hasValidateEmailCode"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "partyId"
+        in: "path"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully returns list of Case Notes. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            type: "boolean"
+        "400":
+          description: "callerId must not be empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Case Notes for party not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person-matches/{personId}/isMatched:
+    get:
+      tags:
+      - "person-matches"
+      summary: "person has been matched by IDA."
+      description: "Request to Check if person has been matched by IDA."
+      operationId: "isPersonMatched"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "code sent to user. Returns result inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "500":
+          description: "There was a problem counting the number of matches."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person-matches/{personId}:
+    delete:
+      tags:
+      - "person-matches"
+      summary: "Delete existing IDA."
+      description: "Request to Delete existing IDA matches for person."
+      operationId: "deletePersonMatches"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "500":
+          description: "There was a problem deleting the person ID to hashedPID map\
+            \ for person ID."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Delete person match"
+  /person/context:
+    get:
+      tags:
+      - "person"
+      summary: "Get User Context."
+      description: "Request to Get User Context - Getting basic person details for\
+        \ the logged in person."
+      operationId: "getUserContext"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Successfully returns user context. Returns result inside a\
+            \ CapdResponse"
+          schema:
+            $ref: "#/definitions/UserContextResponse"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/{customerReference}/{obfuscationType}:
+    delete:
+      tags:
+      - "person"
+      summary: "Delete Person Details."
+      description: "Request to Deletes a person with the specified details."
+      operationId: "obfuscatePersonDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "customerReference"
+        in: "path"
+        description: "customerReference"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{1,20}"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{1,20}"
+      - name: "obfuscationType"
+        in: "path"
+        description: "obfuscationType"
+        required: true
+        type: "string"
+        pattern: "[A-Z]"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Successfully Delete Person Details"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        "404":
+          description: "Person ID and Customer Reference do not match a customer record"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Person has active links to a business"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Exception from SitiAgri in pre-deletion phase"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/unconfirm-not-edited:
+    put:
+      tags:
+      - "person"
+      summary: "Updates organisations."
+      description: "Updates organisations that were confirmed date is lower than date."
+      operationId: "updateNotEditedOrganisationEntries_1"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "integer"
+          format: "int32"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Organisation model with all data filled in. Returns result\
+            \ inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "500":
+          description: "Error updating organisation"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/fullname-email:
+    get:
+      tags:
+      - "person"
+      summary: "Find By Person Ids."
+      description: "Request to Gets details for a persons with a specified ids."
+      operationId: "getPersons"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "id"
+        in: "query"
+        required: false
+        type: "array"
+        items:
+          type: "integer"
+        collectionFormat: "multi"
+      responses:
+        "200":
+          description: "returns list of persondetails inside a CapdResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/PersonNameAndEmailResponse"
+        "403":
+          description: "Getting an external or internal fullname and email is forbidden\
+            \ when not requested by notification-service"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "400":
+          description: "List of person ids (parameter: id) is missing"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/internal:
+    post:
+      tags:
+      - "person"
+      summary: "Create Internal Person."
+      description: "Request to Create Internal Person."
+      operationId: "createInternalPerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/InternalPersonRequest"
+      responses:
+        "200":
+          description: "Successfully returns list of customer summary"
+          schema:
+            $ref: "#/definitions/CapdInternalUserCreateResponseImpl"
+        "403":
+          description: "Request forbidden"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/create:
+    post:
+      tags:
+      - "person"
+      summary: "Create Person Details."
+      description: "Request to Creates a person with the specified details."
+      operationId: "createPersonDetails"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PersonalDetailsRequest"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully Person Details created. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            type: "string"
+        "403":
+          description: "Action forbidden"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Invalid person"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}:
+    get:
+      tags:
+      - "person"
+      summary: "Find By Person Id."
+      description: "Request to Gets details for a person with a specified id."
+      operationId: "getByPersonId"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "returns person details with a specified id. Returns result\
+            \ inside CapdResponse"
+          schema:
+            $ref: "#/definitions/PersonalDetailsFullWithLockedFlagResponse"
+        "403":
+          description: "Getting an internal user's details is forbidden"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    put:
+      tags:
+      - "person"
+      summary: "Update Person Details."
+      description: "Request to Updates a person with the specified details."
+      operationId: "updatePersonDetails"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PersonalDetailsRequest"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "403":
+          description: "Action forbidden"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Invalid person"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully Update Person Details"
+  /person/duplicate/case:
+    post:
+      tags:
+      - "person"
+      summary: "check for duplicate person."
+      description: "Request to check for duplicate person."
+      operationId: "getPersonDuplicate"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/DuplicatePersonsCreateCaseRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Duplicate person found. Returns result inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "404":
+          description: "person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/check/duplicates:
+    post:
+      tags:
+      - "person"
+      summary: "check Duplicates."
+      description: "Request to check Duplicates."
+      operationId: "getPersonDuplicate_1"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PersonDuplicateRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully finds duplicate. Returns result inside a CapdResponse"
+          schema:
+            $ref: "#/definitions/PersonDuplicateResponse"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/email-and-customer-reference:
+    get:
+      tags:
+      - "person"
+      summary: "Get email address and customer reference for person."
+      description: "Request to Get email address and customer reference for person\
+        \ - For a given personId returns their primary email address and customer\
+        \ reference."
+      operationId: "getEmailAddressAndCustomerReferenceForPersonID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully returns person email and customer reference.\
+            \ Returns result in CapdResponse"
+          schema:
+            $ref: "#/definitions/PersonEmailAndCustomerReferenceResponse"
+        "404":
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{email}/validateEmail:
+    get:
+      tags:
+      - "person"
+      summary: "Validates emails"
+      description: "Returns a boolean to indicate if the email is duplicated"
+      operationId: "isEmailDuplicated"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "path"
+        description: "email"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successfully returns the email and a flag to indicate if it's\
+            \ duplicate. Returns result inside CapdResponse"
+          schema:
+            type: "object"
+            additionalProperties:
+              type: "boolean"
+        "500":
+          description: "Error confirming if email is duplicated"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/validateEmailFlag:
+    get:
+      tags:
+      - "person"
+      summary: "Verifies email."
+      description: "Request to Verifies if email for given person Id is validated."
+      operationId: "isValidated"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "Map containing email and 'Validated' flag"
+          schema:
+            type: "object"
+            additionalProperties:
+              type: "boolean"
+        "500":
+          description: "There is more than one person with email"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/check/register:
+    get:
+      tags:
+      - "person"
+      summary: "Is Person Fully Registered."
+      description: "Request to Checks if a person with a specified id has fully registered\
+        \ in the system."
+      operationId: "isPersonFullyRegistered"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "Person Fully Registered. Returns result inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/summary:
+    get:
+      tags:
+      - "person"
+      summary: "Find By Person Id."
+      description: "Request to Gets details for a person with a specified id."
+      operationId: "getPersonSummaryById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "header"
+        required: false
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "returns person details with a specified id. Returns result\
+            \ inside a CapdResponse"
+          schema:
+            $ref: "#/definitions/PersonalDetailsFullWithLockedFlagResponse"
+        "403":
+          description: "Getting an internal user's details is forbidden"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/address/bs7666:
+    get:
+      tags:
+      - "person"
+      summary: "Find Primary Party Address in BS7666 format."
+      description: "Request to Gets address for a person with a specified id."
+      operationId: "findPrimaryPartyAddressInBS7666Format"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "returns person Address. Returns a response inside a CapdResponse"
+          schema:
+            $ref: "#/definitions/PartyAddressResponse"
+        "404":
+          description: "Party address not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/confirmation:
+    get:
+      tags:
+      - "person"
+      summary: "Is Person Confirmed."
+      description: "Request to hecks if a person is confirmed."
+      operationId: "isPersonConfirmed"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "Check person confirmation. Returns a result inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/lock:
+    post:
+      tags:
+      - "person"
+      summary: "Lock Customer Account."
+      description: "Request to Lock Customer Account using person id."
+      operationId: "lockCustomerAccount"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully locked person"
+  /person/{personId}/unlock:
+    post:
+      tags:
+      - "person"
+      summary: "Unlock Customer Account."
+      description: "Request to Unlock Customer Account using person id."
+      operationId: "unlockCustomerAccount"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully unlock person"
+  /person/{personId}/deactivate:
+    post:
+      tags:
+      - "person"
+      summary: "Deactivate Customer Account."
+      description: "Request to Deactivate Customer Account."
+      operationId: "deactivateCustomerAccount"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartyNoteRequest"
+      responses:
+        "400":
+          description: "Invalid reason and notes"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully deactivate person"
+  /person/{personId}/confirmdetails:
+    put:
+      tags:
+      - "person"
+      summary: "Confirm Person Details."
+      description: "Confirm details of a person (setConfirmed is set to true."
+      operationId: "confirmPersonDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully Person Details updated"
+  /person/search:
+    post:
+      tags:
+      - "person"
+      summary: "Search Person."
+      description: "Request to Find a list of CustomerSummaryResponse's based on a\
+        \ search parameter."
+      operationId: "searchPerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/PartySearchRequest"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully returns list of customer summary. Returns result\
+            \ inside a CapdPageResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CustomerSummaryResponse"
+        "400":
+          description: "breached search string length"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/internal/email:
+    get:
+      tags:
+      - "person"
+      summary: "Get Internal Person Email."
+      description: "Request to Get Internal Person Email."
+      operationId: "getInternalPersonEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "query"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Successfully returns Internal Person Email. Returns result\
+            \ inside a CapdResponse"
+          schema:
+            type: "string"
+        "403":
+          description: "Request forbidden"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person does not have any email assigned"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/updatedob:
+    put:
+      tags:
+      - "person"
+      summary: "Update Person Date of Birth."
+      description: "Request to Update Person Date of Birth."
+      operationId: "updatePersonDob"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "string"
+          format: "date-time"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully Update Person Date of Birth"
+  /person/{personId}/dob:
+    get:
+      tags:
+      - "person"
+      summary: "Get persons DOB."
+      description: "Request to Get persons DOB based on person ID."
+      operationId: "getPersonDob"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "Successfully gets persons DOB. Returns result inside a CapdResponse"
+          schema:
+            type: "string"
+            format: "date-time"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/registration-codes:
+    post:
+      tags:
+      - "person"
+      summary: "Generate a code."
+      description: "Request to Generate a code in order for the user to create an\
+        \ identity."
+      operationId: "generateRegistrationCodeForCustomer"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "Successfully Generate a code. Returns result inside CapdResponse"
+          schema:
+            type: "string"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Person already matched"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{customerReference}/assisted-assurance-state:
+    get:
+      tags:
+      - "person"
+      summary: "Gets the state of the external person."
+      description: "Request to Gets the state of the external person's registration\
+        \ progress through the assisted assurance mechanism."
+      operationId: "getAssistedAssuranceState"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "customerReference"
+        in: "path"
+        description: "customerReference"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Successfully Gets the state of the external person. Result\
+            \ result inside a CapdResponse"
+          schema:
+            type: "string"
+            enum:
+            - "NoProgress"
+            - "RegistrationCodeCreated"
+            - "UserCreated"
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{customerReference}/identity:
+    delete:
+      tags:
+      - "person"
+      summary: "Deletes an identity."
+      description: "Request to Deletes an person identity."
+      operationId: "deleteIdentity"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "customerReference"
+        in: "path"
+        description: "customerReference"
+        required: true
+        type: "string"
+      responses:
+        "500":
+          description: "internal server error"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "200":
+          description: "Successfully Gets the state of the external person"
+  /person/{personId}/fullname:
+    get:
+      tags:
+      - "person"
+      summary: "Get external Person full name."
+      description: "Request to Get a persons full name based on personId. For internal\
+        \ users returns 403 forbidden."
+      operationId: "getPersonFullName"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      responses:
+        "200":
+          description: "successfully returns person full name. Returns result inside\
+            \ a CapdResponse"
+          schema:
+            type: "string"
+        "403":
+          description: "Internal Persons name requested"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Person not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{email}/id:
+    get:
+      tags:
+      - "person"
+      summary: "Get person id from email."
+      description: "Request to Get person id from email."
+      operationId: "getPersonIdByEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "path"
+        description: "email"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successfully returns person id. Returns result inside CapdResponse"
+          schema:
+            type: "integer"
+        "404":
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "There is more than one person with email"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{personId}/{email}/confirm:
+    get:
+      tags:
+      - "person"
+      summary: "Verifies email."
+      description: "Request to Verifies if the email can be used and marked as validated\
+        \ by the user and it's not validated on another customers account."
+      operationId: "confirmEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "personId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "email"
+        in: "path"
+        description: "email"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "PartyDigitalContact model with all data filled in. Returns\
+            \ result inside a CapdResponse"
+          schema:
+            $ref: "#/definitions/PartyDigitalContact"
+        "404":
+          description: "Person does not have any email assigned"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /person/{crn}/find:
+    get:
+      tags:
+      - "person"
+      summary: "Change the B2c password."
+      description: "Request to Change the B2c password."
+      operationId: "findPersonDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "crn"
+        in: "path"
+        description: "crn"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CapdResponsePersonDetailsResponse"
+        "401":
+          description: "CRN and email data mismatch."
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "500":
+          description: "Dao exception encountered when retrieving complete person\
+            \ profile."
+          schema:
+            $ref: "#/definitions/DaoException"
+  /reference/legalstatus:
+    get:
+      tags:
+      - "reference"
+      summary: "Get Legal Statuses."
+      description: "Request to Get Legal Statuses."
+      operationId: "getLegalStatuses"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "returns list of LegalStatusType. Returns result inside CapdResponse"
+          schema:
+            $ref: "#/definitions/LegalStatusType"
+  /reference/titles:
+    get:
+      tags:
+      - "reference"
+      summary: "Get Titles."
+      description: "Request to Get Titles."
+      operationId: "getTitles"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "returns list of Titles. Returns result inside a CapdResponse"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+  /reference/business-types:
+    get:
+      tags:
+      - "reference"
+      summary: "Get Business Types."
+      description: "Request to Get Business Types."
+      operationId: "getBusinessTypesByClassification"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "forAgent"
+        in: "query"
+        required: false
+        type: "boolean"
+      - name: "forTrader"
+        in: "query"
+        required: false
+        type: "boolean"
+      - name: "forVendor"
+        in: "query"
+        required: false
+        type: "boolean"
+      - name: "businessTypeId"
+        in: "query"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "returns list of BusinessType. Returns result inside CapdResponse"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/BusinessTypeRequest"
+  /validate-email-service/{partyId}/{code}/{digitalContactType}/validateEmailCode:
+    get:
+      tags:
+      - "validate-email-service"
+      summary: "validate email code."
+      description: "Request to validate email code."
+      operationId: "validateEmailCode"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "integer"
+      - name: "partyId"
+        in: "path"
+        description: "partyId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - name: "code"
+        in: "path"
+        description: "code"
+        required: true
+        type: "string"
+      - name: "digitalContactType"
+        in: "path"
+        description: "digitalContactType"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "emailcode is validated. Returns result inside a CapdResponse"
+          schema:
+            type: "boolean"
+        "500":
+          description: "Party with PartyId was not set to confirmed"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /verify-email/{digitalContactPartyId}:
+    post:
+      tags:
+      - "verify-email"
+      summary: "validate email."
+      description: "Request to validate email."
+      operationId: "validateEmailCode_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "digitalContactPartyId"
+        in: "path"
+        description: "digitalContactPartyId"
+        required: true
+        type: "integer"
+        pattern: "[0-9]{0,20}"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "Success email sent. Returns result inside a CapdResponse"
+          schema:
+            type: "string"
+        "500":
+          description: "Error sending email"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+definitions:
+  EntityTag:
+    type: "object"
+    properties:
+      value:
+        type: "string"
+      weak:
+        type: "boolean"
+  Link:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      title:
+        type: "string"
+      uri:
+        type: "string"
+        format: "uri"
+      rel:
+        type: "string"
+      rels:
+        type: "array"
+        items:
+          type: "string"
+      uriBuilder:
+        $ref: "#/definitions/UriBuilder"
+      params:
+        type: "object"
+        additionalProperties:
+          type: "string"
+  Locale:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      script:
+        type: "string"
+      country:
+        type: "string"
+      variant:
+        type: "string"
+      extensionKeys:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      unicodeLocaleAttributes:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      unicodeLocaleKeys:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      iso3Language:
+        type: "string"
+      iso3Country:
+        type: "string"
+      displayLanguage:
+        type: "string"
+      displayScript:
+        type: "string"
+      displayCountry:
+        type: "string"
+      displayVariant:
+        type: "string"
+      language:
+        type: "string"
+  MediaType:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      subtype:
+        type: "string"
+      parameters:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      wildcardSubtype:
+        type: "boolean"
+      wildcardType:
+        type: "boolean"
+  NewCookie:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
+      version:
+        type: "integer"
+        format: "int32"
+      path:
+        type: "string"
+      domain:
+        type: "string"
+      comment:
+        type: "string"
+      maxAge:
+        type: "integer"
+        format: "int32"
+      expiry:
+        type: "string"
+        format: "date-time"
+      secure:
+        type: "boolean"
+      httpOnly:
+        type: "boolean"
+  Response:
+    type: "object"
+    properties:
+      lastModified:
+        type: "string"
+        format: "date-time"
+      date:
+        type: "string"
+        format: "date-time"
+      length:
+        type: "integer"
+        format: "int32"
+      location:
+        type: "string"
+        format: "uri"
+      language:
+        $ref: "#/definitions/Locale"
+      metadata:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "object"
+      allowedMethods:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      cookies:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/NewCookie"
+      statusInfo:
+        $ref: "#/definitions/StatusType"
+      links:
+        type: "array"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/Link"
+      stringHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      entityTag:
+        $ref: "#/definitions/EntityTag"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      entity:
+        type: "object"
+      status:
+        type: "integer"
+        format: "int32"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "object"
+  StatusType:
+    type: "object"
+    properties:
+      family:
+        type: "string"
+        enum:
+        - "INFORMATIONAL"
+        - "SUCCESSFUL"
+        - "REDIRECTION"
+        - "CLIENT_ERROR"
+        - "SERVER_ERROR"
+        - "OTHER"
+      statusCode:
+        type: "integer"
+        format: "int32"
+      reasonPhrase:
+        type: "string"
+  UriBuilder:
+    type: "object"
+  StackTraceElement:
+    type: "object"
+    properties:
+      classLoaderName:
+        type: "string"
+      moduleName:
+        type: "string"
+      moduleVersion:
+        type: "string"
+      methodName:
+        type: "string"
+      fileName:
+        type: "string"
+      lineNumber:
+        type: "integer"
+        format: "int32"
+      className:
+        type: "string"
+      nativeMethod:
+        type: "boolean"
+  Throwable:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  WebApplicationException:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      response:
+        $ref: "#/definitions/Response"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  CapdResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "object"
+  CapdResponseString:
+    type: "object"
+    properties:
+      _data:
+        type: "string"
+  AgentResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      customerReference:
+        type: "string"
+  CapdResponseListAgentResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/AgentResponse"
+  BodyPart:
+    type: "object"
+    properties:
+      contentDisposition:
+        $ref: "#/definitions/ContentDisposition"
+      entity:
+        type: "object"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      messageBodyWorkers:
+        $ref: "#/definitions/MessageBodyWorkers"
+      parent:
+        $ref: "#/definitions/MultiPart"
+      providers:
+        $ref: "#/definitions/Providers"
+      parameterizedHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParameterizedHeader"
+  ContentDisposition:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      parameters:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      fileName:
+        type: "string"
+      creationDate:
+        type: "string"
+        format: "date-time"
+      modificationDate:
+        type: "string"
+        format: "date-time"
+      readDate:
+        type: "string"
+        format: "date-time"
+      size:
+        type: "integer"
+        format: "int64"
+  FormDataBodyPart:
+    type: "object"
+    properties:
+      contentDisposition:
+        $ref: "#/definitions/ContentDisposition"
+      entity:
+        type: "object"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      messageBodyWorkers:
+        $ref: "#/definitions/MessageBodyWorkers"
+      parent:
+        $ref: "#/definitions/MultiPart"
+      providers:
+        $ref: "#/definitions/Providers"
+      name:
+        type: "string"
+      value:
+        type: "string"
+      simple:
+        type: "boolean"
+      formDataContentDisposition:
+        $ref: "#/definitions/FormDataContentDisposition"
+      parameterizedHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParameterizedHeader"
+  FormDataContentDisposition:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      parameters:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      fileName:
+        type: "string"
+      creationDate:
+        type: "string"
+        format: "date-time"
+      modificationDate:
+        type: "string"
+        format: "date-time"
+      readDate:
+        type: "string"
+        format: "date-time"
+      size:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+  FormDataMultiPart:
+    type: "object"
+    properties:
+      contentDisposition:
+        $ref: "#/definitions/ContentDisposition"
+      entity:
+        type: "object"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      messageBodyWorkers:
+        $ref: "#/definitions/MessageBodyWorkers"
+      parent:
+        $ref: "#/definitions/MultiPart"
+      providers:
+        $ref: "#/definitions/Providers"
+      bodyParts:
+        type: "array"
+        items:
+          $ref: "#/definitions/BodyPart"
+      fields:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            $ref: "#/definitions/FormDataBodyPart"
+      parameterizedHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParameterizedHeader"
+  MessageBodyWorkers:
+    type: "object"
+  MultiPart:
+    type: "object"
+    properties:
+      contentDisposition:
+        $ref: "#/definitions/ContentDisposition"
+      entity:
+        type: "object"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      messageBodyWorkers:
+        $ref: "#/definitions/MessageBodyWorkers"
+      parent:
+        $ref: "#/definitions/MultiPart"
+      providers:
+        $ref: "#/definitions/Providers"
+      bodyParts:
+        type: "array"
+        items:
+          $ref: "#/definitions/BodyPart"
+      parameterizedHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParameterizedHeader"
+  ParameterizedHeader:
+    type: "object"
+    properties:
+      value:
+        type: "string"
+      parameters:
+        type: "object"
+        additionalProperties:
+          type: "string"
+  Providers:
+    type: "object"
+  Alert:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      altText:
+        type: "string"
+      startDate:
+        type: "string"
+        format: "date-time"
+      endDate:
+        type: "string"
+        format: "date-time"
+      imageId:
+        type: "integer"
+  AuthorisedPerson:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      customerReference:
+        type: "string"
+      confirmed:
+        type: "boolean"
+      lastUpdatedOn:
+        type: "string"
+        format: "date-time"
+      role:
+        type: "string"
+      privileges:
+        type: "array"
+        items:
+          type: "string"
+  CapdResponseListAuthorisedPerson:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/AuthorisedPerson"
+  WebApplicationTranslatedException:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      response:
+        $ref: "#/definitions/Response"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  CapdResponsePersonSummaryResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PersonSummaryResponse"
+  PersonSummaryResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      customerReference:
+        type: "string"
+  AgentAssignRequest:
+    type: "object"
+    properties:
+      agentIds:
+        type: "array"
+        items:
+          type: "integer"
+      permissionLevels:
+        type: "array"
+        items:
+          type: "string"
+  CapdResponseCaseDetailResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/CaseDetailResponse"
+  CaseDetailResponse:
+    type: "object"
+    properties:
+      caseId:
+        type: "integer"
+      caseCategory:
+        type: "string"
+      caseCategoryDescription:
+        type: "string"
+      partyName:
+        type: "string"
+      partyId:
+        type: "integer"
+      partyTypeId:
+        type: "integer"
+        format: "int32"
+      ownerId:
+        type: "integer"
+      ownerName:
+        type: "string"
+      dateCreated:
+        type: "string"
+        format: "date-time"
+      status:
+        type: "string"
+  CapdResponseListCaseSummaryResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/CaseSummaryResponse"
+  CaseSummaryResponse:
+    type: "object"
+    properties:
+      caseId:
+        type: "integer"
+      caseCategory:
+        type: "string"
+      partyName:
+        type: "string"
+      ownerName:
+        type: "string"
+      dateCreated:
+        type: "string"
+        format: "date-time"
+      status:
+        type: "string"
+  CapdResponseListNoteResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/NoteResponse"
+  NoteResponse:
+    type: "object"
+    properties:
+      noteType:
+        type: "string"
+        enum:
+        - "CaseNote"
+        - "PartyNote"
+      authorName:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      reason:
+        type: "string"
+      note:
+        type: "string"
+  CapdResponseNoteResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/NoteResponse"
+  DefaultCaseNote:
+    type: "object"
+    required:
+    - "addedById"
+    - "caseId"
+    - "dateAdded"
+    - "note"
+    properties:
+      addedById:
+        type: "integer"
+      dateAdded:
+        type: "string"
+        format: "date-time"
+      note:
+        type: "string"
+        minLength: 1
+        maxLength: 2000
+      caseId:
+        type: "integer"
+  DigitalContactTypeRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  PartyDigitalContactRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      mdmPartyContactId:
+        type: "integer"
+      digitalContactTypeRequest:
+        $ref: "#/definitions/DigitalContactTypeRequest"
+      digitalAddress:
+        type: "string"
+      validated:
+        type: "boolean"
+  ExpressionOfInterestResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      sbi:
+        type: "integer"
+        format: "int64"
+      personId:
+        type: "integer"
+      primaryLandUse:
+        type: "string"
+      submissionDate:
+        type: "string"
+        format: "date-time"
+  ExpressionOfInterestRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      sbi:
+        type: "integer"
+        format: "int64"
+      personId:
+        type: "integer"
+      primaryLandUse:
+        type: "string"
+      submissionDate:
+        type: "string"
+        format: "date-time"
+  CapdResponseListInternalUserSearchResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/InternalUserSearchResponse"
+  InternalUserSearchResponse:
+    type: "object"
+    properties:
+      personId:
+        type: "integer"
+      fullName:
+        type: "string"
+      email:
+        type: "string"
+  ChangeInternalPersonLockedStatusRequest:
+    type: "object"
+    properties:
+      locked:
+        type: "boolean"
+  CapdResponseListLockedInternalUserResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/LockedInternalUserResponse"
+  LockedInternalUserResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      email:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+  CapdResponseBoolean:
+    type: "object"
+    properties:
+      _data:
+        type: "boolean"
+  CapdResponseInternalUserLinkListResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/InternalUserLinkListResponse"
+  InternalUserLinkListResponse:
+    type: "object"
+    properties:
+      createdUsers:
+        type: "array"
+        items:
+          $ref: "#/definitions/InternalUserLinkResponse"
+      failedToCreateUsers:
+        type: "array"
+        items:
+          $ref: "#/definitions/InternalUserLinkResponse"
+  InternalUserLinkResponse:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      creationStatus:
+        type: "string"
+        enum:
+        - "AccountCreated"
+        - "UserEmailAlreadyExists"
+        - "InvalidUserEmail"
+        - "Error"
+  PendingUserCreateRequest:
+    type: "object"
+    properties:
+      pendingUsers:
+        type: "array"
+        items:
+          $ref: "#/definitions/PendingUserRequest"
+  PendingUserRequest:
+    type: "object"
+    properties:
+      sitiAgriId:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      email:
+        type: "string"
+  CapdMdmResponse:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        readOnly: true
+      code:
+        type: "integer"
+        format: "int32"
+        readOnly: true
+  CapdResponseCapdMdmResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/CapdMdmResponse"
+  MDMOrganisation:
+    type: "object"
+    required:
+    - "mdmPartyId"
+    properties:
+      mdmPartyId:
+        type: "integer"
+      organisationName:
+        type: "string"
+        minLength: 0
+        maxLength: 160
+      sbi:
+        type: "integer"
+        format: "int64"
+      taxRegistrationNumber:
+        type: "string"
+        minLength: 0
+        maxLength: 16
+      legalStatusTypeId:
+        type: "integer"
+      businessTypeId:
+        type: "integer"
+      vendorNumber:
+        type: "string"
+        minLength: 0
+        maxLength: 16
+      traderNumber:
+        type: "string"
+        minLength: 0
+        maxLength: 9
+  MDMPerson:
+    type: "object"
+    required:
+    - "mdmPartyId"
+    properties:
+      mdmPartyId:
+        type: "integer"
+      title:
+        type: "string"
+        minLength: 0
+        maxLength: 10
+      firstName:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      middleName:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      lastName:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      deceasedFlag:
+        type: "boolean"
+      dateOfDeath:
+        type: "string"
+        format: "date-time"
+  MDMPartyDigitalContact:
+    type: "object"
+    required:
+    - "digitalContactTypeId"
+    - "mdmPartyContactId"
+    - "mdmPartyId"
+    properties:
+      mdmPartyId:
+        type: "integer"
+      mdmPartyContactId:
+        type: "integer"
+      digitalContactTypeId:
+        type: "integer"
+      digitalAddress:
+        type: "string"
+  MDMPartyAddress:
+    type: "object"
+    required:
+    - "mdmPartyAddressId"
+    - "mdmPartyId"
+    properties:
+      mdmPartyId:
+        type: "integer"
+      mdmPartyAddressId:
+        type: "integer"
+      flatName:
+        type: "string"
+        minLength: 0
+        maxLength: 240
+      buildingNumberRange:
+        type: "string"
+        minLength: 0
+        maxLength: 240
+      buildingName:
+        type: "string"
+        minLength: 0
+        maxLength: 240
+      street:
+        type: "string"
+        minLength: 0
+        maxLength: 240
+      city:
+        type: "string"
+        minLength: 0
+        maxLength: 60
+      county:
+        type: "string"
+        minLength: 0
+        maxLength: 60
+      country:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      postalCode:
+        type: "string"
+        minLength: 0
+        maxLength: 8
+      UPRN:
+        type: "string"
+        minLength: 0
+        maxLength: 12
+      primaryAddress:
+        type: "boolean"
+      address1:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      address2:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      address3:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      address4:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      address5:
+        type: "string"
+        minLength: 0
+        maxLength: 100
+      dependentLocality:
+        type: "string"
+        minLength: 0
+        maxLength: 240
+      doubleDependentLocality:
+        type: "string"
+        minLength: 0
+        maxLength: 240
+      uprn:
+        type: "string"
+  MDMPartyPhoneContact:
+    type: "object"
+    required:
+    - "mdmPartyContactId"
+    - "mdmPartyId"
+    - "phoneContactTypeId"
+    properties:
+      mdmPartyId:
+        type: "integer"
+      mdmPartyContactId:
+        type: "integer"
+      phoneContactTypeId:
+        type: "integer"
+      phoneNumber:
+        type: "string"
+  MDMLegacyIdentifier:
+    type: "object"
+    required:
+    - "identifierValue"
+    - "mdmIdentifierId"
+    - "mdmPartyId"
+    properties:
+      mdmPartyId:
+        type: "integer"
+      mdmIdentifierId:
+        type: "integer"
+      identifierType:
+        type: "integer"
+      identifierValue:
+        type: "string"
+        minLength: 0
+        maxLength: 75
+      sourceSystem:
+        type: "integer"
+  MDMEmpowerment:
+    type: "object"
+    required:
+    - "mdmOrgPartyId"
+    - "mdmPersonPartyId"
+    - "privilege"
+    - "role"
+    properties:
+      mdmPersonPartyId:
+        type: "integer"
+      mdmOrgPartyId:
+        type: "integer"
+      role:
+        type: "string"
+      privilege:
+        type: "string"
+  MDMEmpowermentDelete:
+    type: "object"
+    required:
+    - "mdmOrgPartyId"
+    - "mdmPersonPartyId"
+    - "privilege"
+    - "role"
+    properties:
+      mdmPersonPartyId:
+        type: "integer"
+      mdmOrgPartyId:
+        type: "integer"
+      role:
+        type: "string"
+      privilege:
+        type: "string"
+  ChangeOfPrivilegesNotification:
+    allOf:
+    - $ref: "#/definitions/Notification"
+    - type: "object"
+      properties:
+        senderId:
+          type: "integer"
+        recipientId:
+          type: "integer"
+        organisationId:
+          type: "integer"
+  NewPrivilegesNotification:
+    allOf:
+    - $ref: "#/definitions/Notification"
+    - type: "object"
+      properties:
+        senderId:
+          type: "integer"
+        recipientId:
+          type: "integer"
+        organisationId:
+          type: "integer"
+  Notification:
+    type: "object"
+    discriminator: "type"
+    properties:
+      internalMessageType:
+        type: "string"
+        enum:
+        - "ChangeOfPrivileges"
+        - "NewPrivileges"
+        - "RemovedPrivileges"
+  RemovedPrivilegesNotification:
+    allOf:
+    - $ref: "#/definitions/Notification"
+    - type: "object"
+      properties:
+        senderId:
+          type: "integer"
+        recipientId:
+          type: "integer"
+        organisationId:
+          type: "integer"
+  AdditionalBusinessActivityTypeResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  AssociatedPersonResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      telephoneNumber:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      percentageOfBusinessOwned:
+        type: "integer"
+      datePersonBecameOwner:
+        type: "string"
+        format: "date-time"
+      nationalInsuranceNumber:
+        type: "string"
+      role:
+        type: "string"
+      headOfHolding:
+        type: "boolean"
+      dateBecameHeadOfHolding:
+        type: "string"
+        format: "date-time"
+      hasOtherBusinessInterests:
+        type: "boolean"
+      hasBeenHeadOfHoldingForOtherBusiness:
+        type: "boolean"
+      percentageOfVotingRights:
+        type: "integer"
+  BusinessTypeResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  CapdResponseOrganisationWithAllResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/OrganisationWithAllResponse"
+  LegalStatusTypeResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  OrganisationWithAllResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      additionalSbiIds:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+      confirmed:
+        type: "boolean"
+      lastUpdatedOn:
+        type: "string"
+        format: "date-time"
+      landConfirmed:
+        type: "boolean"
+      deactivated:
+        type: "boolean"
+      locked:
+        type: "boolean"
+      address:
+        $ref: "#/definitions/PartyAddressResponse"
+      correspondenceAddress:
+        $ref: "#/definitions/PartyAddressResponse"
+      isFinancialToBusinessAddr:
+        type: "boolean"
+      isCorrespondenceAsBusinessAddr:
+        type: "boolean"
+      email:
+        type: "string"
+      emailValidated:
+        type: "boolean"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      fax:
+        type: "string"
+      correspondenceEmail:
+        type: "string"
+      correspondenceEmailValidated:
+        type: "boolean"
+      correspondenceLandline:
+        type: "string"
+      correspondenceMobile:
+        type: "string"
+      correspondenceFax:
+        type: "string"
+      taxRegistrationNumber:
+        type: "string"
+      businessType:
+        $ref: "#/definitions/BusinessTypeResponse"
+      businessReference:
+        type: "string"
+      legalStatus:
+        $ref: "#/definitions/LegalStatusTypeResponse"
+      dateStartedFarming:
+        type: "string"
+        format: "date-time"
+      companiesHouseRegistrationNumber:
+        type: "string"
+      charityCommissionRegistrationNumber:
+        type: "string"
+      persons:
+        type: "array"
+        items:
+          $ref: "#/definitions/AssociatedPersonResponse"
+      hasLandInNorthernIreland:
+        type: "boolean"
+      hasLandInScotland:
+        type: "boolean"
+      hasLandInWales:
+        type: "boolean"
+      hasAdditionalBusinessActivities:
+        type: "boolean"
+      vendorNumber:
+        type: "string"
+      traderNumber:
+        type: "string"
+      isAccountablePeopleDeclarationCompleted:
+        type: "boolean"
+      additionalBusinessActivities:
+        type: "array"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/AdditionalBusinessActivityTypeResponse"
+  PartyAddressResponse:
+    type: "object"
+    properties:
+      address1:
+        type: "string"
+      address2:
+        type: "string"
+      address3:
+        type: "string"
+      address4:
+        type: "string"
+      address5:
+        type: "string"
+      pafOrganisationName:
+        type: "string"
+      flatName:
+        type: "string"
+      buildingNumberRange:
+        type: "string"
+      buildingName:
+        type: "string"
+      street:
+        type: "string"
+      city:
+        type: "string"
+      county:
+        type: "string"
+      postalCode:
+        type: "string"
+      country:
+        type: "string"
+      uprn:
+        type: "string"
+      dependentLocality:
+        type: "string"
+      doubleDependentLocality:
+        type: "string"
+      addressTypeId:
+        type: "integer"
+  AssociatedPersonRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      telephoneNumber:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      percentageOfBusinessOwned:
+        type: "integer"
+      datePersonBecameOwner:
+        type: "string"
+        format: "date-time"
+      nationalInsuranceNumber:
+        type: "string"
+      role:
+        type: "string"
+      headOfHolding:
+        type: "boolean"
+      dateBecameHeadOfHolding:
+        type: "string"
+        format: "date-time"
+      hasOtherBusinessInterests:
+        type: "boolean"
+      hasBeenHeadOfHoldingForOtherBusiness:
+        type: "boolean"
+      percentageOfVotingRights:
+        type: "integer"
+  BusinessTypeRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  LegalStatusTypeRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  OrganisationWithAllRequest:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      additionalSbiIds:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+      confirmed:
+        type: "boolean"
+      landConfirmed:
+        type: "boolean"
+      closed:
+        type: "boolean"
+      address:
+        $ref: "#/definitions/PartyAddressRequest"
+      correspondenceAddress:
+        $ref: "#/definitions/PartyAddressRequest"
+      isFinancialToBusinessAddr:
+        type: "boolean"
+      isCorrespondenceAsBusinessAddr:
+        type: "boolean"
+      email:
+        type: "string"
+      emailValidated:
+        type: "boolean"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      fax:
+        type: "string"
+      correspondenceEmail:
+        type: "string"
+      correspondenceEmailValidated:
+        type: "boolean"
+      correspondenceLandline:
+        type: "string"
+      correspondenceMobile:
+        type: "string"
+      correspondenceFax:
+        type: "string"
+      taxRegistrationNumber:
+        type: "string"
+      businessType:
+        $ref: "#/definitions/BusinessTypeRequest"
+      businessReference:
+        type: "string"
+      legalStatus:
+        $ref: "#/definitions/LegalStatusTypeRequest"
+      dateStartedFarming:
+        type: "string"
+        format: "date-time"
+      companiesHouseRegistrationNumber:
+        type: "string"
+      charityCommissionRegistrationNumber:
+        type: "string"
+      persons:
+        type: "array"
+        items:
+          $ref: "#/definitions/AssociatedPersonRequest"
+      isAccountablePeopleDeclarationCompleted:
+        type: "boolean"
+  PartyAddressRequest:
+    type: "object"
+    properties:
+      address1:
+        type: "string"
+      address2:
+        type: "string"
+      address3:
+        type: "string"
+      address4:
+        type: "string"
+      address5:
+        type: "string"
+      pafOrganisationName:
+        type: "string"
+      flatName:
+        type: "string"
+      buildingNumberRange:
+        type: "string"
+      buildingName:
+        type: "string"
+      street:
+        type: "string"
+      city:
+        type: "string"
+      county:
+        type: "string"
+      postalCode:
+        type: "string"
+      country:
+        type: "string"
+      uprn:
+        type: "string"
+      dependentLocality:
+        type: "string"
+      doubleDependentLocality:
+        type: "string"
+      addressTypeId:
+        type: "integer"
+  CapdResponseMapStringObject:
+    type: "object"
+    properties:
+      _data:
+        type: "object"
+        additionalProperties:
+          type: "object"
+  PartyNoteRequest:
+    type: "object"
+    properties:
+      reason:
+        type: "string"
+      note:
+        type: "string"
+      partyNoteType:
+        type: "string"
+        enum:
+        - "Generic"
+        - "DeactivatePerson"
+        - "LockPerson"
+        - "UnlockPerson"
+        - "DeactivateOrganisation"
+        - "ReactivateOrganisation"
+        - "LockOrganisation"
+        - "UnlockOrganisation"
+  AdditionalBusinessDetailsRequest:
+    type: "object"
+    properties:
+      legalStatus:
+        $ref: "#/definitions/LegalStatusTypeRequest"
+      businessType:
+        $ref: "#/definitions/BusinessTypeRequest"
+      companiesHouseRegistrationNumber:
+        type: "string"
+      charityCommissionRegistrationNumber:
+        type: "string"
+      dateStartedFarming:
+        type: "string"
+        format: "date-time"
+  OrganisationDetailsRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      address:
+        $ref: "#/definitions/PartyAddressRequest"
+      email:
+        type: "string"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      correspondenceAddress:
+        $ref: "#/definitions/PartyAddressRequest"
+      correspondenceEmail:
+        type: "string"
+      correspondenceLandline:
+        type: "string"
+      correspondenceMobile:
+        type: "string"
+      taxRegistrationNumber:
+        type: "string"
+      businessType:
+        $ref: "#/definitions/BusinessTypeRequest"
+      isFinancialToBusinessAddr:
+        type: "boolean"
+      isCorrespondenceAsBusinessAddr:
+        type: "boolean"
+  CapdPageResponse:
+    type: "object"
+    properties:
+      _page:
+        $ref: "#/definitions/Page"
+      _data:
+        type: "object"
+  CapdPageResponseListOrganisationWithAddressResponse:
+    type: "object"
+    properties:
+      _page:
+        $ref: "#/definitions/Page"
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/OrganisationWithAddressResponse"
+  OrganisationWithAddressResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      additionalSbiIds:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+      confirmed:
+        type: "boolean"
+      lastUpdatedOn:
+        type: "string"
+        format: "date-time"
+      landConfirmed:
+        type: "boolean"
+      deactivated:
+        type: "boolean"
+      locked:
+        type: "boolean"
+      address:
+        $ref: "#/definitions/PartyAddressResponse"
+      correspondenceAddress:
+        $ref: "#/definitions/PartyAddressResponse"
+      isFinancialToBusinessAddr:
+        type: "boolean"
+      isCorrespondenceAsBusinessAddr:
+        type: "boolean"
+  Page:
+    type: "object"
+    properties:
+      number:
+        type: "integer"
+        format: "int32"
+      size:
+        type: "integer"
+        format: "int32"
+      totalPages:
+        type: "integer"
+        format: "int32"
+      numberOfElements:
+        type: "integer"
+        format: "int32"
+      totalElements:
+        type: "integer"
+        format: "int64"
+  PartySearchRequest:
+    type: "object"
+    properties:
+      offset:
+        type: "integer"
+        format: "int32"
+      limit:
+        type: "integer"
+        format: "int32"
+      searchFieldType:
+        type: "string"
+        enum:
+        - "SBI"
+        - "BUSINESS_NAME"
+        - "TRADER_NUMBER"
+        - "VENDOR_NUMBER"
+        - "CUSTOMER_NAME"
+        - "CUSTOMER_REFERENCE"
+        - "PERSONAL_IDENTIFIER"
+        - "CUSTOMER_POSTCODE"
+        - "BUSINESS_POSTCODE"
+      primarySearchPhrase:
+        type: "string"
+      secondarySearchPhrase:
+        type: "string"
+  CapdResponseListBigInteger:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          type: "integer"
+  CapdResponseOrganisationWithPostalCodeResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/OrganisationWithPostalCodeResponse"
+  OrganisationWithPostalCodeResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      additionalSbiIds:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+      confirmed:
+        type: "boolean"
+      lastUpdatedOn:
+        type: "string"
+        format: "date-time"
+      landConfirmed:
+        type: "boolean"
+      deactivated:
+        type: "boolean"
+      locked:
+        type: "boolean"
+      postalCode:
+        type: "string"
+  CapdResponseOrganisationBaseResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/OrganisationBaseResponse"
+  OrganisationBaseResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      additionalSbiIds:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+      confirmed:
+        type: "boolean"
+      lastUpdatedOn:
+        type: "string"
+        format: "date-time"
+      landConfirmed:
+        type: "boolean"
+      deactivated:
+        type: "boolean"
+      locked:
+        type: "boolean"
+  CapdResponseListOrganisationWithAddressResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/OrganisationWithAddressResponse"
+  CapdPageResponseListOrganisationBaseResponse:
+    type: "object"
+    properties:
+      _page:
+        $ref: "#/definitions/Page"
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/OrganisationBaseResponse"
+  CapdResponseOptionalOrganisationDuplicateResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/OrganisationDuplicateResponse"
+  OrganisationDuplicateResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      email:
+        type: "string"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      fax:
+        type: "string"
+  CapdResponseOrganisationIsDuplicatesCheckResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/OrganisationIsDuplicatesCheckResponse"
+  OrganisationIsDuplicatesCheckResponse:
+    type: "object"
+    properties:
+      duplicate:
+        type: "boolean"
+      duplicateIdsAndSbis:
+        type: "object"
+        additionalProperties:
+          type: "integer"
+          format: "int64"
+  DuplicateAgriculturalOrganisationCreateCaseRequest:
+    type: "object"
+    properties:
+      duplicateId:
+        type: "integer"
+      matchedDuplicateIds:
+        type: "array"
+        items:
+          type: "integer"
+  CapdResponseListCaseNoteResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/CaseNoteResponse"
+  CaseNoteResponse:
+    type: "object"
+    properties:
+      noteType:
+        type: "string"
+        enum:
+        - "CaseNote"
+        - "PartyNote"
+      authorName:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      reason:
+        type: "string"
+      note:
+        type: "string"
+      caseId:
+        type: "integer"
+      caseType:
+        type: "string"
+      caseCategory:
+        type: "string"
+      caseStatus:
+        type: "string"
+  CapdResponseListPartyNoteResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/PartyNoteResponse"
+  PartyNoteResponse:
+    type: "object"
+    properties:
+      noteType:
+        type: "string"
+        enum:
+        - "CaseNote"
+        - "PartyNote"
+      authorName:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      reason:
+        type: "string"
+      note:
+        type: "string"
+      partyNoteType:
+        type: "string"
+        enum:
+        - "Generic"
+        - "DeactivatePerson"
+        - "LockPerson"
+        - "UnlockPerson"
+        - "DeactivateOrganisation"
+        - "ReactivateOrganisation"
+        - "LockOrganisation"
+        - "UnlockOrganisation"
+  CapdResponseUserContextResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/UserContextResponse"
+  UserContextResponse:
+    type: "object"
+    properties:
+      callerId:
+        type: "integer"
+      type:
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      userFirstName:
+        type: "string"
+      userLastName:
+        type: "string"
+  CapdResponseListPersonNameAndEmailResponse:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/PersonNameAndEmailResponse"
+  PersonNameAndEmailResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      email:
+        type: "string"
+  CapdInternalUserCreateResponseImpl:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+  InternalPersonRequest:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      domain:
+        type: "string"
+      id:
+        type: "integer"
+      username:
+        type: "string"
+      privileges:
+        type: "array"
+        items:
+          type: "string"
+  PersonalDetailsRequest:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+      otherTitle:
+        type: "string"
+      firstName:
+        type: "string"
+      middleName:
+        type: "string"
+      lastName:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      email:
+        type: "string"
+      doNotContact:
+        type: "boolean"
+      emailValidated:
+        type: "boolean"
+      address:
+        $ref: "#/definitions/PartyAddressRequest"
+  DuplicatePersonsCreateCaseRequest:
+    type: "object"
+    properties:
+      duplicateCustomerReferenceNumber:
+        type: "string"
+      duplicates:
+        type: "array"
+        items:
+          type: "string"
+  CapdResponsePersonDuplicateResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PersonDuplicateResponse"
+  PersonDuplicateResponse:
+    type: "object"
+    properties:
+      customerReferenceNumber:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "integer"
+  PersonDuplicateRequest:
+    type: "object"
+    properties:
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "integer"
+  CapdResponsePersonEmailAndCustomerReferenceResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PersonEmailAndCustomerReferenceResponse"
+  PersonEmailAndCustomerReferenceResponse:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      customerReferenceNumber:
+        type: "string"
+  CapdResponseMapStringBoolean:
+    type: "object"
+    properties:
+      _data:
+        type: "object"
+        additionalProperties:
+          type: "boolean"
+  CapdResponsePersonalDetailsFullWithLockedFlagResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PersonalDetailsFullWithLockedFlagResponse"
+  PersonalDetailsFullWithLockedFlagResponse:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+      otherTitle:
+        type: "string"
+      firstName:
+        type: "string"
+      middleName:
+        type: "string"
+      lastName:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+      email:
+        type: "string"
+      doNotContact:
+        type: "boolean"
+      emailValidated:
+        type: "boolean"
+      address:
+        $ref: "#/definitions/PartyAddressResponse"
+      locked:
+        type: "boolean"
+      id:
+        type: "integer"
+      confirmed:
+        type: "boolean"
+      customerReferenceNumber:
+        type: "string"
+      personalIdentifiers:
+        type: "array"
+        items:
+          type: "string"
+      deactivated:
+        type: "boolean"
+  CapdResponsePartyAddressResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PartyAddressResponse"
+  CapdPageResponseListCustomerSummaryResponse:
+    type: "object"
+    properties:
+      _page:
+        $ref: "#/definitions/Page"
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/CustomerSummaryResponse"
+  CustomerSummaryResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      fullName:
+        type: "string"
+      primaryAddress:
+        $ref: "#/definitions/PartyAddressResponse"
+      personalIdentifiers:
+        type: "array"
+        items:
+          type: "string"
+      nationalInsuranceNumber:
+        type: "string"
+      customerReference:
+        type: "string"
+      email:
+        type: "string"
+      locked:
+        type: "boolean"
+      deactivated:
+        type: "boolean"
+  CapdResponseDate:
+    type: "object"
+    properties:
+      _data:
+        type: "string"
+        format: "date-time"
+  CapdResponseAssistedAssuranceRegistrationState:
+    type: "object"
+    properties:
+      _data:
+        type: "string"
+        enum:
+        - "NoProgress"
+        - "RegistrationCodeCreated"
+        - "UserCreated"
+  CapdResponseBigInteger:
+    type: "object"
+    properties:
+      _data:
+        type: "integer"
+  CapdResponsePartyDigitalContact:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PartyDigitalContact"
+  DigitalContactType:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+  PartyDigitalContact:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      partyId:
+        type: "integer"
+      mdmPartyContactId:
+        type: "integer"
+      digitalContactType:
+        $ref: "#/definitions/DigitalContactType"
+      digitalAddress:
+        type: "string"
+        minLength: 0
+        maxLength: 254
+      validated:
+        type: "boolean"
+  CapdResponsePersonDetailsResponse:
+    type: "object"
+    properties:
+      _data:
+        $ref: "#/definitions/PersonDetailsResponse"
+  Contacts:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      landline:
+        type: "string"
+      mobile:
+        type: "string"
+  Deceased:
+    type: "object"
+    properties:
+      isDeceased:
+        type: "boolean"
+      dateOfDeath:
+        type: "string"
+        format: "date-time"
+  InternalData:
+    type: "object"
+    properties:
+      confirmed:
+        type: "boolean"
+      internalUser:
+        type: "boolean"
+      amended:
+        type: "boolean"
+      doNotContact:
+        type: "boolean"
+      lastUpdatedOn:
+        type: "string"
+        format: "date-time"
+  Name:
+    type: "object"
+    properties:
+      firstName:
+        type: "string"
+      middleName:
+        type: "string"
+      lastName:
+        type: "string"
+  PersonDetailsResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      titles:
+        $ref: "#/definitions/Titles"
+      name:
+        $ref: "#/definitions/Name"
+      dateOfBirth:
+        type: "string"
+        format: "date-time"
+      contacts:
+        $ref: "#/definitions/Contacts"
+      internalData:
+        $ref: "#/definitions/InternalData"
+      customerReference:
+        type: "string"
+      nationalInsuranceNumber:
+        type: "string"
+      personalIdentifier:
+        type: "string"
+      deceased:
+        $ref: "#/definitions/Deceased"
+  Titles:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+      otherTitle:
+        type: "string"
+  DaoException:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  CapdResponseListLegalStatusType:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/LegalStatusType"
+  LegalStatusType:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+        minLength: 0
+        maxLength: 50
+  CapdResponseListString:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          type: "string"
+  CapdResponseListBusinessTypeRequest:
+    type: "object"
+    properties:
+      _data:
+        type: "array"
+        items:
+          $ref: "#/definitions/BusinessTypeRequest"

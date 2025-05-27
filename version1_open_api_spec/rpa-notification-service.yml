@@ -1,0 +1,2118 @@
+---
+swagger: "2.0"
+info: {}
+tags:
+- name: "Bespoke Notifications"
+- name: "Customer Contact"
+- name: "Notifications"
+- name: "Privileges"
+- name: "Status"
+schemes:
+- "http"
+paths:
+  /notifications/bespoke-notifications/{id}:
+    get:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Get bespoke notification by id"
+      description: "Given Bespoke Notification Id, get the Bespoke Notification"
+      operationId: "get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "Bespoke Notification Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Bespoke Notification is returned successfully"
+          schema:
+            $ref: "#/definitions/BespokeNotification"
+        "404":
+          description: "Bespoke Notification Id is Null"
+    put:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Update the existing bespoke notification with the new content"
+      description: "Given Bespoke Notification Request, Update the existing bespoke\
+        \ notification with the new content"
+      operationId: "update"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "Id"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        description: "Bespoke Notification Request"
+        required: false
+        schema:
+          $ref: "#/definitions/BespokeNotificationRequest"
+      responses:
+        "200":
+          description: "Bespoke Notification Id is returned successfully"
+          schema:
+            type: "integer"
+        "400":
+          description: "Bespoke Notification Request is Null"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    delete:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Delete bespoke notification by id"
+      description: "Given an Id, Delete the matching bespoke notification"
+      operationId: "delete"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Deletion success is returned"
+        "404":
+          description: "No Bespoke Notification matching the given Id"
+  /notifications/bespoke-notifications/all:
+    get:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Get all bespoke notifications"
+      description: "Get list of all created bespoke notifications templates"
+      operationId: "getAllBespokeNotifications"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "group"
+        in: "query"
+        description: "Bespoke Notification Group"
+        required: false
+        type: "string"
+        default: "send"
+      responses:
+        "200":
+          description: "List of Bespoke Notifications returned successfully, in a\
+            \ Response object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/BespokeNotificationListResponse"
+  /notifications/bespoke-notifications/create:
+    post:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Create new bespoke notification with privileges"
+      description: "Given Bespoke Notification Request, Create a new bespoke notification\
+        \ with privileges"
+      operationId: "createBespokeNotification"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Bespoke Notification Request"
+        required: false
+        schema:
+          $ref: "#/definitions/BespokeNotificationRequest"
+      responses:
+        "200":
+          description: "Bespoke Notification Id is returned successfully"
+          schema:
+            type: "integer"
+        "400":
+          description: "Bespoke Notification Request is Null"
+  /notifications/bespoke-notifications/search:
+    get:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Get bespoke notifications by keyword, group, page, pagesize"
+      description: "Given a keyword, group, page and pagesize, get a list of all matching\
+        \ Bespoke Notifications"
+      operationId: "getMatchingBespokeNotifications"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "keyWord"
+        in: "query"
+        description: "Keyword"
+        required: false
+        type: "string"
+      - name: "group"
+        in: "query"
+        description: "Group"
+        required: false
+        type: "string"
+        default: "send"
+      - name: "page"
+        in: "query"
+        description: "Page"
+        required: false
+        type: "integer"
+        default: 1
+        format: "int32"
+      - name: "pageSize"
+        in: "query"
+        description: "Page Size"
+        required: false
+        type: "integer"
+        default: 20
+        format: "int32"
+      responses:
+        "200":
+          description: "List of Bespoke Notification is returned successfully, in\
+            \ a Response object"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/BespokeNotificationListResponse"
+  /notifications/bespoke-notifications/validate-file:
+    post:
+      tags:
+      - "Bespoke Notifications"
+      summary: "GET to verify SBI list"
+      description: "Given the file input, verify it"
+      operationId: "verifyFile"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "file"
+        in: "formData"
+        description: "Input File"
+        required: false
+        type: "file"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Verification Success is returned"
+          schema:
+            $ref: "#/definitions/Response"
+        "400":
+          description: "Input Stream is Null"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Input Stream is not Null but Empty"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "413":
+          description: "Input Stream contains too many lines"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Data in Input Stream does not match SBI format"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /notifications/bespoke-notifications/add-file/{id}:
+    post:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Upload a new SBI List"
+      description: "Given an Input Stream, Upload it and return a Bespoke Notification\
+        \ Id"
+      operationId: "uploadSbiList"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "file"
+        in: "formData"
+        description: "Input File"
+        required: false
+        type: "file"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "id"
+        in: "path"
+        description: "Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Bespoke Notification Id is returned successfully"
+          schema:
+            type: "integer"
+  /notifications/bespoke-notifications/process:
+    get:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Get bespoke notifications for processing"
+      description: "Given a Timestamp, get the Bespoke Notifications for processing"
+      operationId: "getAllBespokeNotificationsForSending"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "timestamp"
+        in: "query"
+        description: "Time Stamp in Format 'yyyyMMddHHmmss'"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Bespoke Notifications is returned successfully"
+          schema:
+            $ref: "#/definitions/BespokeNotificationListResponse"
+  /notifications/bespoke-notifications/sbi-list-to-process/{id}:
+    get:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Get list of SBIs related to bespoke notification"
+      description: "Given a Id, Get list of SBIs related to that bespoke notification"
+      operationId: "getRelatedSBIs"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Bespoke Notification is returned successfully"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+  /notifications/bespoke-notifications/mark-processed:
+    put:
+      tags:
+      - "Bespoke Notifications"
+      summary: "Update processed bespoke notifications"
+      description: "Given the Ids, Update the matching bespoke notifications"
+      operationId: "markProcessed"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "array"
+          items:
+            type: "integer"
+      responses:
+        "200":
+          description: "Updated successfully"
+  /customer-contact/communication:
+    post:
+      tags:
+      - "Customer Contact"
+      summary: "Create a new communication for a Customer Query"
+      description: "Create a new communication for a Customer Query for the given\
+        \ details"
+      operationId: "createCustomerCommunication"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Customer Contact Communication Request"
+        required: false
+        schema:
+          $ref: "#/definitions/CustomerContactCommunicationRequest"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Newly created Communication Id is returned successfully"
+          schema:
+            type: "integer"
+  /customer-contact/query/{queryId}/{crn}/hidden:
+    put:
+      tags:
+      - "Customer Contact"
+      summary: "Set Customer Query as hidden"
+      description: "Set Customer Query as hidden for a given Query and CRN"
+      operationId: "setCustomerQueryAsHidden"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "queryId"
+        in: "path"
+        description: "Query Id"
+        required: true
+        type: "integer"
+      - name: "crn"
+        in: "path"
+        description: "CRN"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Customer Query set as hidden successfully"
+  /customer-contact/query/{queryId}/mark-complaint:
+    put:
+      tags:
+      - "Customer Contact"
+      summary: "Set Customer Query as Complients and Appeals in CRM queue "
+      description: "Set Customer Query as Complients and Appeals in CRM queue for\
+        \ a given Query and CRN"
+      operationId: "setCustomerQueryAsMarkedComplient"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Customer Contact Request"
+        required: false
+        schema:
+          $ref: "#/definitions/CustomerContactQueryRequest"
+      - name: "queryId"
+        in: "path"
+        description: "Query Id"
+        required: true
+        type: "integer"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Customer Query set as Complients and Appeals in CRM Queue\
+            \ successfully"
+  /customer-contact/query/{queryId}/{crn}/closed:
+    put:
+      tags:
+      - "Customer Contact"
+      summary: "Set Customer Query as closed"
+      description: "Set Customer Query as closed for a given Query and CRN"
+      operationId: "setCustomerQueryAsClosed"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "queryId"
+        in: "path"
+        description: "Query Id"
+        required: true
+        type: "integer"
+      - name: "crn"
+        in: "path"
+        description: "CRN"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Customer Query set as closed successfully"
+  /customer-contact/query/{queryId}/{crn}/printed:
+    put:
+      tags:
+      - "Customer Contact"
+      summary: "Set Customer Query as printed"
+      description: "Set Customer Query as printed for a given Query and CRN"
+      operationId: "setCustomerQueryAsPrinted"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "queryId"
+        in: "path"
+        description: "Query Id"
+        required: true
+        type: "integer"
+      - name: "crn"
+        in: "path"
+        description: "CRN"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Customer Query set as printed successfully"
+  /customer-contact/communication/{queryId}/{crn}/{communicationId}/read:
+    put:
+      tags:
+      - "Customer Contact"
+      summary: "Set Customer Query as read"
+      description: "Set Customer Query as read for a given Query, CRN and Communication\
+        \ Id"
+      operationId: "setCustomerCommunicationAsRead"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "queryId"
+        in: "path"
+        description: "Query Id"
+        required: true
+        type: "integer"
+      - name: "crn"
+        in: "path"
+        description: "CRN"
+        required: true
+        type: "string"
+      - name: "communicationId"
+        in: "path"
+        description: "Communication Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Customer Query set as read successfully"
+  /customer-contact/view-query-details/{crn}/{queryId}:
+    get:
+      tags:
+      - "Customer Contact"
+      summary: "Get all sent or inbox queries by Query Id"
+      description: "Get all sent or inbox queries by CRN and Query Id"
+      operationId: "getQueryDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "crn"
+        in: "path"
+        description: "CRN"
+        required: true
+        type: "string"
+      - name: "queryId"
+        in: "path"
+        description: "Query Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Matching queries are returned successfully"
+          schema:
+            $ref: "#/definitions/CustomerContactQueryDetailsResponse"
+        "400":
+          description: "CRN or Query Id is empty or null"
+  /customer-contact:
+    put:
+      tags:
+      - "Customer Contact"
+      summary: "Get Customer Contact matrix details"
+      description: "Get Customer Contact matrix details based on user's permissions\
+        \ for a given business"
+      operationId: "getCustomerContactFormFields"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Customer Contact Request"
+        required: false
+        schema:
+          $ref: "#/definitions/CustomerContactFormFieldsRequest"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Customer Contact Details returned successfully"
+          schema:
+            $ref: "#/definitions/CustomerContactFormFieldsResponse"
+        "400":
+          description: "The fields in the Request is either empty or null"
+        "404":
+          description: "The matching Customer contact or permissions is empty"
+  /customer-contact/query:
+    post:
+      tags:
+      - "Customer Contact"
+      summary: "Create a new Customer Query"
+      description: "Create a new Customer Query for the given details"
+      operationId: "createCustomerQuery"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Customer Contact Request"
+        required: false
+        schema:
+          $ref: "#/definitions/CustomerContactQueryRequest"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Newly created Customer Contact Id is returned successfully"
+          schema:
+            type: "integer"
+  /customer-contact/crm-response:
+    post:
+      tags:
+      - "Customer Contact"
+      summary: "Create a new communication or communications"
+      description: "Create a new communication or communications (Response from CRM)\
+        \ for a Customer Query"
+      operationId: "createCrmResponse"
+      consumes:
+      - "application/xml"
+      produces:
+      - "application/xml"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "External Envelope Request"
+        required: false
+        schema:
+          $ref: "#/definitions/ExternalEnvelope"
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "Communications created successfully"
+        "400":
+          description: "Error while saving CRM Communications"
+        "429":
+          description: "List Size is greater than Max allowed CRM Requests"
+  /customer-contact/all-queries/{crn}/{queriesFolder}:
+    get:
+      tags:
+      - "Customer Contact"
+      summary: "Get all sent or inbox queries by Query Folder"
+      description: "Get all sent or inbox queries by CRN and Query Folder"
+      operationId: "getAllQueries"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "crn"
+        in: "path"
+        description: "CRN"
+        required: true
+        type: "string"
+      - name: "queriesFolder"
+        in: "path"
+        description: "Queries Folder Options"
+        required: true
+        type: "string"
+        enum:
+        - "SENT"
+        - "INBOX"
+      responses:
+        "200":
+          description: "All queries are returned successfully"
+          schema:
+            $ref: "#/definitions/CustomerContactQueryResponse"
+        "400":
+          description: "If CRN is empty or null"
+  /notifications:
+    get:
+      tags:
+      - "Notifications"
+      summary: "Retrieves notification by query params"
+      description: "Retrieves notification by query params"
+      operationId: "get_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "page"
+        in: "query"
+        description: "Page"
+        required: false
+        type: "integer"
+        default: 1
+        format: "int32"
+      - name: "size"
+        in: "query"
+        description: "Size"
+        required: false
+        type: "integer"
+        default: 50
+        format: "int32"
+      - name: "personId"
+        in: "query"
+        description: "Person Id"
+        required: false
+        type: "integer"
+      - name: "organisationId"
+        in: "query"
+        description: "Organisation Id"
+        required: false
+        type: "integer"
+      - name: "filter"
+        in: "query"
+        description: "Filter Options"
+        required: false
+        type: "string"
+        enum:
+        - "archived"
+        - "notArchived"
+        - "notArchivedRead"
+        - "notArchivedNotRead"
+      responses:
+        "200":
+          description: "List of Notications is returned successfully"
+          schema:
+            $ref: "#/definitions/NotificationListResponse"
+        "400":
+          description: "Person Id is null"
+        "403":
+          description: "Expected permisions not found"
+    post:
+      tags:
+      - "Notifications"
+      summary: "Creates notifications in batch with the supplied content"
+      description: "Creates notifications in batch with the supplied content"
+      operationId: "createAll"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Notification Request"
+        required: false
+        schema:
+          $ref: "#/definitions/NotificationRequest"
+      responses:
+        "200":
+          description: "List of newly created Notication Ids is returned successfully"
+          schema:
+            $ref: "#/definitions/NotificationIdsResponse"
+        "403":
+          description: "Caller Id not matching"
+    delete:
+      tags:
+      - "Notifications"
+      summary: "Deletes notifications by Ids"
+      description: "Deletes notifications by Ids sent in query params"
+      operationId: "delete_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "query"
+        description: "Ids"
+        required: false
+        type: "array"
+        items:
+          type: "integer"
+        collectionFormat: "multi"
+      responses:
+        "200":
+          description: "Notifications deleted successfully"
+        "403":
+          description: "Caller Id not matching"
+  /notifications/{id}:
+    get:
+      tags:
+      - "Notifications"
+      summary: "Retrieves notification by Id"
+      description: "Retrieves notification by Id"
+      operationId: "get_2"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Notification is returned successfully"
+          schema:
+            $ref: "#/definitions/Notification"
+        "403":
+          description: "Expected permissions not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+    put:
+      tags:
+      - "Notifications"
+      summary: "Updates notification with the supplied content"
+      description: "Updates notification with the supplied content"
+      operationId: "update_1"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "id"
+        in: "path"
+        description: "Id"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        description: "Notification Request"
+        required: false
+        schema:
+          $ref: "#/definitions/Notification"
+      responses:
+        "200":
+          description: "Notication updated successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Expected permissions not present"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /notifications/count:
+    post:
+      tags:
+      - "Notifications"
+      summary: "Retrieves notification counts per organisation"
+      description: "Retrieves notification counts per organisation"
+      operationId: "getCountsByOrganisation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "query"
+        description: "Person Id"
+        required: false
+        type: "integer"
+      - in: "body"
+        name: "body"
+        description: "Organisation Id List"
+        required: false
+        schema:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "Hashmap with the Notications count is returned successfully"
+          schema:
+            type: "object"
+            additionalProperties:
+              type: "object"
+        "400":
+          description: "Person Id is null"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "403":
+          description: "Expected permisions not found"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /notifications/{personId}/all:
+    delete:
+      tags:
+      - "Notifications"
+      summary: "Deletes all previously archived notifications"
+      description: "Deletes all previously archived notifications for a given person\
+        \ Id"
+      operationId: "deleteAllForPerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "path"
+        description: "Person Id"
+        required: true
+        type: "integer"
+      responses:
+        "204":
+          description: "Notifications deleted successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Unable to delete with existing permissions"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found or not deleted"
+          schema:
+            $ref: "#/definitions/Response"
+  /notifications/obfuscate/{personId}/{obfuscationId}:
+    delete:
+      tags:
+      - "Notifications"
+      summary: "Obfuscates a persons notification body and title including audit records"
+      description: "Obfuscates a persons notification body and title including audit\
+        \ records for a given person Id and Obfuscation Id"
+      operationId: "obfuscatePersonNotification"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "personId"
+        in: "path"
+        description: "Person Id"
+        required: true
+        type: "integer"
+      - name: "obfuscationId"
+        in: "path"
+        description: "Obfuscation Id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Obfuscation successful"
+          schema:
+            type: "string"
+        "500":
+          description: "Exception while Obfuscating"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /notifications/{personId}/organisation/{organisationId}:
+    delete:
+      tags:
+      - "Notifications"
+      summary: "Deletes all previously archived notifications"
+      description: "Deletes all previously archived notifications for a given person\
+        \ Id and Organisation Id"
+      operationId: "deleteAllForPersonAndOrg"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "path"
+        description: "Person Id"
+        required: true
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+      responses:
+        "204":
+          description: "Notifications deleted successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Unable to delete with existing permissions"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found or not deleted"
+          schema:
+            $ref: "#/definitions/Response"
+  /notifications/{personId}/restore-all:
+    put:
+      tags:
+      - "Notifications"
+      summary: "Restores all previously archived notifications by person Id"
+      description: "Restores all previously archived notifications for a given person\
+        \ Id"
+      operationId: "restoreAllForPerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "path"
+        description: "Person Id"
+        required: true
+        type: "integer"
+      responses:
+        "204":
+          description: "Notifications restored successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Unable to restore with existing permissions"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found or not restored"
+          schema:
+            $ref: "#/definitions/Response"
+  /notifications/{personId}/restore/{organisationId}:
+    put:
+      tags:
+      - "Notifications"
+      summary: "Restores all previously archived notifications by person Id and organisation\
+        \ Id"
+      description: "Restores all previously archived notifications for a given person\
+        \ Id and Organisation Id"
+      operationId: "restoreAllForPersonAndOrg"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "path"
+        description: "Person Id"
+        required: true
+        type: "integer"
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+      responses:
+        "204":
+          description: "Notifications restored successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Unable to restore with existing permissions"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found or not restored"
+          schema:
+            $ref: "#/definitions/Response"
+  /notifications/{personId}/restore-one/{notificationId}:
+    patch:
+      tags:
+      - "Notifications"
+      operationId: "restoreOneForPersonAndNotificationId"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "path"
+        required: true
+        type: "integer"
+      - name: "notificationId"
+        in: "path"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/NotificationRequest"
+      responses:
+        "200":
+          description: "Notification restored successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Unable to restore with existing permissions"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not found or not restored"
+          schema:
+            $ref: "#/definitions/Response"
+  /notifications/{personId}/one/{notificationId}:
+    delete:
+      tags:
+      - "Notifications"
+      summary: "Deletes a specific notification"
+      description: "Deletes the notification for a given person Id and Notification\
+        \ Id"
+      operationId: "deleteOneForPersonByID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "personId"
+        in: "path"
+        description: "Person Id"
+        required: true
+        type: "integer"
+      - name: "notificationId"
+        in: "path"
+        description: "Notification Id"
+        required: true
+        type: "integer"
+      responses:
+        "204":
+          description: "Notification Deleted successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Unable to delete with existing permissions"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "404":
+          description: "Notification not deleted"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+        "422":
+          description: "Notification not Archived in the first place"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /notifications/weeklydigest:
+    get:
+      tags:
+      - "Notifications"
+      summary: "Send weekly digest e-mails"
+      description: "Send weekly digest e-mails for users, who have received at least\
+        \ 1 notification in the 7 day period and the notifications are unread"
+      operationId: "weeklyDigest"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Mails triggered successfully"
+          schema:
+            $ref: "#/definitions/Response"
+        "403":
+          description: "Caller Id is not matching"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /notifications/priviledges:
+    get:
+      tags:
+      - "Privileges"
+      summary: "Gets all privileges"
+      description: "GET list of privileges related to bespoke notification"
+      operationId: "getAllPrivileges"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "Privileges returned successfully"
+          schema:
+            $ref: "#/definitions/PrivilegeListResponse"
+  /notifications/priviledges/{bn-id}:
+    get:
+      tags:
+      - "Privileges"
+      summary: "Gets the privileges related to a single bespoke notification Id"
+      description: "GET list of privileges related to bespoke notification by id"
+      operationId: "getPrivileges_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "bn-id"
+        in: "path"
+        description: "Bespoke Notification Id"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Privileges returned successfully"
+          schema:
+            $ref: "#/definitions/PrivilegeListResponse"
+    post:
+      tags:
+      - "Privileges"
+      summary: "Add list of privileges related to bespoke notification by id"
+      description: "Given Bespoke Notification Id and Privileges, they are set correspondingly"
+      operationId: "getPrivileges"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "callerId"
+        in: "header"
+        description: "Caller Id"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        description: "User Type"
+        required: false
+        type: "string"
+      - name: "bn-id"
+        in: "path"
+        description: "Bespoke Notification Id"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        description: "Privilege Request"
+        required: false
+        schema:
+          $ref: "#/definitions/PrivilegeRequest"
+      responses:
+        "200":
+          description: "Bespoke Notification Id for which privileges are set is returned\
+            \ successfully"
+          schema:
+            type: "integer"
+        "400":
+          description: "Privilege request is Null"
+          schema:
+            $ref: "#/definitions/WebApplicationException"
+  /status:
+    get:
+      tags:
+      - "Status"
+      summary: "Application Healthcheck"
+      description: "Checks service health."
+      operationId: "getStatus"
+      produces:
+      - "text/plain"
+      parameters: []
+      responses:
+        "200":
+          description: "Application health status"
+definitions:
+  BespokeNotification:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      subject:
+        type: "string"
+      message:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      createdBy:
+        type: "integer"
+      sendDate:
+        type: "string"
+        format: "date-time"
+  EntityTag:
+    type: "object"
+    properties:
+      value:
+        type: "string"
+      weak:
+        type: "boolean"
+  Link:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      params:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      title:
+        type: "string"
+      uri:
+        type: "string"
+        format: "uri"
+      uriBuilder:
+        $ref: "#/definitions/UriBuilder"
+      rel:
+        type: "string"
+      rels:
+        type: "array"
+        items:
+          type: "string"
+  Locale:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      script:
+        type: "string"
+      country:
+        type: "string"
+      variant:
+        type: "string"
+      extensionKeys:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      unicodeLocaleAttributes:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      unicodeLocaleKeys:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      iso3Language:
+        type: "string"
+      iso3Country:
+        type: "string"
+      displayLanguage:
+        type: "string"
+      displayScript:
+        type: "string"
+      displayCountry:
+        type: "string"
+      displayVariant:
+        type: "string"
+      language:
+        type: "string"
+  MediaType:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      subtype:
+        type: "string"
+      parameters:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      wildcardSubtype:
+        type: "boolean"
+      wildcardType:
+        type: "boolean"
+  NewCookie:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
+      version:
+        type: "integer"
+        format: "int32"
+      path:
+        type: "string"
+      domain:
+        type: "string"
+      comment:
+        type: "string"
+      maxAge:
+        type: "integer"
+        format: "int32"
+      expiry:
+        type: "string"
+        format: "date-time"
+      secure:
+        type: "boolean"
+      httpOnly:
+        type: "boolean"
+  Response:
+    type: "object"
+    properties:
+      lastModified:
+        type: "string"
+        format: "date-time"
+      date:
+        type: "string"
+        format: "date-time"
+      length:
+        type: "integer"
+        format: "int32"
+      location:
+        type: "string"
+        format: "uri"
+      language:
+        $ref: "#/definitions/Locale"
+      entity:
+        type: "object"
+      metadata:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "object"
+      allowedMethods:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+      cookies:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/NewCookie"
+      statusInfo:
+        $ref: "#/definitions/StatusType"
+      mediaType:
+        $ref: "#/definitions/MediaType"
+      entityTag:
+        $ref: "#/definitions/EntityTag"
+      links:
+        type: "array"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/Link"
+      stringHeaders:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      status:
+        type: "integer"
+        format: "int32"
+      headers:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "object"
+  StackTraceElement:
+    type: "object"
+    properties:
+      classLoaderName:
+        type: "string"
+      moduleName:
+        type: "string"
+      moduleVersion:
+        type: "string"
+      methodName:
+        type: "string"
+      fileName:
+        type: "string"
+      lineNumber:
+        type: "integer"
+        format: "int32"
+      className:
+        type: "string"
+      nativeMethod:
+        type: "boolean"
+  StatusType:
+    type: "object"
+    properties:
+      family:
+        type: "string"
+        enum:
+        - "INFORMATIONAL"
+        - "SUCCESSFUL"
+        - "REDIRECTION"
+        - "CLIENT_ERROR"
+        - "SERVER_ERROR"
+        - "OTHER"
+      statusCode:
+        type: "integer"
+        format: "int32"
+      reasonPhrase:
+        type: "string"
+  Throwable:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  UriBuilder:
+    type: "object"
+  WebApplicationException:
+    type: "object"
+    properties:
+      cause:
+        $ref: "#/definitions/Throwable"
+      stackTrace:
+        type: "array"
+        items:
+          $ref: "#/definitions/StackTraceElement"
+      response:
+        $ref: "#/definitions/Response"
+      message:
+        type: "string"
+      suppressed:
+        type: "array"
+        items:
+          $ref: "#/definitions/Throwable"
+      localizedMessage:
+        type: "string"
+  BespokeNotificationRequest:
+    type: "object"
+    properties:
+      bespokenotification:
+        $ref: "#/definitions/BespokeNotification"
+      priviledges:
+        type: "array"
+        items:
+          $ref: "#/definitions/Privilege"
+      privileges:
+        type: "array"
+        items:
+          $ref: "#/definitions/Privilege"
+      bespokeNotification:
+        $ref: "#/definitions/BespokeNotification"
+  Privilege:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      description:
+        type: "string"
+  BespokeNotificationListResponse:
+    type: "object"
+    properties:
+      bespokeNotifications:
+        type: "array"
+        items:
+          $ref: "#/definitions/BespokeNotification"
+  CustomerContactCommunicationRequest:
+    type: "object"
+    properties:
+      queryId:
+        type: "integer"
+      queryCommunicationType:
+        type: "string"
+        enum:
+        - "QUERY"
+        - "RESPONSE"
+      queryCommunication:
+        type: "string"
+  CCPermissions:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+  CustomerContactQueryRequest:
+    type: "object"
+    properties:
+      customerReference:
+        type: "string"
+      customerName:
+        type: "string"
+      businessId:
+        type: "integer"
+      sbi:
+        type: "integer"
+        format: "int64"
+      businessName:
+        type: "string"
+      permissions:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCPermissions"
+      queryType:
+        type: "string"
+      subject:
+        type: "string"
+      countyName:
+        type: "string"
+      csAgreementReference:
+        type: "integer"
+      csClaimReferenceNumber:
+        type: "integer"
+      esAgreementReference:
+        type: "string"
+      esClaimReferenceNumber:
+        type: "string"
+      paymentYear:
+        type: "integer"
+      queryFreeTextArea:
+        type: "string"
+      ccCrmQueueId:
+        type: "integer"
+      ccCrmQueue:
+        type: "string"
+      permissionId:
+        type: "integer"
+  CCCommunication:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      date:
+        type: "string"
+      type:
+        type: "string"
+      message:
+        type: "string"
+  CCQuery:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      receivedDate:
+        type: "string"
+      crn:
+        type: "string"
+      customerName:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      businessName:
+        type: "string"
+      queryType:
+        type: "string"
+      subject:
+        type: "string"
+      county:
+        type: "string"
+      csAgreementReference:
+        type: "integer"
+      csClaimReferenceNumber:
+        type: "integer"
+      esAgreementReference:
+        type: "string"
+      esClaimReferenceNumber:
+        type: "string"
+      paymentYear:
+        type: "integer"
+      message:
+        type: "string"
+      hiddenFlag:
+        type: "boolean"
+      closedFlag:
+        type: "boolean"
+      changeInPermissionsFlag:
+        type: "boolean"
+  CustomerContactQueryDetailsResponse:
+    type: "object"
+    properties:
+      customerQuery:
+        $ref: "#/definitions/CCQuery"
+      customerQueryCommunications:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCCommunication"
+  CCCounties:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+  CCOtherInfo:
+    type: "object"
+    properties:
+      subjectId:
+        type: "integer"
+      formInfo:
+        type: "array"
+        items:
+          type: "string"
+      placeholder:
+        type: "string"
+      crmQueueId:
+        type: "integer"
+      crmQueueName:
+        type: "string"
+  CCQueryType:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+  CCSelectedBusiness:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      businessName:
+        type: "string"
+      sbi:
+        type: "integer"
+  CCSubject:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      permissionId:
+        type: "integer"
+      queryTypeId:
+        type: "integer"
+  CustomerContactFormFieldsResponse:
+    type: "object"
+    properties:
+      selectedBusiness:
+        $ref: "#/definitions/CCSelectedBusiness"
+      permissions:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCPermissions"
+      queryType:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCQueryType"
+      subject:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCSubject"
+      otherInfo:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCOtherInfo"
+      counties:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCCounties"
+  CustomerContactFormFieldsRequest:
+    type: "object"
+    properties:
+      ccSelectedBusiness:
+        $ref: "#/definitions/CCSelectedBusiness"
+  CAPCustomerContact:
+    type: "object"
+    required:
+    - "crmActivityId"
+    - "queryAnswer"
+    properties:
+      crmActivityId:
+        type: "integer"
+        xml:
+          name: "crm_activity_id"
+      queryAnswer:
+        xml:
+          name: "QueryAnswer"
+        $ref: "#/definitions/QueryAnswer"
+    xml:
+      name: "CAPCustomerContact"
+      namespace: "https://RPA_CAP_Schema.CAP_Schema"
+  CAPCustomerContacts:
+    type: "object"
+    properties:
+      capCustomerContactList:
+        type: "array"
+        xml:
+          name: "CAPCustomerContact"
+          namespace: "https://RPA_CAP_Schema.CAP_Schema"
+        items:
+          xml:
+            name: "CAPCustomerContact"
+          $ref: "#/definitions/CAPCustomerContact"
+  ExternalEnvelope:
+    type: "object"
+    properties:
+      capCustomerContacts:
+        xml:
+          name: "CAPCustomerContacts"
+          namespace: "https://RPA_CAP_Schema"
+        $ref: "#/definitions/CAPCustomerContacts"
+    xml:
+      name: "ExternalEnvelope"
+      namespace: "https://RPA_CAP_Schema"
+  QueryAnswer:
+    type: "object"
+    required:
+    - "crmResponse"
+    - "crmResponseDate"
+    - "crmResponseType"
+    - "parentQueryId"
+    properties:
+      parentQueryId:
+        type: "integer"
+        xml:
+          name: "parent_query_id"
+      subQueryId:
+        type: "integer"
+        xml:
+          name: "sub_query_id"
+      crmResponseDate:
+        type: "string"
+        format: "date-time"
+        xml:
+          name: "crm_response_date"
+      crmResponseType:
+        type: "string"
+        xml:
+          name: "crm_response_type"
+        enum:
+        - "QUERY"
+        - "RESPONSE"
+      crmResponse:
+        type: "string"
+        xml:
+          name: "crm_response"
+  CCQuerySummary:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      latestCommunicationId:
+        type: "integer"
+      date:
+        type: "string"
+      sbi:
+        type: "integer"
+        format: "int64"
+      businessName:
+        type: "string"
+      subject:
+        type: "string"
+      readFlag:
+        type: "boolean"
+      hiddenFlag:
+        type: "boolean"
+      closedFlag:
+        type: "boolean"
+  CustomerContactQueryResponse:
+    type: "object"
+    properties:
+      customerQueries:
+        type: "array"
+        items:
+          $ref: "#/definitions/CCQuerySummary"
+  Notification:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      personId:
+        type: "integer"
+      organisationId:
+        type: "integer"
+      messageId:
+        type: "integer"
+      readAt:
+        type: "string"
+        format: "date-time"
+      archivedAt:
+        type: "string"
+        format: "date-time"
+      archive:
+        type: "boolean"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      title:
+        type: "string"
+      body:
+        type: "string"
+      category:
+        type: "string"
+        enum:
+        - "AccountLevel"
+        - "OrganisationLevel"
+      bespokeNotificationId:
+        type: "integer"
+  NotificationListResponse:
+    type: "object"
+    properties:
+      notifications:
+        type: "array"
+        items:
+          $ref: "#/definitions/Notification"
+      resultCount:
+        type: "integer"
+        format: "int64"
+      readCount:
+        type: "integer"
+        format: "int64"
+      unreadCount:
+        type: "integer"
+        format: "int64"
+  NotificationIdsResponse:
+    type: "object"
+    properties:
+      ids:
+        type: "array"
+        items:
+          type: "integer"
+  NotificationRequest:
+    type: "object"
+    properties:
+      notifications:
+        type: "array"
+        items:
+          $ref: "#/definitions/Notification"
+  PrivilegeListResponse:
+    type: "object"
+    properties:
+      priviledges:
+        type: "array"
+        items:
+          $ref: "#/definitions/Privilege"
+      privileges:
+        type: "array"
+        items:
+          $ref: "#/definitions/Privilege"
+  PrivilegeRequest:
+    type: "object"
+    properties:
+      priviledges:
+        type: "array"
+        items:
+          $ref: "#/definitions/Privilege"
+      privileges:
+        type: "array"
+        items:
+          $ref: "#/definitions/Privilege"
