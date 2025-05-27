@@ -1,0 +1,1720 @@
+---
+swagger: "2.0"
+info: {}
+tags:
+- name: "status"
+- name: "lmsorganisation{organisationId}"
+- name: "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+- name: "lms"
+schemes:
+- "http"
+paths:
+  /status:
+    get:
+      tags:
+      - "status"
+      summary: "Application Health check"
+      description: "Checks service health."
+      operationId: "getStatus"
+      produces:
+      - "text/plain"
+      parameters: []
+      responses:
+        "200":
+          description: "Application health status"
+  /lms/organisation/{organisationId}/covers-summary/group/{groupId}/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land cover summary for group and historic date"
+      description: "Get land cover summary details for group and historic date"
+      operationId: "l"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "groupId"
+        in: "path"
+        description: "Group Id"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Land cover summary details for group"
+          schema:
+            $ref: "#/definitions/AreaInfo"
+  /lms/organisation/{organisationId}/unique-parcels:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get unique parcels for organisation"
+      description: "Retrieve unique parcels related to organisationId"
+      operationId: "getUniqueParcels"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning unique parcel list successfully"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcels/single-cover:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get all parcels for organisation"
+      description: "Retrieve all parcels related to organisationId"
+      operationId: "getSingleCoverParcels"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel list successfully"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcels/bo-summary:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land summary details"
+      description: "Used on Business Overview to avoid bringing whole list of parcels"
+      operationId: "getParcelsForBusinessOverview"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning land summary successfully"
+          schema:
+            $ref: "#/definitions/LandSummary"
+  /lms/organisation/{organisationId}/parcels/count:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get parcel count"
+      description: "Retrieve number of parcels related to organisation"
+      operationId: "getParcelCount"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel count"
+          schema:
+            type: "integer"
+            format: "int32"
+  /lms/organisation/{organisationId}/parcel-details/group/{group}/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get all parcels details for group for given date"
+      description: "Retrieve parcels details related to organisation id and group\
+        \ for historic date"
+      operationId: "getParcelDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group"
+        in: "path"
+        description: "Group"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel details"
+          schema:
+            $ref: "#/definitions/ParcelDetails"
+  /lms/organisation/{organisationId}/parcel-details/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get all parcels for group"
+      description: "Retrieve parcels for group"
+      operationId: "getParcelDetails_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel for group"
+          schema:
+            $ref: "#/definitions/ParcelDetails"
+  /lms/organisation/{organisationId}/land-covers/grouped/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get basic land covers info for grouped parcels"
+      description: "Retrieve eligible land covers information"
+      operationId: "getGroupsLandCoversInfo"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "groupSize"
+        in: "query"
+        description: "Group size"
+        required: false
+        type: "integer"
+        default: 3
+        format: "int32"
+      - name: "historicDate"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning eligible land covers information"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers/grouped:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get basic land covers info for grouped parcels"
+      description: "Retrieve eligible land covers information"
+      operationId: "getGroupsLandCoversInfo_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "groupSize"
+        in: "query"
+        description: "Group size"
+        required: false
+        type: "integer"
+        default: 3
+        format: "int32"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning eligible land covers information"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information"
+      description: "Get land covers information details"
+      operationId: "getLandCoversInfo"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible land covers information details"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information for historic date"
+      description: "Get land covers information details for historic date"
+      operationId: "getLandCoversInfo_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible land covers information details for historic date"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers/group/{group}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information for group, parcel and historic date"
+      description: "Get land covers information details for group, parcel and historic\
+        \ date"
+      operationId: "getLandCoversInfo_2"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group"
+        in: "path"
+        description: "Group"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible land covers information details for group, parcel\
+            \ and historic date"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers/group/{group}/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information for group, parcel and historic date"
+      description: "Get land covers information details for group, parcel and historic\
+        \ date"
+      operationId: "getLandCoversInfo_3"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group"
+        in: "path"
+        description: "Group"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible land covers information details for group, parcel\
+            \ and historic date"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers/single:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information with single land cover type for current\
+        \ date"
+      description: "Get land covers information with single land cover type for current\
+        \ date"
+      operationId: "getSingleLandCoversInfo"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible single land covers information details"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/covers-summary/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land cover summary for all parcels and historic date"
+      description: "Get land cover summary details all parcels and historic date"
+      operationId: "getLandCoverSummary"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Land cover summary details all parcels and historic date"
+          schema:
+            $ref: "#/definitions/AreaInfo"
+  /lms/organisation/{organisationId}/covers-summary:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land cover summary for all parcels"
+      description: "Get land cover summary details all parcels"
+      operationId: "getLandCoverSummary_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Land cover summary details all parcels"
+          schema:
+            $ref: "#/definitions/AreaInfo"
+  /lms/organisation/{organisationId}/covers-summary/group/{groupId}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land cover summary for group"
+      description: "Get land cover summary details for group"
+      operationId: "getLandCoverSummary_2"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "groupId"
+        in: "path"
+        description: "Group Id"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Land cover summary details for group"
+          schema:
+            $ref: "#/definitions/AreaInfo"
+  /lms/organisation/{organisationId}/parcels:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get all parcels for organisation"
+      description: "Retrieve all parcels related to organisationId"
+      operationId: "getParcels"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel list successfully"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcels/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get parcels for organisation for given date"
+      description: "Retrieve all parcels related to organisationId"
+      operationId: "getParcels_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcels successfully"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcels/group/{group}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get all parcels for group"
+      description: "Retrieve parcels related to organisation id and group"
+      operationId: "getParcels_2"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group"
+        in: "path"
+        description: "Group"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel list"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcels/group/{group}/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get all parcels for group for given date"
+      description: "Retrieve parcels related to organisation id and group for historic\
+        \ date"
+      operationId: "getParcels_3"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group"
+        in: "path"
+        description: "Group"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning parcel list"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/centroids:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get parcels centroids"
+      description: "Get parcels geometries for organisation"
+      operationId: "getParcelsCentroids"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group"
+        in: "query"
+        description: "Group"
+        required: false
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Centroids for organisation"
+          schema:
+            $ref: "#/definitions/Centroid"
+  /lms/organisation/{organisationId}/geometries:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get parcels geometries"
+      description: "Get parcels geometries for organisation"
+      operationId: "getParcelsGeometries"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "bbox"
+        in: "query"
+        description: "BBox"
+        required: false
+        type: "string"
+      - name: "group"
+        in: "query"
+        description: "Group"
+        required: false
+        type: "string"
+      - name: "historicDate"
+        in: "query"
+        description: "Historic date"
+        required: false
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Parcel with geometry"
+          schema:
+            $ref: "#/definitions/ParcelWithGeometryDTO"
+        "400":
+          description: "organisationId or bbox query parameter wasn't specified"
+  /lms/organisation/{organisationId}/geometries/single-cover:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get parcels single cover geometries"
+      description: "Get parcels single cover geometries for organisation"
+      operationId: "getSingleCoverParcelsGeometries"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "bbox"
+        in: "query"
+        description: "BBox"
+        required: false
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Single cover parcels with geometry"
+          schema:
+            $ref: "#/definitions/ParcelWithGeometryDTO"
+        "400":
+          description: "organisationId or bbox query parameter wasn't specified"
+  /lms/organisation/{organisationId}/national-character-areas:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get national character areas"
+      description: "Get national character areas details"
+      operationId: "getNationalCharacterAreas"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "National character areas"
+          schema:
+            $ref: "#/definitions/NationalCharacterArea"
+  /lms/organisation/{organisationId}/centroids/groups:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get groups centroids"
+      description: "Get groups centroids"
+      operationId: "getGroupsCentroids"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "groupSize"
+        in: "query"
+        description: "Group size"
+        required: false
+        type: "integer"
+        default: 3
+        format: "int32"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Returning groups centroids"
+          schema:
+            $ref: "#/definitions/GroupWithCentroidDTO"
+  /lms/organisation/{organisationId}/land-covers/parcel/{sheetId}/{parcelId}/historic/{historicDate}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information for parcel for historic date"
+      description: "Get land covers information details for parcel for historic date"
+      operationId: "getLandCoversInfoForParcel"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible land covers information details for parcel for historic\
+            \ date"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/land-covers/parcel/{sheetId}/{parcelId}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}"
+      summary: "Get land covers information for parcel"
+      description: "Get land covers information details for parcel"
+      operationId: "getLandCoversInfoForParcel_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Eligible land covers information details for parcel"
+          schema:
+            $ref: "#/definitions/EligibleLandCoversInfo"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/related:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Check if has related parcels"
+      description: "Check if parcels exists for given organisation and parcel id"
+      operationId: "hasParcel"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Check if related parcel exists"
+          schema:
+            type: "boolean"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Get parcel"
+      description: "Get parcel with geometry details"
+      operationId: "getParcel"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Parcel with geometry details"
+          schema:
+            $ref: "#/definitions/ParcelWithGeometryDTO"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/land-covers:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Get parcel land covers for parcel id"
+      description: "Get parcel land covers details for parcel id"
+      operationId: "getParcelLandCovers"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "includeGeometries"
+        in: "query"
+        required: false
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "Parcel Land Covers"
+          schema:
+            $ref: "#/definitions/LandCoverDTO"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Get parcel land covers for parcel id for historic date"
+      description: "Get parcel land covers details for parcel id for historic date"
+      operationId: "getParcelLandCovers_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "includeGeometries"
+        in: "query"
+        description: "Include Geometries"
+        required: false
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "Parcel land covers for historic date"
+          schema:
+            $ref: "#/definitions/LandCoverDTO"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/attributes-only:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Get parcel with attributes only"
+      description: "Get parcel with attributes details"
+      operationId: "getParcelWithAttributesOnly"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Parcel with attributes only"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/attributes-only:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Get parcel with attributes only for historic date"
+      description: "Get parcel with attributes details for historic date"
+      operationId: "getParcelWithAttributesOnly_1"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "organisationId"
+        in: "path"
+        description: "Organisation Id"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      - name: "historicDate"
+        in: "path"
+        description: "Historic Date"
+        required: true
+        type: "string"
+      - name: "callerId"
+        in: "header"
+        required: false
+        type: "integer"
+      - name: "userType"
+        in: "header"
+        required: false
+        type: "string"
+        enum:
+        - "internal"
+        - "external"
+        - "ida_no_match"
+      responses:
+        "200":
+          description: "Parcel with attributes only for historic date"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+  /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/land-covers/geometries:
+    get:
+      tags:
+      - "lmsorganisation{organisationId}parcelsheet-id{sheetId}parcel-id{parcelId}"
+      summary: "Get parcel land covers geometries for parcel id"
+      description: "Get parcel land covers geometries details for parcel id"
+      operationId: "getLandCoversGeometries"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sheetId"
+        in: "path"
+        description: "Sheet Id"
+        required: true
+        type: "string"
+      - name: "parcelId"
+        in: "path"
+        description: "Parcel Id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Parcel land covers geometries for parcel id"
+          schema:
+            $ref: "#/definitions/LandCoverDTO"
+  /lms/parcels:
+    post:
+      tags:
+      - "lms"
+      summary: "Get parcels"
+      description: "Retrieve parcels based on Parcel Reference list"
+      operationId: "getParcels_4"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParcelReference"
+      responses:
+        "200":
+          description: "Returning parcel list successfully"
+          schema:
+            $ref: "#/definitions/ParcelNoGeometry"
+definitions:
+  AreaInfo:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+      name:
+        type: "string"
+      area:
+        type: "number"
+  ParcelNoGeometry:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      sheetId:
+        type: "string"
+      parcelId:
+        type: "string"
+      area:
+        type: "number"
+      pendingDigitisation:
+        type: "boolean"
+  LandSummary:
+    type: "object"
+    properties:
+      totalParcels:
+        type: "integer"
+        format: "int32"
+      totalArea:
+        type: "number"
+  ParcelDetails:
+    type: "object"
+    properties:
+      sheetId:
+        type: "string"
+      parcelId:
+        type: "string"
+      validFrom:
+        type: "string"
+        format: "date-time"
+      validTo:
+        type: "string"
+        format: "date-time"
+  EligibleLandCoversInfo:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      info:
+        type: "array"
+        items:
+          $ref: "#/definitions/AreaInfo"
+  Centroid:
+    type: "object"
+    properties:
+      x:
+        type: "number"
+      "y":
+        type: "number"
+  Coordinate:
+    type: "object"
+    properties:
+      x:
+        type: "number"
+        format: "double"
+      "y":
+        type: "number"
+        format: "double"
+      z:
+        type: "number"
+        format: "double"
+      m:
+        type: "number"
+        format: "double"
+  CoordinateSequence:
+    type: "object"
+    properties:
+      measures:
+        type: "integer"
+        format: "int32"
+      dimension:
+        type: "integer"
+        format: "int32"
+  CoordinateSequenceFactory:
+    type: "object"
+  Envelope:
+    type: "object"
+    properties:
+      "null":
+        type: "boolean"
+      area:
+        type: "number"
+        format: "double"
+      minX:
+        type: "number"
+        format: "double"
+      maxX:
+        type: "number"
+        format: "double"
+      minY:
+        type: "number"
+        format: "double"
+      maxY:
+        type: "number"
+        format: "double"
+      width:
+        type: "number"
+        format: "double"
+      height:
+        type: "number"
+        format: "double"
+  Geometry:
+    type: "object"
+    properties:
+      envelope:
+        $ref: "#/definitions/Geometry"
+      factory:
+        $ref: "#/definitions/GeometryFactory"
+      userData:
+        type: "object"
+      valid:
+        type: "boolean"
+      length:
+        type: "number"
+        format: "double"
+      empty:
+        type: "boolean"
+      area:
+        type: "number"
+        format: "double"
+      centroid:
+        $ref: "#/definitions/Point"
+      simple:
+        type: "boolean"
+      srid:
+        type: "integer"
+        format: "int32"
+      geometryType:
+        type: "string"
+      numGeometries:
+        type: "integer"
+        format: "int32"
+      coordinates:
+        type: "array"
+        items:
+          $ref: "#/definitions/Coordinate"
+      precisionModel:
+        $ref: "#/definitions/PrecisionModel"
+      coordinate:
+        $ref: "#/definitions/Coordinate"
+      numPoints:
+        type: "integer"
+        format: "int32"
+      rectangle:
+        type: "boolean"
+      interiorPoint:
+        $ref: "#/definitions/Point"
+      boundary:
+        $ref: "#/definitions/Geometry"
+      boundaryDimension:
+        type: "integer"
+        format: "int32"
+      envelopeInternal:
+        $ref: "#/definitions/Envelope"
+      dimension:
+        type: "integer"
+        format: "int32"
+  GeometryFactory:
+    type: "object"
+    properties:
+      precisionModel:
+        $ref: "#/definitions/PrecisionModel"
+      coordinateSequenceFactory:
+        $ref: "#/definitions/CoordinateSequenceFactory"
+      srid:
+        type: "integer"
+        format: "int32"
+  ParcelWithGeometryDTO:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      geometry:
+        $ref: "#/definitions/Geometry"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      type:
+        type: "string"
+  Point:
+    type: "object"
+    properties:
+      envelope:
+        $ref: "#/definitions/Geometry"
+      factory:
+        $ref: "#/definitions/GeometryFactory"
+      userData:
+        type: "object"
+      coordinates:
+        type: "array"
+        items:
+          $ref: "#/definitions/Coordinate"
+      empty:
+        type: "boolean"
+      simple:
+        type: "boolean"
+      geometryType:
+        type: "string"
+      coordinate:
+        $ref: "#/definitions/Coordinate"
+      numPoints:
+        type: "integer"
+        format: "int32"
+      boundary:
+        $ref: "#/definitions/Geometry"
+      boundaryDimension:
+        type: "integer"
+        format: "int32"
+      coordinateSequence:
+        $ref: "#/definitions/CoordinateSequence"
+      dimension:
+        type: "integer"
+        format: "int32"
+      x:
+        type: "number"
+        format: "double"
+      "y":
+        type: "number"
+        format: "double"
+      valid:
+        type: "boolean"
+      length:
+        type: "number"
+        format: "double"
+      area:
+        type: "number"
+        format: "double"
+      centroid:
+        $ref: "#/definitions/Point"
+      srid:
+        type: "integer"
+        format: "int32"
+      numGeometries:
+        type: "integer"
+        format: "int32"
+      precisionModel:
+        $ref: "#/definitions/PrecisionModel"
+      rectangle:
+        type: "boolean"
+      interiorPoint:
+        $ref: "#/definitions/Point"
+      envelopeInternal:
+        $ref: "#/definitions/Envelope"
+  PrecisionModel:
+    type: "object"
+    properties:
+      scale:
+        type: "number"
+        format: "double"
+      floating:
+        type: "boolean"
+      type:
+        $ref: "#/definitions/Type"
+      maximumSignificantDigits:
+        type: "integer"
+        format: "int32"
+      offsetX:
+        type: "number"
+        format: "double"
+      offsetY:
+        type: "number"
+        format: "double"
+  Type:
+    type: "object"
+  NationalCharacterArea:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+      name:
+        type: "string"
+      statementOfPrioritiesURL:
+        type: "string"
+  GroupWithCentroidDTO:
+    type: "object"
+    properties:
+      geometry:
+        $ref: "#/definitions/Geometry"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      type:
+        type: "string"
+      id:
+        type: "string"
+  LandCoverDTO:
+    type: "object"
+    properties:
+      id:
+        type: "number"
+      geometry:
+        $ref: "#/definitions/Geometry"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      type:
+        type: "string"
+  ParcelReference:
+    type: "object"
+    properties:
+      sheetId:
+        type: "string"
+      parcelId:
+        type: "string"

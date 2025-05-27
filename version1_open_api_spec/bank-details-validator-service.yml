@@ -1,0 +1,213 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:9041
+  description: Generated server url
+paths:
+  /bank-details-validator-service/v1/validate/details:
+    post:
+      tags:
+      - bank-details-controller
+      summary: validates the requested bank details
+      description: "Endpoint to validate the bank details inputted by the user, currently\
+        \ validated against LexisNexis system"
+      operationId: validateBankDetails
+      requestBody:
+        description: Bank details validation request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationRequest'
+            examples:
+              Bank change validation request:
+                summary: A bank detail validation request
+                description: Bank change validation request
+                value:
+                  account:
+                    name:
+                      forename: John
+                      surname: Doe
+                    number: 12345678
+                    iban: PT392831273127334616
+                    buildingSocietyRollNumber: 23123414
+                    bank:
+                      sortCode: 123456
+                      swiftCode: 8741236
+                  country:
+                    code: IRL
+                    currency: EUR
+        required: true
+      responses:
+        "200":
+          description: Successfully validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankDetailsResponse'
+              examples:
+                A response for a request that has been validated correctly:
+                  summary: Full match response
+                  description: A response for a request that has been validated correctly
+                  value:
+                    status: MATCH
+                    message: All details match
+                    bankName: Acme Bank
+                A response for a request that has been validated correctly but only was partially matched:
+                  summary: Partially matched response
+                  description: A response for a request that has been validated correctly
+                    but only was partially matched
+                  value:
+                    status: PARTIAL_MATCH
+                    message: mostly ok
+                    bankName: Acme Bank
+                A response for a request that has been validated but failed to match:
+                  summary: Failed to match response
+                  description: A response for a request that has been validated but
+                    failed to match
+                  value:
+                    status: FAILED
+                    message: not ok
+                    errors:
+                    - code: 1
+                      description: didn't found anything to match with
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankDetailsResponse'
+              examples:
+                There was a unexpected service error and the service is unable validate the request:
+                  summary: Unable to validate due to unexpected error
+                  description: There was a unexpected service error and the service
+                    is unable validate the request
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+  /bank-details-validator-service/v1/country-currency/all:
+    get:
+      tags:
+      - information-controller
+      summary: Returns a map with country codes and their currency
+      description: Endpoint to retrieve a list of countries and their currency from
+        LexisNexis system
+      operationId: getCountryAndCurrency
+      responses:
+        "200":
+          description: Successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountriesCurrencyResponse'
+              examples:
+                A response with a map of countries and their currency:
+                  summary: A map of countries and their currency (not all values are
+                    present in the example)
+                  description: A response with a map of countries and their currency
+                  value:
+                    countriesCurrency:
+                      GB: GBP
+                      IE: EUR
+                      PT: EUR
+                      US: USD
+        "500":
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountriesCurrencyResponse'
+              examples:
+                There was a unexpected service error and the service is unable return the request:
+                  summary: Unable to retrieve map due to unexpected error
+                  description: There was a unexpected service error and the service
+                    is unable return the request
+                  value:
+                    errors:
+                    - code: 500
+                      description: error 123 occurred
+components:
+  schemas:
+    AccountDetails:
+      type: object
+      properties:
+        accountType:
+          type: string
+          enum:
+          - EU
+          - UK_PERSONAL
+          - UK_BUSINESS
+        name:
+          type: string
+        number:
+          type: string
+        iban:
+          type: string
+        buildingSocietyRollNumber:
+          type: string
+        bank:
+          $ref: '#/components/schemas/BankDetails'
+    BankDetails:
+      type: object
+      properties:
+        name:
+          type: string
+        sortCode:
+          type: string
+        swiftCode:
+          type: string
+    CountryDetails:
+      type: object
+      properties:
+        code:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - GBP
+    ValidationRequest:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountDetails'
+        country:
+          $ref: '#/components/schemas/CountryDetails'
+    BankDetailsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - FAILED
+          - MATCH
+          - PARTIAL_MATCH
+        message:
+          type: string
+        bankName:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        description:
+          type: string
+    CountriesCurrencyResponse:
+      type: object
+      properties:
+        countriesCurrency:
+          type: object
+          additionalProperties:
+            type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'

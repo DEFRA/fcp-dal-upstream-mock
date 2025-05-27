@@ -1,0 +1,52 @@
+---
+swagger: "2.0"
+info: {}
+tags:
+- name: "authentication_request"
+schemes:
+- "http"
+paths:
+  /authentication_request/pseudoAuth/{crn}:
+    get:
+      tags:
+      - "authentication_request"
+      summary: "Auth details"
+      description: "Returns the customer auth details if found else returns the CAP\
+        \ id sent in the request"
+      operationId: "thisMethodShouldntExist"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "crn"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Customer auth details found"
+        "404":
+          description: "No customer found"
+  /authentication_request/pseudoAuthInternal/{email}:
+    get:
+      tags:
+      - "authentication_request"
+      summary: "Auth details"
+      description: "Returns the customer auth details if found else returns the CAP\
+        \ id sent in the request for a internal account"
+      operationId: "pseudoAuthInternal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Customer auth details found"
+        "404":
+          description: "No customer found"
