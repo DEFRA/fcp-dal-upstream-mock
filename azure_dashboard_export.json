@@ -1,0 +1,233 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# Consolidated View Report"
+            },
+            "customWidth": "30",
+            "name": "Heading"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "ac08096a-570c-4b3b-96c0-8295e255cb24",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeRange",
+                  "label": "Time Range",
+                  "type": 4,
+                  "isRequired": true,
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "value": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "50",
+            "name": "TimeRangeFilter"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppPageViews\n| summarize UniqueUsers = dcount(UserId) by bin(TimeGenerated, 1d)\n| summarize AvgUniqueUsersPerDay = avg(UniqueUsers)\n",
+              "size": 0,
+              "title": "Average Unique Users Per Day",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "stat"
+            },
+            "customWidth": "25",
+            "name": "AverageUniqueUsersPerDay",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppPageViews \n| distinct UserId\n| count ",
+              "size": 0,
+              "title": "Total Unique Users",
+              "timeContextFromParameter": "TimeRange",
+              "headingLevel": 3,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "stat"
+            },
+            "customWidth": "25",
+            "name": "TotalUniqueUsers",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppEvents\n| where Name contains \"PowerApps\" and Name contains \"OnStart\"\n| summarize requests = count()",
+              "size": 0,
+              "title": "App Opens",
+              "timeContextFromParameter": "TimeRange",
+              "headingLevel": 3,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "stat"
+            },
+            "customWidth": "25",
+            "name": "AppOpens",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppRequests\n| where Properties.Data !contains \"generate_access_token\"\n| extend t=parse_json(tostring(Properties.Data))\n| summarize requests = count(), request_time_ms = avg(toint(DurationMs))",
+              "size": 0,
+              "title": "Total Requests",
+              "timeContextFromParameter": "TimeRange",
+              "headingLevel": 3,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "stat"
+            },
+            "customWidth": "25",
+            "name": "TotalRequests",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppRequests\n| where Properties.Data !contains \"generate_access_token\"\n| extend t=parse_json(tostring(Properties.Data))\n| summarize requests = count() by bin(TimeGenerated, 1d)\n| summarize requests_by_day=avg(requests)",
+              "size": 0,
+              "title": "Average Requests Per Day",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "stat"
+            },
+            "customWidth": "25",
+            "name": "AverageRequestsPerDay",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppPageViews\n| order by TimeGenerated asc\n| summarize unique_users=count_distinct(tostring(UserId)) by bin(TimeGenerated, 1d), ['time'] = bin(TimeGenerated, 1d)\n| project ['time'], unique_users",
+              "size": 0,
+              "title": "Unique Users By Day",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "linechart"
+            },
+            "name": "UniqueUsersByDay"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppPageViews\n| order by TimeGenerated asc\n| summarize page_views = count() by Name\n| evaluate pivot(Name, sum(page_views))",
+              "size": 0,
+              "title": "Views By App",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "barchart"
+            },
+            "name": "ViewsByApp"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AppRequests\n| where Properties.Data !contains \"generate_access_token\"\n| extend t=parse_json(tostring(Properties.Data))\n| summarize Requests = countif(Success == true), Warnings = 0, Errors = countif(Success == false) by bin(TimeGenerated, 1d), ['time'] = bin(TimeGenerated, 1d)\n| project ['time'], Requests, Warnings, Errors",
+              "size": 0,
+              "title": "Requests By Day",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/6485a79a-70dd-4d29-b5d9-7ff48b083654/resourceGroups/SNDFDAINFRG1401/providers/Microsoft.OperationalInsights/workspaces/SNDFDAINFLA1401"
+              ],
+              "visualization": "categoricalbar"
+            },
+            "name": "RequestsByDay"
+          }
+        ]
+      },
+      "name": "Report"
+    }
+  ],
+  "fallbackResourceIds": [
+    "azure monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
