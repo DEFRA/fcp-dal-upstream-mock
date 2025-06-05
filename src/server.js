@@ -1,4 +1,5 @@
 import Hapi from '@hapi/hapi'
+import inert from '@hapi/inert'
 
 import { failAction } from './common/helpers/fail-action.js'
 import { createLogger } from './common/helpers/logging/logger.js'
@@ -7,6 +8,7 @@ import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
 import { router } from './plugins/router.js'
+import { schemata } from './routes/schemata.js'
 
 export const startServer = async () => {
   let server
@@ -38,8 +40,10 @@ export const startServer = async () => {
     // requestLogger  - automatically logs incoming requests
     // requestTracing - trace header logging and propagation
     // pulse          - provides shutdown handlers
+    // inert          - serves static files
+    // schemata       - serves swagger 2.0 schema files
     // router         - routes used in the app
-    await server.register([requestLogger, requestTracing, pulse, router])
+    await server.register([requestLogger, requestTracing, pulse, inert, schemata, router])
     await server.start()
 
     server.logger.info('Server started successfully')
