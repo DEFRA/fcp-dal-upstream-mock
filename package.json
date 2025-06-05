@@ -19,17 +19,21 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
     "server:watch": "nodemon --inspect=0.0.0.0 --ext js,json --legacy-watch ./src",
-    "server:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,json --legacy-watch ./src",
+    "server:debug": "nodemon --ext js,json --legacy-watch ./src",
     "start": "NODE_ENV=production node --use-strict . | jq .",
-    "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module"
+    "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
+    "verify:schemata": "npx @redocly/cli lint src/routes/v2/**/*-schema.yml",
+    "verify:mock": "docker run --network=host --rm schemathesis/schemathesis run http://localhost:3001/schemata/person.yml"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@defra/hapi-tracing": "1.0.0",
     "@elastic/ecs-pino-format": "1.5.0",
+    "@faker-js/faker": "^9.8.0",
     "@hapi/boom": "10.0.1",
     "@hapi/hapi": "21.3.12",
+    "@hapi/inert": "^7.1.0",
     "convict": "6.2.4",
     "convict-format-with-validator": "6.2.0",
     "eslint-plugin-import": "2.31.0",
