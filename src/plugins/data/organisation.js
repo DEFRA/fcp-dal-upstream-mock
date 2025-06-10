@@ -4,8 +4,26 @@ export const organisationByOrgId = (orgId) => {
   return loadFromFixtures(`./orgId/${orgId}/organisation.json`)
 }
 
-export const organisationPeopleByOrgId = (orgId) => {
-  return loadFromFixtures(`./orgId/${orgId}/organisation-people.json`)
+export const organisationPeopleByOrgId = (orgId, page = 1, size = 3) => {
+  const response = loadFromFixtures(`./orgId/${orgId}/organisation-people.json`)
+  const end = size * page
+  const start = end - size
+
+  // If this organisation is the 'large number of people set' test org, add people by repeatedly duplicating the first one they have
+  if (personId == 9000002) {
+    let numberOfPeople = 500
+    const personTemplate = JSON.parse(JSON.stringify(response._data[0]))
+
+    for (let i = 0; i < numberOfPeople; i++) {
+      personTemplate.id += i
+      response._data.push(personTemplate)
+    }
+  }
+
+  return {
+    ...response,
+    notifications: response._data.slice(start, end)
+  }
 }
 
 export const organisationBySbi = (sbi) => {
