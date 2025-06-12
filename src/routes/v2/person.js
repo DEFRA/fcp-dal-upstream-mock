@@ -1,6 +1,6 @@
 import Boom from '@hapi/boom'
 import { crnIdCache } from '../../../fixtures/relations/crn-person-id.js'
-import { createPerson } from '../../factories/person.factory.js'
+import { createPerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
 const idCrnCache = Object.fromEntries(Object.entries(crnIdCache).map(([crn, id]) => [id, crn]))
