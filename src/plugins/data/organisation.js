@@ -34,6 +34,24 @@ export const organisationApplicationsByOrgId = (orgId) => {
   return loadFromFixtures(`./orgId/${orgId}/organisation-applications.json`)
 }
 
-export const organisationPersonSummary = (personId) => {
-  return loadFromFixtures(`./personId/${personId}/organisationSummary.json`)
+export const organisationPersonSummary = (personId, page = 1, size = 3) => {
+  const response = loadFromFixtures(`./personId/${personId}/organisationSummary.json`)
+  const end = size * page
+  const start = end - size
+
+  // If this person is the 'large number of organisations set' test person, add orgs by repeatedly duplicating the first one they have
+  if (personId == 9000003) {
+    let numberOfOrgs = 500
+    const orgTemplate = JSON.parse(JSON.stringify(response._data[0]))
+
+    for (let i = 0; i < numberOfOrgs; i++) {
+      orgTemplate.id += i
+      response._data.push(orgTemplate)
+    }
+  }
+
+  return {
+    ...response,
+    notifications: response._data.slice(start, end)
+  }
 }
