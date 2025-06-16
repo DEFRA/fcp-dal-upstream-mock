@@ -2,11 +2,10 @@ import { health } from '../routes/health.js'
 import { authenticate } from '../routes/rural-payments/authenticate.js'
 import { lms } from '../routes/rural-payments/lms.js'
 import { notifications } from '../routes/rural-payments/messages.js'
-import { organisation } from '../routes/rural-payments/organisation.js'
-import { person } from '../routes/rural-payments/person.js'
 import { sitiAgri } from '../routes/rural-payments/siti-agri.js'
 // v2
-import { person as personV2 } from '../routes/v2/person.js'
+import { organisation } from '../routes/v2/organisation.js'
+import { person } from '../routes/v2/person.js'
 
 const router = {
   plugin: {
@@ -15,7 +14,6 @@ const router = {
       server.route([
         health,
         ...person,
-        ...personV2,
         ...organisation,
         ...authenticate,
         ...lms,
