@@ -1,41 +1,40 @@
 import Boom from '@hapi/boom'
-import { crnIdCache } from '../../../fixtures/relations/crn-person-id.js'
-import { createPerson } from '../../factories/person/person.factory.js'
+import { crnToPersonId } from '../../factories/id-lookups.js'
+import { retrievePerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-
-const idCrnCache = Object.fromEntries(Object.entries(crnIdCache).map(([crn, id]) => [id, crn]))
 
 export const person = [
   {
     method: 'GET',
-    path: '/v2/person/{personId}/summary',
+    path: '/person/{personId}/summary',
     handler: async (request, h) => {
-      const crn = idCrnCache[request.params.personId]
-
-      if (crn) {
-        return h.response({ _data: createPerson(parseInt(request.params.personId), crn) })
-      }
-
-      return Boom.notFound('Person not found')
+      const personId = request.params.personId
+      return h.response({ _data: retrievePerson(personId) })
     }
   },
   {
     method: 'POST',
-    path: '/v2/person/search',
+    path: '/person/search',
     handler: async (request, h) => {
       const body = request.payload
+      const crn = body?.primarySearchPhrase
 
-      if (!body?.searchFieldType || !body?.primarySearchPhrase) {
+      if (
+        !body?.searchFieldType ||
+        // Only search by CRN supported by mock
+        searchFieldType !== 'CUSTOMER_REFERENCE' ||
+        !crn
+      ) {
         return Boom.badRequest('Invalid or missing search parameters')
       }
 
-      let personId = crnIdCache[body.primarySearchPhrase]
+      let personId = crnToPersonId[crn]
       if (!personId) {
         return h.response({ _data: [], _page: pagination0 })
       }
 
       return h.response({
-        _data: [createPerson(personId, body.primarySearchPhrase)],
+        _data: [retrievePerson(personId)],
         _page: pagination
       })
     }

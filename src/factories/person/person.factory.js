@@ -1,12 +1,17 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
+import Boom from '@hapi/boom'
+import { personIdToCRN } from '../../factories/id-lookups.js'
 
-export const fakeId = () => `${faker.number.int({ min: 100_000_000, max: 9_999_999_999 })}`
-export const fakeIds = (count) => Array.from({ length: count }, fakeId)
+const fakeId = () => `${faker.number.int({ min: 100_000_000, max: 9_999_999_999 })}`
+const fakeIds = (count) => Array.from({ length: count }, fakeId)
 
-export const createPerson = (id, crn) => {
-  faker.seed(id)
+const people = {}
+
+const createPerson = (personId) => {
+  const crn = personIdToCRN[personId]
+  faker.seed(personId)
   const person = {
-    id,
+    id: parseInt(personId),
     title: faker.person.prefix(),
     otherTitle: faker.person.suffix(),
     firstName: faker.person.firstName(),
@@ -40,4 +45,14 @@ export const createPerson = (id, crn) => {
   }
 
   return person
+}
+
+export const retrievePerson = (personId) => {
+  if (people[personId]) {
+    return people[personId]
+  } else if (!personIdToCRN[personId]) {
+    return Boom.notFound('Person not found')
+  }
+
+  return createPerson(personId)
 }

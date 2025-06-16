@@ -1,0 +1,874 @@
+---
+swagger: '2.0'
+info: {}
+tags:
+  - name: 'change-password'
+  - name: 'healthcheck'
+  - name: 'registration-codes'
+  - name: 'status'
+  - name: 'users'
+  - name: 'user-session'
+schemes:
+  - 'http'
+paths:
+  /change-password/code:
+    post:
+      tags:
+        - 'change-password'
+      summary: 'New password code for the customer'
+      description: "Creates a code for a customer which they can use to change their\
+        \ password."
+      operationId: 'createCodeForChangingPassword'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          description: 'Create code request'
+          required: false
+          schema:
+            $ref: '#/definitions/CreateCodeRequest'
+      responses:
+        '200':
+          description: 'Code created successfully'
+        '401':
+          description: 'User not authorized'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '403':
+          description: 'User has attempted password change too many times'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '500':
+          description: 'Error when sending an email'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /change-password/b2c/code:
+    post:
+      tags:
+        - 'change-password'
+      operationId: 'createCodeForChangingPasswordB2C'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/CreateB2cCodeRequest'
+      responses:
+        default:
+          description: 'successful operation'
+  /change-password:
+    post:
+      tags:
+        - 'change-password'
+      summary: 'New password for the customer'
+      description: "Creates a new password for the customer, given they have entered\
+        \ a correct code and the matching customer details."
+      operationId: 'changePasswordApi'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/ChangePasswordRequest'
+      responses:
+        '200':
+          description: 'All validations passed, password can be changed'
+          schema:
+            $ref: '#/definitions/Response'
+        '422':
+          description: 'Password not complex enough or is being re-used'
+          schema:
+            $ref: '#/definitions/Response'
+        '404':
+          description: 'User account not found'
+          schema:
+            $ref: '#/definitions/Response'
+  /change-password/b2c:
+    post:
+      tags:
+        - 'change-password'
+      operationId: 'changePasswordB2C'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/ChangeB2cPasswordRequest'
+      responses:
+        default:
+          description: 'successful operation'
+  /change-password/{changePasswordCode}:
+    post:
+      tags:
+        - 'change-password'
+      summary: 'Check the user code'
+      description: "Checks if security code entered by user is valid and if matches\
+        \ CRN and email."
+      operationId: 'verifySecurityCode'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'changePasswordCode'
+          in: 'path'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          description: 'Change password request'
+          required: false
+          schema:
+            $ref: '#/definitions/ChangePasswordCodeRequest'
+      responses:
+        '200':
+          description: 'Security code verified successfully'
+          schema:
+            $ref: '#/definitions/Response'
+  /healthcheck:
+    get:
+      tags:
+        - 'healthcheck'
+      summary: 'Healthcheck'
+      description: 'Checks dependent services health.'
+      operationId: 'getStatus'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Dependent services health status'
+  /registration-codes:
+    post:
+      tags:
+        - 'registration-codes'
+      summary: 'Create registration code'
+      description: 'Creates a new registration code for the customer'
+      operationId: 'createRegistrationCode'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          description: 'Create registration code request'
+          required: false
+          schema:
+            $ref: '#/definitions/CreateRegistrationCodeRequest'
+      responses:
+        '200':
+          description: 'Registration code created successfully'
+          schema:
+            type: 'string'
+        '403':
+          description: 'An identity already exists for the customer reference number'
+        '500':
+          description: 'Error when sending an email'
+    delete:
+      tags:
+        - 'registration-codes'
+      summary: 'Delete registration code'
+      description: 'Delete registration code for given customer'
+      operationId: 'deleteRegistrationCode'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'customerReference'
+          in: 'query'
+          description: 'Customer reference.'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'Code has been deleted successfully'
+        '400':
+          description: 'Customer reference parameter is empty'
+  /registration-codes/{registrationCode}/{customerReference}:
+    get:
+      tags:
+        - 'registration-codes'
+      summary: 'Code validation'
+      description: 'Checks if code is valid and update registration attempts if not'
+      operationId: 'checkIfCodeIsValidAndUpdateRegistrationAttemptsIfNot'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'registrationCode'
+          in: 'path'
+          description: 'Registration code.'
+          required: true
+          type: 'string'
+        - name: 'customerReference'
+          in: 'path'
+          description: 'Customer reference'
+          required: true
+          type: 'string'
+          pattern: '[0-9A-Za-z]{10}'
+      responses:
+        '204':
+          description: "If no content code is valid, if unsuccessful registration\
+            \ code check failure reason"
+          schema:
+            $ref: '#/definitions/Response'
+  /registration-codes/exists:
+    get:
+      tags:
+        - 'registration-codes'
+      summary: 'Verify code for customer'
+      description: 'Checks if registration code exists for customer'
+      operationId: 'registrationCodeExistsForCustomer'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'customerReference'
+          in: 'query'
+          description: 'Customer reference.'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'Code exists for customer with given CRN'
+          schema:
+            $ref: '#/definitions/Response'
+        '400':
+          description: 'Customer reference parameter is empty'
+          schema:
+            $ref: '#/definitions/Response'
+  /status:
+    get:
+      tags:
+        - 'status'
+      summary: 'Application Healthcheck'
+      description: 'Checks service health.'
+      operationId: 'getStatus_1'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Application health status'
+  /users:
+    post:
+      tags:
+        - 'users'
+      summary: 'Create user'
+      description: "Creates a customer's account if the provided code is valid and\
+        \ the provided customer details match"
+      operationId: 'createUser'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          description: 'Create user request'
+          required: false
+          schema:
+            $ref: '#/definitions/CreateUserRequest'
+      responses:
+        '200':
+          description: 'Code created successfully'
+        '400':
+          description: 'Missing CallerId'
+        '500':
+          description: 'Error when sending an email'
+  /users/{customerReference}/exists:
+    get:
+      tags:
+        - 'users'
+      summary: 'Check if user exists'
+      description: 'Checks if a customer account exists, given a customer reference'
+      operationId: 'userExists'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'customerReference'
+          in: 'path'
+          description: 'Customer reference'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'Code created successfully'
+          schema:
+            type: 'boolean'
+  /users/{customerReference}:
+    delete:
+      tags:
+        - 'users'
+      summary: "Remove customer's login"
+      description: "Removes a customer's login, preventing them from logging onto\
+        \ the system. This does not remove any codes."
+      operationId: 'deleteUser'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'customerReference'
+          in: 'path'
+          description: 'Customer reference'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'User removed successfully'
+        '400':
+          description: 'User not found'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /users/obfuscate/{customerReference}/{obfuscationId}:
+    delete:
+      tags:
+        - 'users'
+      summary: "Remove customer's login"
+      description: "Removes a customer's login, preventing them from logging onto\
+        \ the system. This does not remove any codes."
+      operationId: 'obfuscateUser'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'customerReference'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'obfuscationId'
+          in: 'path'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'User removed successfully'
+          schema:
+            type: 'string'
+        '400':
+          description: 'User not found'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /users/{customerReference}/authentication-attempt:
+    post:
+      tags:
+        - 'users'
+      summary: 'Customer authentication attempt'
+      description: "Given the provided credentials, attempts to log the customer into\
+        \ the system."
+      operationId: 'createAuthenticationAttempt'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'customerReference'
+          in: 'path'
+          description: 'Customer reference.'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/AuthenticationAttemptRequest'
+      responses:
+        '200':
+          description: 'Customer logged in successfully'
+          schema:
+            $ref: '#/definitions/Response'
+        '401':
+          description: "Customer not found or password doesn't match"
+          schema:
+            $ref: '#/definitions/Response'
+        '403':
+          description: 'Customer password has expired or failed log in too many times'
+          schema:
+            $ref: '#/definitions/Response'
+  /user-session:
+    get:
+      tags:
+        - 'user-session'
+      summary: 'Check if session exists'
+      description: "Checks if user's session exists for a given callerId."
+      operationId: 'userSessionExists'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+      responses:
+        '200':
+          description: 'Code created successfully'
+          schema:
+            $ref: '#/definitions/PersistUserSessionResponse'
+        '400':
+          description: 'Missing CallerId'
+        '500':
+          description: 'Error when sending an email'
+    delete:
+      tags:
+        - 'user-session'
+      summary: "Removes a user's session record from EXTERNAL_USER_SESSION table."
+      description: "Call this one only if previously we have checked that user's session\
+        \ exists."
+      operationId: 'deleteUserSession'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+      responses:
+        '200':
+          description: 'Session deleted successfully'
+        '400':
+          description: 'Missing CallerId'
+        '404':
+          description: 'Error occurred while deleting session.'
+  /user-session/persist-session:
+    post:
+      tags:
+        - 'user-session'
+      summary: "Given the provided callerId, verifies if there is an active session\
+        \ for that callerId in same or different machine."
+      description: "Call this one only if previously we have checked that user's session\
+        \ doesn't exist."
+      operationId: 'persistUserSession'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          description: 'Persist user session request'
+          required: false
+          schema:
+            $ref: '#/definitions/PersistUserSessionRequest'
+      responses:
+        '200':
+          description: 'Code created successfully'
+          schema:
+            $ref: '#/definitions/Response'
+        '412':
+          description: 'There is already a session for that callerId in the database.'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+definitions:
+  EntityTag:
+    type: 'object'
+    properties:
+      value:
+        type: 'string'
+      weak:
+        type: 'boolean'
+  Link:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      params:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      title:
+        type: 'string'
+      uri:
+        type: 'string'
+        format: 'uri'
+      uriBuilder:
+        $ref: '#/definitions/UriBuilder'
+      rel:
+        type: 'string'
+      rels:
+        type: 'array'
+        items:
+          type: 'string'
+  Locale:
+    type: 'object'
+    properties:
+      displayName:
+        type: 'string'
+      script:
+        type: 'string'
+      country:
+        type: 'string'
+      variant:
+        type: 'string'
+      extensionKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleAttributes:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      iso3Language:
+        type: 'string'
+      iso3Country:
+        type: 'string'
+      displayLanguage:
+        type: 'string'
+      displayScript:
+        type: 'string'
+      displayCountry:
+        type: 'string'
+      displayVariant:
+        type: 'string'
+      language:
+        type: 'string'
+  MediaType:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      subtype:
+        type: 'string'
+      parameters:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      wildcardSubtype:
+        type: 'boolean'
+      wildcardType:
+        type: 'boolean'
+  NewCookie:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      value:
+        type: 'string'
+      version:
+        type: 'integer'
+        format: 'int32'
+      path:
+        type: 'string'
+      domain:
+        type: 'string'
+      comment:
+        type: 'string'
+      maxAge:
+        type: 'integer'
+        format: 'int32'
+      expiry:
+        type: 'string'
+        format: 'date-time'
+      secure:
+        type: 'boolean'
+      httpOnly:
+        type: 'boolean'
+  Response:
+    type: 'object'
+    properties:
+      lastModified:
+        type: 'string'
+        format: 'date-time'
+      date:
+        type: 'string'
+        format: 'date-time'
+      length:
+        type: 'integer'
+        format: 'int32'
+      location:
+        type: 'string'
+        format: 'uri'
+      language:
+        $ref: '#/definitions/Locale'
+      metadata:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+      allowedMethods:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      cookies:
+        type: 'object'
+        additionalProperties:
+          $ref: '#/definitions/NewCookie'
+      statusInfo:
+        $ref: '#/definitions/StatusType'
+      entity:
+        type: 'object'
+      mediaType:
+        $ref: '#/definitions/MediaType'
+      entityTag:
+        $ref: '#/definitions/EntityTag'
+      links:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/Link'
+      stringHeaders:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'string'
+      status:
+        type: 'integer'
+        format: 'int32'
+      headers:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+  StackTraceElement:
+    type: 'object'
+    properties:
+      classLoaderName:
+        type: 'string'
+      moduleName:
+        type: 'string'
+      moduleVersion:
+        type: 'string'
+      methodName:
+        type: 'string'
+      fileName:
+        type: 'string'
+      lineNumber:
+        type: 'integer'
+        format: 'int32'
+      className:
+        type: 'string'
+      nativeMethod:
+        type: 'boolean'
+  StatusType:
+    type: 'object'
+    properties:
+      family:
+        type: 'string'
+        enum:
+          - 'INFORMATIONAL'
+          - 'SUCCESSFUL'
+          - 'REDIRECTION'
+          - 'CLIENT_ERROR'
+          - 'SERVER_ERROR'
+          - 'OTHER'
+      statusCode:
+        type: 'integer'
+        format: 'int32'
+      reasonPhrase:
+        type: 'string'
+  Throwable:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  UriBuilder:
+    type: 'object'
+  WebApplicationException:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      response:
+        $ref: '#/definitions/Response'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  CreateCodeRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      enteredCustomerEmail:
+        type: 'string'
+      validCustomerEmail:
+        type: 'string'
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+  CreateB2cCodeRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      emailAddress:
+        type: 'string'
+      validCustomerEmail:
+        type: 'string'
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+      personId:
+        type: 'integer'
+  ChangePasswordRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      customerEmail:
+        type: 'string'
+      verificationCode:
+        type: 'string'
+      newPassword:
+        type: 'string'
+  ChangeB2cPasswordRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      emailAddress:
+        type: 'string'
+      verificationCode:
+        type: 'string'
+      password:
+        type: 'string'
+  ChangePasswordCodeRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      customerEmail:
+        type: 'string'
+  CreateRegistrationCodeRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      customerEmail:
+        type: 'string'
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+  RegistrationCode:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      email:
+        type: 'string'
+      code:
+        type: 'string'
+      registrationAttempts:
+        type: 'integer'
+        format: 'int32'
+      created:
+        type: 'string'
+        format: 'date-time'
+  CreateUserRequest:
+    type: 'object'
+    properties:
+      customerReference:
+        type: 'string'
+      registrationCode:
+        type: 'string'
+      password:
+        type: 'string'
+  AuthenticationAttemptRequest:
+    type: 'object'
+    properties:
+      password:
+        type: 'string'
+  PersistUserSessionResponse:
+    type: 'object'
+    properties:
+      sessionStatus:
+        type: 'string'
+        enum:
+          - 'EXISTING_SESSION'
+          - 'NO_SESSION'
+      callerId:
+        type: 'integer'
+      capdAccessToken:
+        type: 'string'
+      logInTimestamp:
+        type: 'string'
+        format: 'date-time'
+  PersistUserSessionRequest:
+    type: 'object'
+    properties:
+      callerId:
+        type: 'integer'
+      capdAccessToken:
+        type: 'string'
