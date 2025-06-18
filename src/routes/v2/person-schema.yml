@@ -12,7 +12,6 @@ tags:
 schemes:
   - 'http'
 security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
-basePath: '/v2'
 paths:
   /person/{personId}/summary:
     get:
@@ -30,20 +29,22 @@ paths:
           required: true
           type: 'integer'
           pattern: '[0-9]{0,20}'
-          example: 1000009 # needed for automated testing
-        - name: 'callerId'
-          in: 'header'
-          required: false
-          type: 'integer'
-        - name: 'personId'
-          in: 'header'
-          required: false
-          type: 'integer'
-          pattern: '[0-9]{0,20}'
-        - name: 'userType'
-          in: 'header'
-          required: false
-          type: 'string'
+          # `example` needed for automated testing
+          example: 11111111
+      # unsupported params
+      # - name: 'callerId'
+      #   in: 'header'
+      #   required: false
+      #   type: 'integer'
+      # - name: 'personId'
+      #   in: 'header'
+      #   required: false
+      #   type: 'integer'
+      #   pattern: '[0-9]{0,20}'
+      # - name: 'userType'
+      #   in: 'header'
+      #   required: false
+      #   type: 'string'
       responses:
         '200':
           description: "returns person details with a specified id. Returns result\
@@ -73,21 +74,30 @@ paths:
       parameters:
         - in: 'body'
           name: 'body'
-          required: false
+          required: true
           schema:
             $ref: '#/definitions/PartySearchRequest'
-        - name: 'callerId'
-          in: 'header'
-          required: false
-          type: 'integer'
+      # unsupported params
+      # - name: 'callerId'
+      #   in: 'header'
+      #   required: false
+      #   type: 'integer'
       responses:
         '200':
           description: "Successfully returns list of customer summary. Returns result\
             \ inside a CapdPageResponse"
           schema:
-            type: 'array'
-            items:
-              $ref: '#/definitions/CustomerSummaryResponse'
+            type: 'object'
+            properties:
+              _data:
+                type: 'array'
+                items:
+                  $ref: '#/definitions/CustomerSummaryResponse'
+              _page:
+                $ref: '#/definitions/CapdPageResponse'
+            required:
+              - '_data'
+              - '_page'
         '400':
           description: 'breached search string length'
           schema:
@@ -102,32 +112,45 @@ definitions:
   PartySearchRequest:
     type: 'object'
     properties:
-      offset:
-        type: 'integer'
-        format: 'int32'
-      limit:
-        type: 'integer'
-        format: 'int32'
       searchFieldType:
         type: 'string'
         enum:
-          - 'SBI'
-          - 'BUSINESS_NAME'
-          - 'TRADER_NUMBER'
-          - 'VENDOR_NUMBER'
-          - 'CUSTOMER_NAME'
           - 'CUSTOMER_REFERENCE'
-          - 'PERSONAL_IDENTIFIER'
-          - 'CUSTOMER_POSTCODE'
-          - 'BUSINESS_POSTCODE'
+        # unsupported values
+        # - 'SBI'
+        # - 'BUSINESS_NAME'
+        # - 'TRADER_NUMBER'
+        # - 'VENDOR_NUMBER'
+        # - 'CUSTOMER_NAME'
+        # - 'PERSONAL_IDENTIFIER'
+        # - 'CUSTOMER_POSTCODE'
+        # - 'BUSINESS_POSTCODE'
         example: 'CUSTOMER_REFERENCE'
       primarySearchPhrase:
         type: 'string'
-        example: '1000809-crn'
-      secondarySearchPhrase:
-        type: 'string'
+        minLength: 10
+        example: 'crn-11111111'
+    required:
+      - 'searchFieldType'
+      - 'primarySearchPhrase'
+    # unsupported properties
+    # offset:
+    #   type: 'integer'
+    #   format: 'int32'
+    # limit:
+    #   type: 'integer'
+    #   format: 'int32'
+    # secondarySearchPhrase:
+    #   type: 'string'
 
   # response objects
+  CapdPageResponse:
+    type: 'object'
+    properties:
+      _page:
+        $ref: '#/definitions/Page'
+      _data:
+        type: 'object'
   CustomerSummaryResponse:
     type: 'object'
     properties:
@@ -151,22 +174,24 @@ definitions:
         type: 'boolean'
       deactivated:
         type: 'boolean'
-  Locale:
+  Page:
     type: 'object'
     properties:
-      displayName:
-        type: 'string'
-      script:
-        type: 'string'
-      country:
-        type: 'string'
-      variant:
-        type: 'string'
-      extensionKeys:
-        type: 'array'
-        uniqueItems: true
-        items:
-          type: 'string'
+      number:
+        type: 'integer'
+        format: 'int32'
+      size:
+        type: 'integer'
+        format: 'int32'
+      totalPages:
+        type: 'integer'
+        format: 'int32'
+      numberOfElements:
+        type: 'integer'
+        format: 'int32'
+      totalElements:
+        type: 'integer'
+        format: 'int64'
   PartyAddressResponse:
     type: 'object'
     properties:
@@ -248,6 +273,41 @@ definitions:
           type: 'string'
       deactivated:
         type: 'boolean'
+
+  # errors
+  DaoException:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  Locale:
+    type: 'object'
+    properties:
+      displayName:
+        type: 'string'
+      script:
+        type: 'string'
+      country:
+        type: 'string'
+      variant:
+        type: 'string'
+      extensionKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
   Response:
     type: 'object'
     properties:
@@ -271,25 +331,6 @@ definitions:
           type: 'array'
           items:
             type: 'object'
-
-  # errors
-  DaoException:
-    type: 'object'
-    properties:
-      cause:
-        $ref: '#/definitions/Throwable'
-      stackTrace:
-        type: 'array'
-        items:
-          $ref: '#/definitions/StackTraceElement'
-      message:
-        type: 'string'
-      suppressed:
-        type: 'array'
-        items:
-          $ref: '#/definitions/Throwable'
-      localizedMessage:
-        type: 'string'
   StackTraceElement:
     type: 'object'
     properties:

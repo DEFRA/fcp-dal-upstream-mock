@@ -44,6 +44,8 @@ const createPerson = (personId) => {
     deactivated: faker.datatype.boolean()
   }
 
+  people[personId] = person
+
   return person
 }
 
@@ -51,7 +53,7 @@ export const retrievePerson = (personId) => {
   if (people[personId]) {
     return people[personId]
   } else if (!personIdToCRN[personId]) {
-    return Boom.notFound('Person not found')
+    throw Boom.notFound('Person not found')
   }
 
   return createPerson(personId)

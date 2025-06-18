@@ -3,6 +3,7 @@ import { crnToPersonId } from '../../factories/id-lookups.js'
 import { retrievePerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
+const CRN_MIN_LENGTH = 10
 export const person = [
   {
     method: 'GET',
@@ -19,13 +20,9 @@ export const person = [
       const body = request.payload
       const crn = body?.primarySearchPhrase
 
-      if (
-        !body?.searchFieldType ||
-        // Only search by CRN supported by mock
-        searchFieldType !== 'CUSTOMER_REFERENCE' ||
-        !crn
-      ) {
-        return Boom.badRequest('Invalid or missing search parameters')
+      // Only search by CRN supported by mock
+      if (body?.searchFieldType !== 'CUSTOMER_REFERENCE' || (crn?.length || 0) < CRN_MIN_LENGTH) {
+        throw Boom.badRequest('Invalid or missing search parameters')
       }
 
       let personId = crnToPersonId[crn]
@@ -33,8 +30,33 @@ export const person = [
         return h.response({ _data: [], _page: pagination0 })
       }
 
+      const {
+        id,
+        firstName,
+        lastName,
+        primaryAddress,
+        personalIdentifiers,
+        nationalInsuranceNumber,
+        customerReference,
+        email,
+        locked,
+        deactivated
+      } = retrievePerson(personId)
       return h.response({
-        _data: [retrievePerson(personId)],
+        _data: [
+          {
+            // NOTE: the limited schema for search results
+            id,
+            fullName: `${firstName} ${lastName}`,
+            primaryAddress,
+            personalIdentifiers,
+            nationalInsuranceNumber,
+            customerReference,
+            email,
+            locked,
+            deactivated
+          }
+        ],
         _page: pagination
       })
     }
