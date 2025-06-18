@@ -6,10 +6,8 @@ import { orgIdToSbi } from '../../factories/id-lookups.js'
 const organisations = {}
 
 const createOrganisation = (orgId) => {
-  faker.seed(orgId)
-
   const sbi = orgIdToSbi[orgId]
-
+  faker.seed(orgId)
   const org = {
     id: parseInt(orgId),
     name: faker.company.name(),
@@ -66,7 +64,7 @@ export const updateOrganisation = (orgId, updatesToOrg) => {
   if (organisations[orgId]) {
     org = organisations[orgId]
   } else if (!orgIdToSbi[orgId]) {
-    return Boom.notFound('Organisation not found')
+    throw Boom.notFound('Organisation not found')
   } else {
     org = createOrganisation(orgId)
   }
@@ -79,7 +77,7 @@ export const retrieveOrganisation = (orgId) => {
   if (organisations[orgId]) {
     return organisations[orgId]
   } else if (!orgIdToSbi[orgId]) {
-    return Boom.notFound('Organisation not found')
+    throw Boom.notFound('Organisation not found')
   }
 
   return createOrganisation(orgId)

@@ -1,23 +1,18 @@
 import Boom from '@hapi/boom'
-import { crnIdCache } from '../../../fixtures/relations/crn-person-id.js'
 import { sbiToOrgId } from '../../factories/id-lookups.js'
 import {
   retrieveOrganisation,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
-
-const idCrnCache = Object.fromEntries(Object.entries(crnIdCache).map(([crn, id]) => [id, crn]))
+import { pagination } from '../../plugins/data/pagination.js'
 
 export const organisation = [
   {
     method: 'GET',
     path: '/organisation/{organisationId}',
     handler: async (request, h) => {
-      console.error('EHRE')
       const organisationId = request.params.organisationId
-      if (organisationId) {
-        return h.response({ _data: retrieveOrganisation(organisationId) })
-      }
+      return h.response({ _data: retrieveOrganisation(organisationId) })
     }
   },
   {
@@ -27,13 +22,9 @@ export const organisation = [
       const body = request.payload
       const sbi = body?.primarySearchPhrase
 
-      if (
-        !body?.searchFieldType ||
-        // Only search by SBI supported by mock
-        searchFieldType !== 'SBI' ||
-        !sbi
-      ) {
-        return Boom.badRequest('Invalid or missing search parameters')
+      // Only search by SBI supported by mock
+      if (body?.searchFieldType !== 'SBI') {
+        throw Boom.badRequest('Invalid or missing search parameters')
       }
 
       const orgId = sbiToOrgId[sbi]
@@ -51,20 +42,16 @@ export const organisation = [
     method: 'GET',
     path: '/authorisation/organisation/{organisationId}',
     handler: async (request, h) => {
-      if (request.params.organisationId) {
-        return h.response({ _data: retrieveOrganisation(request.params.organisationId) })
-      }
+      return h.response({ _data: retrieveOrganisation(request.params.organisationId) })
     }
   },
   {
     method: 'PUT',
     path: '/organisation/{organisationId}/business-details',
     handler: async (request, h) => {
-      if (request.params.organisationId) {
-        return h.response({
-          _data: updateOrganisation(request.params.organisationId, request.payload)
-        })
-      }
+      return h.response({
+        _data: updateOrganisation(request.params.organisationId, request.payload)
+      })
     }
   }
 ]
