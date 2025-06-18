@@ -130,7 +130,7 @@ definitions:
       primarySearchPhrase:
         type: 'string'
         minLength: 10
-        example: '0866159801'
+        example: 'crn-11111111'
     required:
       - 'searchFieldType'
       - 'primarySearchPhrase'
