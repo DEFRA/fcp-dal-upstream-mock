@@ -80,7 +80,7 @@ describe('Check basic requests', () => {
         expect.objectContaining({
           title: 'Mr.',
           firstName: 'Julia',
-          middleName: 'Theobald',
+          middleName: 'Bob',
           lastName: 'Theobald',
           dateOfBirth: '1994-01-24T02:37:34.730Z',
           mobile: '0887090618',
