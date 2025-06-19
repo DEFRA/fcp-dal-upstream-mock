@@ -1,5 +1,9 @@
 import Boom from '@hapi/boom'
-import { organisationCPH, organisationCPHInfo } from '../../plugins/data/organisation-cph.js'
+import {
+  organisationCPH,
+  organisationCPHBySbi,
+  organisationCPHInfo
+} from '../../plugins/data/organisation-cph.js'
 
 export const sitiAgri = [
   {
@@ -20,6 +24,19 @@ export const sitiAgri = [
     path: '/v1/SitiAgriApi/cph/organisation/{orgId}/cph-numbers/{cphNumber}',
     handler: async (request, h) => {
       const data = organisationCPHInfo(request.params.orgId, request.params.cphNumber)
+
+      if (!data) {
+        return Boom.notFound('CPH info not found')
+      }
+
+      return h.response(data)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/v1/SitiAgriApi/cv/cphByBusiness/sbi/{sbi}/list',
+    handler: async (request, h) => {
+      const data = organisationCPHBySbi(request.params.sbi)
 
       if (!data) {
         return Boom.notFound('CPH info not found')
