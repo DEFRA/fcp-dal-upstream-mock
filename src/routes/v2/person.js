@@ -37,7 +37,7 @@ export const person = [
         primaryAddress,
         personalIdentifiers,
         nationalInsuranceNumber,
-        customerReference,
+        customerReferenceNumber,
         email,
         locked,
         deactivated
@@ -51,7 +51,7 @@ export const person = [
             primaryAddress,
             personalIdentifiers,
             nationalInsuranceNumber,
-            customerReference,
+            customerReference: customerReferenceNumber,
             email,
             locked,
             deactivated
