@@ -10,7 +10,7 @@ export const organisationPeopleByOrgId = (orgId, page = 1, size = 3) => {
   const start = end - size
 
   // If this organisation is the 'large number of people set' test org, add people by repeatedly duplicating the first one they have
-  if (personId == 9000002) {
+  if (orgId == 9000002) {
     let numberOfPeople = 500
     const personTemplate = JSON.parse(JSON.stringify(response._data[0]))
 
