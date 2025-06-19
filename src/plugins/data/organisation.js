@@ -20,10 +20,7 @@ export const organisationPeopleByOrgId = (orgId, page = 1, size = 3) => {
     }
   }
 
-  return {
-    ...response,
-    notifications: response._data.slice(start, end)
-  }
+  return response
 }
 
 export const organisationBySbi = (sbi) => {
@@ -50,8 +47,5 @@ export const organisationPersonSummary = (personId, page = 1, size = 3) => {
     }
   }
 
-  return {
-    ...response,
-    notifications: response._data.slice(start, end)
-  }
+  return response
 }
