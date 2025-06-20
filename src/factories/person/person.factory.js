@@ -10,20 +10,22 @@ const people = {}
 const createPerson = (personId) => {
   const crn = personIdToCRN[personId]
   faker.seed(personId)
+  const firstName = faker.person.firstName()
+  const lastName = faker.person.lastName()
   const person = {
     id: parseInt(personId),
     title: faker.person.prefix(),
     otherTitle: faker.person.suffix(),
-    firstName: faker.person.firstName(),
+    firstName,
     middleName: faker.person.firstName(),
-    lastName: faker.person.lastName(),
+    lastName: lastName,
     dateOfBirth: faker.date
       .birthdate({ min: 18, max: 90, mode: 'age' })
       .toISOString()
       .substring(0, 10),
     landline: faker.phone.number(),
     mobile: faker.phone.number(),
-    email: faker.internet.email(),
+    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${faker.internet.domainName()}`,
     doNotContact: faker.datatype.boolean(),
     emailValidated: faker.datatype.boolean(),
     address: {
