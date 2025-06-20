@@ -396,4 +396,35 @@ describe('Check basic requests', () => {
       })
     })
   })
+
+  describe('SitiAgri routes - beginning: /v1/SitiAgriApi/cv/cphByBusiness/sbi/{sbi}', () => {
+    test('Should return data /list', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/v1/SitiAgriApi/cv/cphByBusiness/sbi/121428499/list'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual({
+        // snippet only, due to size of list
+        data: expect.arrayContaining([
+          {
+            sbi: '121428499',
+            dt_insert: '2020-03-23T11:10:22:000+0100',
+            dt_delete: '9999-12-31T00:00:00:000+0100',
+            cph_number: '20/060/0001',
+            parish: 'WESTHAVEN',
+            species: 'CATTLE,MORE THAN FIFTY POULTRY',
+            start_date: '2020-03-20T00:00:00:000+0100',
+            end_date: '2021-03-20T00:00:00:000+0100',
+            address: 'Manor Farm, High Street, Westhaven, Devon, EX12 3AB',
+            x: 572505,
+            y: 152485
+          }
+        ]),
+        success: true,
+        errorString: null
+      })
+    })
+  })
 })
