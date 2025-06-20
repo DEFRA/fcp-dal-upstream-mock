@@ -9,3 +9,7 @@ export const organisationCPHInfo = (orgId, cphNumber) => {
 export const organisationCPH = (orgId) => {
   return loadFromFixtures(`./orgId/${orgId}/cph.json`)
 }
+
+export const organisationCPHBySbi = (sbi) => {
+  return loadFromFixtures(`./sbi/${sbi}/cph.json`)
+}
