@@ -5,7 +5,20 @@ export const organisationByOrgId = (orgId) => {
 }
 
 export const organisationPeopleByOrgId = (orgId) => {
-  return loadFromFixtures(`./orgId/${orgId}/organisation-people.json`)
+  const response = loadFromFixtures(`./orgId/${orgId}/organisation-people.json`)
+
+  // If this organisation is the 'large number of people set' test org, add people by repeatedly duplicating the first one they have
+  if (orgId == 9000002) {
+    let numberOfPeople = 500
+    const personTemplate = JSON.parse(JSON.stringify(response._data[0]))
+
+    for (let i = 0; i < numberOfPeople; i++) {
+      personTemplate.id += i
+      response._data.push(personTemplate)
+    }
+  }
+
+  return response
 }
 
 export const organisationBySbi = (sbi) => {
@@ -17,5 +30,18 @@ export const organisationApplicationsByOrgId = (orgId) => {
 }
 
 export const organisationPersonSummary = (personId) => {
-  return loadFromFixtures(`./personId/${personId}/organisationSummary.json`)
+  const response = loadFromFixtures(`./personId/${personId}/organisationSummary.json`)
+
+  // If this person is the 'large number of organisations set' test person, add orgs by repeatedly duplicating the first one they have
+  if (personId == 9000003) {
+    let numberOfOrgs = 500
+    const orgTemplate = JSON.parse(JSON.stringify(response._data[0]))
+
+    for (let i = 0; i < numberOfOrgs; i++) {
+      orgTemplate.id += i
+      response._data.push(orgTemplate)
+    }
+  }
+
+  return response
 }
