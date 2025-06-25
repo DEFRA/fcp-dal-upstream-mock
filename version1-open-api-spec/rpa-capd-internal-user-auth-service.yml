@@ -1,0 +1,978 @@
+---
+swagger: '2.0'
+info: {}
+tags:
+  - name: 'status'
+  - name: 'internal-user'
+  - name: 'user'
+  - name: 'userToken'
+  - name: 'user-session'
+schemes:
+  - 'http'
+paths:
+  /status:
+    get:
+      tags:
+        - 'status'
+      summary: 'Application Health check'
+      description: 'Checks service health.'
+      operationId: 'getStatus'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Application health status'
+  /internal-user/create:
+    post:
+      tags:
+        - 'internal-user'
+      summary: 'Create user.'
+      description: "Creates customer's account if the provided code is valid and customer\
+        \ details match."
+      operationId: 'create'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          description: 'Internal User'
+          required: false
+          schema:
+            $ref: '#/definitions/CapdInternalUserCreateRequest'
+      responses:
+        '200':
+          description: 'User created successfully'
+          schema:
+            $ref: '#/definitions/InternalUserCreateResponse'
+        '403':
+          description: "Missing CallerId or CallerId is not allowed to perform this\
+            \ request"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /internal-user/{email}:
+    put:
+      tags:
+        - 'internal-user'
+      summary: 'Activates user email'
+      description: "Activates internal user's email address"
+      operationId: 'activate'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'email'
+          in: 'path'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/CapdInternalUserActivationRequest'
+      responses:
+        '200':
+          description: 'Email activated'
+  /internal-user/{email}/password:
+    put:
+      tags:
+        - 'internal-user'
+      summary: 'Change Password'
+      description: 'Changes internal user password'
+      operationId: 'changePassword'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'email'
+          in: 'path'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/CapdPasswordChangeRequest'
+      responses:
+        '200':
+          description: 'Password Changed'
+  /internal-user/{callerId}/password:
+    delete:
+      tags:
+        - 'internal-user'
+      summary: 'Resets Password'
+      description: 'Resets internal user Password'
+      operationId: 'resetPassword'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'path'
+          required: true
+          type: 'integer'
+      responses:
+        '200':
+          description: 'Password has been reset successfully'
+        '500':
+          description: 'Error when resetting password'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /internal-user/{personId}/password-for-person:
+    delete:
+      tags:
+        - 'internal-user'
+      summary: 'Resets Password'
+      description: 'Resets Password for person'
+      operationId: 'resetPasswordForPerson'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          required: true
+          type: 'integer'
+      responses:
+        '200':
+          description: 'Password changed'
+        '500':
+          description: 'Error when resetting password'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /internal-user/deactivate:
+    post:
+      tags:
+        - 'internal-user'
+      summary: 'Deactivate User'
+      description: "Deactivate internal user's account"
+      operationId: 'deactivateInternalUsers'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/InternalUsersRequest'
+      responses:
+        '200':
+          description: 'User account deactivated'
+          schema:
+            $ref: '#/definitions/InternalUsersResponse'
+  /internal-user/reactivate:
+    post:
+      tags:
+        - 'internal-user'
+      summary: 'Re-activate User'
+      description: "Re-activate internal user's account"
+      operationId: 'startInternalUsersReactivation'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/InternalUsersRequest'
+      responses:
+        '200':
+          description: 'User account reactivated'
+          schema:
+            $ref: '#/definitions/InternalUsersResponse'
+        '500':
+          description: 'User not found'
+          schema:
+            $ref: '#/definitions/InternalUsersResponse'
+  /internal-user/validatePassword:
+    post:
+      tags:
+        - 'internal-user'
+      summary: 'Validates Password'
+      description: "Validates internal user's password "
+      operationId: 'validatePassword'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/CapdInternalUserPasswordComplexityRequest'
+      responses:
+        '200':
+          description: 'Password validated'
+  /internal-user/{email}/locked:
+    put:
+      tags:
+        - 'internal-user'
+      summary: 'Changes Locked Status'
+      description: 'Unlock internal user account if locked by unsuccessful login attempts'
+      operationId: 'changeLockedStatus'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'email'
+          in: 'path'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            type: 'boolean'
+      responses:
+        '200':
+          description: 'User unlocked successfully'
+        '400':
+          description: 'Error while performing unlock/user is locked'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '404':
+          description: 'User not found'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /internal-user/locked:
+    get:
+      tags:
+        - 'internal-user'
+      summary: 'Lists user accounts that are locked'
+      description: "Get list of internal users whose account is locked by unsuccessful\
+        \ login attempts."
+      operationId: 'getLockedUsers'
+      produces:
+        - 'application/json'
+      parameters: []
+      responses:
+        '200':
+          description: 'List of locked users generated'
+  /user:
+    get:
+      tags:
+        - 'user'
+      summary: 'Find an user.'
+      description: 'Find user by email address.'
+      operationId: 'findByEmail'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'email'
+          in: 'query'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'User created successfully'
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: 'Email not supplied/Email is invalid.'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '404':
+          description: 'User not found.'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+    post:
+      tags:
+        - 'user'
+      summary: 'Update existing user.'
+      description: 'Updates existing user.'
+      operationId: 'update'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: 'User updated successfully'
+        '404':
+          description: 'User not found'
+    put:
+      tags:
+        - 'user'
+      summary: 'Creates  user.'
+      description: 'Creates user.'
+      operationId: 'create_1'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: 'User created successfully'
+          schema:
+            $ref: '#/definitions/User'
+        '409':
+          description: 'User already exist'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /user/{email}/authentication-attempt:
+    post:
+      tags:
+        - 'user'
+      summary: 'Create authentication attempt.'
+      description: 'Attempts to authenticate user via given email address.'
+      operationId: 'createAuthenticationAttempt'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/AuthenticationAttemptRequest'
+        - name: 'email'
+          in: 'path'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'User authenticated successfully'
+        '404':
+          description: 'User not found.'
+  /userToken:
+    get:
+      tags:
+        - 'userToken'
+      summary: 'Find token for an user.'
+      description: 'Find token for particular user providing user details.'
+      operationId: 'findByTypeAndEitherTokenOrUser'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'type'
+          in: 'query'
+          required: false
+          type: 'string'
+        - name: 'token'
+          in: 'query'
+          required: false
+          type: 'string'
+        - name: 'targetUser'
+          in: 'query'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'User token listed'
+          schema:
+            $ref: '#/definitions/UserToken'
+        '400':
+          description: "Wrong Type supplied or Neither Token nor targetUser provided\
+            \ or Token and targetUser provided, should be either of them/Wrong Token\
+            \ supplied"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '404':
+          description: 'User Token not found'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+    put:
+      tags:
+        - 'userToken'
+      summary: 'Creates token for an user.'
+      description: 'Creates token.'
+      operationId: 'create_2'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/UserToken'
+      responses:
+        '200':
+          description: 'User created successfully'
+        '409':
+          description: 'Conflict while creating Token.'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+    delete:
+      tags:
+        - 'userToken'
+      summary: 'Deletes token for an user.'
+      description: 'Deletes token for an user.'
+      operationId: 'deleteByUser'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'type'
+          in: 'query'
+          required: false
+          type: 'string'
+        - name: 'targetUser'
+          in: 'query'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'User token deleted successfully'
+        '400':
+          description: 'Wrong type supplied or TargetUser not supplied.'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /user-session:
+    get:
+      tags:
+        - 'user-session'
+      summary: "Checks if user's session exists for a given callerId."
+      description: "Checks if user's session exists for a given callerId."
+      operationId: 'userSessionExists'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+      responses:
+        '200':
+          description: 'User session exists'
+          schema:
+            $ref: '#/definitions/PersistUserSessionResponse'
+        '400':
+          description: 'CallerId missing'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+    delete:
+      tags:
+        - 'user-session'
+      summary: "Removes a user's session record from INTERNAL_USER_SESSION table."
+      description: "Removes a user's session record from INTERNAL_USER_SESSION table.\
+        \ \" +\n\"Note: Call this one only if previously we have checked that user's\
+        \ session exists."
+      operationId: 'deleteUserSession'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+      responses:
+        '200':
+          description: 'User session exists'
+        '400':
+          description: 'Missing callerId.'
+        '404':
+          description: 'User session not found.'
+  /user-session/persist-session:
+    post:
+      tags:
+        - 'user-session'
+      summary: 'Verifies if there is an active session for given callerId.'
+      description: "Given the provided callerId, verifies if there is an active session\
+        \ for that callerId in same or different machine. Note: Call this one only\
+        \ if previously we have checked that user's session doesn't exist."
+      operationId: 'persistUserSession'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/PersistUserSessionRequest'
+      responses:
+        '200':
+          description: 'User session exists'
+          schema:
+            $ref: '#/definitions/PersistUserSessionResponse'
+        '412':
+          description: 'There is already a session for that callerId in the database.'
+definitions:
+  InternalUserCreateResponse:
+    type: 'object'
+    properties:
+      message:
+        type: 'string'
+      error:
+        type: 'string'
+        readOnly: true
+      code:
+        type: 'integer'
+        format: 'int32'
+      personId:
+        type: 'integer'
+  EntityTag:
+    type: 'object'
+    properties:
+      value:
+        type: 'string'
+      weak:
+        type: 'boolean'
+  Link:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      title:
+        type: 'string'
+      uri:
+        type: 'string'
+        format: 'uri'
+      uriBuilder:
+        $ref: '#/definitions/UriBuilder'
+      rel:
+        type: 'string'
+      rels:
+        type: 'array'
+        items:
+          type: 'string'
+      params:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+  Locale:
+    type: 'object'
+    properties:
+      displayName:
+        type: 'string'
+      script:
+        type: 'string'
+      country:
+        type: 'string'
+      variant:
+        type: 'string'
+      extensionKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleAttributes:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      iso3Language:
+        type: 'string'
+      iso3Country:
+        type: 'string'
+      displayLanguage:
+        type: 'string'
+      displayScript:
+        type: 'string'
+      displayCountry:
+        type: 'string'
+      displayVariant:
+        type: 'string'
+      language:
+        type: 'string'
+  MediaType:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      subtype:
+        type: 'string'
+      parameters:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      wildcardSubtype:
+        type: 'boolean'
+      wildcardType:
+        type: 'boolean'
+  NewCookie:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      value:
+        type: 'string'
+      version:
+        type: 'integer'
+        format: 'int32'
+      path:
+        type: 'string'
+      domain:
+        type: 'string'
+      comment:
+        type: 'string'
+      maxAge:
+        type: 'integer'
+        format: 'int32'
+      expiry:
+        type: 'string'
+        format: 'date-time'
+      secure:
+        type: 'boolean'
+      httpOnly:
+        type: 'boolean'
+  Response:
+    type: 'object'
+    properties:
+      lastModified:
+        type: 'string'
+        format: 'date-time'
+      date:
+        type: 'string'
+        format: 'date-time'
+      length:
+        type: 'integer'
+        format: 'int32'
+      location:
+        type: 'string'
+        format: 'uri'
+      language:
+        $ref: '#/definitions/Locale'
+      status:
+        type: 'integer'
+        format: 'int32'
+      metadata:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+      allowedMethods:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      cookies:
+        type: 'object'
+        additionalProperties:
+          $ref: '#/definitions/NewCookie'
+      statusInfo:
+        $ref: '#/definitions/StatusType'
+      entity:
+        type: 'object'
+      mediaType:
+        $ref: '#/definitions/MediaType'
+      entityTag:
+        $ref: '#/definitions/EntityTag'
+      links:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/Link'
+      stringHeaders:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'string'
+      headers:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+  StackTraceElement:
+    type: 'object'
+    properties:
+      classLoaderName:
+        type: 'string'
+      moduleName:
+        type: 'string'
+      moduleVersion:
+        type: 'string'
+      methodName:
+        type: 'string'
+      fileName:
+        type: 'string'
+      lineNumber:
+        type: 'integer'
+        format: 'int32'
+      className:
+        type: 'string'
+      nativeMethod:
+        type: 'boolean'
+  StatusType:
+    type: 'object'
+    properties:
+      family:
+        type: 'string'
+        enum:
+          - 'INFORMATIONAL'
+          - 'SUCCESSFUL'
+          - 'REDIRECTION'
+          - 'CLIENT_ERROR'
+          - 'SERVER_ERROR'
+          - 'OTHER'
+      statusCode:
+        type: 'integer'
+        format: 'int32'
+      reasonPhrase:
+        type: 'string'
+  Throwable:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  UriBuilder:
+    type: 'object'
+  WebApplicationException:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      response:
+        $ref: '#/definitions/Response'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  CapdInternalUserCreateRequest:
+    type: 'object'
+    properties:
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+      email:
+        type: 'string'
+      domain:
+        type: 'string'
+      username:
+        type: 'string'
+      privileges:
+        type: 'array'
+        items:
+          type: 'string'
+  CapdInternalUserActivationRequest:
+    type: 'object'
+    properties:
+      password:
+        type: 'string'
+  CapdPasswordChangeRequest:
+    type: 'object'
+    properties:
+      password:
+        type: 'string'
+  InternalUsersResponse:
+    type: 'object'
+    properties:
+      results:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+          enum:
+            - 'SUCCESS'
+            - 'USER_NOT_FOUND'
+            - 'INVALID_EMAIL_FORMAT'
+            - 'USER_ALREADY_ACTIVE'
+            - 'UNEXPECTED_ERROR'
+  InternalUsersRequest:
+    type: 'object'
+    properties:
+      users:
+        type: 'array'
+        items:
+          type: 'string'
+  CapdInternalUserPasswordComplexityRequest:
+    type: 'object'
+    properties:
+      password:
+        type: 'string'
+      email:
+        type: 'string'
+      checkAgainstLastUserPasswords:
+        type: 'boolean'
+  LockedInternalUserResponse:
+    type: 'object'
+    properties:
+      message:
+        type: 'string'
+        readOnly: true
+      error:
+        type: 'string'
+        readOnly: true
+      id:
+        type: 'integer'
+      email:
+        type: 'string'
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+  User:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      email:
+        type: 'string'
+      password:
+        type: 'string'
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+      active:
+        type: 'boolean'
+      emailValidated:
+        type: 'boolean'
+      lastLogin:
+        type: 'string'
+        format: 'date-time'
+      domain:
+        type: 'string'
+      username:
+        type: 'string'
+      lastPasswordChange:
+        type: 'string'
+        format: 'date-time'
+      expirePasswordEmailSent:
+        type: 'boolean'
+      failedLoginAttempts:
+        type: 'integer'
+        format: 'int32'
+  UserAccountInfo:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      email:
+        type: 'string'
+      firstName:
+        type: 'string'
+      lastName:
+        type: 'string'
+      lastLogin:
+        type: 'string'
+        format: 'date-time'
+      status:
+        type: 'string'
+        enum:
+          - 'OK'
+          - 'LOCKED'
+          - 'UNVERIFIED'
+          - 'PASSWORD_EXPIRED'
+          - 'INACTIVE'
+  AuthenticationAttemptRequest:
+    type: 'object'
+    properties:
+      password:
+        type: 'string'
+  UserToken:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      token:
+        type: 'string'
+      targetUser:
+        type: 'string'
+      type:
+        type: 'string'
+      created:
+        type: 'string'
+        format: 'date-time'
+      expires:
+        type: 'string'
+        format: 'date-time'
+  PersistUserSessionResponse:
+    type: 'object'
+    properties:
+      sessionStatus:
+        type: 'string'
+        enum:
+          - 'EXISTING_SESSION'
+          - 'NO_SESSION'
+      callerId:
+        type: 'integer'
+      capdAccessToken:
+        type: 'string'
+      logInTimestamp:
+        type: 'string'
+        format: 'date-time'
+  PersistUserSessionRequest:
+    type: 'object'
+    properties:
+      callerId:
+        type: 'integer'
+      capdAccessToken:
+        type: 'string'
