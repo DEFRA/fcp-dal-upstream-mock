@@ -1,0 +1,8 @@
+services:
+  contract-tests:
+    image: schemathesis/schemathesis
+    command: run --exclude-checks=unsupported_method http://dal-mock:3000/schemata/person.yml
+    depends_on:
+      - dal-mock
+    networks:
+      - default
