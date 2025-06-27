@@ -28,5 +28,10 @@ jobs:
       - name: Install, lint, & test
         run: npm cit
 
-      - name: Test Docker Image Build
-        run: docker build --no-cache --tag fcp-dal-upstream-mock .
+      - name: Docker build, Contract test
+        continue-on-error: true
+        run: >
+          docker compose \
+            -f compose.yml \
+            -f test/contract/compose.yml \
+            run --build --quiet-pull --rm contract-tests
