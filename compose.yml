@@ -1,0 +1,23 @@
+services:
+  dal-mock:
+    build:
+      context: .
+    ports:
+      - '3000:3000'
+    environment:
+      MOCK_LOG_LEVEL: info
+      MOCK_SERVER_COLLECTION: all
+      NODE_ENV: production
+      PORT: 3000
+    healthcheck:
+      test: curl -s http://localhost:3000/health
+      interval: 3s
+      timeout: 10s
+      retries: 3
+      start_period: 3s
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

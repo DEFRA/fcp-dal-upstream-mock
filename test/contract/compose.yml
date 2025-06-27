@@ -1,0 +1,19 @@
+services:
+  contract-tests:
+    image: schemathesis/schemathesis
+    entrypoint: sh
+    command:
+      - -c
+      - |
+        result=0
+        for schema in person ; do
+          echo "Running contract tests for schema: $${schema}"
+          schemathesis run --exclude-checks=unsupported_method \
+            "http://dal-mock:3000/schemata/$${schema}.yml"
+          result=$((result | $?))
+        done
+        exit $$result
+    depends_on:
+      - dal-mock
+    networks:
+      - default

@@ -62,6 +62,8 @@ To test the application run:
 npm run test
 ```
 
+> NOTE: Contract testing is described separately [here](./test/contract/README.md).
+
 ### Production
 
 To mimic the application running in `production` mode locally run:
@@ -102,9 +104,12 @@ git config --global core.autocrlf false
 
 ## API endpoints
 
-| Endpoint       | Description |
-| :------------- | :---------- |
-| `GET: /health` | Health      |
+More information about each logical area of the API can be found by accessing its associated schema.
+
+| Endpoint                    | Description                                       |
+| :-------------------------- | :------------------------------------------------ |
+| `GET: /health`              | Basic platform health check                       |
+| `GET: /schemata/person.yml` | Defines the API for `person` data at `/v1/person` |
 
 ## Docker
 
@@ -136,12 +141,12 @@ Run:
 docker run -e PORT=3001 -p 3001:3001 fcp-dal-upstream-mock
 ```
 
-### Dependabot
+## Dependabot
 
 We have added an example dependabot configuration file to the repository. You can enable it by renaming
 the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github/dependabot.yml`
 
-### SonarCloud
+## SonarCloud
 
 Instructions for setting up SonarCloud can be found in [sonar-project.properties](./sonar-project.properties)
 
