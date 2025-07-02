@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
 import {
+  agreementsByBusiness,
   organisationByOrgId,
   organisationBySbi,
   organisationPeopleByOrgId
@@ -45,6 +46,19 @@ export const organisation = [
 
       if (!data) {
         return Boom.notFound('Organisation people not found')
+      }
+
+      return h.response(data)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/v1/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list',
+    handler: async (request, h) => {
+      const data = agreementsByBusiness(request.params.sbi)
+
+      if (!data) {
+        return Boom.notFound('Agreements not found')
       }
 
       return h.response(data)
