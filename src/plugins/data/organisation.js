@@ -45,3 +45,7 @@ export const organisationPersonSummary = (personId) => {
 
   return response
 }
+
+export const agreementsByBusiness = (sbi) => {
+  return loadFromFixtures(`./sbi/${sbi}/agreements.json`)
+}
