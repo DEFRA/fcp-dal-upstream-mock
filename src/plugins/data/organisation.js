@@ -19,3 +19,7 @@ export const organisationApplicationsByOrgId = (orgId) => {
 export const organisationPersonSummary = (personId) => {
   return loadFromFixtures(`./personId/${personId}/organisationSummary.json`)
 }
+
+export const agreementsByBusiness = (sbi) => {
+  return loadFromFixtures(`./sbi/${sbi}/agreements.json`)
+}
