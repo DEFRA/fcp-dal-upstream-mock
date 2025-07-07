@@ -401,7 +401,7 @@ describe('Check basic requests', () => {
     test('Should return data /list', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/v1/SitiAgriApi/cv/cphByBusiness/sbi/121428499/list'
+        url: '/v1/SitiAgriApi/cv/cphByBusiness/sbi/106238988/list'
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
@@ -409,7 +409,7 @@ describe('Check basic requests', () => {
         // snippet only, due to size of list
         data: expect.arrayContaining([
           {
-            sbi: '121428499',
+            sbi: '106238988',
             dt_insert: '2020-03-23T11:10:22:000+0100',
             dt_delete: '9999-12-31T00:00:00:000+0100',
             cph_number: '20/060/0001',
