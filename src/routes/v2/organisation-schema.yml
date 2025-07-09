@@ -12,6 +12,7 @@ tags:
 schemes:
   - 'http'
 security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
+basePath: /extapi
 paths:
   /organisation/{organisationId}:
     get:
@@ -27,7 +28,8 @@ paths:
           in: 'path'
           description: 'organisationId'
           required: true
-          type: 'integer'
+          type: 'string'
+          pattern: '[1-9][0-9]{0,19}'
           # `example` needed for automated testing
           example: 11111111
       # unsupported parameters
@@ -77,11 +79,19 @@ paths:
           description: "Returns a list of Organisations inside a CapdPageResponse\
             \ object"
           schema:
-            type: 'array'
-            items:
-              $ref: '#/definitions/OrganisationWithAddressResponse'
+            type: 'object'
+            properties:
+              _data:
+                type: 'array'
+                items:
+                  $ref: '#/definitions/OrganisationWithAddressResponse'
+              _page:
+                $ref: '#/definitions/CapdPageResponse'
+            required:
+              - '_data'
+              - '_page'
         '400':
-          description: 'searchFieldType is not eqaul to getPrimarySearchPhrase'
+          description: 'searchFieldType is not equal to getPrimarySearchPhrase'
           schema:
             $ref: '#/definitions/WebApplicationException'
         '500':
@@ -109,6 +119,7 @@ definitions:
         example: 'SBI'
       primarySearchPhrase:
         type: 'string'
+        minLength: 9
         example: 'sbi-11111111'
     required:
       - 'searchFieldType'
@@ -170,13 +181,13 @@ definitions:
         type: 'integer'
       type:
         type: 'string'
-  EntityTag:
+  CapdPageResponse:
     type: 'object'
     properties:
-      value:
-        type: 'string'
-      weak:
-        type: 'boolean'
+      _page:
+        $ref: '#/definitions/Page'
+      _data:
+        type: 'object'
   LegalStatusTypeResponse:
     type: 'object'
     properties:
@@ -184,47 +195,6 @@ definitions:
         type: 'integer'
       type:
         type: 'string'
-  MediaType:
-    type: 'object'
-    properties:
-      type:
-        type: 'string'
-      subtype:
-        type: 'string'
-      parameters:
-        type: 'object'
-        additionalProperties:
-          type: 'string'
-      wildcardSubtype:
-        type: 'boolean'
-      wildcardType:
-        type: 'boolean'
-  NewCookie:
-    type: 'object'
-    properties:
-      name:
-        type: 'string'
-      value:
-        type: 'string'
-      version:
-        type: 'integer'
-        format: 'int32'
-      path:
-        type: 'string'
-      domain:
-        type: 'string'
-      comment:
-        type: 'string'
-      maxAge:
-        type: 'integer'
-        format: 'int32'
-      expiry:
-        type: 'string'
-        format: 'date-time'
-      secure:
-        type: 'boolean'
-      httpOnly:
-        type: 'boolean'
   OrganisationWithAddressResponse:
     type: 'object'
     properties:
@@ -243,8 +213,8 @@ definitions:
       confirmed:
         type: 'boolean'
       lastUpdatedOn:
-        type: 'string'
-        format: 'date-time'
+        type: 'integer'
+        description: 'Timestamp in milliseconds since epoch'
       landConfirmed:
         type: 'boolean'
       deactivated:
@@ -255,10 +225,13 @@ definitions:
         $ref: '#/definitions/PartyAddressResponse'
       correspondenceAddress:
         $ref: '#/definitions/PartyAddressResponse'
+        x-nullable: true
       isFinancialToBusinessAddr:
         type: 'boolean'
+        x-nullable: true
       isCorrespondenceAsBusinessAddr:
         type: 'boolean'
+        x-nullable: true
   OrganisationWithAllResponse:
     type: 'object'
     properties:
@@ -277,8 +250,8 @@ definitions:
       confirmed:
         type: 'boolean'
       lastUpdatedOn:
-        type: 'string'
-        format: 'date-time'
+        type: 'integer'
+        description: 'Timestamp in milliseconds since epoch'
       landConfirmed:
         type: 'boolean'
       deactivated:
@@ -289,32 +262,44 @@ definitions:
         $ref: '#/definitions/PartyAddressResponse'
       correspondenceAddress:
         $ref: '#/definitions/PartyAddressResponse'
+        x-nullable: true
       isFinancialToBusinessAddr:
         type: 'boolean'
+        x-nullable: true
       isCorrespondenceAsBusinessAddr:
         type: 'boolean'
+        x-nullable: true
       email:
         type: 'string'
       emailValidated:
         type: 'boolean'
       landline:
         type: 'string'
+        x-nullable: true
       mobile:
         type: 'string'
+        x-nullable: true
       fax:
         type: 'string'
+        x-nullable: true
       correspondenceEmail:
         type: 'string'
+        x-nullable: true
       correspondenceEmailValidated:
         type: 'boolean'
+        x-nullable: true
       correspondenceLandline:
         type: 'string'
+        x-nullable: true
       correspondenceMobile:
         type: 'string'
+        x-nullable: true
       correspondenceFax:
         type: 'string'
+        x-nullable: true
       taxRegistrationNumber:
         type: 'string'
+        x-nullable: true
       businessType:
         $ref: '#/definitions/BusinessTypeResponse'
       businessReference:
@@ -324,91 +309,128 @@ definitions:
       dateStartedFarming:
         type: 'string'
         format: 'date-time'
+        x-nullable: true
       companiesHouseRegistrationNumber:
         type: 'string'
+        x-nullable: true
       charityCommissionRegistrationNumber:
         type: 'string'
+        x-nullable: true
       persons:
         type: 'array'
         items:
           $ref: '#/definitions/AssociatedPersonResponse'
       hasLandInNorthernIreland:
         type: 'boolean'
+        x-nullable: true
       hasLandInScotland:
         type: 'boolean'
+        x-nullable: true
       hasLandInWales:
         type: 'boolean'
+        x-nullable: true
       hasAdditionalBusinessActivities:
         type: 'boolean'
+        x-nullable: true
       vendorNumber:
         type: 'string'
+        x-nullable: true
       traderNumber:
         type: 'string'
+        x-nullable: true
       isAccountablePeopleDeclarationCompleted:
         type: 'boolean'
+        x-nullable: true
       additionalBusinessActivities:
         type: 'array'
         uniqueItems: true
         items:
           $ref: '#/definitions/AdditionalBusinessActivityTypeResponse'
+        x-nullable: true
+  Page:
+    type: 'object'
+    properties:
+      number:
+        type: 'integer'
+        format: 'int32'
+      size:
+        type: 'integer'
+        format: 'int32'
+      totalPages:
+        type: 'integer'
+        format: 'int32'
+      numberOfElements:
+        type: 'integer'
+        format: 'int32'
+      totalElements:
+        type: 'integer'
+        format: 'int64'
   PartyAddressResponse:
     type: 'object'
     properties:
       address1:
         type: 'string'
+        x-nullable: true
       address2:
         type: 'string'
+        x-nullable: true
       address3:
         type: 'string'
+        x-nullable: true
       address4:
         type: 'string'
+        x-nullable: true
       address5:
         type: 'string'
+        x-nullable: true
       pafOrganisationName:
         type: 'string'
+        x-nullable: true
       flatName:
         type: 'string'
+        x-nullable: true
       buildingNumberRange:
         type: 'string'
+        x-nullable: true
       buildingName:
         type: 'string'
+        x-nullable: true
       street:
         type: 'string'
+        x-nullable: true
       city:
         type: 'string'
+        x-nullable: true
       county:
         type: 'string'
+        x-nullable: true
       postalCode:
         type: 'string'
+        x-nullable: true
       country:
         type: 'string'
+        x-nullable: true
       uprn:
         type: 'string'
+        x-nullable: true
       dependentLocality:
         type: 'string'
+        x-nullable: true
       doubleDependentLocality:
         type: 'string'
+        x-nullable: true
       addressTypeId:
         type: 'integer'
-  StatusType:
-    type: 'object'
-    properties:
-      family:
-        type: 'string'
-        enum:
-          - 'INFORMATIONAL'
-          - 'SUCCESSFUL'
-          - 'REDIRECTION'
-          - 'CLIENT_ERROR'
-          - 'SERVER_ERROR'
-          - 'OTHER'
-      statusCode:
-        type: 'integer'
-        format: 'int32'
-      reasonPhrase:
-        type: 'string'
+        x-nullable: true
 
   # errors
+  EntityTag:
+    type: 'object'
+    properties:
+      value:
+        type: 'string'
+      weak:
+        type: 'boolean'
   Link:
     type: 'object'
     properties:
@@ -471,6 +493,47 @@ definitions:
         type: 'string'
       language:
         type: 'string'
+  MediaType:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      subtype:
+        type: 'string'
+      parameters:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      wildcardSubtype:
+        type: 'boolean'
+      wildcardType:
+        type: 'boolean'
+  NewCookie:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      value:
+        type: 'string'
+      version:
+        type: 'integer'
+        format: 'int32'
+      path:
+        type: 'string'
+      domain:
+        type: 'string'
+      comment:
+        type: 'string'
+      maxAge:
+        type: 'integer'
+        format: 'int32'
+      expiry:
+        type: 'string'
+        format: 'date-time'
+      secure:
+        type: 'boolean'
+      httpOnly:
+        type: 'boolean'
   Response:
     type: 'object'
     properties:
@@ -551,6 +614,23 @@ definitions:
         type: 'string'
       nativeMethod:
         type: 'boolean'
+  StatusType:
+    type: 'object'
+    properties:
+      family:
+        type: 'string'
+        enum:
+          - 'INFORMATIONAL'
+          - 'SUCCESSFUL'
+          - 'REDIRECTION'
+          - 'CLIENT_ERROR'
+          - 'SERVER_ERROR'
+          - 'OTHER'
+      statusCode:
+        type: 'integer'
+        format: 'int32'
+      reasonPhrase:
+        type: 'string'
   Throwable:
     type: 'object'
     properties:
@@ -1336,7 +1416,7 @@ definitions:
 #         schema:
 #           $ref: '#/definitions/WebApplicationException'
 #       '404':
-#         description: 'No sitiagri organisations found'
+#         description: 'No SitiAgri organisations found'
 #         schema:
 #           $ref: '#/definitions/WebApplicationException'
 #       '500':
@@ -1378,7 +1458,7 @@ definitions:
 #   put:
 #     tags:
 #       - 'organisation'
-#     summary: 'Update Business details , Controlbusiness and legallyresponsiblepeople.'
+#     summary: 'Update Business details, Control business and legally responsible people.'
 #     description: 'Request to Update Business details by external user.'
 #     operationId: 'updateOrganisationExternal'
 #     consumes:
@@ -1422,7 +1502,7 @@ definitions:
 #   put:
 #     tags:
 #       - 'organisation'
-#     summary: 'Update Business details , Controlbusiness and legallyresponsiblepeople.'
+#     summary: 'Update Business details, Control business and legally responsible people.'
 #     description: 'Request to Update Business details by internal user.'
 #     operationId: 'updateOrganisationInternal'
 #     consumes:

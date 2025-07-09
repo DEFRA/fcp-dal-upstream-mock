@@ -8,7 +8,9 @@ mkdir -p ./tmp
 
 usage() {
   set +x
+  echo
   echo "Usage: $0 {person|organisation|all}"
+  echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
   echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
@@ -57,8 +59,12 @@ case "$1" in
     ;;
   organisation)
     schema="organisation"
-    echo note yet implemented
-    exit 0
+    mutations='
+      . |
+      .schemes[0] = "https" |
+      .paths["/organisation/{organisationId}"].get.parameters[0].example = 5849659 |
+      .definitions.PartySearchRequest.properties.primarySearchPhrase.example = "200629003"
+    '
     ;;
   help | --help | -h)
     usage
