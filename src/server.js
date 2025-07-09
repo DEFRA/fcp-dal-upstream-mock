@@ -8,6 +8,7 @@ import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
 import { router } from './plugins/router.js'
+import { router as fakeRouter } from './plugins/fake-router.js'
 import { schemata } from './routes/schemata.js'
 
 export const startServer = async () => {
@@ -44,6 +45,11 @@ export const startServer = async () => {
     // schemata       - serves swagger 2.0 schema files
     // router         - routes used in the app
     await server.register([requestLogger, requestTracing, pulse, inert, schemata, router])
+    await server.register(fakeRouter, {
+      routes: {
+        prefix: '/extapi'
+      }
+    })
     await server.start()
 
     server.logger.info('Server started successfully')
