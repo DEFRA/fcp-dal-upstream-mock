@@ -23,15 +23,16 @@ paths:
       operationId: 'getByPartyId'
       produces:
         - 'application/json'
+        - 'text/html'
       parameters:
         - name: 'organisationId'
           in: 'path'
           description: 'organisationId'
           required: true
-          type: 'string'
+          type: 'integer'
           pattern: '[1-9][0-9]{0,19}'
           # `example` needed for automated testing
-          example: 11111111
+          example: 111111111
       # unsupported parameters
       # - name: 'callerId'
       #   in: 'header'
@@ -50,6 +51,18 @@ paths:
           description: 'userType must not be empty'
           schema:
             $ref: '#/definitions/WebApplicationException'
+        '403':
+          description: "Getting an organisation's details is forbidden, or a WAF\
+            \ rule has been triggered"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              message: 'Some error message'
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
         '404':
           description: 'organisation details not found'
           schema:
@@ -120,7 +133,7 @@ definitions:
       primarySearchPhrase:
         type: 'string'
         minLength: 9
-        example: 'sbi-11111111'
+        example: '111111111'
     required:
       - 'searchFieldType'
       - 'primarySearchPhrase'

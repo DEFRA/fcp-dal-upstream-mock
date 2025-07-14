@@ -12,7 +12,7 @@ tags:
 schemes:
   - 'http'
 security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
-basePath: /v1
+basePath: /extapi
 paths:
   /person/{personId}/summary:
     get:
@@ -23,13 +23,14 @@ paths:
       operationId: 'getPersonSummaryById'
       produces:
         - 'application/json'
+        - 'text/html'
       parameters:
         - name: 'personId'
           in: 'path'
           description: 'personId'
           required: true
           type: 'integer'
-          pattern: '[0-9]{0,20}'
+          pattern: '[1-9][0-9]{0,19}'
           # `example` needed for automated testing
           example: 11111111
       # unsupported params
@@ -53,9 +54,17 @@ paths:
           schema:
             $ref: '#/definitions/PersonalDetailsFullWithLockedFlagResponse'
         '403':
-          description: "Getting an internal user's details is forbidden"
+          description: "Getting an internal user's details is forbidden, or a WAF\
+            \ rule has been triggered"
           schema:
             $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              message: 'Some error message'
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
         '404':
           description: 'Person not found'
           schema:
@@ -104,9 +113,14 @@ paths:
           schema:
             $ref: '#/definitions/WebApplicationException'
         '500':
-          description: 'internal server error'
+          description: 'internal server error, or only `searchFieldType` was provided'
           schema:
             $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              code: 500
+              message: "There was an error processing your request. It has been logged\
+                \ (ID 704b9f3b19536a35)."
 
 definitions:
   # request objects
@@ -129,7 +143,7 @@ definitions:
         example: 'CUSTOMER_REFERENCE'
       primarySearchPhrase:
         type: 'string'
-        minLength: 10
+        minLength: 9
         example: 'crn-11111111'
     required:
       - 'searchFieldType'
@@ -564,7 +578,7 @@ definitions:
 #         collectionFormat: 'multi'
 #     responses:
 #       '200':
-#         description: 'returns list of persondetails inside a CapdResponse'
+#         description: 'returns list of person details inside a CapdResponse'
 #         schema:
 #           type: 'array'
 #           items:
