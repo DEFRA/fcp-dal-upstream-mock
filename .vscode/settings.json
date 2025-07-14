@@ -17,13 +17,23 @@
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "cSpell.words": [
+    "Agri",
+    "Capd",
     "defra",
     "defradigital",
+    "extapi",
+    "healthcheck",
     "nationalarchives",
+    "NINO",
     "nodemon",
     "pino",
+    "redocly",
+    "schemathesis",
+    "Siti",
     "sonarcloud",
-    "TRUSTSTORE"
+    "TRUSTSTORE",
+    "unconfirm",
+    "uprn"
   ],
   "cSpell.ignorePaths": [
     ".git",
