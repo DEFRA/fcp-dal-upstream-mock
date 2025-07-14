@@ -1,6 +1,5 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
-import merge from 'lodash.merge'
 import { orgIdToSbi } from '../../factories/id-lookups.js'
 
 const organisations = {}
@@ -68,7 +67,7 @@ export const updateOrganisation = (orgId, updatesToOrg) => {
   } else {
     org = createOrganisation(orgId)
   }
-  const newOrg = merge({}, org, updatesToOrg)
+  const newOrg = Object.assign(org, updatesToOrg)
   organisations[orgId] = newOrg
   return newOrg
 }

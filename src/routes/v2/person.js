@@ -3,7 +3,6 @@ import { crnToPersonId } from '../../factories/id-lookups.js'
 import { retrievePerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
-const CRN_MIN_LENGTH = 10
 export const person = [
   {
     method: 'GET',
@@ -21,10 +20,15 @@ export const person = [
       const crn = body?.primarySearchPhrase
 
       // Only search by CRN supported by mock
-      if (body?.searchFieldType !== 'CUSTOMER_REFERENCE' || (crn?.length || 0) < CRN_MIN_LENGTH) {
-        throw Boom.badRequest('Invalid or missing search parameters')
+      // mimic the actual upstream responses...
+      if (body?.searchFieldType !== 'CUSTOMER_REFERENCE') {
+        throw Boom.internal(
+          'There was an error processing your request. It has been logged (ID someID)'
+        )
       }
-
+      if ((crn?.length || 0) < 9) {
+        throw Boom.badRequest('HTTP 400 Bad Request')
+      }
       let personId = crnToPersonId[crn]
       if (!personId) {
         return h.response({ _data: [], _page: pagination0 })

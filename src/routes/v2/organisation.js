@@ -4,7 +4,7 @@ import {
   retrieveOrganisation,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
-import { pagination } from '../../plugins/data/pagination.js'
+import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
 export const organisation = [
   {
@@ -23,15 +23,21 @@ export const organisation = [
       const sbi = body?.primarySearchPhrase
 
       // Only search by SBI supported by mock
+      // mimic the actual upstream responses...
       if (body?.searchFieldType !== 'SBI') {
-        throw Boom.badRequest('Invalid or missing search parameters')
+        throw Boom.internal(
+          'There was an error processing your request. It has been logged (ID someID)'
+        )
       }
-
+      if ((sbi?.length || 0) < 9) {
+        throw Boom.badRequest('HTTP 400 Bad Request')
+      }
       const orgId = sbiToOrgId[sbi]
       if (!orgId) {
         return h.response({ _data: [], _page: pagination0 })
       }
 
+      // TODO: check this response vs schema
       return h.response({
         _data: [retrieveOrganisation(orgId)],
         _page: pagination
