@@ -9,7 +9,7 @@ mkdir -p ./tmp
 usage() {
   set +x
   echo
-  echo "Usage: $0 {person|organisation|all}"
+  echo "Usage: $0 {person|organisation}"
   echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
@@ -87,9 +87,9 @@ docker run --rm --network=host \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
-  -e HTTPS_PROXY=${CDP_PROXY} \
   schemathesis/schemathesis \
     run /tmp/schema.json \
+      --proxy "${CDP_PROXY}" \
       --header 'email: test.user01@defra.gov.uk' \
       --exclude-checks=unsupported_method \
       --request-cert /kits.crt \
