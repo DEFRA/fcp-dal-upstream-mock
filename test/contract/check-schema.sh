@@ -51,19 +51,23 @@ case "$1" in
   person)
     schema="person"
     mutations='
-      . |
-      .schemes = "https" |
-      .paths["/person/{personId}/summary"].get.parameters[0].example = 5858232 |
-      .definitions.PartySearchRequest.properties.primarySearchPhrase.example = "1105658066"
+. |
+.schemes = "https" |
+.paths["/person/{personId}/summary"].get.parameters[0]["x-examples"] = [5858232,5108985,5108989] |
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '1105658066' |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '1101089857' |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '1101089899'
     '
     ;;
   organisation)
     schema="organisation"
     mutations='
-      . |
-      .schemes[0] = "https" |
-      .paths["/organisation/{organisationId}"].get.parameters[0].example = 5849659 |
-      .definitions.PartySearchRequest.properties.primarySearchPhrase.example = "200629003"
+. |
+.schemes[0] = "https" |
+.paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5509239,5849659,5858233  ] |
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '108224522' |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '200629003' |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '200665008'
     '
     ;;
   help | --help | -h)

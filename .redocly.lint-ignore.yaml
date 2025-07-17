@@ -2,7 +2,7 @@
 # See https://redocly.com/docs/cli/ for more information.
 src/routes/v2/organisation-schema.yml:
   struct:
-    - '#/paths/~1organisation~1{organisationId}/get/parameters/0/example'
+    - '#/paths/~1organisation~1{organisationId}/get/parameters/0/x-examples'
 src/routes/v2/person-schema.yml:
   struct:
-    - '#/paths/~1person~1{personId}~1summary/get/parameters/0/example'
+    - '#/paths/~1person~1{personId}~1summary/get/parameters/0/x-examples'

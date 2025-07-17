@@ -30,9 +30,8 @@ paths:
           description: 'organisationId'
           required: true
           type: 'integer'
-          pattern: '[1-9][0-9]{0,19}'
-          # `example` needed for automated testing
-          example: 111111111
+          maximum: 99999999999999999999
+          x-examples: [1000000000, 1111111111, 2222222222]
       # unsupported parameters
       # - name: 'callerId'
       #   in: 'header'
@@ -44,13 +43,22 @@ paths:
       #   type: 'string'
       responses:
         '200':
-          description: 'Returns organisation details. Inside a CapdResponse object'
+          description: 'Returns full organisation details.'
           schema:
-            $ref: '#/definitions/OrganisationWithAllResponse'
+            type: 'object'
+            properties:
+              _data:
+                $ref: '#/definitions/OrganisationWithAllResponse'
+            required:
+              - '_data'
         '400':
-          description: 'userType must not be empty'
+          description: 'userType must not be empty, and orgId must have 10 or more digits'
           schema:
             $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              code: 400
+              message: 'HTTP 400 Bad Request'
         '403':
           description: "Getting an organisation's details is forbidden, or a WAF\
             \ rule has been triggered"
@@ -99,7 +107,7 @@ paths:
                 items:
                   $ref: '#/definitions/OrganisationWithAddressResponse'
               _page:
-                $ref: '#/definitions/CapdPageResponse'
+                $ref: '#/definitions/Page'
             required:
               - '_data'
               - '_page'
@@ -129,11 +137,17 @@ definitions:
         # - 'PERSONAL_IDENTIFIER'
         # - 'CUSTOMER_POSTCODE'
         # - 'BUSINESS_POSTCODE'
-        example: 'SBI'
       primarySearchPhrase:
         type: 'string'
-        minLength: 9
-        example: '111111111'
+        minLength: 10
+        # pattern: '^[0-9]{10,}$' # not just SBI upstream, other searches are also allowed
+    x-examples:
+      - primarySearchPhrase: '1000000000'
+        searchFieldType: 'SBI'
+      - primarySearchPhrase: '1111111111'
+        searchFieldType: 'SBI'
+      - primarySearchPhrase: '2222222222'
+        searchFieldType: 'SBI'
     required:
       - 'searchFieldType'
       - 'primarySearchPhrase'
@@ -155,6 +169,9 @@ definitions:
         type: 'integer'
       type:
         type: 'string'
+    required:
+      - 'id'
+      - 'type'
   AssociatedPersonResponse:
     type: 'object'
     properties:
@@ -210,6 +227,7 @@ definitions:
         type: 'string'
   OrganisationWithAddressResponse:
     type: 'object'
+    additionalProperties: false
     properties:
       id:
         type: 'integer'
@@ -245,8 +263,23 @@ definitions:
       isCorrespondenceAsBusinessAddr:
         type: 'boolean'
         x-nullable: true
+    required:
+      - 'id'
+      - 'name'
+      - 'sbi'
+      - 'additionalSbiIds'
+      - 'confirmed'
+      - 'lastUpdatedOn'
+      - 'landConfirmed'
+      - 'deactivated'
+      - 'locked'
+      - 'address'
+      - 'correspondenceAddress'
+      - 'isFinancialToBusinessAddr'
+      - 'isCorrespondenceAsBusinessAddr'
   OrganisationWithAllResponse:
     type: 'object'
+    additionalProperties: false
     properties:
       id:
         type: 'integer'
@@ -284,6 +317,7 @@ definitions:
         x-nullable: true
       email:
         type: 'string'
+        x-nullable: true
       emailValidated:
         type: 'boolean'
       landline:
@@ -360,6 +394,46 @@ definitions:
         items:
           $ref: '#/definitions/AdditionalBusinessActivityTypeResponse'
         x-nullable: true
+    required:
+      - 'id'
+      - 'name'
+      - 'sbi'
+      - 'additionalSbiIds'
+      - 'confirmed'
+      - 'lastUpdatedOn'
+      - 'landConfirmed'
+      - 'deactivated'
+      - 'locked'
+      - 'address'
+      - 'correspondenceAddress'
+      - 'isFinancialToBusinessAddr'
+      - 'isCorrespondenceAsBusinessAddr'
+      - 'email'
+      - 'emailValidated'
+      - 'landline'
+      - 'mobile'
+      - 'fax'
+      - 'correspondenceEmail'
+      - 'correspondenceEmailValidated'
+      - 'correspondenceLandline'
+      - 'correspondenceMobile'
+      - 'correspondenceFax'
+      - 'taxRegistrationNumber'
+      - 'businessType'
+      - 'businessReference'
+      - 'legalStatus'
+      - 'dateStartedFarming'
+      - 'companiesHouseRegistrationNumber'
+      - 'charityCommissionRegistrationNumber'
+      - 'persons'
+      - 'hasLandInNorthernIreland'
+      - 'hasLandInScotland'
+      - 'hasLandInWales'
+      - 'hasAdditionalBusinessActivities'
+      - 'vendorNumber'
+      - 'traderNumber'
+      - 'isAccountablePeopleDeclarationCompleted'
+      - 'additionalBusinessActivities'
   Page:
     type: 'object'
     properties:
@@ -666,6 +740,11 @@ definitions:
   WebApplicationException:
     type: 'object'
     properties:
+      code:
+        type: 'integer'
+        format: 'int32'
+        minimum: 400
+        maximum: 599
       cause:
         $ref: '#/definitions/Throwable'
       stackTrace:
@@ -682,6 +761,11 @@ definitions:
           $ref: '#/definitions/Throwable'
       localizedMessage:
         type: 'string'
+    example:
+      - code: 400
+        message: 'HTTP 400 Bad Request'
+      - code: 500
+        message: 'There was an error processing your request. It has been logged (ID someID)'
 #
 # Other endpoints that are currently part of KITS but not this mock
 # NOTE: potentially useful as these endpoints may be added in the future

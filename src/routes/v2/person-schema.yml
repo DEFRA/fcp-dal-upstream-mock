@@ -30,9 +30,8 @@ paths:
           description: 'personId'
           required: true
           type: 'integer'
-          pattern: '[1-9][0-9]{0,19}'
-          # `example` needed for automated testing
-          example: 11111111
+          maximum: 99999999999999999999
+          x-examples: [11111111, 11112222, 22222222]
       # unsupported params
       # - name: 'callerId'
       #   in: 'header'
@@ -52,7 +51,12 @@ paths:
           description: "returns person details with a specified id. Returns result\
             \ inside a CapdResponse"
           schema:
-            $ref: '#/definitions/PersonalDetailsFullWithLockedFlagResponse'
+            type: 'object'
+            properties:
+              _data:
+                $ref: '#/definitions/PersonalDetailsFullWithLockedFlagResponse'
+            required:
+              - '_data'
         '403':
           description: "Getting an internal user's details is forbidden, or a WAF\
             \ rule has been triggered"
@@ -104,7 +108,7 @@ paths:
                 items:
                   $ref: '#/definitions/CustomerSummaryResponse'
               _page:
-                $ref: '#/definitions/CapdPageResponse'
+                $ref: '#/definitions/Page'
             required:
               - '_data'
               - '_page'
@@ -143,8 +147,15 @@ definitions:
         example: 'CUSTOMER_REFERENCE'
       primarySearchPhrase:
         type: 'string'
-        minLength: 9
-        example: 'crn-11111111'
+        minLength: 10
+        # pattern: '^[0-9]{10,}$' # not just CRN upstream, other searches are also allowed
+    x-examples:
+      - primarySearchPhrase: 'crn-11111111'
+        searchFieldType: 'CUSTOMER_REFERENCE'
+      - primarySearchPhrase: 'crn-11111122'
+        searchFieldType: 'CUSTOMER_REFERENCE'
+      - primarySearchPhrase: 'crn-22222222'
+        searchFieldType: 'CUSTOMER_REFERENCE'
     required:
       - 'searchFieldType'
       - 'primarySearchPhrase'
@@ -159,15 +170,9 @@ definitions:
     #   type: 'string'
 
   # response objects
-  CapdPageResponse:
-    type: 'object'
-    properties:
-      _page:
-        $ref: '#/definitions/Page'
-      _data:
-        type: 'object'
   CustomerSummaryResponse:
     type: 'object'
+    additionalProperties: false
     properties:
       id:
         type: 'integer'
@@ -190,6 +195,16 @@ definitions:
         type: 'boolean'
       deactivated:
         type: 'boolean'
+    required:
+      - 'id'
+      - 'fullName'
+      - 'primaryAddress'
+      - 'personalIdentifiers'
+      - 'nationalInsuranceNumber'
+      - 'customerReference'
+      - 'email'
+      - 'locked'
+      - 'deactivated'
   Page:
     type: 'object'
     properties:
@@ -267,9 +282,11 @@ definitions:
         x-nullable: true
   PersonalDetailsFullWithLockedFlagResponse:
     type: 'object'
+    additionalProperties: false
     properties:
       title:
         type: 'string'
+        x-nullable: true
       otherTitle:
         type: 'string'
         x-nullable: true
@@ -281,8 +298,8 @@ definitions:
       lastName:
         type: 'string'
       dateOfBirth:
-        type: 'string'
-        format: 'date-time'
+        type: 'integer'
+        x-nullable: true
       landline:
         type: 'string'
         x-nullable: true
@@ -312,6 +329,25 @@ definitions:
           type: 'string'
       deactivated:
         type: 'boolean'
+    required:
+      - 'title'
+      - 'otherTitle'
+      - 'firstName'
+      - 'middleName'
+      - 'lastName'
+      - 'dateOfBirth'
+      - 'landline'
+      - 'mobile'
+      - 'email'
+      - 'doNotContact'
+      - 'emailValidated'
+      - 'address'
+      - 'locked'
+      - 'id'
+      - 'confirmed'
+      - 'customerReferenceNumber'
+      - 'personalIdentifiers'
+      - 'deactivated'
 
   # errors
   DaoException:
