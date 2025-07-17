@@ -7,10 +7,11 @@ import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
-import { router } from './plugins/router.js'
 import { router as fakeRouter } from './plugins/fake-router.js'
+import { router } from './plugins/router.js'
 import { schemata } from './routes/schemata.js'
 
+const logger = createLogger()
 export const startServer = async () => {
   let server
 
@@ -50,6 +51,50 @@ export const startServer = async () => {
         prefix: '/extapi'
       }
     })
+
+    // emulate upstream error responses
+    server.ext('onPreResponse', (request, h) => {
+      const response = request.response
+
+      if (response.isBoom) {
+        const code = response.output.statusCode
+        logger.warn({
+          http: {
+            request: {
+              id: request.info.id,
+              method: request.method,
+              ...(request?.headers && { headers: request.headers })
+            },
+            response: {
+              status_code: code,
+              ...(request?.info?.received && {
+                response_time: new Date().getTime() - request.info.received
+              })
+            }
+          },
+          error: {
+            code,
+            type: response.name,
+            message: response.message,
+            stack_trace: response.stack
+          },
+          message: `${request.method}${
+            request.payload ? ' ' + JSON.stringify(request.payload) : ''
+          } ${request.path} ${code}`
+        })
+
+        // Replace payload for client
+        if (code === 403) {
+          return h
+            .response(`<html><body><h1>403 Forbidden</h1>\n${response.message}\n</body></html>\n`)
+            .code(code)
+        }
+        return h.response({ code, message: response.message }).code(code)
+      }
+
+      return h.continue
+    })
+
     await server.start()
 
     server.logger.info('Server started successfully')
@@ -57,7 +102,6 @@ export const startServer = async () => {
 
     return server
   } catch (error) {
-    const logger = createLogger()
     logger.info('Server failed to start :(')
     logger.error(error)
     if (server) {
