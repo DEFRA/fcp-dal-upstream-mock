@@ -1,25 +1,51 @@
+import { getTraceId } from '@defra/hapi-tracing'
 import { ecsFormat } from '@elastic/ecs-pino-format'
 import { config } from '../../../config.js'
-import { getTraceId } from '@defra/hapi-tracing'
 
 const logConfig = config.get('log')
 const serviceName = config.get('serviceName')
 const serviceVersion = config.get('serviceVersion')
 
+const customTransform = {
+  formatters: {
+    log(object) {
+      if (!object?.payload) return object
+
+      const withQuery = { ...object, url: { query: JSON.stringify(object.payload) } }
+      try {
+        withQuery.url.query = new URLSearchParams(object.payload).toString()
+      } catch (_) {
+        // NOTE: ignore any errors in URLSearchParams
+      }
+      return withQuery
+    }
+  }
+}
+const ecsTransform = ecsFormat({
+  serviceVersion,
+  serviceName
+})
+
 const formatters = {
   ecs: {
-    ...ecsFormat({
-      serviceVersion,
-      serviceName
-    })
+    ...ecsTransform,
+    formatters: {
+      log(object, ...rest) {
+        return ecsTransform.formatters.log(customTransform.formatters.log(object), ...rest)
+      }
+    }
   },
-  'pino-pretty': { transport: { target: 'pino-pretty' } }
+  'pino-pretty': {
+    ...customTransform,
+    ...{ transport: { target: 'pino-pretty' } }
+  }
 }
 
 export const loggerOptions = {
   enabled: logConfig.isEnabled,
   ignorePaths: ['/health'],
   level: logConfig.level,
+  logPayload: true,
   ...formatters[logConfig.format],
   nesting: true,
   mixin() {
