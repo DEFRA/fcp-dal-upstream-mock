@@ -20,9 +20,8 @@ describe('Fake Person', () => {
     const {
       firstName,
       lastName,
-      primaryAddress,
+      address,
       personalIdentifiers,
-      nationalInsuranceNumber,
       customerReferenceNumber,
       email,
       locked,
@@ -46,9 +45,9 @@ describe('Fake Person', () => {
     expect(samePerson).toEqual({
       id,
       fullName: `${firstName} ${lastName}`,
-      primaryAddress: primaryAddress,
+      primaryAddress: address,
       personalIdentifiers: personalIdentifiers,
-      nationalInsuranceNumber: nationalInsuranceNumber,
+      nationalInsuranceNumber: null,
       customerReference: customerReferenceNumber,
       email: email,
       locked: locked,

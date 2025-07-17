@@ -24,16 +24,12 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          title: 'Mr.',
-          firstName: 'Gerhard',
-          middleName: 'Shayna',
-          lastName: 'Purdy',
-          dateOfBirth: '1955-10-30',
-          landline: '055 2317 9411',
-          mobile: '01650 95852',
-          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
           id: 11111111,
-          customerReferenceNumber: 'crn-11111111'
+          customerReferenceNumber: 'crn-11111111',
+          firstName: 'Lauren',
+          lastName: 'Sanford',
+          email: 'lauren.sanford@immaculate-shark.info',
+          address: expect.objectContaining({}) // just used to assert the `address` field name
         })
       )
     })
@@ -53,31 +49,33 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          fullName: 'Gerhard Purdy',
-          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          fullName: 'Lauren Sanford',
+          nationalInsuranceNumber: null, // available in search, not the summary!!
           id: 11111111,
-          customerReference: 'crn-11111111'
+          customerReference: 'crn-11111111',
+          // line below is just used to assert the `primaryAddress` field name
+          primaryAddress: expect.objectContaining({})
         })
       )
     })
   })
 
   describe('Organisation routes', () => {
-    test('Should return data for /organisation/11111111', async () => {
+    test('Should return data for /organisation/1111111111', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/organisation/11111111'
+        url: '/extapi/organisation/1111111111'
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
       expect(json._data).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          id: 11111111,
-          name: 'Stamm LLC',
-          sbi: 'sbi-11111111',
-          confirmed: false,
-          landline: '0800 977814',
+          id: 1111111111,
+          name: 'Maggio, Murray and Dicki',
+          sbi: 1111111111,
+          confirmed: true,
+          landline: '010952 63723',
           deactivated: false,
           locked: false
         })
@@ -89,7 +87,7 @@ describe('Basic queries for faked routes', () => {
         method: 'POST',
         url: '/extapi/organisation/search',
         payload: {
-          primarySearchPhrase: 'sbi-11111111',
+          primarySearchPhrase: '1111111111',
           searchFieldType: 'SBI'
         }
       })
@@ -98,11 +96,10 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          id: 11111111,
-          name: 'Stamm LLC',
-          sbi: 'sbi-11111111',
-          confirmed: false,
-          landline: '0800 977814',
+          id: 1111111111,
+          name: 'Maggio, Murray and Dicki',
+          sbi: 1111111111,
+          confirmed: true,
           deactivated: false,
           locked: false
         })
