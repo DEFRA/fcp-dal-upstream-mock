@@ -11,7 +11,12 @@ export const organisation = [
     method: 'GET',
     path: '/organisation/{organisationId}',
     handler: async (request, h) => {
-      const organisationId = request.params.organisationId
+      const organisationId = parseInt(request.params.organisationId, 10)
+
+      if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
       return h.response({ _data: retrieveOrganisation(organisationId) })
     }
   },
@@ -20,26 +25,66 @@ export const organisation = [
     path: '/organisation/search',
     handler: async (request, h) => {
       const body = request.payload
-      const sbi = body?.primarySearchPhrase
+      const searchSbi = body?.primarySearchPhrase
 
       // Only search by SBI supported by mock
-      // mimic the actual upstream responses...
-      if (body?.searchFieldType !== 'SBI') {
+      if (
+        !searchSbi ||
+        body?.searchFieldType !== 'SBI' ||
+        !(typeof searchSbi === 'number' || typeof searchSbi === 'string')
+      ) {
+        // mimic the actual upstream response for missing searchFieldType
         throw Boom.internal(
-          'There was an error processing your request. It has been logged (ID someID)'
+          'There was an error processing your request. It has been logged (ID someID)',
+          request
         )
       }
-      if ((sbi?.length || 0) < 9) {
-        throw Boom.badRequest('HTTP 400 Bad Request')
+
+      // SBI must be at least 10 characters long
+      if ((`${searchSbi}`?.length || 0) < 10) {
+        throw Boom.badRequest('HTTP 400 Bad Request', request)
       }
-      const orgId = sbiToOrgId[sbi]
+
+      // return empty result if no orgId found but no "errors" encountered
+      const orgId = sbiToOrgId[searchSbi]
       if (!orgId) {
         return h.response({ _data: [], _page: pagination0 })
       }
 
-      // TODO: check this response vs schema
+      // reduce the response to the subset of fields for search results
+      const {
+        id,
+        name,
+        sbi,
+        additionalSbiIds,
+        confirmed,
+        lastUpdatedOn,
+        landConfirmed,
+        deactivated,
+        locked,
+        address,
+        correspondenceAddress,
+        isFinancialToBusinessAddr,
+        isCorrespondenceAsBusinessAddr
+      } = retrieveOrganisation(orgId)
       return h.response({
-        _data: [retrieveOrganisation(orgId)],
+        _data: [
+          {
+            id,
+            name,
+            sbi,
+            additionalSbiIds,
+            confirmed,
+            lastUpdatedOn,
+            landConfirmed,
+            deactivated,
+            locked,
+            address,
+            correspondenceAddress,
+            isFinancialToBusinessAddr,
+            isCorrespondenceAsBusinessAddr
+          }
+        ],
         _page: pagination
       })
     }

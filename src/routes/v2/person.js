@@ -8,7 +8,12 @@ export const person = [
     method: 'GET',
     path: '/person/{personId}/summary',
     handler: async (request, h) => {
-      const personId = request.params.personId
+      const personId = parseInt(request.params.personId, 10)
+
+      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
       return h.response({ _data: retrievePerson(personId) })
     }
   },
@@ -20,27 +25,36 @@ export const person = [
       const crn = body?.primarySearchPhrase
 
       // Only search by CRN supported by mock
-      // mimic the actual upstream responses...
-      if (body?.searchFieldType !== 'CUSTOMER_REFERENCE') {
+      if (
+        !crn ||
+        body?.searchFieldType !== 'CUSTOMER_REFERENCE' ||
+        !(typeof crn === 'number' || typeof crn === 'string')
+      ) {
+        // mimic the actual upstream response for missing searchFieldType
         throw Boom.internal(
           'There was an error processing your request. It has been logged (ID someID)'
         )
       }
-      if ((crn?.length || 0) < 9) {
+
+      // CRN must be at least 10 characters long
+      if ((`${crn}`?.length || 0) < 10) {
         throw Boom.badRequest('HTTP 400 Bad Request')
       }
-      let personId = crnToPersonId[crn]
+
+      // return empty result if no personId found but no "errors" encountered
+      const personId = crnToPersonId[crn]
       if (!personId) {
         return h.response({ _data: [], _page: pagination0 })
       }
 
+      // reduce the response to the subset of fields for search results
       const {
         id,
         firstName,
         lastName,
-        primaryAddress,
+        address,
         personalIdentifiers,
-        nationalInsuranceNumber,
+        nationalInsuranceNumber, // not currently part of the full person object!!
         customerReferenceNumber,
         email,
         locked,
@@ -49,12 +63,11 @@ export const person = [
       return h.response({
         _data: [
           {
-            // NOTE: the limited schema for search results
             id,
             fullName: `${firstName} ${lastName}`,
-            primaryAddress,
+            primaryAddress: address,
             personalIdentifiers,
-            nationalInsuranceNumber,
+            nationalInsuranceNumber: nationalInsuranceNumber || null,
             customerReference: customerReferenceNumber,
             email,
             locked,
