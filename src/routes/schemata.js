@@ -14,6 +14,13 @@ export const schemata = {
           handler: {
             file: path.join(__dirname, '/v2/person-schema.yml')
           }
+        },
+        {
+          method: 'GET',
+          path: '/schemata/organisation.yml',
+          handler: {
+            file: path.join(__dirname, '/v2/organisation-schema.yml')
+          }
         }
       ])
     }

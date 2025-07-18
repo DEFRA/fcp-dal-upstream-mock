@@ -12,7 +12,7 @@ tags:
 schemes:
   - 'http'
 security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
-basePath: /v1
+basePath: /extapi
 paths:
   /person/{personId}/summary:
     get:
@@ -23,15 +23,15 @@ paths:
       operationId: 'getPersonSummaryById'
       produces:
         - 'application/json'
+        - 'text/html'
       parameters:
         - name: 'personId'
           in: 'path'
           description: 'personId'
           required: true
           type: 'integer'
-          pattern: '[0-9]{0,20}'
-          # `example` needed for automated testing
-          example: 11111111
+          maximum: 99999999999999999999
+          x-examples: [11111111, 11112222, 22222222]
       # unsupported params
       # - name: 'callerId'
       #   in: 'header'
@@ -51,11 +51,24 @@ paths:
           description: "returns person details with a specified id. Returns result\
             \ inside a CapdResponse"
           schema:
-            $ref: '#/definitions/PersonalDetailsFullWithLockedFlagResponse'
+            type: 'object'
+            properties:
+              _data:
+                $ref: '#/definitions/PersonalDetailsFullWithLockedFlagResponse'
+            required:
+              - '_data'
         '403':
-          description: "Getting an internal user's details is forbidden"
+          description: "Getting an internal user's details is forbidden, or a WAF\
+            \ rule has been triggered"
           schema:
             $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              message: 'Some error message'
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
         '404':
           description: 'Person not found'
           schema:
@@ -95,7 +108,7 @@ paths:
                 items:
                   $ref: '#/definitions/CustomerSummaryResponse'
               _page:
-                $ref: '#/definitions/CapdPageResponse'
+                $ref: '#/definitions/Page'
             required:
               - '_data'
               - '_page'
@@ -104,9 +117,14 @@ paths:
           schema:
             $ref: '#/definitions/WebApplicationException'
         '500':
-          description: 'internal server error'
+          description: 'internal server error, or only `searchFieldType` was provided'
           schema:
             $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              code: 500
+              message: "There was an error processing your request. It has been logged\
+                \ (ID 704b9f3b19536a35)."
 
 definitions:
   # request objects
@@ -130,7 +148,14 @@ definitions:
       primarySearchPhrase:
         type: 'string'
         minLength: 10
-        example: '0866159801'
+        # pattern: '^[0-9]{10,}$' # not just CRN upstream, other searches are also allowed
+    x-examples:
+      - primarySearchPhrase: 'crn-11111111'
+        searchFieldType: 'CUSTOMER_REFERENCE'
+      - primarySearchPhrase: 'crn-11111122'
+        searchFieldType: 'CUSTOMER_REFERENCE'
+      - primarySearchPhrase: 'crn-22222222'
+        searchFieldType: 'CUSTOMER_REFERENCE'
     required:
       - 'searchFieldType'
       - 'primarySearchPhrase'
@@ -145,15 +170,9 @@ definitions:
     #   type: 'string'
 
   # response objects
-  CapdPageResponse:
-    type: 'object'
-    properties:
-      _page:
-        $ref: '#/definitions/Page'
-      _data:
-        type: 'object'
   CustomerSummaryResponse:
     type: 'object'
+    additionalProperties: false
     properties:
       id:
         type: 'integer'
@@ -176,6 +195,16 @@ definitions:
         type: 'boolean'
       deactivated:
         type: 'boolean'
+    required:
+      - 'id'
+      - 'fullName'
+      - 'primaryAddress'
+      - 'personalIdentifiers'
+      - 'nationalInsuranceNumber'
+      - 'customerReference'
+      - 'email'
+      - 'locked'
+      - 'deactivated'
   Page:
     type: 'object'
     properties:
@@ -253,9 +282,11 @@ definitions:
         x-nullable: true
   PersonalDetailsFullWithLockedFlagResponse:
     type: 'object'
+    additionalProperties: false
     properties:
       title:
         type: 'string'
+        x-nullable: true
       otherTitle:
         type: 'string'
         x-nullable: true
@@ -267,8 +298,8 @@ definitions:
       lastName:
         type: 'string'
       dateOfBirth:
-        type: 'string'
-        format: 'date-time'
+        type: 'integer'
+        x-nullable: true
       landline:
         type: 'string'
         x-nullable: true
@@ -298,6 +329,25 @@ definitions:
           type: 'string'
       deactivated:
         type: 'boolean'
+    required:
+      - 'title'
+      - 'otherTitle'
+      - 'firstName'
+      - 'middleName'
+      - 'lastName'
+      - 'dateOfBirth'
+      - 'landline'
+      - 'mobile'
+      - 'email'
+      - 'doNotContact'
+      - 'emailValidated'
+      - 'address'
+      - 'locked'
+      - 'id'
+      - 'confirmed'
+      - 'customerReferenceNumber'
+      - 'personalIdentifiers'
+      - 'deactivated'
 
   # errors
   DaoException:
@@ -564,7 +614,7 @@ definitions:
 #         collectionFormat: 'multi'
 #     responses:
 #       '200':
-#         description: 'returns list of persondetails inside a CapdResponse'
+#         description: 'returns list of person details inside a CapdResponse'
 #         schema:
 #           type: 'array'
 #           items:

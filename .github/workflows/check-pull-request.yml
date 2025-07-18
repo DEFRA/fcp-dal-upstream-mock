@@ -25,8 +25,12 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Install, lint, & test
-        run: npm cit
+      - name: Audit, install, lint, & test
+        run: |
+          npm audit --omit=dev
+          npm ci
+          npm run lint
+          npm t
 
       - name: Docker build, Contract test
         continue-on-error: true
