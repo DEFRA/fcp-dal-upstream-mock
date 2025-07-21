@@ -8,7 +8,9 @@ mkdir -p ./tmp
 
 usage() {
   set +x
-  echo "Usage: $0 {person|organisation|all}"
+  echo
+  echo "Usage: $0 {person|organisation}"
+  echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
   echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
@@ -49,16 +51,24 @@ case "$1" in
   person)
     schema="person"
     mutations='
-      . |
-      .schemes = "https" |
-      .paths["/person/{personId}/summary"].get.parameters[0].example = 5858232 |
-      .definitions.PartySearchRequest.properties.primarySearchPhrase.example = "1105658066"
+. |
+.schemes = "https" |
+.paths["/person/{personId}/summary"].get.parameters[0]["x-examples"] = [5858232,5108985,5108989] |
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '1105658066' |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '1101089857' |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '1101089899'
     '
     ;;
   organisation)
     schema="organisation"
-    echo note yet implemented
-    exit 0
+    mutations='
+. |
+.schemes[0] = "https" |
+.paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5509239,5849659,5858233  ] |
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '108224522' |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '200629003' |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '200665008'
+    '
     ;;
   help | --help | -h)
     usage
@@ -81,9 +91,9 @@ docker run --rm --network=host \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
-  -e HTTPS_PROXY=${CDP_PROXY} \
   schemathesis/schemathesis \
     run /tmp/schema.json \
+      --proxy "${CDP_PROXY}" \
       --header 'email: test.user01@defra.gov.uk' \
       --exclude-checks=unsupported_method \
       --request-cert /kits.crt \

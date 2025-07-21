@@ -1,0 +1,431 @@
+---
+swagger: '2.0'
+info: {}
+tags:
+  - name: 'Land Cover'
+  - name: 'Land Draft'
+  - name: 'Status'
+schemes:
+  - 'http'
+paths:
+  /land-drawing/land-cover/all:
+    get:
+      tags:
+        - 'Land Cover'
+      operationId: 'getAll'
+      produces:
+        - 'application/json'
+      parameters: []
+      responses:
+        '200':
+          description: 'successful operation'
+          headers: {}
+          schema:
+            $ref: '#/definitions/CapdResponseListLandCoverType'
+  /land-drawing/land-draft/{organisationId}/{osSheetId}/{parcelId}/status/{parcelStatus}:
+    put:
+      tags:
+        - 'Land Draft'
+      operationId: 'updateParcelStatus'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'organisationId'
+          in: 'path'
+          required: true
+          type: 'integer'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'parcelStatus'
+          in: 'path'
+          required: true
+          type: 'boolean'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/internal/{osSheetId}/{parcelId}:
+    get:
+      tags:
+        - 'Land Draft'
+      operationId: 'getParcelDraftsByStatus'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'draftStatus'
+          in: 'query'
+          required: false
+          type: 'string'
+          enum:
+            - 'ACTIVE'
+            - 'SUBMITTED'
+            - 'CANCELLED'
+        - name: 'offset'
+          in: 'query'
+          required: false
+          type: 'integer'
+        - name: 'limit'
+          in: 'query'
+          required: false
+          type: 'integer'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/internal/parcels-ids:
+    get:
+      tags:
+        - 'Land Draft'
+      operationId: 'getParcelIdentifiers'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'offset'
+          in: 'query'
+          required: false
+          type: 'integer'
+        - name: 'limit'
+          in: 'query'
+          required: false
+          type: 'integer'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/{organisationId}/{osSheetId}/{parcelId}:
+    get:
+      tags:
+        - 'Land Draft'
+      operationId: 'getLandDraft'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'draftStatus'
+          in: 'query'
+          required: false
+          type: 'string'
+          enum:
+            - 'ACTIVE'
+            - 'SUBMITTED'
+            - 'CANCELLED'
+      responses:
+        default:
+          description: 'successful operation'
+    post:
+      tags:
+        - 'Land Draft'
+      operationId: 'createLandDraft'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'organisationId'
+          in: 'path'
+          required: true
+          type: 'integer'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/LandDraftRequest'
+      responses:
+        default:
+          description: 'successful operation'
+    put:
+      tags:
+        - 'Land Draft'
+      operationId: 'updateLandDraft'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'organisationId'
+          in: 'path'
+          required: true
+          type: 'integer'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/LandDraftRequest'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/{organisationId}/{osSheetId}/{parcelId}/{draftStatus}:
+    put:
+      tags:
+        - 'Land Draft'
+      operationId: 'updateLandDraftStatus'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'draftStatus'
+          in: 'path'
+          required: true
+          type: 'string'
+          enum:
+            - 'ACTIVE'
+            - 'SUBMITTED'
+            - 'CANCELLED'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/internal/{draftId}:
+    put:
+      tags:
+        - 'Land Draft'
+      operationId: 'updateLandDraftContentById'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'draftId'
+          in: 'path'
+          required: true
+          type: 'integer'
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/LandDraftRequest'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/{organisationId}/list:
+    get:
+      tags:
+        - 'Land Draft'
+      operationId: 'getLandDraftsList'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'organisationId'
+          in: 'path'
+          required: true
+          type: 'integer'
+      responses:
+        default:
+          description: 'successful operation'
+  /land-drawing/land-draft/{organisationId}/{osSheetId}/{parcelId}/verified:
+    post:
+      tags:
+        - 'Land Draft'
+      operationId: 'markAsVerified'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'organisationId'
+          in: 'path'
+          required: true
+          type: 'integer'
+        - name: 'parcelId'
+          in: 'path'
+          required: true
+          type: 'string'
+        - name: 'osSheetId'
+          in: 'path'
+          required: true
+          type: 'string'
+      responses:
+        default:
+          description: 'successful operation'
+  /status:
+    get:
+      tags:
+        - 'Status'
+      summary: 'Application Healthcheck'
+      description: 'Checks service health.'
+      operationId: 'getStatus'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Application health status'
+          schema:
+            type: 'string'
+definitions:
+  CapdResponse:
+    type: 'object'
+    properties:
+      _data:
+        type: 'object'
+  CapdResponseListLandCoverType:
+    type: 'object'
+    properties:
+      _data:
+        type: 'array'
+        items:
+          $ref: '#/definitions/LandCoverType'
+  LandCoverType:
+    type: 'object'
+    properties:
+      code:
+        type: 'string'
+      description:
+        type: 'string'
+      drawingTools:
+        type: 'string'
+      measurementType:
+        type: 'string'
+      measurementUnit:
+        type: 'string'
+      affectsParcelSize:
+        type: 'boolean'
+  DigitisationJob:
+    type: 'object'
+    properties:
+      jobId:
+        type: 'string'
+  LandCoverEntry:
+    type: 'object'
+    properties:
+      description:
+        type: 'string'
+      code:
+        type: 'string'
+      drawingTools:
+        type: 'string'
+      area:
+        type: 'number'
+      effectiveDate:
+        type: 'string'
+        format: 'date-time'
+      center:
+        $ref: '#/definitions/Point'
+      measurements:
+        type: 'string'
+      geometry:
+        type: 'string'
+      landCoverId:
+        type: 'integer'
+        format: 'int32'
+      note:
+        type: 'string'
+      featureWidth:
+        type: 'number'
+      featureLength:
+        type: 'number'
+  LandDraftRequest:
+    type: 'object'
+    properties:
+      processed:
+        type: 'boolean'
+      verified:
+        type: 'boolean'
+      jobs:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/DigitisationJob'
+      landCovers:
+        type: 'array'
+        items:
+          $ref: '#/definitions/LandCoverEntry'
+      status:
+        type: 'string'
+        enum:
+          - 'ACTIVE'
+          - 'SUBMITTED'
+          - 'CANCELLED'
+  Point:
+    type: 'object'
+    properties:
+      x:
+        type: 'number'
+        format: 'double'
+      'y':
+        type: 'number'
+        format: 'double'

@@ -1,0 +1,1821 @@
+swagger: '2.0'
+info:
+  title: Person API
+  description: API for person-related operations
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+tags:
+  - name: 'person'
+    description: 'Operations related to person management'
+schemes:
+  - 'http'
+security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
+basePath: /extapi
+paths:
+  /organisation/{organisationId}:
+    get:
+      tags:
+        - 'organisation'
+      summary: 'Find an Organisation.'
+      description: 'Request to Find an Organisation by party Id.'
+      operationId: 'getByPartyId'
+      produces:
+        - 'application/json'
+        - 'text/html'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: 'organisationId'
+          required: true
+          type: 'integer'
+          maximum: 99999999999999999999
+          x-examples: [1000000000, 1111111111, 2222222222]
+      # unsupported parameters
+      # - name: 'callerId'
+      #   in: 'header'
+      #   required: false
+      #   type: 'integer'
+      # - name: 'userType'
+      #   in: 'header'
+      #   required: false
+      #   type: 'string'
+      responses:
+        '200':
+          description: 'Returns full organisation details.'
+          schema:
+            type: 'object'
+            properties:
+              _data:
+                $ref: '#/definitions/OrganisationWithAllResponse'
+            required:
+              - '_data'
+        '400':
+          description: 'userType must not be empty, and orgId must have 10 or more digits'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              code: 400
+              message: 'HTTP 400 Bad Request'
+        '403':
+          description: "Getting an organisation's details is forbidden, or a WAF\
+            \ rule has been triggered"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              message: 'Some error message'
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
+        '404':
+          description: 'organisation details not found'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /organisation/search:
+    post:
+      tags:
+        - 'organisation'
+      summary: 'Find By Partial Business Name.'
+      description: 'Find an Organisation by a partial business name'
+      operationId: 'findOrganisations'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/PartySearchRequest'
+      # unsupported parameters
+      # - name: 'callerId'
+      #   in: 'header'
+      #   required: false
+      #   type: 'integer'
+      responses:
+        '200':
+          description: "Returns a list of Organisations inside a CapdPageResponse\
+            \ object"
+          schema:
+            type: 'object'
+            properties:
+              _data:
+                type: 'array'
+                items:
+                  $ref: '#/definitions/OrganisationWithAddressResponse'
+              _page:
+                $ref: '#/definitions/Page'
+            required:
+              - '_data'
+              - '_page'
+        '400':
+          description: 'searchFieldType is not equal to getPrimarySearchPhrase'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '500':
+          description: 'internal server error'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+definitions:
+  # request objects
+  PartySearchRequest:
+    type: 'object'
+    properties:
+      searchFieldType:
+        type: 'string'
+        enum:
+          - 'SBI'
+        # unsupported values
+        # - 'BUSINESS_NAME'
+        # - 'TRADER_NUMBER'
+        # - 'VENDOR_NUMBER'
+        # - 'CUSTOMER_NAME'
+        # - 'CUSTOMER_REFERENCE'
+        # - 'PERSONAL_IDENTIFIER'
+        # - 'CUSTOMER_POSTCODE'
+        # - 'BUSINESS_POSTCODE'
+      primarySearchPhrase:
+        type: 'string'
+        minLength: 10
+        # pattern: '^[0-9]{10,}$' # not just SBI upstream, other searches are also allowed
+    x-examples:
+      - primarySearchPhrase: '1000000000'
+        searchFieldType: 'SBI'
+      - primarySearchPhrase: '1111111111'
+        searchFieldType: 'SBI'
+      - primarySearchPhrase: '2222222222'
+        searchFieldType: 'SBI'
+    required:
+      - 'searchFieldType'
+      - 'primarySearchPhrase'
+    # unsupported properties
+    # limit:
+    #   type: 'integer'
+    #   format: 'int32'
+    # offset:
+    #   type: 'integer'
+    #   format: 'int32'
+    # secondarySearchPhrase:
+    #   type: 'string'
+
+  # response objects
+  AdditionalBusinessActivityTypeResponse:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      type:
+        type: 'string'
+    required:
+      - 'id'
+      - 'type'
+  AssociatedPersonResponse:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      name:
+        type: 'string'
+      telephoneNumber:
+        type: 'string'
+      dateOfBirth:
+        type: 'string'
+        format: 'date-time'
+      percentageOfBusinessOwned:
+        type: 'integer'
+      datePersonBecameOwner:
+        type: 'string'
+        format: 'date-time'
+      nationalInsuranceNumber:
+        type: 'string'
+      role:
+        type: 'string'
+      headOfHolding:
+        type: 'boolean'
+      dateBecameHeadOfHolding:
+        type: 'string'
+        format: 'date-time'
+      hasOtherBusinessInterests:
+        type: 'boolean'
+      hasBeenHeadOfHoldingForOtherBusiness:
+        type: 'boolean'
+      percentageOfVotingRights:
+        type: 'integer'
+  BusinessTypeResponse:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      type:
+        type: 'string'
+  CapdPageResponse:
+    type: 'object'
+    properties:
+      _page:
+        $ref: '#/definitions/Page'
+      _data:
+        type: 'object'
+  LegalStatusTypeResponse:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      type:
+        type: 'string'
+  OrganisationWithAddressResponse:
+    type: 'object'
+    additionalProperties: false
+    properties:
+      id:
+        type: 'integer'
+      name:
+        type: 'string'
+      sbi:
+        type: 'integer'
+        format: 'int64'
+      additionalSbiIds:
+        type: 'array'
+        items:
+          type: 'integer'
+          format: 'int64'
+      confirmed:
+        type: 'boolean'
+      lastUpdatedOn:
+        type: 'integer'
+        description: 'Timestamp in milliseconds since epoch'
+      landConfirmed:
+        type: 'boolean'
+      deactivated:
+        type: 'boolean'
+      locked:
+        type: 'boolean'
+      address:
+        $ref: '#/definitions/PartyAddressResponse'
+      correspondenceAddress:
+        $ref: '#/definitions/PartyAddressResponse'
+        x-nullable: true
+      isFinancialToBusinessAddr:
+        type: 'boolean'
+        x-nullable: true
+      isCorrespondenceAsBusinessAddr:
+        type: 'boolean'
+        x-nullable: true
+    required:
+      - 'id'
+      - 'name'
+      - 'sbi'
+      - 'additionalSbiIds'
+      - 'confirmed'
+      - 'lastUpdatedOn'
+      - 'landConfirmed'
+      - 'deactivated'
+      - 'locked'
+      - 'address'
+      - 'correspondenceAddress'
+      - 'isFinancialToBusinessAddr'
+      - 'isCorrespondenceAsBusinessAddr'
+  OrganisationWithAllResponse:
+    type: 'object'
+    additionalProperties: false
+    properties:
+      id:
+        type: 'integer'
+      name:
+        type: 'string'
+      sbi:
+        type: 'integer'
+        format: 'int64'
+      additionalSbiIds:
+        type: 'array'
+        items:
+          type: 'integer'
+          format: 'int64'
+      confirmed:
+        type: 'boolean'
+      lastUpdatedOn:
+        type: 'integer'
+        description: 'Timestamp in milliseconds since epoch'
+      landConfirmed:
+        type: 'boolean'
+      deactivated:
+        type: 'boolean'
+      locked:
+        type: 'boolean'
+      address:
+        $ref: '#/definitions/PartyAddressResponse'
+      correspondenceAddress:
+        $ref: '#/definitions/PartyAddressResponse'
+        x-nullable: true
+      isFinancialToBusinessAddr:
+        type: 'boolean'
+        x-nullable: true
+      isCorrespondenceAsBusinessAddr:
+        type: 'boolean'
+        x-nullable: true
+      email:
+        type: 'string'
+        x-nullable: true
+      emailValidated:
+        type: 'boolean'
+      landline:
+        type: 'string'
+        x-nullable: true
+      mobile:
+        type: 'string'
+        x-nullable: true
+      fax:
+        type: 'string'
+        x-nullable: true
+      correspondenceEmail:
+        type: 'string'
+        x-nullable: true
+      correspondenceEmailValidated:
+        type: 'boolean'
+        x-nullable: true
+      correspondenceLandline:
+        type: 'string'
+        x-nullable: true
+      correspondenceMobile:
+        type: 'string'
+        x-nullable: true
+      correspondenceFax:
+        type: 'string'
+        x-nullable: true
+      taxRegistrationNumber:
+        type: 'string'
+        x-nullable: true
+      businessType:
+        $ref: '#/definitions/BusinessTypeResponse'
+      businessReference:
+        type: 'string'
+      legalStatus:
+        $ref: '#/definitions/LegalStatusTypeResponse'
+      dateStartedFarming:
+        type: 'string'
+        format: 'date-time'
+        x-nullable: true
+      companiesHouseRegistrationNumber:
+        type: 'string'
+        x-nullable: true
+      charityCommissionRegistrationNumber:
+        type: 'string'
+        x-nullable: true
+      persons:
+        type: 'array'
+        items:
+          $ref: '#/definitions/AssociatedPersonResponse'
+      hasLandInNorthernIreland:
+        type: 'boolean'
+        x-nullable: true
+      hasLandInScotland:
+        type: 'boolean'
+        x-nullable: true
+      hasLandInWales:
+        type: 'boolean'
+        x-nullable: true
+      hasAdditionalBusinessActivities:
+        type: 'boolean'
+        x-nullable: true
+      vendorNumber:
+        type: 'string'
+        x-nullable: true
+      traderNumber:
+        type: 'string'
+        x-nullable: true
+      isAccountablePeopleDeclarationCompleted:
+        type: 'boolean'
+        x-nullable: true
+      additionalBusinessActivities:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/AdditionalBusinessActivityTypeResponse'
+        x-nullable: true
+    required:
+      - 'id'
+      - 'name'
+      - 'sbi'
+      - 'additionalSbiIds'
+      - 'confirmed'
+      - 'lastUpdatedOn'
+      - 'landConfirmed'
+      - 'deactivated'
+      - 'locked'
+      - 'address'
+      - 'correspondenceAddress'
+      - 'isFinancialToBusinessAddr'
+      - 'isCorrespondenceAsBusinessAddr'
+      - 'email'
+      - 'emailValidated'
+      - 'landline'
+      - 'mobile'
+      - 'fax'
+      - 'correspondenceEmail'
+      - 'correspondenceEmailValidated'
+      - 'correspondenceLandline'
+      - 'correspondenceMobile'
+      - 'correspondenceFax'
+      - 'taxRegistrationNumber'
+      - 'businessType'
+      - 'businessReference'
+      - 'legalStatus'
+      - 'dateStartedFarming'
+      - 'companiesHouseRegistrationNumber'
+      - 'charityCommissionRegistrationNumber'
+      - 'persons'
+      - 'hasLandInNorthernIreland'
+      - 'hasLandInScotland'
+      - 'hasLandInWales'
+      - 'hasAdditionalBusinessActivities'
+      - 'vendorNumber'
+      - 'traderNumber'
+      - 'isAccountablePeopleDeclarationCompleted'
+      - 'additionalBusinessActivities'
+  Page:
+    type: 'object'
+    properties:
+      number:
+        type: 'integer'
+        format: 'int32'
+      size:
+        type: 'integer'
+        format: 'int32'
+      totalPages:
+        type: 'integer'
+        format: 'int32'
+      numberOfElements:
+        type: 'integer'
+        format: 'int32'
+      totalElements:
+        type: 'integer'
+        format: 'int64'
+  PartyAddressResponse:
+    type: 'object'
+    properties:
+      address1:
+        type: 'string'
+        x-nullable: true
+      address2:
+        type: 'string'
+        x-nullable: true
+      address3:
+        type: 'string'
+        x-nullable: true
+      address4:
+        type: 'string'
+        x-nullable: true
+      address5:
+        type: 'string'
+        x-nullable: true
+      pafOrganisationName:
+        type: 'string'
+        x-nullable: true
+      flatName:
+        type: 'string'
+        x-nullable: true
+      buildingNumberRange:
+        type: 'string'
+        x-nullable: true
+      buildingName:
+        type: 'string'
+        x-nullable: true
+      street:
+        type: 'string'
+        x-nullable: true
+      city:
+        type: 'string'
+        x-nullable: true
+      county:
+        type: 'string'
+        x-nullable: true
+      postalCode:
+        type: 'string'
+        x-nullable: true
+      country:
+        type: 'string'
+        x-nullable: true
+      uprn:
+        type: 'string'
+        x-nullable: true
+      dependentLocality:
+        type: 'string'
+        x-nullable: true
+      doubleDependentLocality:
+        type: 'string'
+        x-nullable: true
+      addressTypeId:
+        type: 'integer'
+        x-nullable: true
+
+  # errors
+  EntityTag:
+    type: 'object'
+    properties:
+      value:
+        type: 'string'
+      weak:
+        type: 'boolean'
+  Link:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      title:
+        type: 'string'
+      uri:
+        type: 'string'
+        format: 'uri'
+      rel:
+        type: 'string'
+      rels:
+        type: 'array'
+        items:
+          type: 'string'
+      uriBuilder:
+        $ref: '#/definitions/UriBuilder'
+      params:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+  Locale:
+    type: 'object'
+    properties:
+      displayName:
+        type: 'string'
+      script:
+        type: 'string'
+      country:
+        type: 'string'
+      variant:
+        type: 'string'
+      extensionKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleAttributes:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      iso3Language:
+        type: 'string'
+      iso3Country:
+        type: 'string'
+      displayLanguage:
+        type: 'string'
+      displayScript:
+        type: 'string'
+      displayCountry:
+        type: 'string'
+      displayVariant:
+        type: 'string'
+      language:
+        type: 'string'
+  MediaType:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      subtype:
+        type: 'string'
+      parameters:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      wildcardSubtype:
+        type: 'boolean'
+      wildcardType:
+        type: 'boolean'
+  NewCookie:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      value:
+        type: 'string'
+      version:
+        type: 'integer'
+        format: 'int32'
+      path:
+        type: 'string'
+      domain:
+        type: 'string'
+      comment:
+        type: 'string'
+      maxAge:
+        type: 'integer'
+        format: 'int32'
+      expiry:
+        type: 'string'
+        format: 'date-time'
+      secure:
+        type: 'boolean'
+      httpOnly:
+        type: 'boolean'
+  Response:
+    type: 'object'
+    properties:
+      lastModified:
+        type: 'string'
+        format: 'date-time'
+      date:
+        type: 'string'
+        format: 'date-time'
+      length:
+        type: 'integer'
+        format: 'int32'
+      location:
+        type: 'string'
+        format: 'uri'
+      language:
+        $ref: '#/definitions/Locale'
+      metadata:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+      allowedMethods:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      cookies:
+        type: 'object'
+        additionalProperties:
+          $ref: '#/definitions/NewCookie'
+      statusInfo:
+        $ref: '#/definitions/StatusType'
+      links:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/Link'
+      stringHeaders:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'string'
+      entityTag:
+        $ref: '#/definitions/EntityTag'
+      mediaType:
+        $ref: '#/definitions/MediaType'
+      entity:
+        type: 'object'
+      status:
+        type: 'integer'
+        format: 'int32'
+      headers:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+  StackTraceElement:
+    type: 'object'
+    properties:
+      classLoaderName:
+        type: 'string'
+      moduleName:
+        type: 'string'
+      moduleVersion:
+        type: 'string'
+      methodName:
+        type: 'string'
+      fileName:
+        type: 'string'
+      lineNumber:
+        type: 'integer'
+        format: 'int32'
+      className:
+        type: 'string'
+      nativeMethod:
+        type: 'boolean'
+  StatusType:
+    type: 'object'
+    properties:
+      family:
+        type: 'string'
+        enum:
+          - 'INFORMATIONAL'
+          - 'SUCCESSFUL'
+          - 'REDIRECTION'
+          - 'CLIENT_ERROR'
+          - 'SERVER_ERROR'
+          - 'OTHER'
+      statusCode:
+        type: 'integer'
+        format: 'int32'
+      reasonPhrase:
+        type: 'string'
+  Throwable:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  UriBuilder:
+    type: 'object'
+  WebApplicationException:
+    type: 'object'
+    properties:
+      code:
+        type: 'integer'
+        format: 'int32'
+        minimum: 400
+        maximum: 599
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      response:
+        $ref: '#/definitions/Response'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+    example:
+      - code: 400
+        message: 'HTTP 400 Bad Request'
+      - code: 500
+        message: 'There was an error processing your request. It has been logged (ID someID)'
+#
+# Other endpoints that are currently part of KITS but not this mock
+# NOTE: potentially useful as these endpoints may be added in the future
+#
+# /organisation/{organisationId}/name:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Gets business name.'
+#     description: 'Gets business name by using organisation id'
+#     operationId: 'getName'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: 'Returns business name. Inside a CapdResponse'
+#         schema:
+#           type: 'string'
+#       '400':
+#         description: 'name must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/business-reference:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Gets business reference number.'
+#     description: "Gets business reference number (also called frn - firm reference\
+#       \ number) for organisation."
+#     operationId: 'getBusinessReference'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: 'Returns businessReference. Inside a CapdResponse'
+#         schema:
+#           type: 'string'
+#       '400':
+#         description: 'businessReference must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/create/{personId}:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'Create Organisation For Person.'
+#     description: "Request to Creates new organisation in capd database, assigns\
+#       \ Id and Ref Number to it and later on registers it in SitiAgri."
+#     operationId: 'createOrganisationForPerson'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'personId'
+#         in: 'path'
+#         description: 'personId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#     responses:
+#       '200':
+#         description: "Successfully returns organisation details inside a CapdResponse\
+#           \ object"
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllResponse'
+#       '404':
+#         description: 'Malformed data - id should be null'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Internal Server Error'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '400':
+#         description: 'Create Unsuccessful Supplied entity was not valid'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/confirmation/details:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Find if person has assigned.'
+#     description: "Request to Find if person has assigned only one not confirmed\
+#       \ organisation"
+#     operationId: 'findOrganisationConfirmationDetails'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'personId'
+#         in: 'query'
+#         required: false
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: 'success returns organisation conformation inside a CapdResponse'
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Update organisation details.'
+#     description: 'Request to Update organisation details.'
+#     operationId: 'updateOrganisation_1'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#     responses:
+#       '200':
+#         description: "Successfully returns updated organisation details inside a\
+#           \ CapdResponse"
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllResponse'
+#       '404':
+#         description: 'organisation is empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'organisation Update Unsuccessful'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#   delete:
+#     tags:
+#       - 'organisation'
+#     summary: 'Delete Organisation.'
+#     description: 'Request to Delete an Organisation by party Id.'
+#     operationId: 'deleteOrganisation_1'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '404':
+#         description: 'Organisation not found'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Dao exception encountered when retrieving complete organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '200':
+#         description: 'Successfully Delete Organisation'
+# /organisation/{organisationId}/deactivate:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'deactivate Organisation.'
+#     description: 'Request to deactivate an Organisation by party Id.'
+#     operationId: 'deactivateOrganisation'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/PartyNoteRequest'
+#     responses:
+#       '400':
+#         description: 'Invalid reason and notes'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'organisationId must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: 'Organisation with id could not be found in capd to be deactivated'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '200':
+#         description: 'Successfully deactivate Organisation'
+# /organisation/{organisationId}/lock:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'Lock Organisation.'
+#     description: 'Request to Lock an Organisation by party Id.'
+#     operationId: 'lockOrganisation'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/PartyNoteRequest'
+#     responses:
+#       '400':
+#         description: 'Invalid reason and notes'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'organisationId must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: 'Organisation with id could not be found in capd to be locked'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '403':
+#         description: "Organisation with id is locked. It couldn't be locked again"
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '200':
+#         description: 'Successfully locked Organisation'
+# /organisation/{organisationId}/unlock:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'unlock Organisation.'
+#     description: 'Request to unlock an Organisation by party Id.'
+#     operationId: 'unlockOrganisation'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/PartyNoteRequest'
+#     responses:
+#       '400':
+#         description: 'Invalid reason and notes'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'organisationId must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: 'Organisation with id could not be found in capd to be unlocked'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '403':
+#         description: "Organisation with id isn't locked. It cannot be unlocked"
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '200':
+#         description: 'Successfully unlocked Organisation'
+# /organisation/{organisationId}/reactivate:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'reactivate Organisation.'
+#     description: 'Request to reactivate an Organisation by party Id.'
+#     operationId: 'reactivateOrganisation'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/PartyNoteRequest'
+#     responses:
+#       '400':
+#         description: 'Invalid reason and notes'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'organisationId must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '403':
+#         description: 'Organisation with id is not deactivated and cannot be reactivate'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '200':
+#         description: 'Successfully reactivate Organisation'
+# /organisation/{organisationId}/additional-business-details:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Update additional-business-details.'
+#     description: 'Request to Update additional-business-details.'
+#     operationId: 'updateAdditionalBusinessDetails'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/AdditionalBusinessDetailsRequest'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#     responses:
+#       '400':
+#         description: 'Unable to validate additional business details'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: "Organisation with id doesn't exist in the system"
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Internal server error'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '204':
+#         description: 'Successfully updated'
+#         schema:
+#           $ref: '#/definitions/Response'
+# /organisation/unconfirm-not-edited:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Updates organisations.'
+#     description: "Request to Updates organisations that were confirmed date is lower\
+#       \ than date."
+#     operationId: 'updateNotEditedOrganisationEntries'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           type: 'integer'
+#           format: 'int32'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: 'Successfully updated. Returns result inside a CapdResponse'
+#         schema:
+#           type: 'boolean'
+#       '422':
+#         description: 'Validation of organisation fails'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Organisations could not be unconfirmed in CAPD database'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/business-details:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Update business-details.'
+#     description: 'Request to Update business-details.'
+#     operationId: 'updateBusinessDetails'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationDetailsRequest'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#     responses:
+#       '400':
+#         description: 'Unable to validate additional business details'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: "Organisation with id doesn't exist in the system"
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Internal server error'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '204':
+#         description: 'Successfully updated'
+#         schema:
+#           $ref: '#/definitions/Response'
+# /organisation/organisation-list:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'Gets organisation Ids for given SBIs.'
+#     description: 'Request to Gets organisation Ids for given SBIs.'
+#     operationId: 'getOrganisationIds'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           type: 'array'
+#           items:
+#             type: 'integer'
+#             format: 'int64'
+#     responses:
+#       '200':
+#         description: "Successfully provides list of organisations. Returns result\
+#           \ inside a CapdResponse"
+#         schema:
+#           type: 'array'
+#           items:
+#             type: 'integer'
+#       '500':
+#         description: 'Dao exception encountered when retrieving complete organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/summary:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Find Summary Details By Party Id.'
+#     description: "Request to Find Summary Details By Party Id - Find an Organisation\
+#       \ Summary Details by party Id"
+#     operationId: 'getSummaryByPartyId'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: 'Returns Organisation Summary. Inside a CapdResponse object'
+#         schema:
+#           $ref: '#/definitions/OrganisationWithPostalCodeResponse'
+#       '404':
+#         description: 'organisation must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/agency/{agencyId}/summary:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Find Agency.'
+#     description: 'Request to Find Agency By Party Id Summary'
+#     operationId: 'findAgencyByPartyIdSummary'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'agencyId'
+#         in: 'path'
+#         description: 'agencyId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Returns summary information for given agency. Inside a CapdResponse\
+#           \ object"
+#         schema:
+#           $ref: '#/definitions/OrganisationBaseResponse'
+#       '404':
+#         description: 'Organisation not present'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Dao exception encountered when retrieving complete organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/search/sbi:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Find By SBI.'
+#     description: 'Request to Find an Organisation by an SBI'
+#     operationId: 'findBySBI'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'sbi'
+#         in: 'query'
+#         required: false
+#         type: 'integer'
+#         format: 'int64'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: 'Returns Organisation With Address inside a CapdResponse'
+#         schema:
+#           type: 'array'
+#           items:
+#             $ref: '#/definitions/OrganisationWithAddressResponse'
+#       '404':
+#         description: 'Organisation not present'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Dao exception encountered when retrieving complete organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/summary:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Searching for basic businesses information.'
+#     description: "Request to Find Summary - Searching for basic businesses information\
+#       \ by reference number or partial business name, and business type."
+#     operationId: 'findSummary'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'referenceNumber'
+#         in: 'query'
+#         required: false
+#         type: 'string'
+#       - name: 'businessName'
+#         in: 'query'
+#         required: false
+#         type: 'string'
+#       - name: 'businessType'
+#         in: 'query'
+#         required: false
+#         type: 'integer'
+#       - name: 'returnDeactivated'
+#         in: 'query'
+#         required: false
+#         type: 'boolean'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Returns list of Organisation With Address inside a CapdResponse\
+#           \ object"
+#         schema:
+#           type: 'array'
+#           items:
+#             $ref: '#/definitions/OrganisationWithAddressResponse'
+#       '400':
+#         description: "Business name and reference number are missing or both have\
+#           \ been provided. (only one is required)"
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '422':
+#         description: 'Invalid reference number'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: 'Business name not found'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'There was a problem retrieving the organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/person/{personId}/summary:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Find Organisation Summary List.'
+#     description: "Request to Find Organisation Summary List - Get all organisations\
+#       \ linked to a person Id."
+#     operationId: 'findOrganisationSummaryList'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#         enum:
+#           - 'internal'
+#           - 'external'
+#           - 'ida_no_match'
+#       - name: 'personId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'personId'
+#         in: 'path'
+#         description: 'personId'
+#         required: true
+#         type: 'integer'
+#       - name: 'page'
+#         in: 'query'
+#         required: false
+#         type: 'integer'
+#         default: 1
+#         format: 'int32'
+#       - name: 'page-size'
+#         in: 'query'
+#         required: false
+#         type: 'integer'
+#         default: 20
+#         format: 'int32'
+#       - name: 'search'
+#         in: 'query'
+#         required: false
+#         type: 'string'
+#       - name: 'sort-by'
+#         in: 'query'
+#         required: false
+#         type: 'string'
+#       - name: 'order'
+#         in: 'query'
+#         required: false
+#         type: 'string'
+#       - name: 'withNotifications'
+#         in: 'query'
+#         required: false
+#         type: 'boolean'
+#         default: false
+#     responses:
+#       '200':
+#         description: 'Returns list of Organisation inside a CapdPageResponse'
+#         schema:
+#           type: 'array'
+#           items:
+#             $ref: '#/definitions/OrganisationBaseResponse'
+#       '400':
+#         description: 'pageSize must not be empty'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '404':
+#         description: 'No SitiAgri organisations found'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Dao exception internal server error'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/confirm-business:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Confirm Business Details.'
+#     description: "Request to Confirm business details of an organisation (setConfirmed\
+#       \ is set to true."
+#     operationId: 'confirmBusinessDetails'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '404':
+#         description: 'Organisation not found'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Dao exception encountered when retrieving complete organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '200':
+#         description: 'Successfully updated'
+# /organisation/{organisationId}/details/external:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Update Business details, Control business and legally responsible people.'
+#     description: 'Request to Update Business details by external user.'
+#     operationId: 'updateOrganisationExternal'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Successfully updated organisation details. Returns result\
+#           \ inside aCapdResponse"
+#         schema:
+#           type: 'boolean'
+#       '404':
+#         description: 'Duplicated NINO for LPR'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '422':
+#         description: 'Validation of organisation fails'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Error updating organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/details/internal:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Update Business details, Control business and legally responsible people.'
+#     description: 'Request to Update Business details by internal user.'
+#     operationId: 'updateOrganisationInternal'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Successfully updated organisation details. Returns result\
+#           \ inside aCapdResponse"
+#         schema:
+#           type: 'boolean'
+#       '404':
+#         description: 'Duplicated NINO for LPR'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '422':
+#         description: 'Validation of organisation fails'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Error updating organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/check/duplicates:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'Check Duplicate.'
+#     description: 'Request to Check Duplicate of the organisation.'
+#     operationId: 'agentOrganisationDuplicates'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Successfully returns Duplicate organisation details or nothing.\
+#           \ Inside a CapdResponse"
+#         schema:
+#           $ref: '#/definitions/OrganisationDuplicateResponse'
+#       '500':
+#         description: 'Internal server error'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/check/duplicates/agricultural:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'Check Duplicate for AgriculturalOrganisation.'
+#     description: 'Request to Check Duplicate for AgriculturalOrganisation.'
+#     operationId: 'getAgriculturalOrganisationDuplicates'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#     responses:
+#       '200':
+#         description: 'Successfully returns duplicateIds. Inside a CapdResponse'
+#         schema:
+#           $ref: '#/definitions/OrganisationIsDuplicatesCheckResponse'
+#       '500':
+#         description: 'Internal server error'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/duplicate/agricultural:
+#   post:
+#     tags:
+#       - 'organisation'
+#     summary: 'create Agricultural Organisation DuplicateCase.'
+#     description: 'Request to create Agricultural Organisation DuplicateCase.'
+#     operationId: 'createAgriculturalOrganisationDuplicateCase'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/DuplicateAgriculturalOrganisationCreateCaseRequest'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Successfully unlocked Organisation. Returns result inside\
+#           \ a CapdResponse"
+#         schema:
+#           type: 'boolean'
+#       '404':
+#         description: 'Organisation not found'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/details/amend:
+#   put:
+#     tags:
+#       - 'organisation'
+#     summary: 'Amend Business Details.'
+#     description: 'Request to Amend Business Details by party Id.'
+#     operationId: 'amendBusinessData'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - in: 'body'
+#         name: 'body'
+#         required: false
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllRequest'
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "Successfully unlocked Organisation. Returns result inside\
+#           \ a CapdResponse"
+#         schema:
+#           $ref: '#/definitions/OrganisationWithAllResponse'
+#       '404':
+#         description: 'organisation not found'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Dao exception encountered when retrieving complete organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+# /organisation/{organisationId}/is-deactivated:
+#   get:
+#     tags:
+#       - 'organisation'
+#     summary: 'Verification of the date of deactivation.'
+#     description: "Request to Verification of the date of deactivation, checking\
+#       \ if organisation should be already deactivated in SitiAgri."
+#     operationId: 'isFullyDeactivated'
+#     consumes:
+#       - 'application/json'
+#     produces:
+#       - 'application/json'
+#     parameters:
+#       - name: 'callerId'
+#         in: 'header'
+#         required: false
+#         type: 'integer'
+#       - name: 'userType'
+#         in: 'header'
+#         required: false
+#         type: 'string'
+#       - name: 'organisationId'
+#         in: 'path'
+#         description: 'organisationId'
+#         required: true
+#         type: 'integer'
+#     responses:
+#       '200':
+#         description: "checks the status of the organisation. Returns result inside\
+#           \ a CapdResponse"
+#         schema:
+#           type: 'boolean'
+#       '422':
+#         description: 'Validation of organisation fails'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
+#       '500':
+#         description: 'Error updating organisation'
+#         schema:
+#           $ref: '#/definitions/WebApplicationException'
