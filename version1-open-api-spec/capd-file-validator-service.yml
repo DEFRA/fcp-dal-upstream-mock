@@ -1,0 +1,154 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: http://localhost:9032
+    description: Generated server url
+paths:
+  /v1/validate:
+    post:
+      tags:
+        - file-validator-controller
+      summary: validates a single file
+      description: "Endpoint to validate a single file, will return a flag to tell\
+        \ if the file is valid, in case of errors will also return a list of those\
+        \ errors"
+      operationId: validateFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successfully validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleFileResponse'
+              examples:
+                A response with a file that has been cleared in the anti-virus:
+                  summary: Valid file Response
+                  description: A response with a file that has been cleared in the
+                    anti-virus
+                  value:
+                    valid: 'true'
+        '400':
+          description: Successfully validated but failed scan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleFileResponse'
+              examples:
+                A response with a file that has been identified as positive by the anti-virus:
+                  summary: Valid file Response
+                  description: A response with a file that has been identified as
+                    positive by the anti-virus
+                  value:
+                    valid: 'false'
+        '500':
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleFileResponse'
+              examples:
+                There was a unexpected service error and the service is unable to process the validation:
+                  summary: Unable to validate
+                  description: There was a unexpected service error and the service
+                    is unable to process the validation
+                  value:
+                    errors:
+                      - code: 500
+                        description: error 123 occurred
+                    valid: false
+  /v1/validate/all:
+    post:
+      tags:
+        - file-validator-controller
+      summary: validates a multiple files
+      description: "Endpoint to validate multiple files, will return the filename\
+        \ and a boolean to indicate if it's valid, in case of errors will also return\
+        \ a list of those errors"
+      operationId: validateFiles
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - files
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Successfully validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiFileResponse'
+              examples:
+                A response with files that has been scanned by the anti-virus:
+                  summary: Files validated
+                  description: A response with files that has been scanned by the
+                    anti-virus
+                  value:
+                    validations:
+                      virus.exe: false
+                      good-file.txt: true
+        '500':
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiFileResponse'
+              examples:
+                There was a unexpected service error and the service is unable to process the validation:
+                  summary: Unable to validate
+                  description: There was a unexpected service error and the service
+                    is unable to process the validation
+                  value:
+                    errors:
+                      - code: 500
+                        description: error 123 occurred
+components:
+  schemas:
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        description:
+          type: string
+    SingleFileResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+        valid:
+          type: boolean
+    MultiFileResponse:
+      type: object
+      properties:
+        validations:
+          type: object
+          additionalProperties:
+            type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'

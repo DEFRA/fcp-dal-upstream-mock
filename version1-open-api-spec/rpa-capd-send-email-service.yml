@@ -1,0 +1,73 @@
+---
+swagger: '2.0'
+info: {}
+tags:
+  - name: 'status'
+  - name: 'sendEmail'
+schemes:
+  - 'http'
+paths:
+  /status:
+    get:
+      tags:
+        - 'status'
+      summary: 'Application Status check'
+      description: 'Request Checks for Status of the apllication.'
+      operationId: 'getStatus'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Application status'
+  /sendEmail:
+    post:
+      tags:
+        - 'sendEmail'
+      summary: 'Send Email'
+      description: 'Request to Send email to a user'
+      operationId: 'sendEmail'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: false
+          schema:
+            $ref: '#/definitions/SimpleMailMessage'
+      responses:
+        '200':
+          description: 'Email sent'
+        '422':
+          description: 'Incorrect email addresses format'
+        '500':
+          description: 'Error trying to send email'
+definitions:
+  SimpleMailMessage:
+    type: 'object'
+    properties:
+      from:
+        type: 'string'
+      replyTo:
+        type: 'string'
+      to:
+        type: 'array'
+        items:
+          type: 'string'
+      cc:
+        type: 'array'
+        items:
+          type: 'string'
+      bcc:
+        type: 'array'
+        items:
+          type: 'string'
+      sentDate:
+        type: 'string'
+        format: 'date-time'
+      subject:
+        type: 'string'
+      text:
+        type: 'string'

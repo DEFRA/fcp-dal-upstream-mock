@@ -50,14 +50,16 @@ describe('#startServer', () => {
   describe('When server start fails', () => {
     test('Should attempt to stop (teardown) the server', async () => {
       const register = jest.fn()
+      const ext = jest.fn()
       const start = jest.fn(() => {
         throw new Error('Server failed to start')
       })
       const stop = jest.fn()
-      hapiServerSpy.mockReturnValue({ register, start, stop })
+      hapiServerSpy.mockReturnValue({ register, ext, start, stop })
       await startServerImport.startServer()
 
       expect(register).toHaveBeenCalled()
+      expect(ext).toHaveBeenCalled()
       expect(start).toHaveBeenCalled()
       expect(stop).toHaveBeenCalledWith({ timeout: 0 })
     })

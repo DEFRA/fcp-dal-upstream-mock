@@ -1,0 +1,373 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: http://localhost:9031
+    description: Generated server url
+paths:
+  /v1/internal/azure/upload:
+    post:
+      tags:
+        - internal-azure-controller
+      summary: uploads the requested file to a requested Azure container
+      description: "Endpoint for internal use, to upload to a specific Azure container\
+        \ a file, with optional anti-virus scan"
+      operationId: internalAzureUpload
+      parameters:
+        - name: containerName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: requiresScan
+          in: query
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successfully uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                A response that the request has been processed correctly:
+                  summary: Valid uploaded Response
+                  description: A response that the request has been processed correctly
+                  value: {}
+        '422':
+          description: There was one or several errors when trying to upload the file(s)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a failure when uploading the file(s) and the service is unable to process the upload:
+                  summary: Unable to upload one or multiple files due to failure
+                  description: There was a failure when uploading the file(s) and
+                    the service is unable to process the upload
+                  value:
+                    errors:
+                      - code: 1
+                        description: error 123 occurred
+        '500':
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a unexpected service error and the service is unable to process the upload:
+                  summary: Unable to upload one or multiple files due to unexpected
+                    error
+                  description: There was a unexpected service error and the service
+                    is unable to process the upload
+                  value:
+                    errors:
+                      - code: 500
+                        description: error 123 occurred
+  /file-handler/v1/temporary/upload/{organisationId}/{personId}:
+    post:
+      tags:
+        - temporary-storage-controller
+      summary: "saves the uploaded file into a temporary table assigned to a person\
+        \ id, organisation id and single Business Identifier"
+      description: Endpoint to save into a temporary table a file related to a business
+        for future use
+      operationId: temporaryUpload
+      parameters:
+        - name: userType
+          in: header
+          required: false
+          schema:
+            type: string
+            enum:
+              - internal
+              - external
+              - ida_no_match
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: personId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successfully saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                A response that the request has been processed correctly:
+                  summary: Valid and saved successfully
+                  description: A response that the request has been processed correctly
+                  value:
+                    id: '1234567890'
+        '422':
+          description: There were expected errors that prevent the save
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There expected errors, either failed validation or a db data issue and the service is unable to process the save:
+                  summary: Unable to save the file due to failure in validation or
+                    db data issue
+                  description: "There expected errors, either failed validation or\
+                    \ a db data issue and the service is unable to process the save"
+                  value:
+                    errors:
+                      - code: 1
+                        description: error 123 occurred
+        '500':
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a unexpected service error and the service is unable to process the save:
+                  summary: Unable to save the file due to unexpected error
+                  description: There was a unexpected service error and the service
+                    is unable to process the save
+                  value:
+                    errors:
+                      - code: 500
+                        description: error 123 occurred
+  /file-handler/v1/azure/upload:
+    post:
+      tags:
+        - azure-controller
+      summary: "uploads the requested files belonging to a person id, organisation\
+        \ id and single Business Identifier to Azure"
+      description: "Endpoint to upload to Azure a list of files related to a business,\
+        \ that have been previous created in a temporary table"
+      operationId: azureUpload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LandChangePortalRequest'
+        required: true
+      responses:
+        '200':
+          description: Successfully uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                A response that the request has been processed correctly:
+                  summary: Valid uploaded Response
+                  description: A response that the request has been processed correctly
+                  value:
+                    id: RLE1_1234567890
+        '422':
+          description: There was one or several errors when trying to upload the file(s)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a failure when uploading the file(s) and the service is unable to process the upload:
+                  summary: Unable to upload one or multiple files due to failure
+                  description: There was a failure when uploading the file(s) and
+                    the service is unable to process the upload
+                  value:
+                    id: RLE1_1234567890
+                    errors:
+                      - code: 1
+                        description: error 123 occurred
+        '500':
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a unexpected service error and the service is unable to process the upload:
+                  summary: Unable to upload one or multiple files due to unexpected
+                    error
+                  description: There was a unexpected service error and the service
+                    is unable to process the upload
+                  value:
+                    errors:
+                      - code: 500
+                        description: error 123 occurred
+  /file-handler/v1/temporary/upload/{personId}:
+    delete:
+      tags:
+        - temporary-storage-controller
+      operationId: deleteTemporaryUploadFileByPersonId
+      parameters:
+        - name: personId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /file-handler/v1/temporary/upload/{organisationId}/{personId}/{fileName}:
+    delete:
+      tags:
+        - temporary-storage-controller
+      summary: "deletes the uploaded file in the temporary table that belongs to a\
+        \ person id, organisation id and single Business Identifier"
+      description: Endpoint to delete a file related to a business for future use
+      operationId: deleteTemporaryUploadFile
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: personId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: fileName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Successfully accepted for deletion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                A response that the request has been accepted correctly:
+                  summary: PortalRequest was accepted
+                  description: A response that the request has been accepted correctly
+                  value: {}
+        '500':
+          description: There was a unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                There was a unexpected service error and the service is unable to process the save:
+                  summary: Unable to save the file due to unexpected error
+                  description: There was a unexpected service error and the service
+                    is unable to process the save
+                  value:
+                    errors:
+                      - code: 500
+                        description: error 123 occurred
+components:
+  schemas:
+    DefaultResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        description:
+          type: string
+    LandChangePortalRequest:
+      type: object
+      properties:
+        personId:
+          type: integer
+          format: int64
+        organisationId:
+          type: integer
+          format: int64
+        userType:
+          type: string
+          enum:
+            - internal
+            - external
+            - ida_no_match
+        fileNames:
+          type: array
+          items:
+            type: string
+        singleBusinessIdentifier:
+          type: integer
+          format: int64
+        firmReferenceNumber:
+          type: integer
+          format: int64
+        customerReferenceNumber:
+          type: integer
+          format: int64
+        parcels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parcel'
+        changeType:
+          $ref: '#/components/schemas/LandChangeType'
+    LandChangeType:
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+    LandCoverChange:
+      type: object
+      properties:
+        currentCoverTypeName:
+          type: string
+        currentCoverTypeCode:
+          type: string
+        newCoverTypeName:
+          type: string
+        newCoverTypeCode:
+          type: string
+    Parcel:
+      type: object
+      properties:
+        parcelId:
+          type: string
+        sheetId:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+        coverChange:
+          $ref: '#/components/schemas/LandCoverChange'

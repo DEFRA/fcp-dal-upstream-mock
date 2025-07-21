@@ -1,0 +1,427 @@
+---
+swagger: '2.0'
+info: {}
+tags:
+  - name: 'Status'
+  - name: 'Internal Auth'
+schemes:
+  - 'http'
+paths:
+  /status:
+    get:
+      tags:
+        - 'Status'
+      summary: 'Application Healthcheck'
+      description: 'Checks service health.'
+      operationId: 'getStatus'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Application health status'
+  /api/internal-auth/session/{uuid}:
+    get:
+      tags:
+        - 'Internal Auth'
+      summary: 'Validate the Session'
+      description: 'Validate the Session, given the uuid, User-Agent and request'
+      operationId: 'validateSession'
+      produces:
+        - 'text/plain'
+      parameters:
+        - name: 'uuid'
+          in: 'path'
+          description: 'uuid'
+          required: true
+          type: 'string'
+        - name: 'User-Agent'
+          in: 'header'
+          description: 'User-Agent'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'Session Details is returned if found'
+          schema:
+            type: 'string'
+        '401':
+          description: "Session has expired or token is being used from different\
+            \ browser or machine"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+    delete:
+      tags:
+        - 'Internal Auth'
+      summary: 'Delete the Session'
+      description: 'Delete the Session, given the uuid and Request'
+      operationId: 'deleteSession'
+      consumes:
+        - 'text/plain'
+      produces:
+        - 'text/plain'
+      parameters:
+        - name: 'uuid'
+          in: 'path'
+          description: 'uuid'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'Session is deleted'
+          schema:
+            $ref: '#/definitions/Response'
+        '500':
+          description: 'Error deleting the session'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /api/internal-auth/session:
+    post:
+      tags:
+        - 'Internal Auth'
+      summary: 'Create a Session'
+      description: 'Create a Session, given the Request Body, User-Agent and request'
+      operationId: 'createSession'
+      consumes:
+        - 'text/plain'
+      produces:
+        - 'text/plain'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          description: 'Request Body'
+          required: false
+          schema:
+            type: 'string'
+        - name: 'User-Agent'
+          in: 'header'
+          description: 'User-Agent'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'Session uuid is returned'
+          schema:
+            type: 'string'
+        '500':
+          description: 'Unable to create new session'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '400':
+          description: 'Error with the request'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /api/internal-auth/terminate-session:
+    put:
+      tags:
+        - 'Internal Auth'
+      summary: 'Terminate the Session'
+      description: "Terminate the Session, given the session request, CallerId, Usertype\
+        \ and Request"
+      operationId: 'terminateExternalUserSession'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          description: 'Session Request'
+          required: false
+          schema:
+            $ref: '#/definitions/PersistUserSessionRequest'
+        - name: 'callerId'
+          in: 'header'
+          description: 'CallerId'
+          required: false
+          type: 'integer'
+        - name: 'userType'
+          in: 'header'
+          description: 'Usertype'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'User Session Deleted from DB'
+        '400':
+          description: 'Error with the request'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+  /api/internal-auth/verify-session/{callerId}/{userType}:
+    get:
+      tags:
+        - 'Internal Auth'
+      summary: 'Verify the Session'
+      description: 'Verify the Session, given the Callerid, Usertype and request'
+      operationId: 'verifySessionInDatabase'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'path'
+          description: 'CallerId'
+          required: true
+          type: 'integer'
+        - name: 'userType'
+          in: 'path'
+          description: 'Usertype'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'Session Status is returned'
+definitions:
+  EntityTag:
+    type: 'object'
+    properties:
+      value:
+        type: 'string'
+      weak:
+        type: 'boolean'
+  Link:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      params:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      uriBuilder:
+        $ref: '#/definitions/UriBuilder'
+      rel:
+        type: 'string'
+      rels:
+        type: 'array'
+        items:
+          type: 'string'
+      title:
+        type: 'string'
+      uri:
+        type: 'string'
+        format: 'uri'
+  Locale:
+    type: 'object'
+    properties:
+      displayName:
+        type: 'string'
+      script:
+        type: 'string'
+      country:
+        type: 'string'
+      variant:
+        type: 'string'
+      extensionKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleAttributes:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      iso3Language:
+        type: 'string'
+      iso3Country:
+        type: 'string'
+      displayLanguage:
+        type: 'string'
+      displayScript:
+        type: 'string'
+      displayCountry:
+        type: 'string'
+      displayVariant:
+        type: 'string'
+      language:
+        type: 'string'
+  MediaType:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      subtype:
+        type: 'string'
+      parameters:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      wildcardSubtype:
+        type: 'boolean'
+      wildcardType:
+        type: 'boolean'
+  NewCookie:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      value:
+        type: 'string'
+      version:
+        type: 'integer'
+        format: 'int32'
+      path:
+        type: 'string'
+      domain:
+        type: 'string'
+      comment:
+        type: 'string'
+      maxAge:
+        type: 'integer'
+        format: 'int32'
+      expiry:
+        type: 'string'
+        format: 'date-time'
+      secure:
+        type: 'boolean'
+      httpOnly:
+        type: 'boolean'
+  Response:
+    type: 'object'
+    properties:
+      lastModified:
+        type: 'string'
+        format: 'date-time'
+      date:
+        type: 'string'
+        format: 'date-time'
+      length:
+        type: 'integer'
+        format: 'int32'
+      location:
+        type: 'string'
+        format: 'uri'
+      language:
+        $ref: '#/definitions/Locale'
+      status:
+        type: 'integer'
+        format: 'int32'
+      metadata:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+      allowedMethods:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      mediaType:
+        $ref: '#/definitions/MediaType'
+      entity:
+        type: 'object'
+      statusInfo:
+        $ref: '#/definitions/StatusType'
+      cookies:
+        type: 'object'
+        additionalProperties:
+          $ref: '#/definitions/NewCookie'
+      entityTag:
+        $ref: '#/definitions/EntityTag'
+      links:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/Link'
+      stringHeaders:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'string'
+      headers:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+  StackTraceElement:
+    type: 'object'
+    properties:
+      classLoaderName:
+        type: 'string'
+      moduleName:
+        type: 'string'
+      moduleVersion:
+        type: 'string'
+      methodName:
+        type: 'string'
+      fileName:
+        type: 'string'
+      lineNumber:
+        type: 'integer'
+        format: 'int32'
+      className:
+        type: 'string'
+      nativeMethod:
+        type: 'boolean'
+  StatusType:
+    type: 'object'
+    properties:
+      family:
+        type: 'string'
+        enum:
+          - 'INFORMATIONAL'
+          - 'SUCCESSFUL'
+          - 'REDIRECTION'
+          - 'CLIENT_ERROR'
+          - 'SERVER_ERROR'
+          - 'OTHER'
+      statusCode:
+        type: 'integer'
+        format: 'int32'
+      reasonPhrase:
+        type: 'string'
+  Throwable:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  UriBuilder:
+    type: 'object'
+  WebApplicationException:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      response:
+        $ref: '#/definitions/Response'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  PersistUserSessionRequest:
+    type: 'object'
+    properties:
+      callerId:
+        type: 'integer'
+      capdAccessToken:
+        type: 'string'

@@ -1,0 +1,193 @@
+---
+swagger: '2.0'
+info: {}
+tags:
+  - name: 'messages'
+  - name: 'status'
+schemes:
+  - 'http'
+paths:
+  /messages/{id}:
+    get:
+      tags:
+        - 'messages'
+      summary: 'Retrieve message'
+      description: 'Retrieve message based on id parameter'
+      operationId: 'get'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'userType'
+          in: 'header'
+          required: false
+          type: 'string'
+        - name: 'Id'
+          in: 'path'
+          description: 'Message id'
+          required: true
+          type: 'BigInteger'
+          x-example: '12'
+      responses:
+        '200':
+          description: 'Message has been retrieved successfully'
+          schema:
+            $ref: '#/definitions/Message'
+        '404':
+          description: 'Message not found'
+  /messages:
+    post:
+      tags:
+        - 'messages'
+      summary: 'Create messages'
+      description: 'Create messages in batch'
+      operationId: 'create'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'userType'
+          in: 'header'
+          required: false
+          type: 'string'
+        - in: 'body'
+          name: 'Message Request'
+          required: true
+          schema:
+            $ref: '#/definitions/MessageRequest'
+      responses:
+        '200':
+          description: 'Message has been created successfully '
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        '400':
+          description: 'Bad request'
+    delete:
+      tags:
+        - 'messages'
+      summary: 'Delete message'
+      description: 'Delete message based on id parameter Sample call: /messages?id=1&id=3&id=7&messageId=3'
+      operationId: 'delete'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'userType'
+          in: 'header'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: 'Message has been deleted successfully'
+  /messages/clean-dlq:
+    delete:
+      tags:
+        - 'messages'
+      summary: 'Delete message in DLQ table'
+      description: "Deletes messages in DLQ table that are older than retention timestamp\
+        \ parameter"
+      operationId: 'cleanDLQ'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'userType'
+          in: 'header'
+          required: false
+          type: 'string'
+        - name: 'Timestamp'
+          in: 'query'
+          description: 'Retention date in format yyyyMMddHHmmss'
+          required: true
+          type: 'String'
+          x-example: '20200101190000'
+      responses:
+        '200':
+          description: 'Message has been deleted successfully'
+        '400':
+          description: 'Empty timestamp'
+  /status:
+    get:
+      tags:
+        - 'status'
+      summary: 'Application health check'
+      description: 'Checks service health.'
+      operationId: 'getStatus'
+      produces:
+        - 'text/plain'
+      parameters: []
+      responses:
+        '200':
+          description: 'Application health status'
+definitions:
+  Message:
+    type: 'object'
+    properties:
+      id:
+        type: 'integer'
+      externalSystemId:
+        type: 'integer'
+      personIds:
+        type: 'array'
+        items:
+          type: 'integer'
+      organisationId:
+        type: 'integer'
+      type:
+        type: 'string'
+      createdByUserId:
+        type: 'integer'
+      createdOn:
+        type: 'string'
+        format: 'date-time'
+      sentByEmail:
+        type: 'boolean'
+      sentByNotification:
+        type: 'boolean'
+      originatingSystem:
+        type: 'string'
+        enum:
+          - 'RuralPayments'
+          - 'SitiAgri'
+      title:
+        type: 'string'
+      body:
+        type: 'string'
+      params:
+        type: 'object'
+        additionalProperties:
+          type: 'object'
+      isRead:
+        type: 'boolean'
+  MessageResponse:
+    type: 'object'
+    properties:
+      ids:
+        type: 'array'
+        items:
+          type: 'integer'
+      responseText:
+        type: 'string'
+      successful:
+        type: 'boolean'
+  MessageRequest:
+    type: 'object'
+    properties:
+      messages:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Message'
