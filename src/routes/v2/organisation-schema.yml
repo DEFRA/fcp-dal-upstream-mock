@@ -139,8 +139,8 @@ definitions:
         # - 'BUSINESS_POSTCODE'
       primarySearchPhrase:
         type: 'string'
-        minLength: 10
-        # pattern: '^[0-9]{10,}$' # not just SBI upstream, other searches are also allowed
+        minLength: 9
+        # pattern: '^[0-9]{9,}$' # not just SBI upstream, other searches are also allowed
     x-examples:
       - primarySearchPhrase: '1000000000'
         searchFieldType: 'SBI'
