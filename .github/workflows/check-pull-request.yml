@@ -33,7 +33,6 @@ jobs:
           npm t
 
       - name: Docker build, Contract test
-        continue-on-error: true
         run: >
           docker compose \
             -f compose.yml \
