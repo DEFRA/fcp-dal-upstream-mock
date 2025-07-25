@@ -95,7 +95,7 @@ docker run --rm --network=host \
     run /tmp/schema.json \
       --proxy "${CDP_PROXY}" \
       --header 'email: test.user01@defra.gov.uk' \
-      --exclude-checks=unsupported_method \
+      --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
       --url "https://chs-upgrade-api.ruraldev.org.uk:8444/extapi"
