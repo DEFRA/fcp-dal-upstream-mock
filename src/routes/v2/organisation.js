@@ -40,8 +40,8 @@ export const organisation = [
         )
       }
 
-      // SBI must be at least 10 characters long
-      if ((`${searchSbi}`?.length || 0) < 10) {
+      // SBI must be at least 9 characters long
+      if ((`${searchSbi}`?.length || 0) < 9) {
         throw Boom.badRequest('HTTP 400 Bad Request', request)
       }
 

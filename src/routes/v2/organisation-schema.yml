@@ -1,14 +1,14 @@
 swagger: '2.0'
 info:
-  title: Person API
-  description: API for person-related operations
+  title: Organisation API
+  description: API for organisation-related operations
   version: '1.0.0'
   license:
     name: 'Open Government Licence v3.0'
     url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
 tags:
-  - name: 'person'
-    description: 'Operations related to person management'
+  - name: 'organisation'
+    description: 'Operations related to organisation management'
 schemes:
   - 'http'
 security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
@@ -139,8 +139,8 @@ definitions:
         # - 'BUSINESS_POSTCODE'
       primarySearchPhrase:
         type: 'string'
-        minLength: 10
-        # pattern: '^[0-9]{10,}$' # not just SBI upstream, other searches are also allowed
+        minLength: 9
+        # pattern: '^[0-9]{9,}$' # not just SBI upstream, other searches are also allowed
     x-examples:
       - primarySearchPhrase: '1000000000'
         searchFieldType: 'SBI'
