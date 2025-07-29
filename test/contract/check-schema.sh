@@ -9,7 +9,7 @@ mkdir -p ./tmp
 usage() {
   set +x
   echo
-  echo "Usage: $0 {person|organisation}"
+  echo "Usage: $0 {p|person|o|org|organisation|a|auth|authenticate|help}"
   echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
@@ -48,7 +48,7 @@ fi
 
 # check arguments
 case "$1" in
-  person)
+  p | person)
     schema="person"
     mutations='
 . |
@@ -59,7 +59,7 @@ case "$1" in
 .definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '1101089899'
     '
     ;;
-  organisation)
+  o | org | organisation)
     schema="organisation"
     mutations='
 . |
@@ -70,7 +70,15 @@ case "$1" in
 .definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '200665008'
     '
     ;;
-  help | --help | -h)
+  a | auth | authenticate )
+    schema="authenticate"
+    mutations='
+. |
+.schemes[0] = "https" |
+.paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]
+    '
+    ;;
+  h | help | --help | -h)
     usage
     exit 0
     ;;
