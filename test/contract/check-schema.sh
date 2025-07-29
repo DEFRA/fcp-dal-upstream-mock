@@ -75,6 +75,7 @@ case "$1" in
     mutations='
 . |
 .schemes[0] = "https" |
+.paths["/external-auth/security-answers/{crn}"].get.parameters[0].pattern = "^[1-9][0-9]{9,19}$" |
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]
     '
     ;;

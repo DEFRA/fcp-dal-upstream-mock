@@ -26,6 +26,7 @@ paths:
           in: 'path'
           required: true
           type: 'string'
+          pattern: '^crn-[1-9][0-9]{7,17}$'
           description: 'CRN of the person to retrieve security answers for.'
           x-examples:
             - 'crn-11111111'
@@ -44,6 +45,50 @@ paths:
               memorableEvent: 'Graduation'
               memorableLocation: 'London'
               lastUpdatedOn: '2023-10-01T12:00:00Z'
+        '204':
+          description: 'No security answers found for the provided CRN.'
+        '403':
+          description: "Getting an organisation's details is forbidden, or a WAF\
+            \ rule has been triggered"
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                example: 403
+              message:
+                type: 'string'
+                example: 'HTTP 403 Forbidden'
+          examples:
+            application/json:
+              code: 403
+              message: 'Some error message'
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
+        '404':
+          description: 'Person not found.'
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                example: 404
+              message:
+                type: 'string'
+                example: 'HTTP 404 Not Found'
+        '500':
+          description: 'Internal server error.'
+          schema:
+            type: 'object'
+            properties:
+              code:
+                type: 'integer'
+                example: 500
+              message:
+                type: 'string'
+                example: 'There was an error processing your request. It has been logged (ID 64c93a5b3c14d7ca).'
 definitions:
   AuthenticateData:
     type: 'object'
