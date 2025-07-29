@@ -1,0 +1,68 @@
+swagger: '2.0'
+info:
+  title: Authenticate data API
+  description: API for person authenticate data related operations
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+tags:
+  - name: 'authenticate'
+    description: 'Operations related to person authenticate data management'
+schemes:
+  - 'http'
+security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
+basePath: /extapi
+paths:
+  /external-auth/security-answers/{crn}:
+    get:
+      tags:
+        - 'authenticate'
+      summary: 'Get security answers for a person'
+      description: 'Returns security answers for a person identified by the provided CRN.'
+      operationId: 'getSecurityAnswers'
+      parameters:
+        - name: 'crn'
+          in: 'path'
+          required: true
+          type: 'string'
+          description: 'CRN of the person to retrieve security answers for.'
+          x-examples:
+            - 'crn-11111111'
+            - 'crn-11111112'
+            - 'crn-11111113'
+            - 'crn-11111114'
+            - 'crn-11111115'
+      responses:
+        '200':
+          description: 'Security answers retrieved successfully.'
+          schema:
+            $ref: '#/definitions/AuthenticateData'
+          examples:
+            application/json:
+              memorableDate: '2020-01-01'
+              memorableEvent: 'Graduation'
+              memorableLocation: 'London'
+              lastUpdatedOn: '2023-10-01T12:00:00Z'
+definitions:
+  AuthenticateData:
+    type: 'object'
+    properties:
+      memorableDate:
+        type: 'string'
+        description: 'Memorable date for the person.'
+      memorableEvent:
+        type: 'string'
+        description: 'Memorable event for the person.'
+      memorableLocation:
+        type: 'string'
+        description: 'Memorable location for the person.'
+      lastUpdatedOn:
+        type: 'string'
+        format: 'date-time'
+        description: 'Timestamp of the last update to the authenticate data.'
+    required:
+      - 'memorableDate'
+      - 'memorableEvent'
+      - 'memorableLocation'
+      - 'lastUpdatedOn'
