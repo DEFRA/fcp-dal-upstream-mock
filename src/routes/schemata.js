@@ -21,6 +21,13 @@ export const schemata = {
           handler: {
             file: path.join(__dirname, '/v2/organisation-schema.yml')
           }
+        },
+        {
+          method: 'GET',
+          path: '/schemata/authenticate.yml',
+          handler: {
+            file: path.join(__dirname, '/v2/authenticate-schema.yml')
+          }
         }
       ])
     }
