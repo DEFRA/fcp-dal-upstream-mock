@@ -5,6 +5,7 @@
   "collectCoverageFrom": ["<rootDir>/src/**/*.js"],
   "coverageDirectory": "coverage",
   "coverageReporters": ["text-summary", "lcov"],
+  "setupFilesAfterEnv": ["<rootDir>/test/setup-schema-matcher.js"],
   "verbose": true,
   "resetMocks": true
 }

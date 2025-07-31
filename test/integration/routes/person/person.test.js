@@ -1,12 +1,40 @@
 import Hapi from '@hapi/hapi'
 import { person } from '../../../../src/routes/v2/person.js'
+import { loadSchema } from '../../../helpers.js'
 
 describe('Fake Person', () => {
-  let server
+  let server, schema
   beforeAll(async () => {
     server = Hapi.server()
     server.route(person)
-    await server.initialize()
+    await Promise.all([
+      server.initialize(),
+      loadSchema('src/routes/v2/person-schema.yml').then((s) => (schema = s))
+    ])
+  })
+
+  it('should GET a person conforming to the schema', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/person/11111111/summary'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toConformToSchema(
+      schema.paths['/person/{personId}/summary'].get.responses['200'].schema
+    )
+  })
+
+  it('should respond with a person conforming to schema when searches POST-ed', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'POST',
+      url: '/person/search',
+      payload: {
+        searchFieldType: 'CUSTOMER_REFERENCE',
+        primarySearchPhrase: 'crn-11111111'
+      }
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toConformToSchema(schema.paths['/person/search'].post.responses['200'].schema)
   })
 
   it('should fetch the same person with ID or CRN', async () => {

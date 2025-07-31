@@ -185,8 +185,7 @@ definitions:
         items:
           type: 'string'
       nationalInsuranceNumber:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       customerReference:
         type: 'string'
       email:
@@ -227,88 +226,63 @@ definitions:
     type: 'object'
     properties:
       address1:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       address2:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       address3:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       address4:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       address5:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       pafOrganisationName:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       flatName:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       buildingNumberRange:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       buildingName:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       street:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       city:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       county:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       postalCode:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       country:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       uprn:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       dependentLocality:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       doubleDependentLocality:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       addressTypeId:
-        type: 'integer'
-        x-nullable: true
+        type: ['integer', 'null']
   PersonalDetailsFullWithLockedFlagResponse:
     type: 'object'
     additionalProperties: false
     properties:
       title:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       otherTitle:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       firstName:
         type: 'string'
       middleName:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       lastName:
         type: 'string'
       dateOfBirth:
-        type: 'integer'
-        x-nullable: true
+        type: ['integer', 'null']
       landline:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       mobile:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       email:
-        type: 'string'
-        x-nullable: true
+        type: ['string', 'null']
       doNotContact:
         type: 'boolean'
       emailValidated:
