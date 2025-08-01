@@ -16,7 +16,10 @@ export const person = [
         personId = crnToPersonId[crn]
       }
       if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
-        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+        throw Boom.forbidden(
+          `bad personId: ${personId}, is not an integer in the acceptable range`,
+          request
+        )
       }
 
       return h.response({ _data: retrievePerson(personId) })
@@ -37,13 +40,15 @@ export const person = [
       ) {
         // mimic the actual upstream response for missing searchFieldType
         throw Boom.internal(
-          'There was an error processing your request. It has been logged (ID someID)'
+          'invalid searchFieldType/primarySearchPhrase, expected "CUSTOMER_REFERENCE" and CRN\n' +
+            `searchFieldType: '${body?.searchFieldType}', primarySearchPhrase: '${crn}'`,
+          request
         )
       }
 
       // CRN must be at least 10 characters long
       if ((`${crn}`?.length || 0) < 10) {
-        throw Boom.badRequest('HTTP 400 Bad Request')
+        throw Boom.badRequest(`bad CRN: ${crn}, it must comprise 10 or more digits`, request)
       }
 
       // return empty result if no personId found but no "errors" encountered
