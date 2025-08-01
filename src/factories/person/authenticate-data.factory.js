@@ -29,5 +29,5 @@ export const retrieveAuthenticateData = (crn) => {
     return nullOrFake(() => createAuthenticateData(crnToPersonId[crn]))
   }
 
-  throw Boom.notFound('HTTP 404 Not Found')
+  throw Boom.notFound(`person with CRN ${crn} not found`)
 }

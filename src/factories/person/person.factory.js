@@ -41,7 +41,7 @@ export const retrievePerson = (personId) => {
     return people[personId]
   }
   if (!personIdToCRN[personId]) {
-    throw Boom.notFound('HTTP 404 Not Found')
+    throw Boom.notFound(`person with personId ${personId} not found`)
   }
 
   return createPerson(personId)

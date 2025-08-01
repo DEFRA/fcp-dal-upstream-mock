@@ -73,7 +73,7 @@ export const updateOrganisation = (orgId, updatesToOrg) => {
   if (organisations[orgId]) {
     org = organisations[orgId]
   } else if (!orgIdToSbi[orgId]) {
-    throw Boom.notFound('HTTP 404 Not Found')
+    throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   } else {
     org = createOrganisation(orgId)
   }
@@ -87,7 +87,7 @@ export const retrieveOrganisation = (orgId) => {
     return organisations[orgId]
   }
   if (!orgIdToSbi[orgId]) {
-    throw Boom.notFound('HTTP 404 Not Found')
+    throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   }
 
   return createOrganisation(orgId)
