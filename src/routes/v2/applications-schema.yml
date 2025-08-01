@@ -23,6 +23,7 @@ paths:
       operationId: 'getApplicationsBySBI'
       produces:
         - 'application/json'
+        - 'text/html'
       parameters:
         - name: 'sbi'
           in: 'path'
@@ -45,6 +46,18 @@ paths:
                 type: ['string', 'null']
               success:
                 type: boolean
+            required:
+              - data
+              - errorString
+              - success
+        '403':
+          description: 'Getting Application details is forbidden, or a WAF rule has been triggered,\
+            \ or the SBI was not found (i.e. 404!).'
+          examples:
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
 
 definitions:
   Application:
