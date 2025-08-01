@@ -1,7 +1,7 @@
 import Hapi from '@hapi/hapi'
 import inert from '@hapi/inert'
 
-import { failAction } from './common/helpers/fail-action.js'
+import { emulateUpstreamErrors, failAction } from './common/helpers/fail-action.js'
 import { createLogger } from './common/helpers/logging/logger.js'
 import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { pulse } from './common/helpers/pulse.js'
@@ -46,54 +46,10 @@ export const startServer = async () => {
     // schemata       - serves swagger 2.0 schema files
     // router         - routes used in the app
     await server.register([requestLogger, requestTracing, pulse, inert, schemata, router])
-    await server.register(fakeRouter, {
-      routes: {
-        prefix: '/extapi'
-      }
-    })
+    await server.register(fakeRouter, { routes: { prefix: '/extapi' } })
 
     // emulate upstream error responses
-    server.ext('onPreResponse', (request, h) => {
-      const response = request.response
-
-      if (response.isBoom) {
-        const code = response.output.statusCode
-        logger.warn({
-          http: {
-            request: {
-              id: request.info.id,
-              method: request.method,
-              ...(request?.headers && { headers: request.headers })
-            },
-            response: {
-              status_code: code,
-              ...(request?.info?.received && {
-                response_time: new Date().getTime() - request.info.received
-              })
-            }
-          },
-          error: {
-            code,
-            type: response.name,
-            message: response.message,
-            stack_trace: response.stack
-          },
-          message: `${request.method}${
-            request.payload ? ' ' + JSON.stringify(request.payload) : ''
-          } ${request.path} ${code}`
-        })
-
-        // Replace payload for client
-        if (code === 403) {
-          return h
-            .response(`<html><body><h1>403 Forbidden</h1>\n${response.message}\n</body></html>\n`)
-            .code(code)
-        }
-        return h.response({ code, message: response.message }).code(code)
-      }
-
-      return h.continue
-    })
+    server.ext('onPreResponse', emulateUpstreamErrors)
 
     await server.start()
 
