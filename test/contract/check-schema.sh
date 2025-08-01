@@ -54,10 +54,9 @@ case "$1" in
 . |
 .schemes = "https" |
 .paths["/person/{personId}/summary"].get.parameters[0]["x-examples"] = [5858232,5108985,5108989] |
-.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '1105658066' |
-.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '1101089857' |
-.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '1101089899'
-    '
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = "1105658066" |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = "1101089857" |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = "1101089899"'
     ;;
   o | org | organisation)
     schema="organisation"
@@ -65,10 +64,9 @@ case "$1" in
 . |
 .schemes[0] = "https" |
 .paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5509239,5849659,5858233  ] |
-.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '108224522' |
-.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '200629003' |
-.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '200665008'
-    '
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = "108224522" |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = "200629003" |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = "200665008"'
     ;;
   a | auth | authenticate )
     schema="authenticate"
@@ -76,8 +74,14 @@ case "$1" in
 . |
 .schemes[0] = "https" |
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0].pattern = "^[1-9][0-9]{9,19}$" |
-.paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]
-    '
+.paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]'
+    ;;
+  ap | apps | applications)
+    schema="applications"
+    mutations='
+. |
+.schemes[0] = "https" |
+.paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0]["x-examples"] = [108224522,200629003,200665008]'
     ;;
   h | help | --help | -h)
     usage
@@ -107,7 +111,7 @@ docker run --rm --network=host \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
-      --url "https://chs-upgrade-api.ruraldev.org.uk:8444/extapi"
+      --url "https://chs-upgrade-api.ruraldev.org.uk:8446/extapi"
 
 # cleanup
 rm -rf ./tmp
