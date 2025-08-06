@@ -1,0 +1,161 @@
+openapi: 3.1.0
+info:
+  title: Applications API
+  description: API for applications data and related operations
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+security: []
+servers:
+  - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
+    description: 'The test server for KITS/V1 APIs'
+tags:
+  - name: 'applications'
+    description: 'Operations related to applications management'
+paths:
+  /SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list:
+    get:
+      tags:
+        - 'applications'
+      summary: 'List Applications for a business.'
+      description: 'Gets details for Applications for a business specified by SBI.'
+      operationId: 'getApplicationsBySBI'
+      parameters:
+        - name: 'sbi'
+          in: path
+          description: 'SBI of the business to retrieve applications for.'
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples:
+              - 1000000000
+              - 1111111111
+              - 2222222222
+              - 107167406
+              - 107097991
+              - 106354662
+              - 106221605
+              - 106440483
+      responses:
+        '200':
+          description: 'Returns full organisation details.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetApplicationsBySBIResponse'
+        '403':
+          description: >
+            Getting Application details is forbidden, or a WAF rule has been triggered, or the SBI
+             was not found (i.e. 404!).
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+components:
+  schemas:
+    GetApplicationsBySBIResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+        errorString:
+          type: [string, 'null']
+        success:
+          type: boolean
+      required:
+        - data
+        - errorString
+        - success
+      additionalProperties: false
+    Application:
+      type: object
+      properties:
+        sbi:
+          type: string
+        subject_id:
+          type: integer
+        year:
+          type: integer
+        application_name:
+          type: string
+        module_code:
+          type: string
+        scheme:
+          type: string
+        application_id:
+          type: integer
+        status_code_p:
+          type: string
+        status_code_s:
+          type: string
+        status:
+          type: string
+        submission_date:
+          type: [string, 'null']
+        portal_status_p:
+          type: string
+        portal_status_s:
+          type: [string, 'null']
+        portal_status:
+          type: [string, 'null']
+        fg_active:
+          type: string
+        transition_id:
+          type: integer
+        transition_name:
+          type: string
+        agreement_ref:
+          type: [string, 'null']
+        application_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationHistory'
+      required:
+        - sbi
+        - subject_id
+        - year
+        - application_name
+        - module_code
+        - scheme
+        - application_id
+        - status_code_p
+        - status_code_s
+        - status
+        - submission_date
+        - portal_status_p
+        - portal_status_s
+        - fg_active
+        - transition_id
+        - transition_name
+        - agreement_ref
+        - application_history
+      additionalProperties: false
+    ApplicationHistory:
+      type: object
+      properties:
+        dt_transition:
+          type: string
+        check_status:
+          type: string
+        transition_id:
+          type: integer
+        transition_name:
+          type: string
+      required:
+        - dt_transition
+        - check_status
+        - transition_id
+        - transition_name
+      additionalProperties: false
