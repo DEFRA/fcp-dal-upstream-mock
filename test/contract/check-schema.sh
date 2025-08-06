@@ -76,12 +76,11 @@ case "$1" in
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0].pattern = "^[1-9][0-9]{9,19}$" |
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]'
     ;;
-  ap | apps | applications)
-    schema="applications"
+  s | sa | siti-agri)
+    schema="siti-agri"
     mutations='
 . |
-.schemes[0] = "https" |
-.paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0]["x-examples"] = [108224522,200629003,200665008]'
+.paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [121174131,200697200,107120488,117713636,200694241,200721391,119897756]'
     ;;
   h | help | --help | -h)
     usage
@@ -94,7 +93,7 @@ case "$1" in
 esac
 
 # mutate target schema - NOTE: the use of `tee` is intentional!!
-yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.yml \
+yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 set +e
