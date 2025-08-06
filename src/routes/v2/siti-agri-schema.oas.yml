@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Applications API
-  description: API for applications data and related operations
+  title: SitiAgri API
+  description: API for siti-agri data and related operations
   version: '1.0.0'
   license:
     name: 'Open Government Licence v3.0'
@@ -11,12 +11,13 @@ servers:
   - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
     description: 'The test server for KITS/V1 APIs'
 tags:
-  - name: 'applications'
-    description: 'Operations related to applications management'
+  - name: 'siti-agri'
+    description: 'Operations related to siti-agri management'
 paths:
   /SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list:
     get:
       tags:
+        - 'siti-agri'
         - 'applications'
       summary: 'List Applications for a business.'
       description: 'Gets details for Applications for a business specified by SBI.'
@@ -45,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetApplicationsBySBIResponse'
+                $ref: '#/components/schemas/ApplicationsResponse'
         '403':
           description: >
             Getting Application details is forbidden, or a WAF rule has been triggered, or the SBI
@@ -63,7 +64,7 @@ paths:
                     </body></html>
 components:
   schemas:
-    GetApplicationsBySBIResponse:
+    ApplicationsResponse:
       type: object
       properties:
         data:

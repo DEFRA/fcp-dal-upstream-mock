@@ -31,9 +31,9 @@ export const schemata = {
         },
         {
           method: 'GET',
-          path: '/schemata/applications.yml',
+          path: '/schemata/siti-agri.yml',
           handler: {
-            file: path.join(__dirname, '/v2/applications-schema.yml')
+            file: path.join(__dirname, '/v2/siti-agri-schema.oas.yml')
           }
         }
       ])
