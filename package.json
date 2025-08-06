@@ -12,7 +12,7 @@
     "dev:debug": "NODE_ENV=development npm run server:debug",
     "git:pre-commit-hook": "npm run lint",
     "postinstall": "npm run setup:husky",
-    "lint": "eslint . && prettier --check .",
+    "lint": "eslint . && prettier --check . && redocly lint src/routes/v2/**/*-schema*.yml",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "lint:test": "npm run lint",
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
@@ -21,7 +21,7 @@
     "start": "NODE_ENV=production node --use-strict . | jq .",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
     "test:contract": "docker compose -f compose.yml -f test/contract/compose.yml run --quiet-pull --build --rm contract-tests",
-    "verify:schemata": "npx --yes @redocly/cli@v1 lint src/routes/v2/**/*-schema.yml"
+    "verify:schemata": "redocly lint src/routes/v2/**/*-schema*.yml"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",
+    "@redocly/cli": "^1.34.5",
     "ajv": "^8.17.1",
     "eslint": "^9.32.0",
     "eslint-plugin-import": "^2.31.0",
