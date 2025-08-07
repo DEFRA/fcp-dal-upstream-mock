@@ -63,8 +63,8 @@ case "$1" in
     mutations='
 . |
 .schemes[0] = "https" |
-.paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5509239,5849659,5858233  ] |
-.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = "108224522" |
+.paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5491723,5680131,5849659,5852711,5858233 ] |
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = "106554744" |
 .definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = "200629003" |
 .definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = "200665008"'
     ;;
