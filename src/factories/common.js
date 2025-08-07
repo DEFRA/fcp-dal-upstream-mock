@@ -27,14 +27,14 @@ export const fakeAddress = (overrides = {}) => ({
   ...overrides
 })
 
-export const fakeId = () => `${faker.number.int({ min: 100_000_000, max: 9_999_999_999 })}`
+export const fakeId = () => faker.number.int({ min: 100_000_000, max: 9_999_999_999 })
 export const fakeIds = (count) => Array.from({ length: count }, fakeId)
 
 export const nft = (...weights) =>
   faker.helpers.weightedArrayElement([
     { weight: weights[0] || 3, value: null },
-    { weight: weights[0] || 2, value: false },
-    { weight: weights[0] || 5, value: true }
+    { weight: weights[1] || 2, value: false },
+    { weight: weights[2] || 5, value: true }
   ])
 export const nullOrFake = (fakeFn, nullWeight = 0.5) =>
   faker.datatype.boolean(nullWeight) ? null : fakeFn()

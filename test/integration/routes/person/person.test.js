@@ -9,7 +9,7 @@ describe('Fake Person', () => {
     server.route(person)
     await Promise.all([
       server.initialize(),
-      loadSchema('src/routes/v2/person-schema.yml').then((s) => (schema = s))
+      loadSchema('src/routes/v2/person-schema.oas.yml').then((s) => (schema = s))
     ])
   })
 
@@ -20,7 +20,8 @@ describe('Fake Person', () => {
     })
     expect(statusCode).toBe(200)
     expect(result).toConformToSchema(
-      schema.paths['/person/{personId}/summary'].get.responses['200'].schema
+      schema.paths['/person/{personId}/summary'].get.responses['200'].content['application/json']
+        .schema
     )
   })
 
@@ -34,7 +35,9 @@ describe('Fake Person', () => {
       }
     })
     expect(statusCode).toBe(200)
-    expect(result).toConformToSchema(schema.paths['/person/search'].post.responses['200'].schema)
+    expect(result).toConformToSchema(
+      schema.paths['/person/search'].post.responses['200'].content['application/json'].schema
+    )
   })
 
   it('should fetch the same person with ID or CRN', async () => {

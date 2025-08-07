@@ -18,22 +18,31 @@
   "editor.tabSize": 2,
   "cSpell.words": [
     "Agri",
+    "AGRLIV",
+    "APPCRE",
+    "APPROV",
     "Capd",
+    "CHEAPP",
     "defra",
     "defradigital",
+    "DOMPRS",
     "extapi",
     "healthcheck",
+    "IDRAFT",
     "nationalarchives",
     "NINO",
     "nodemon",
+    "PAYPRO",
     "pino",
     "redocly",
     "schemathesis",
     "Siti",
     "sonarcloud",
+    "STADOM",
     "TRUSTSTORE",
     "unconfirm",
-    "uprn"
+    "uprn",
+    "WTHDRW"
   ],
   "cSpell.ignorePaths": [
     ".git",
@@ -43,5 +52,10 @@
     "node_modules",
     "package-lock.json"
   ],
-  "cSpell.language": "en,en-GB"
+  "cSpell.language": "en,en-GB",
+  "yaml.schemas": {
+    "https://spec.openapis.org/oas/3.1/schema/2022-10-07": ["*.oas.yaml", "*.oas.yml"]
+  },
+  "yaml.validate": true,
+  "yaml.format.enable": true
 }

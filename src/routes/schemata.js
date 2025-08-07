@@ -12,14 +12,14 @@ export const schemata = {
           method: 'GET',
           path: '/schemata/person.yml',
           handler: {
-            file: path.join(__dirname, '/v2/person-schema.yml')
+            file: path.join(__dirname, '/v2/person-schema.oas.yml')
           }
         },
         {
           method: 'GET',
           path: '/schemata/organisation.yml',
           handler: {
-            file: path.join(__dirname, '/v2/organisation-schema.yml')
+            file: path.join(__dirname, '/v2/organisation-schema.oas.yml')
           }
         },
         {
@@ -27,6 +27,13 @@ export const schemata = {
           path: '/schemata/authenticate.yml',
           handler: {
             file: path.join(__dirname, '/v2/authenticate-schema.yml')
+          }
+        },
+        {
+          method: 'GET',
+          path: '/schemata/siti-agri.yml',
+          handler: {
+            file: path.join(__dirname, '/v2/siti-agri-schema.oas.yml')
           }
         }
       ])
