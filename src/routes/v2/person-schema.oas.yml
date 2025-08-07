@@ -117,7 +117,7 @@ paths:
                     type: string
                     example: 'HTTP 400 Bad Request'
         '500':
-          description: 'internal server error, or only `searchFieldType` was provided'
+          description: 'Internal server error, or only `searchFieldType` was provided.'
           content:
             application/json:
               schema:

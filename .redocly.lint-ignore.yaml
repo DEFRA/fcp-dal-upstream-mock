@@ -4,6 +4,3 @@ src/routes/v2/authenticate-schema.yml:
   struct:
     - >-
       #/paths/~1external-auth~1security-answers~1{crn}/get/parameters/0/x-examples
-src/routes/v2/organisation-schema.yml:
-  struct:
-    - '#/paths/~1organisation~1{organisationId}/get/parameters/0/x-examples'

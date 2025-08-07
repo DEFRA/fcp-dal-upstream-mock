@@ -1,0 +1,467 @@
+openapi: 3.1.0
+info:
+  title: Organisation API
+  description: API for organisation-related operations
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+tags:
+  - name: 'organisation'
+    description: 'Operations related to organisation management'
+security:
+  - mTLS: []
+servers:
+  - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
+    description: The test server for KITS/V1 APIs
+paths:
+  /organisation/{organisationId}:
+    get:
+      tags:
+        - 'organisation'
+      summary: 'Find an Organisation.'
+      description: 'Request to get details for an organisation with a specified ID.'
+      operationId: 'getByPartyId'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: 'organisationId'
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples: [1000000000, 1111111111, 2222222222]
+      responses:
+        '200':
+          description: 'Returns full organisation details.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    $ref: '#/components/schemas/OrganisationWithAllResponse'
+                required:
+                  - '_data'
+                additionalProperties: false
+        '400':
+          description: 'The organisationId must have 10 or more digits'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: 'HTTP 400 Bad Request'
+        '403':
+          description: >
+            Getting an organisation's details is forbidden, or a WAF rule has been triggered.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '404':
+          description: 'organisation details not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+  /organisation/search:
+    post:
+      tags:
+        - 'organisation'
+      summary: 'Search for organisation by SBI.'
+      description: 'Search for organisation by SBI (Single Business Identifier).'
+      operationId: 'searchOrganisation'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequestBody'
+      responses:
+        '200':
+          description: 'Returns a list of Organisations with a paging object.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrganisationWithAddressResponse'
+                  _page:
+                    $ref: '#/components/schemas/Page'
+                required:
+                  - '_data'
+                  - '_page'
+        '400':
+          description: 'If searchFieldType is not "SBI"'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '500':
+          description: 'Internal server error, or only `searchFieldType` was provided.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+
+components:
+  schemas:
+    # request objects
+    SearchRequestBody:
+      type: object
+      properties:
+        searchFieldType:
+          type: string
+          enum:
+            - 'SBI'
+        primarySearchPhrase:
+          oneOf:
+            - type: string
+              minLength: 9
+              # pattern: '^[0-9]{9,}$' # not just SBI upstream, other searches are also allowed
+            - type: integer
+              minimum: 100000000
+              description: 'If the SBI is a number it must have at least 9 digits.'
+              # This is because the upstream checks the character length of the number.
+              # Unfortunately the upstream accepts any `number`, but this is the closest we can
+              # replicate the type-space in this schema!
+              # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
+              # numbers, rationals, and exponents will be flagged as false negatives!!!
+      examples:
+        - primarySearchPhrase: '1000000000'
+          searchFieldType: 'SBI'
+        - primarySearchPhrase: '1111111111'
+          searchFieldType: 'SBI'
+        - primarySearchPhrase: '2222222222'
+          searchFieldType: 'SBI'
+      required:
+        - 'searchFieldType'
+        - 'primarySearchPhrase'
+
+    # response objects
+    TypeWithId:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+      required:
+        - 'id'
+        - 'type'
+    AssociatedPersonResponse:
+      # NOTE: this data never seems to be populated
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        telephoneNumber:
+          type: string
+        dateOfBirth:
+          type: string
+          format: 'date-time'
+        percentageOfBusinessOwned:
+          type: integer
+        datePersonBecameOwner:
+          type: string
+          format: 'date-time'
+        nationalInsuranceNumber:
+          type: string
+        role:
+          type: string
+        headOfHolding:
+          type: boolean
+        dateBecameHeadOfHolding:
+          type: string
+          format: 'date-time'
+        hasOtherBusinessInterests:
+          type: boolean
+        hasBeenHeadOfHoldingForOtherBusiness:
+          type: boolean
+        percentageOfVotingRights:
+          type: integer
+    OrganisationWithAddressResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sbi:
+          type: integer
+          format: 'int64'
+        additionalSbiIds:
+          type: array
+          items:
+            type: integer
+            format: 'int64'
+        confirmed:
+          type: boolean
+        lastUpdatedOn:
+          type: integer
+          description: 'Timestamp in milliseconds since epoch'
+        landConfirmed:
+          type: boolean
+        deactivated:
+          type: boolean
+        locked:
+          type: boolean
+        address:
+          $ref: '#/components/schemas/Address'
+        correspondenceAddress:
+          $ref: '#/components/schemas/Address'
+        isFinancialToBusinessAddr:
+          type: [boolean, 'null']
+        isCorrespondenceAsBusinessAddr:
+          type: [boolean, 'null']
+      required:
+        - 'id'
+        - 'name'
+        - 'sbi'
+        - 'additionalSbiIds'
+        - 'confirmed'
+        - 'lastUpdatedOn'
+        - 'landConfirmed'
+        - 'deactivated'
+        - 'locked'
+        - 'address'
+        - 'correspondenceAddress'
+        - 'isFinancialToBusinessAddr'
+        - 'isCorrespondenceAsBusinessAddr'
+    OrganisationWithAllResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sbi:
+          type: integer
+          format: 'int64'
+        additionalSbiIds:
+          type: array
+          items:
+            type: integer
+            format: 'int64'
+        confirmed:
+          type: boolean
+        lastUpdatedOn:
+          type: integer
+          description: 'Timestamp in milliseconds since epoch'
+        landConfirmed:
+          type: boolean
+        deactivated:
+          type: boolean
+        locked:
+          type: boolean
+        address:
+          $ref: '#/components/schemas/Address'
+        correspondenceAddress:
+          $ref: '#/components/schemas/Address'
+        isFinancialToBusinessAddr:
+          type: [boolean, 'null']
+        isCorrespondenceAsBusinessAddr:
+          type: [boolean, 'null']
+        email:
+          type: [string, 'null']
+        emailValidated:
+          type: boolean
+        landline:
+          type: [string, 'null']
+        mobile:
+          type: [string, 'null']
+        fax:
+          type: [string, 'null']
+        correspondenceEmail:
+          type: [string, 'null']
+        correspondenceEmailValidated:
+          type: [boolean, 'null']
+        correspondenceLandline:
+          type: [string, 'null']
+        correspondenceMobile:
+          type: [string, 'null']
+        correspondenceFax:
+          type: [string, 'null']
+        taxRegistrationNumber:
+          type: [string, 'null']
+        businessType:
+          $ref: '#/components/schemas/TypeWithId'
+        businessReference:
+          type: string
+        legalStatus:
+          $ref: '#/components/schemas/TypeWithId'
+        dateStartedFarming:
+          type: [string, 'null']
+          format: 'date-time'
+        companiesHouseRegistrationNumber:
+          type: [string, 'null']
+        charityCommissionRegistrationNumber:
+          type: [string, 'null']
+        persons:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssociatedPersonResponse'
+        hasLandInNorthernIreland:
+          type: [boolean, 'null']
+        hasLandInScotland:
+          type: [boolean, 'null']
+        hasLandInWales:
+          type: [boolean, 'null']
+        hasAdditionalBusinessActivities:
+          type: [boolean, 'null']
+        vendorNumber:
+          type: [string, 'null']
+        traderNumber:
+          type: [string, 'null']
+        isAccountablePeopleDeclarationCompleted:
+          type: [boolean, 'null']
+        additionalBusinessActivities:
+          type: [array, 'null']
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TypeWithId'
+      required:
+        - 'id'
+        - 'name'
+        - 'sbi'
+        - 'additionalSbiIds'
+        - 'confirmed'
+        - 'lastUpdatedOn'
+        - 'landConfirmed'
+        - 'deactivated'
+        - 'locked'
+        - 'address'
+        - 'correspondenceAddress'
+        - 'isFinancialToBusinessAddr'
+        - 'isCorrespondenceAsBusinessAddr'
+        - 'email'
+        - 'emailValidated'
+        - 'landline'
+        - 'mobile'
+        - 'fax'
+        - 'correspondenceEmail'
+        - 'correspondenceEmailValidated'
+        - 'correspondenceLandline'
+        - 'correspondenceMobile'
+        - 'correspondenceFax'
+        - 'taxRegistrationNumber'
+        - 'businessType'
+        - 'businessReference'
+        - 'legalStatus'
+        - 'dateStartedFarming'
+        - 'companiesHouseRegistrationNumber'
+        - 'charityCommissionRegistrationNumber'
+        - 'persons'
+        - 'hasLandInNorthernIreland'
+        - 'hasLandInScotland'
+        - 'hasLandInWales'
+        - 'hasAdditionalBusinessActivities'
+        - 'vendorNumber'
+        - 'traderNumber'
+        - 'isAccountablePeopleDeclarationCompleted'
+        - 'additionalBusinessActivities'
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: 'int32'
+        size:
+          type: integer
+          format: 'int32'
+        totalPages:
+          type: integer
+          format: 'int32'
+        numberOfElements:
+          type: integer
+          format: 'int32'
+        totalElements:
+          type: integer
+          format: 'int64'
+    Address:
+      type: [object, 'null']
+      properties:
+        address1:
+          type: [string, 'null']
+        address2:
+          type: [string, 'null']
+        address3:
+          type: [string, 'null']
+        address4:
+          type: [string, 'null']
+        address5:
+          type: [string, 'null']
+        pafOrganisationName:
+          type: [string, 'null']
+        flatName:
+          type: [string, 'null']
+        buildingNumberRange:
+          type: [string, 'null']
+        buildingName:
+          type: [string, 'null']
+        street:
+          type: [string, 'null']
+        city:
+          type: [string, 'null']
+        county:
+          type: [string, 'null']
+        postalCode:
+          type: [string, 'null']
+        country:
+          type: [string, 'null']
+        uprn:
+          type: [string, 'null']
+        dependentLocality:
+          type: [string, 'null']
+        doubleDependentLocality:
+          type: [string, 'null']
+        addressTypeId:
+          type: [integer, 'null']
+
+    # errors
+    BadRequest:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: 'HTTP 400 Bad Request'
+
+  securitySchemes:
+    mTLS:
+      type: mutualTLS
+      description: >
+        Mutual TLS authentication. Client must present a certificate issued by the server.

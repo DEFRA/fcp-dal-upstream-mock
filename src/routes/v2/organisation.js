@@ -45,7 +45,12 @@ export const organisation = [
       }
 
       // SBI must be at least 9 characters long
-      if ((`${searchSbi}`?.length || 0) < 9) {
+      if (
+        // upstream checks the character length of the number
+        (`${searchSbi}`?.length || 0) < 9 ||
+        // we also have to check for a big enough integer to satisfy the schema
+        (typeof searchSbi === 'number' && searchSbi < 100000000)
+      ) {
         throw Boom.badRequest(`bad SBI: ${searchSbi}, it must comprise 9 or more digits`, request)
       }
 
