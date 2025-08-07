@@ -47,7 +47,12 @@ export const person = [
       }
 
       // CRN must be at least 10 characters long
-      if ((`${crn}`?.length || 0) < 10) {
+      if (
+        // upstream checks the character length of the number
+        (`${crn}`?.length || 0) < 10 ||
+        // we also have to check for a big enough integer to satisfy the schema
+        (typeof crn === 'number' && searchSbi < 1000000000)
+      ) {
         throw Boom.badRequest(`bad CRN: ${crn}, it must comprise 10 or more digits`, request)
       }
 

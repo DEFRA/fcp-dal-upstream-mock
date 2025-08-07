@@ -1,0 +1,346 @@
+openapi: 3.1.0
+info:
+  title: Person API
+  description: API for person-related operations
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+tags:
+  - name: person
+    description: 'Operations related to person management'
+security:
+  - mTLS: []
+servers:
+  - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
+    description: The test server for KITS/V1 APIs
+paths:
+  /person/{personId}/summary:
+    get:
+      tags:
+        - 'person'
+      summary: 'Find By Person ID'
+      description: 'Request to get details for a person with a specified ID.'
+      operationId: 'getPersonSummaryById'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'The unique ID of the requested person.'
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples: [11111111, 11112222, 22222222]
+      responses:
+        '200':
+          description: 'Returns the person details for the specified ID.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    $ref: '#/components/schemas/FullPersonDetails'
+                required:
+                  - '_data'
+                additionalProperties: false
+        '403':
+          description: >
+            Getting an internal user's details is forbidden, or a WAF rule has been triggered.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '404':
+          description: 'Person not found.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: 'HTTP 404 Not Found'
+  /person/search:
+    post:
+      tags:
+        - 'person'
+      summary: 'Search for a person by CRN'
+      description: 'Search for a person using their CRN (Customer Reference Number).'
+      operationId: 'searchPerson'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequestBody'
+      responses:
+        '200':
+          description: 'Successfully returns list of customer summary. Returns result inside a CapdPageResponse'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PersonSearchResponse'
+                  _page:
+                    $ref: '#/components/schemas/Page'
+                required:
+                  - '_data'
+                  - '_page'
+                additionalProperties: false
+        '400':
+          description: 'breached search string length'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: 'HTTP 400 Bad Request'
+        '500':
+          description: 'internal server error, or only `searchFieldType` was provided'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+
+components:
+  schemas:
+    # request objects
+    SearchRequestBody:
+      type: object
+      properties:
+        searchFieldType:
+          type: string
+          enum:
+            - 'CUSTOMER_REFERENCE'
+        primarySearchPhrase:
+          oneOf:
+            - type: string
+              minLength: 10
+              # pattern: '^[0-9]{10,}$' # not just CRN upstream, other searches are also allowed
+            - type: integer
+              minimum: 1000000000
+              description: 'If the CRN is a number it must have at least 10 digits.'
+              # This is because the upstream checks the character length of the number.
+              # Unfortunately the upstream accepts any `number`, but this is the closest we can
+              # replicate the type-space in this schema!
+              # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
+              # numbers, rationals, and exponents will be flagged as false negatives!!!
+      examples:
+        - primarySearchPhrase: 'crn-11111111'
+          searchFieldType: 'CUSTOMER_REFERENCE'
+        - primarySearchPhrase: 'crn-11111122'
+          searchFieldType: 'CUSTOMER_REFERENCE'
+        - primarySearchPhrase: 'crn-22222222'
+          searchFieldType: 'CUSTOMER_REFERENCE'
+      required:
+        - 'searchFieldType'
+        - 'primarySearchPhrase'
+
+    # response objects
+    PersonSearchResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        primaryAddress:
+          $ref: '#/components/schemas/Address'
+        personalIdentifiers:
+          type: array
+          items:
+            type: string
+        nationalInsuranceNumber:
+          type: [string, 'null']
+        customerReference:
+          type: string
+        email:
+          type: string
+        locked:
+          type: boolean
+        deactivated:
+          type: boolean
+      required:
+        - 'id'
+        - 'fullName'
+        - 'primaryAddress'
+        - 'personalIdentifiers'
+        - 'nationalInsuranceNumber'
+        - 'customerReference'
+        - 'email'
+        - 'locked'
+        - 'deactivated'
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: 'int32'
+        size:
+          type: integer
+          format: 'int32'
+        totalPages:
+          type: integer
+          format: 'int32'
+        numberOfElements:
+          type: integer
+          format: 'int32'
+        totalElements:
+          type: integer
+          format: 'int64'
+    Address:
+      type: object
+      additionalProperties: false
+      properties:
+        address1:
+          type: [string, 'null']
+        address2:
+          type: [string, 'null']
+        address3:
+          type: [string, 'null']
+        address4:
+          type: [string, 'null']
+        address5:
+          type: [string, 'null']
+        pafOrganisationName:
+          type: [string, 'null']
+        flatName:
+          type: [string, 'null']
+        buildingNumberRange:
+          type: [string, 'null']
+        buildingName:
+          type: [string, 'null']
+        street:
+          type: [string, 'null']
+        city:
+          type: [string, 'null']
+        county:
+          type: [string, 'null']
+        postalCode:
+          type: [string, 'null']
+        country:
+          type: [string, 'null']
+        uprn:
+          type: [string, 'null']
+        dependentLocality:
+          type: [string, 'null']
+        doubleDependentLocality:
+          type: [string, 'null']
+        addressTypeId:
+          type: [integer, 'null']
+      required:
+        - 'address1'
+        - 'address2'
+        - 'address3'
+        - 'address4'
+        - 'address5'
+        - 'pafOrganisationName'
+        - 'flatName'
+        - 'buildingNumberRange'
+        - 'buildingName'
+        - 'street'
+        - 'city'
+        - 'county'
+        - 'postalCode'
+        - 'country'
+        - 'uprn'
+        - 'dependentLocality'
+        - 'doubleDependentLocality'
+        - 'addressTypeId'
+    FullPersonDetails:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: [string, 'null']
+        otherTitle:
+          type: [string, 'null']
+        firstName:
+          type: string
+        middleName:
+          type: [string, 'null']
+        lastName:
+          type: string
+        dateOfBirth:
+          type: [integer, 'null']
+        landline:
+          type: [string, 'null']
+        mobile:
+          type: [string, 'null']
+        email:
+          type: [string, 'null']
+        doNotContact:
+          type: boolean
+        emailValidated:
+          type: boolean
+        address:
+          $ref: '#/components/schemas/Address'
+        locked:
+          type: boolean
+        id:
+          type: integer
+        confirmed:
+          type: boolean
+        customerReferenceNumber:
+          type: string
+        personalIdentifiers:
+          type: array
+          items:
+            type: string
+        deactivated:
+          type: boolean
+      required:
+        - 'title'
+        - 'otherTitle'
+        - 'firstName'
+        - 'middleName'
+        - 'lastName'
+        - 'dateOfBirth'
+        - 'landline'
+        - 'mobile'
+        - 'email'
+        - 'doNotContact'
+        - 'emailValidated'
+        - 'address'
+        - 'locked'
+        - 'id'
+        - 'confirmed'
+        - 'customerReferenceNumber'
+        - 'personalIdentifiers'
+        - 'deactivated'
+
+  securitySchemes:
+    mTLS:
+      type: mutualTLS
+      description: >
+        Mutual TLS authentication. Client must present a certificate issued by the server.

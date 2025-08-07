@@ -12,7 +12,7 @@ export const schemata = {
           method: 'GET',
           path: '/schemata/person.yml',
           handler: {
-            file: path.join(__dirname, '/v2/person-schema.yml')
+            file: path.join(__dirname, '/v2/person-schema.oas.yml')
           }
         },
         {

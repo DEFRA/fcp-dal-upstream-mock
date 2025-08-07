@@ -5,8 +5,7 @@ import { fakeAddress, fakeIds } from '../common.js'
 
 const people = {}
 
-const createPerson = (personId) => {
-  const crn = personIdToCRN[personId]
+const createPerson = (personId, crn) => {
   faker.seed(personId)
   const firstName = faker.person.firstName()
   const lastName = faker.person.lastName()
@@ -27,7 +26,7 @@ const createPerson = (personId) => {
     locked: faker.datatype.boolean(),
     confirmed: faker.datatype.boolean(),
     customerReferenceNumber: crn,
-    personalIdentifiers: fakeIds(faker.number.int({ min: 0, max: 3 })),
+    personalIdentifiers: fakeIds(faker.number.int({ min: 0, max: 3 })).map((id) => `${id}`),
     deactivated: faker.datatype.boolean()
   }
 
@@ -37,12 +36,15 @@ const createPerson = (personId) => {
 }
 
 export const retrievePerson = (personId) => {
-  if (people[personId]) {
-    return people[personId]
-  }
-  if (!personIdToCRN[personId]) {
-    throw Boom.notFound(`person with personId ${personId} not found`)
+  const person = people[personId]
+  if (person) {
+    return person
   }
 
-  return createPerson(personId)
+  const crn = personIdToCRN[personId]
+  if (crn) {
+    return createPerson(personId, crn)
+  }
+
+  throw Boom.notFound(`person with personId ${personId} not found`)
 }
