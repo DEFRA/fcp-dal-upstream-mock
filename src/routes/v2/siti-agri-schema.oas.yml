@@ -6,7 +6,8 @@ info:
   license:
     name: 'Open Government Licence v3.0'
     url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
-security: []
+security:
+  - mTLS: []
 servers:
   - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
     description: 'The test server for KITS/V1 APIs'
@@ -160,3 +161,8 @@ components:
         - transition_id
         - transition_name
       additionalProperties: false
+  securitySchemes:
+    mTLS:
+      type: mutualTLS
+      description: >
+        Mutual TLS authentication. Client must present a certificate issued by the server.
