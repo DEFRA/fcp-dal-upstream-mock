@@ -19,7 +19,7 @@ export const schemata = {
           method: 'GET',
           path: '/schemata/organisation.yml',
           handler: {
-            file: path.join(__dirname, '/v2/organisation-schema.yml')
+            file: path.join(__dirname, '/v2/organisation-schema.oas.yml')
           }
         },
         {
