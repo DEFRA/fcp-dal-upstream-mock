@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import { retrievePerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
@@ -8,8 +9,12 @@ export const person = [
     method: 'GET',
     path: '/person/{personId}/summary',
     handler: async (request, h) => {
-      const personId = parseInt(request.params.personId, 10)
-
+      let personId = parseInt(request.params.personId, 10)
+      if (personId === config.get('personIdOverride')) {
+        const crn = request?.headers?.crn
+        // override with personId obtained from crn request header
+        personId = crnToPersonId[crn]
+      }
       if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
         throw Boom.forbidden('Request forbidden by administrative rules.', request)
       }
