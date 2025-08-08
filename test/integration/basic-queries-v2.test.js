@@ -1,3 +1,5 @@
+import { config } from '../../src/config.js'
+
 describe('Basic queries for faked routes', () => {
   let mockServer
   const PROCESS_ENV = process.env
@@ -18,6 +20,27 @@ describe('Basic queries for faked routes', () => {
       const response = await mockServer.inject({
         method: 'GET',
         url: '/extapi/person/11111111/summary'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data).toEqual(
+        // snippet only, due to size of person object
+        expect.objectContaining({
+          id: 11111111,
+          customerReferenceNumber: 'crn-11111111',
+          firstName: 'Lauren',
+          lastName: 'Sanford',
+          email: 'lauren.sanford@immaculate-shark.info',
+          address: expect.objectContaining({}) // just used to assert the `address` field name
+        })
+      )
+    })
+
+    test('Should return data /person/{personId}/summary corresponding to crn for personIdOverride', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/person/${config.get('personIdOverride')}/summary`,
+        headers: { crn: 'crn-11111111' }
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)

@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import { retrievePerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
