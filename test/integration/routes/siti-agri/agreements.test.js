@@ -1,25 +1,24 @@
+import Hapi from '@hapi/hapi'
 import { retrieveOrganisationAgreements } from '../../../../src/factories/siti-agri/agreement.factory.js'
+import { sitiagri } from '../../../../src/routes/v2/siti-agri.js'
+import { loadSchema } from '../../../helpers.js'
 
 describe('Basic queries for faked routes', () => {
-  let mockServer
-  const PROCESS_ENV = process.env
-
+  let server, schema
   beforeAll(async () => {
-    process.env = { ...PROCESS_ENV }
-    process.env.PORT = '3097' // Set to obscure port to avoid conflicts
-    const { startServer } = await import('../../../../src/server.js')
-    mockServer = await startServer()
-  })
-  afterAll(() => {
-    process.env = PROCESS_ENV
-    mockServer.stop({ timeout: 0 })
+    server = Hapi.server()
+    server.route(sitiagri)
+    await Promise.all([
+      server.initialize(),
+      loadSchema('src/routes/v2/siti-agri-schema.yml').then((s) => (schema = s))
+    ])
   })
 
   describe('SitiAgri route', () => {
-    test('Should return data for /SitiAgriApi/cv/agreementsByBusiness/sbi/1111111111/list', async () => {
-      const response = await mockServer.inject({
+    it('Should return data for /SitiAgriApi/cv/agreementsByBusiness/sbi/1111111111/list', async () => {
+      const response = await server.inject({
         method: 'GET',
-        url: `/extapi/SitiAgriApi/cv/agreementsByBusiness/sbi/1111111111/list`
+        url: `/SitiAgriApi/cv/agreementsByBusiness/sbi/1111111111/list`
       })
 
       expect(response.statusCode).toBe(200)
@@ -27,6 +26,30 @@ describe('Basic queries for faked routes', () => {
 
       const agreements = retrieveOrganisationAgreements(1111111111)
       expect(json.data).toEqual(agreements)
+    })
+    it('Should return random data for SBI without defined agreements in config', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: `/SitiAgriApi/cv/agreementsByBusiness/sbi/107167406/list`
+      })
+
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+
+      const agreements = retrieveOrganisationAgreements(107167406)
+      expect(json.data).toEqual(agreements)
+    })
+
+    it('should GET a agreements conforming to the schema', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/SitiAgriApi/cv/agreementsByBusiness/sbi/1111111111/list'
+      })
+      expect(statusCode).toBe(200)
+      expect(result).toConformToSchema(
+        schema.paths['/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list'].get.responses['200']
+          .schema
+      )
     })
   })
 })

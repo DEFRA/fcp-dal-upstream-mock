@@ -1,7 +1,6 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
-import { transformDate } from '../../plugins/fake-router.js'
-import { fakeIds, nft, nullOrFake } from '../common.js'
+import { fakeIds, nullOrFake, transformDate } from '../common.js'
 import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
 
 const agreementsStore = {}
@@ -60,23 +59,34 @@ export const retrieveOrganisationAgreements = (sbi) => {
 
   faker.seed(sbi)
 
-  const fakeAgreements =
-    nft(4, 2, 3) &&
-    fakeIds(faker.number.int({ min: 1, max: 3 })).map((id) => ({
-      contract_id: `${id}`,
-      payment_schedules: nft(4, 2, 3) && fakeIds(faker.number.int({ min: 1, max: 3 }))
-    }))
-  const agreements = orgIdLookup[sbiToOrgId[sbi]].agreements || fakeAgreements || []
+  const fakeAgreements = () =>
+    fakeIds(faker.number.int({ min: 1, max: 3 })).map((id) => {
+      const paymentSchedules = nullOrFake(
+        () => fakeIds(faker.number.int({ min: 1, max: 3 })),
+        0.3333
+      )
+      return {
+        contract_id: `${id}`,
+        payment_schedules: paymentSchedules || []
+      }
+    })
+
+  const agreements =
+    orgIdLookup[sbiToOrgId[sbi]].agreements || nullOrFake(fakeAgreements, 0.3333) || []
 
   try {
     return agreements.map((agreement) => {
-      const fakePaymentSchedules = nft(4, 2, 3) ? fakeIds(faker.number.int({ min: 1, max: 3 })) : []
-      const paymentScheduleIds = agreement.payment_schedules || fakePaymentSchedules || []
-      const paymentSchedules = paymentScheduleIds.map(() => createPaymentSchedule())
+      const paymentSchedules = agreement.payment_schedules
+        ? agreement.payment_schedules.map(() => createPaymentSchedule())
+        : nullOrFake(
+            () =>
+              Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, createPaymentSchedule),
+            0.3333
+          )
 
       return createAgreementMock(sbi, {
         ...agreement,
-        payment_schedules: paymentSchedules
+        payment_schedules: paymentSchedules || []
       })
     })
   } catch (error) {
