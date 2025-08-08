@@ -1,0 +1,451 @@
+swagger: '2.0'
+info:
+  title: SitiAgri API
+  description: API for siti-agri data
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+tags:
+  - name: 'siti-agri'
+    description: 'Operations related to siti-agri data'
+schemes:
+  - 'http'
+security: [] # mTLS, but swagger 2.0 does not support it directly, should probably upgrade to 3.0+
+basePath: /extapi
+paths:
+  /SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list:
+    get:
+      tags:
+        - 'siti-agri'
+        - 'agreements'
+      summary: 'Find Agreements by SBI.'
+      description: 'Find Agreements by SBI'
+      operationId: 'findAgreementsBySBI'
+      produces:
+        - 'application/json'
+        - 'text/html'
+      parameters:
+        - name: 'sbi'
+          in: 'path'
+          description: 'sbi'
+          required: true
+          type: 'integer'
+          maximum: 99999999999999999999
+          minimum: 1
+          x-examples: [1000000000, 1111111111, 2222222222]
+      responses:
+        '200':
+          description: 'Returns full organisation details.'
+          schema:
+            type: 'object'
+            additionalProperties: false
+            properties:
+              data:
+                type: 'array'
+                items:
+                  $ref: '#/definitions/Agreement'
+              success:
+                type: 'boolean'
+              errorString:
+                type: ['string', 'null']
+                description: 'Error string if present, otherwise can be null'
+            required:
+              - 'data'
+              - 'success'
+              - 'errorString'
+        '403':
+          description: "Getting an internal user's details is forbidden, or a WAF\
+            \ rule has been triggered"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+          examples:
+            application/json:
+              message: 'Some error message'
+            text/html: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
+definitions:
+  Agreement:
+    type: 'object'
+    properties:
+      sbi:
+        type: 'string'
+        description: 'SBI of the business'
+      contract_id:
+        type: 'string'
+        description: 'Contract ID'
+      agreement_name:
+        type: 'string'
+        description: 'Name of the agreement'
+      status:
+        type: 'string'
+        description: 'Status of the agreement'
+      contract_type:
+        type: 'string'
+        description: 'Type of contract'
+      scheme_year:
+        type: 'integer'
+        description: 'Scheme year'
+      start_date:
+        type: 'string'
+        description: 'Start date of the agreement'
+      end_date:
+        type: 'string'
+        description: 'End date of the agreement'
+      payment_schedules:
+        type: 'array'
+        description: 'List of payment schedules'
+        items:
+          $ref: '#/definitions/PaymentSchedule'
+    required:
+      - sbi
+      - contract_id
+      - agreement_name
+      - status
+      - contract_type
+      - scheme_year
+      - start_date
+      - end_date
+      - payment_schedules
+  PaymentSchedule:
+    type: 'object'
+    properties:
+      option_code:
+        type: 'string'
+        description: 'Option code'
+      option_description:
+        type: 'string'
+        description: 'Description of the option'
+      commitment_group_start_date:
+        type: 'string'
+        description: 'Commitment group start date'
+      commitment_group_end_date:
+        type: 'string'
+        description: 'Commitment group end date'
+      year:
+        type: 'integer'
+        description: 'Year of the payment schedule'
+      sheet_name:
+        type: ['string', 'null']
+        description: 'Sheet name'
+      parcel_name:
+        type: ['string', 'null']
+        description: 'Parcel name'
+      action_area:
+        type: ['integer', 'null']
+        description: 'Action area'
+      action_mtl:
+        type: ['integer', 'null']
+        description: 'Action MTL'
+      action_units:
+        type: ['number', 'null']
+        description: 'Action units'
+      parcel_total_area:
+        type: ['integer', 'null']
+        description: 'Total area of the parcel'
+      payment_schedule_start_date:
+        type: 'string'
+        description: 'Payment schedule start date'
+      payment_schedule_end_date:
+        type: 'string'
+        description: 'Payment schedule end date'
+    required:
+      - option_code
+      - option_description
+      - commitment_group_start_date
+      - commitment_group_end_date
+      - year
+      - sheet_name
+      - parcel_name
+      - action_area
+      - action_mtl
+      - action_units
+      - parcel_total_area
+      - payment_schedule_start_date
+      - payment_schedule_end_date
+  Throwable:
+    type: 'object'
+    properties:
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+  WebApplicationException:
+    type: 'object'
+    properties:
+      code:
+        type: 'integer'
+        format: 'int32'
+        minimum: 400
+        maximum: 599
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      response:
+        $ref: '#/definitions/Response'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+    example:
+      - code: 400
+        message: 'HTTP 400 Bad Request'
+      - code: 500
+        message: 'There was an error processing your request. It has been logged (ID someID)'
+
+  # errors
+  EntityTag:
+    type: 'object'
+    properties:
+      value:
+        type: 'string'
+      weak:
+        type: 'boolean'
+  Link:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      title:
+        type: 'string'
+      uri:
+        type: 'string'
+        format: 'uri'
+      rel:
+        type: 'string'
+      rels:
+        type: 'array'
+        items:
+          type: 'string'
+      uriBuilder:
+        $ref: '#/definitions/UriBuilder'
+      params:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+  Locale:
+    type: 'object'
+    properties:
+      displayName:
+        type: 'string'
+      script:
+        type: 'string'
+      country:
+        type: 'string'
+      variant:
+        type: 'string'
+      extensionKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleAttributes:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      unicodeLocaleKeys:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      iso3Language:
+        type: 'string'
+      iso3Country:
+        type: 'string'
+      displayLanguage:
+        type: 'string'
+      displayScript:
+        type: 'string'
+      displayCountry:
+        type: 'string'
+      displayVariant:
+        type: 'string'
+      language:
+        type: 'string'
+  MediaType:
+    type: 'object'
+    properties:
+      type:
+        type: 'string'
+      subtype:
+        type: 'string'
+      parameters:
+        type: 'object'
+        additionalProperties:
+          type: 'string'
+      wildcardSubtype:
+        type: 'boolean'
+      wildcardType:
+        type: 'boolean'
+  NewCookie:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      value:
+        type: 'string'
+      version:
+        type: 'integer'
+        format: 'int32'
+      path:
+        type: 'string'
+      domain:
+        type: 'string'
+      comment:
+        type: 'string'
+      maxAge:
+        type: 'integer'
+        format: 'int32'
+      expiry:
+        type: 'string'
+        format: 'date-time'
+      secure:
+        type: 'boolean'
+      httpOnly:
+        type: 'boolean'
+  Response:
+    type: 'object'
+    properties:
+      lastModified:
+        type: 'string'
+        format: 'date-time'
+      date:
+        type: 'string'
+        format: 'date-time'
+      length:
+        type: 'integer'
+        format: 'int32'
+      location:
+        type: 'string'
+        format: 'uri'
+      language:
+        $ref: '#/definitions/Locale'
+      metadata:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+      allowedMethods:
+        type: 'array'
+        uniqueItems: true
+        items:
+          type: 'string'
+      cookies:
+        type: 'object'
+        additionalProperties:
+          $ref: '#/definitions/NewCookie'
+      statusInfo:
+        $ref: '#/definitions/StatusType'
+      links:
+        type: 'array'
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/Link'
+      stringHeaders:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'string'
+      entityTag:
+        $ref: '#/definitions/EntityTag'
+      mediaType:
+        $ref: '#/definitions/MediaType'
+      entity:
+        type: 'object'
+      status:
+        type: 'integer'
+        format: 'int32'
+      headers:
+        type: 'object'
+        additionalProperties:
+          type: 'array'
+          items:
+            type: 'object'
+  StackTraceElement:
+    type: 'object'
+    properties:
+      classLoaderName:
+        type: 'string'
+      moduleName:
+        type: 'string'
+      moduleVersion:
+        type: 'string'
+      methodName:
+        type: 'string'
+      fileName:
+        type: 'string'
+      lineNumber:
+        type: 'integer'
+        format: 'int32'
+      className:
+        type: 'string'
+      nativeMethod:
+        type: 'boolean'
+  StatusType:
+    type: 'object'
+    properties:
+      family:
+        type: 'string'
+        enum:
+          - 'INFORMATIONAL'
+          - 'SUCCESSFUL'
+          - 'REDIRECTION'
+          - 'CLIENT_ERROR'
+          - 'SERVER_ERROR'
+          - 'OTHER'
+      statusCode:
+        type: 'integer'
+        format: 'int32'
+      reasonPhrase:
+        type: 'string'
+  UriBuilder:
+    type: 'object'
+    properties:
+      code:
+        type: 'integer'
+        format: 'int32'
+        minimum: 400
+        maximum: 599
+      cause:
+        $ref: '#/definitions/Throwable'
+      stackTrace:
+        type: 'array'
+        items:
+          $ref: '#/definitions/StackTraceElement'
+      response:
+        $ref: '#/definitions/Response'
+      message:
+        type: 'string'
+      suppressed:
+        type: 'array'
+        items:
+          $ref: '#/definitions/Throwable'
+      localizedMessage:
+        type: 'string'
+    example:
+      - code: 400
+        message: 'HTTP 400 Bad Request'
+      - code: 500
+        message: 'There was an error processing your request. It has been logged (ID someID)'

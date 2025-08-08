@@ -28,6 +28,13 @@ export const schemata = {
           handler: {
             file: path.join(__dirname, '/v2/authenticate-schema.yml')
           }
+        },
+        {
+          method: 'GET',
+          path: '/schemata/siti-agri.yml',
+          handler: {
+            file: path.join(__dirname, '/v2/siti-agri-schema.yml')
+          }
         }
       ])
     }
