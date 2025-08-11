@@ -1,6 +1,0 @@
-# This file instructs Redocly's linter to ignore the rules contained for specific parts of your API.
-# See https://redocly.com/docs/cli/ for more information.
-src/routes/v2/authenticate-schema.yml:
-  struct:
-    - >-
-      #/paths/~1external-auth~1security-answers~1{crn}/get/parameters/0/x-examples

@@ -26,7 +26,7 @@ export const schemata = {
           method: 'GET',
           path: '/schemata/authenticate.yml',
           handler: {
-            file: path.join(__dirname, '/v2/authenticate-schema.yml')
+            file: path.join(__dirname, '/v2/authenticate-schema.oas.yml')
           }
         },
         {
