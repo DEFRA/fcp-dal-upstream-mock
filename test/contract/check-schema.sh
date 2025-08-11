@@ -15,6 +15,7 @@ usage() {
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
   echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
   echo "  CDP_PROXY - the URL of the CDP HTTPS proxy to use"
+  echo "  KITS_URL  - the URL of the KITS API to use"
 }
 
 # resolve KITS_KEY
@@ -70,6 +71,14 @@ case "$1" in
 .definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '200665008'
     '
     ;;
+  s | sa | siti-agri)
+    schema="siti-agri"
+    mutations='
+. |
+.schemes[0] = "https" |
+.paths["/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list"].get.parameters[0]["x-examples"] = [107183280,107591843,106327021]
+    '
+    ;;
   a | auth | authenticate )
     schema="authenticate"
     mutations='
@@ -95,6 +104,11 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.yml \
 
 set +e
 
+# resolve KITS_URL
+if [ -z "${KITS_URL}" ]; then
+  KITS_URL="https://chs-upgrade-api.ruraldev.org.uk:8446/extapi"
+fi
+
 # run schemathesis tests
 docker run --rm --network=host \
   -v ${baseDir}/tmp:/tmp \
@@ -107,7 +121,7 @@ docker run --rm --network=host \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
-      --url "https://chs-upgrade-api.ruraldev.org.uk:8444/extapi"
+      --url "${KITS_URL}"
 
 # cleanup
 rm -rf ./tmp
