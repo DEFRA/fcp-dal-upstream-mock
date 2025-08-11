@@ -70,6 +70,12 @@ const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  personIdOverride: {
+    doc: 'This is the person ID that can be used in place of an actual personId for external users and will return the data corresponding to their crn',
+    format: 'int',
+    default: 3337243,
+    env: 'KIT_EXT_PERSON_ID_OVERRIDE'
   }
 })
 
