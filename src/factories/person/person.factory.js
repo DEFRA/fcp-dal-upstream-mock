@@ -88,3 +88,24 @@ export const retrievePersonOrgs = (personId) => {
   })
   return orgs
 }
+
+export const updatePerson = (personId, updatesToPerson) => {
+  let person
+
+  if (people[personId]) {
+    person = people[personId]
+  } else if (!personIdToCRN[personId]) {
+    throw Boom.notFound('HTTP 404 Not Found')
+  } else {
+    person = createPerson(personId)
+  }
+
+  return (people[personId] = {
+    ...person,
+    ...updatesToPerson,
+    address: {
+      ...person.address,
+      ...(updatesToPerson.address || {})
+    }
+  })
+}
