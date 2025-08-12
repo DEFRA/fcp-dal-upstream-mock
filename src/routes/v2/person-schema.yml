@@ -125,7 +125,82 @@ paths:
               code: 500
               message: "There was an error processing your request. It has been logged\
                 \ (ID 704b9f3b19536a35)."
-
+  /person/{personId}:
+    get:
+      tags:
+        - 'person'
+      summary: 'Find By Person Id.'
+      description: 'Request to Gets details for a person with a specified id.'
+      operationId: 'getByPersonId'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'personId'
+          required: true
+          type: 'integer'
+          pattern: '[0-9]{0,20}'
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+      responses:
+        '200':
+          description: "returns person details with a specified id. Returns result\
+            \ inside CapdResponse"
+          schema:
+            $ref: '#/definitions/PersonalDetailsFullWithLockedFlagResponse'
+        '403':
+          description: "Getting an internal user's details is forbidden"
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+    put:
+      tags:
+        - 'person'
+      summary: 'Update Person Details.'
+      description: 'Request to Updates a person with the specified details.'
+      operationId: 'updatePersonDetails'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'personId'
+          required: true
+          type: 'integer'
+          pattern: '[0-9]{0,20}'
+        - in: 'body'
+          name: 'body'
+          description: 'Person data to update'
+          required: true
+          schema:
+            $ref: '#/definitions/PersonalDetailsRequest'
+        - name: 'callerId'
+          in: 'header'
+          required: false
+          type: 'integer'
+        - name: 'userType'
+          in: 'header'
+          required: false
+          type: 'string'
+      responses:
+        '201':
+          description: 'Successfully Update Person Details'
+        '403':
+          description: 'Action forbidden'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '404':
+          description: 'Person not found'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
+        '422':
+          description: 'Invalid input'
+          schema:
+            $ref: '#/definitions/WebApplicationException'
 definitions:
   # request objects
   PartySearchRequest:
@@ -168,7 +243,42 @@ definitions:
     #   format: 'int32'
     # secondarySearchPhrase:
     #   type: 'string'
-
+  PersonalDetailsRequest:
+    type: 'object'
+    properties:
+      title:
+        type: ['string', 'null']
+        description: 'Title of the person (e.g., Mr, Mrs)'
+      otherTitle:
+        type: ['string', 'null']
+        description: 'Alternative or additional title'
+      firstName:
+        type: 'string'
+        description: 'First name of the person'
+      middleName:
+        type: ['string', 'null']
+        description: 'Middle name of the person'
+      lastName:
+        type: 'string'
+        description: 'Last name of the person'
+      dateOfBirth:
+        type: ['integer', 'null']
+        description: 'Date of birth as a Unix timestamp'
+      landline:
+        type: ['string', 'null']
+        description: 'Landline phone number'
+      mobile:
+        type: ['string', 'null']
+        description: 'Mobile phone number'
+      email:
+        type: ['string', 'null']
+        description: 'Email address'
+        format: email
+      address:
+        $ref: '#/definitions/PartyAddressResponse'
+    required:
+      - firstName
+      - lastName
   # response objects
   CustomerSummaryResponse:
     type: 'object'
