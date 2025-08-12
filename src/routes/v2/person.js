@@ -1,7 +1,11 @@
 import Boom from '@hapi/boom'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
-import { retrievePerson, retrievePersonOrgs } from '../../factories/person/person.factory.js'
+import {
+  retrievePerson,
+  retrievePersonOrgs,
+  updatePerson
+} from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
 export const person = [
@@ -118,6 +122,57 @@ export const person = [
           totalElements: orgs.length
         }
       })
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/person/{personId}',
+    async handler(request, h) {
+      try {
+        Joi.object({
+          title: Joi.string(),
+          otherTitle: Joi.string(),
+          firstName: Joi.string().required(),
+          middleName: Joi.string(),
+          lastName: Joi.string().required(),
+          dateOfBirth: Joi.number().integer(),
+          landline: Joi.string(),
+          mobile: Joi.string(),
+          email: Joi.string().email(),
+          address: Joi.object({
+            address1: Joi.string(),
+            address2: Joi.string(),
+            address3: Joi.string(),
+            address4: Joi.string(),
+            address5: Joi.string(),
+            pafOrganisationName: Joi.string(),
+            flatName: Joi.string(),
+            buildingNumberRange: Joi.string(),
+            buildingName: Joi.string(),
+            street: Joi.string(),
+            city: Joi.string(),
+            county: Joi.string(),
+            postalCode: Joi.string(),
+            country: Joi.string(),
+            uprn: Joi.string(),
+            dependentLocality: Joi.string(),
+            doubleDependentLocality: Joi.string(),
+            addressTypeId: Joi.string()
+          })
+        }).validateAsync(request.payload)
+      } catch (err) {
+        throw Boom.badData('HTTP 422')
+      }
+
+      const personId = parseInt(request.params.personId, 10)
+
+      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
+      updatePerson(personId, request.payload)
+
+      return h.response().code(204)
     }
   }
 ]
