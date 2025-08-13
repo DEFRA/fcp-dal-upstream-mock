@@ -1,6 +1,8 @@
 import Ajv from 'ajv'
+import addFormats from 'ajv-formats'
 
-const ajv = new Ajv({ strict: false }) // or use ajv-draft-04 if needed
+const ajv = new Ajv({ strict: false })
+addFormats(ajv)
 
 expect.extend({
   toConformToSchema(received, schema) {

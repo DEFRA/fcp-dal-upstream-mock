@@ -54,21 +54,19 @@ case "$1" in
 . |
 .schemes = "https" |
 .paths["/person/{personId}/summary"].get.parameters[0]["x-examples"] = [5858232,5108985,5108989] |
-.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '1105658066' |
-.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '1101089857' |
-.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '1101089899'
-    '
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = "1105658066" |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = "1101089857" |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = "1101089899"'
     ;;
   o | org | organisation)
     schema="organisation"
     mutations='
 . |
 .schemes[0] = "https" |
-.paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5509239,5849659,5858233  ] |
-.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = '108224522' |
-.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = '200629003' |
-.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = '200665008'
-    '
+.paths["/organisation/{organisationId}"].get.parameters[0]["x-examples"] = [5491723,5680131,5849659,5852711,5858233 ] |
+.definitions.PartySearchRequest["x-examples"][0].primarySearchPhrase = "106554744" |
+.definitions.PartySearchRequest["x-examples"][1].primarySearchPhrase = "200629003" |
+.definitions.PartySearchRequest["x-examples"][2].primarySearchPhrase = "200665008"'
     ;;
   a | auth | authenticate )
     schema="authenticate"
@@ -76,8 +74,13 @@ case "$1" in
 . |
 .schemes[0] = "https" |
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0].pattern = "^[1-9][0-9]{9,19}$" |
-.paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]
-    '
+.paths["/external-auth/security-answers/{crn}"].get.parameters[0]["x-examples"] = [1105739979,1106046692,1106077237,1100932879,1105430162]'
+    ;;
+  s | sa | siti-agri)
+    schema="siti-agri"
+    mutations='
+. |
+.paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [121174131,200697200,107120488,117713636,200694241,200721391,119897756]'
     ;;
   h | help | --help | -h)
     usage
@@ -90,7 +93,7 @@ case "$1" in
 esac
 
 # mutate target schema - NOTE: the use of `tee` is intentional!!
-yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.yml \
+yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 set +e
@@ -107,7 +110,7 @@ docker run --rm --network=host \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
-      --url "https://chs-upgrade-api.ruraldev.org.uk:8444/extapi"
+      --url "https://chs-upgrade-api.ruraldev.org.uk:8446/extapi"
 
 # cleanup
 rm -rf ./tmp

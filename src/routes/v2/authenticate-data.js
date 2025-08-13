@@ -10,7 +10,10 @@ export const authenticate = [
 
       // Validate the CRN format
       if (!/crn-\d{6,16}/.test(crn)) {
-        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+        throw Boom.forbidden(
+          `bad CRN: ${crn}, does not begin 'crn-' followed by an integer in the acceptable range`,
+          request
+        )
       }
 
       // handle valid request

@@ -1,5 +1,5 @@
+import SwaggerParser from '@apidevtools/swagger-parser'
 import path from 'path'
-import SwaggerParser from 'swagger-parser'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
