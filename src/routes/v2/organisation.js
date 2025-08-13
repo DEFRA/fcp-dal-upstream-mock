@@ -14,7 +14,10 @@ export const organisation = [
       const organisationId = parseInt(request.params.organisationId, 10)
 
       if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
-        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+        throw Boom.forbidden(
+          `bad organisationId: ${organisationId}, is not an integer in the acceptable range`,
+          request
+        )
       }
 
       return h.response({ _data: retrieveOrganisation(organisationId) })
@@ -35,14 +38,20 @@ export const organisation = [
       ) {
         // mimic the actual upstream response for missing searchFieldType
         throw Boom.internal(
-          'There was an error processing your request. It has been logged (ID someID)',
+          'missing or invalid searchFieldType/primarySearchPhrase, expected "SBI" and SBI number\n' +
+            `searchFieldType: '${body?.searchFieldType}', primarySearchPhrase: '${searchSbi}'`,
           request
         )
       }
 
       // SBI must be at least 9 characters long
-      if ((`${searchSbi}`?.length || 0) < 9) {
-        throw Boom.badRequest('HTTP 400 Bad Request', request)
+      if (
+        // upstream checks the character length of the number
+        (`${searchSbi}`?.length || 0) < 9 ||
+        // we also have to check for a big enough integer to satisfy the schema
+        (typeof searchSbi === 'number' && searchSbi < 100000000)
+      ) {
+        throw Boom.badRequest(`bad SBI: ${searchSbi}, it must comprise 9 or more digits`, request)
       }
 
       // return empty result if no orgId found but no "errors" encountered

@@ -9,7 +9,7 @@ describe('Fake Authenticate data', () => {
     server.route(authenticate)
     await Promise.all([
       server.initialize(),
-      loadSchema('src/routes/v2/authenticate-schema.yml').then((s) => (schema = s))
+      loadSchema('src/routes/v2/authenticate-schema.oas.yml').then((s) => (schema = s))
     ])
   })
 
@@ -28,7 +28,9 @@ describe('Fake Authenticate data', () => {
     })
     expect(statusCode).toBe(200)
     expect(result).toConformToSchema(
-      schema.paths['/external-auth/security-answers/{crn}'].get.responses['200'].schema
+      schema.paths['/external-auth/security-answers/{crn}'].get.responses['200'].content[
+        'application/json'
+      ].schema
     )
   })
 })
