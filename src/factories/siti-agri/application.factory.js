@@ -1,5 +1,5 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
-import { fakeId, nullOrFake } from '../common.js'
+import { fakeId, nullOrFake, transformDate } from '../common.js'
 import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
 
 const applications = {}
@@ -68,7 +68,7 @@ const intermediateTransitions = [
 ]
 
 export const createHistory = (overrides = {}) => ({
-  dt_transition: faker.date.recent().toISOString(),
+  dt_transition: transformDate(faker.date.recent()),
   check_status: faker.helpers.weightedArrayElement([
     { weight: 14, value: 'PASSED' },
     { weight: 1, value: 'NOT PASSED' }
@@ -129,7 +129,7 @@ export const createApplication = (sbi, overrides = {}) => {
     status_code_p: 'STADOM', // always seems to be 'STADOM'
     status_code_s: code,
     status,
-    submission_date: faker.date.recent().toISOString(),
+    submission_date: transformDate(faker.date.recent()),
     portal_status_p: 'DOMPRS', // always seems to be 'DOMPRS'
     // portal_status_s is often `null`, otherwise follows normal pattern from mappings
     portal_status_s: nullOrFake(() => portal, 0.2),
