@@ -1,6 +1,6 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
-import { fakeId, nullOrFake } from '../common.js'
-import { sbiToOrgId } from '../id-lookups.js'
+import { fakeId, nullOrFake, transformDate } from '../common.js'
+import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
 
 const applications = {}
 
@@ -68,7 +68,7 @@ const intermediateTransitions = [
 ]
 
 export const createHistory = (overrides = {}) => ({
-  dt_transition: faker.date.recent().toISOString(),
+  dt_transition: transformDate(faker.date.recent()),
   check_status: faker.helpers.weightedArrayElement([
     { weight: 14, value: 'PASSED' },
     { weight: 1, value: 'NOT PASSED' }
@@ -116,6 +116,7 @@ export const createHistoryFromTransition = (transition, overrides = {}) => {
 export const createApplication = (sbi, overrides = {}) => {
   const year = faker.date.recent().getFullYear()
   const { status, code, portal, transition } = faker.helpers.weightedArrayElement(statusMappings)
+  const transition_id = overrides?.transition_id || fakeId()
 
   return {
     sbi,
@@ -128,24 +129,37 @@ export const createApplication = (sbi, overrides = {}) => {
     status_code_p: 'STADOM', // always seems to be 'STADOM'
     status_code_s: code,
     status,
-    submission_date: faker.date.recent().toISOString(),
+    submission_date: transformDate(faker.date.recent()),
     portal_status_p: 'DOMPRS', // always seems to be 'DOMPRS'
     // portal_status_s is often `null`, otherwise follows normal pattern from mappings
     portal_status_s: nullOrFake(() => portal, 0.2),
     fg_active: 'Yes', // always seems to be 'Yes'
-    transition_id: fakeId(),
+    transition_id,
     transition_name: transition,
     agreement_ref: nullOrFake(() => `${fakeId()}`), // sometimes refers to multiple agreements!!
-    application_history: createHistoryFromTransition(transition),
-    ...overrides
+    ...overrides,
+    application_history:
+      // priority to provided history, then current transition, then fake history
+      overrides?.application_history?.length
+        ? [
+            createHistory({
+              transition_id,
+              transition_name: transition,
+              ...overrides.application_history.shift()
+            }),
+            ...(overrides.application_history?.map((history) => createHistory(history)) || [])
+          ]
+        : createHistoryFromTransition(transition)
   }
 }
 
 export const createApplications = (orgId, sbi) => {
   faker.seed(orgId)
-  const applicationsData = Array.from({ length: faker.helpers.arrayElement([0, 5, 60, 350]) }, () =>
-    createApplication(sbi)
-  )
+  const applicationsData =
+    orgIdLookup[orgId]?.applications?.map((application) => createApplication(sbi, application)) ||
+    Array.from({ length: faker.helpers.arrayElement([0, 5, 60, 350]) }, () =>
+      createApplication(sbi)
+    )
   applications[sbi] = applicationsData
   return applicationsData
 }

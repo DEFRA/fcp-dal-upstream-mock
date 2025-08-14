@@ -97,7 +97,7 @@ export const personIdToCRN = {
   5069674: '1100696741'
 }
 
-const orgIdLookup = {
+export const orgIdLookup = {
   1000000000: {
     sbi: 1000000000,
     customers: [] // org with no customers
@@ -122,6 +122,7 @@ const orgIdLookup = {
       22222277, 22222278, 22222279
     ]
   },
+  // SFD requested
   5583575: { sbi: 107167406, customers: [5007704] },
   5578463: { sbi: 107097991, customers: [5010242] },
   5501559: { sbi: 106354662, customers: [5002139] },
@@ -147,7 +148,15 @@ const orgIdLookup = {
   5705812: { sbi: 200089578, customers: [5042346] },
   5783443: { sbi: 200384417, customers: [5042346] },
   5374662: { sbi: 114301879, customers: [5069674] },
-  5467167: { sbi: 106430700, customers: [5069674] }
+  5467167: { sbi: 106430700, customers: [5069674] },
+  // temporarily add v1 data for testing Applications
+  5565448: { sbi: 107183280, customers: [], applications: [{ application_history: [{}] }] }, // 1 app
+  5559799: { sbi: 106238988, customers: [] },
+  5560725: { sbi: 106284736, customers: [] },
+  5625145: { sbi: 107591843, customers: [] },
+  5447505: { sbi: 121428499, customers: [] },
+  9000001: { sbi: 900000001, customers: [] },
+  9000002: { sbi: 900000002, customers: [] }
 }
 
 // Derived inverses — calculated once
