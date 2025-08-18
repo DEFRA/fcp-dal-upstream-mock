@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import Joi from 'joi'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
@@ -129,38 +130,82 @@ export const person = [
     path: '/person/{personId}',
     async handler(request, h) {
       try {
-        Joi.object({
-          title: Joi.string(),
-          otherTitle: Joi.string(),
-          firstName: Joi.string().required(),
-          middleName: Joi.string(),
-          lastName: Joi.string().required(),
-          dateOfBirth: Joi.number().integer(),
-          landline: Joi.string(),
-          mobile: Joi.string(),
-          email: Joi.string().email(),
-          address: Joi.object({
-            address1: Joi.string(),
-            address2: Joi.string(),
-            address3: Joi.string(),
-            address4: Joi.string(),
-            address5: Joi.string(),
-            pafOrganisationName: Joi.string(),
-            flatName: Joi.string(),
-            buildingNumberRange: Joi.string(),
-            buildingName: Joi.string(),
-            street: Joi.string(),
-            city: Joi.string(),
-            county: Joi.string(),
-            postalCode: Joi.string(),
-            country: Joi.string(),
-            uprn: Joi.string(),
-            dependentLocality: Joi.string(),
-            doubleDependentLocality: Joi.string(),
-            addressTypeId: Joi.string()
-          })
-        }).validateAsync(request.payload)
+        // Reusable schema for fields allowing string (including empty), number (including unsafe), boolean, and null
+        const flexibleTypeSchema = Joi.alternatives().try(
+          Joi.string().allow(''),
+          Joi.number().unsafe(), // Allow any number, including unsafe ones
+          Joi.boolean(),
+          Joi.valid(null)
+        )
+
+        // Reusable schema for fields allowing string (including empty), number (including unsafe), and boolean
+        const requiredFlexibleTypeSchema = Joi.alternatives()
+          .try(
+            Joi.string().allow(''),
+            Joi.number().unsafe(), // Allow any number, including unsafe ones
+            Joi.boolean()
+          )
+          .required()
+
+        // Reusable schema for fields allowing object, array, string (including empty), and null
+        const contactInfoSchema = Joi.alternatives().try(
+          Joi.object(),
+          Joi.array(),
+          Joi.string().allow(''),
+          Joi.valid(null)
+        )
+
+        // Reusable schema for address subfields
+        const addressFieldSchema = Joi.alternatives().try(
+          Joi.object(),
+          Joi.array(),
+          Joi.string(),
+          Joi.number().unsafe(), // Allow any number, including unsafe ones
+          Joi.boolean(),
+          Joi.valid(null)
+        )
+
+        const schema = Joi.object({
+          title: flexibleTypeSchema,
+          otherTitle: flexibleTypeSchema,
+          firstName: requiredFlexibleTypeSchema,
+          middleName: flexibleTypeSchema,
+          lastName: requiredFlexibleTypeSchema,
+          dateOfBirth: Joi.alternatives().try(
+            Joi.number().unsafe().integer(), // Allow any integer number, including unsafe ones
+            Joi.string()
+              .pattern(/^(-?[1-9][0-9]{9})?$/)
+              .allow(''),
+            Joi.valid(null)
+          ),
+          landline: contactInfoSchema,
+          mobile: contactInfoSchema,
+          email: contactInfoSchema,
+          address: Joi.alternatives().try(
+            Joi.object({
+              address1: addressFieldSchema,
+              address2: addressFieldSchema,
+              address3: addressFieldSchema,
+              address4: addressFieldSchema,
+              address5: addressFieldSchema,
+              pafOrganisationName: addressFieldSchema,
+              flatName: addressFieldSchema,
+              buildingNumberRange: addressFieldSchema,
+              buildingName: addressFieldSchema,
+              street: addressFieldSchema,
+              city: addressFieldSchema,
+              county: addressFieldSchema,
+              postalCode: addressFieldSchema,
+              country: addressFieldSchema,
+              uprn: addressFieldSchema
+            }).unknown(true), // Allow arbitrary fields in address object
+            Joi.valid(null)
+          )
+        }).unknown(true) // Allow arbitrary fields at top level
+
+        await schema.validateAsync(request.payload)
       } catch (err) {
+        console.log(err)
         throw Boom.badData('HTTP 422')
       }
 
