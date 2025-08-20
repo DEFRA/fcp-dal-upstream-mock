@@ -18,6 +18,7 @@ describe('Fake Person', () => {
       method: 'GET',
       url: '/person/11111111/summary'
     })
+
     expect(statusCode).toBe(200)
     expect(result).toConformToSchema(
       schema.paths['/person/{personId}/summary'].get.responses['200'].content['application/json']

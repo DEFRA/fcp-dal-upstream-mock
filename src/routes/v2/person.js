@@ -1,7 +1,8 @@
 import Boom from '@hapi/boom'
+import Joi from 'joi'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
-import { retrievePerson } from '../../factories/person/person.factory.js'
+import { retrievePerson, updatePerson } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
 export const person = [
@@ -91,6 +92,101 @@ export const person = [
         ],
         _page: pagination
       })
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/person/{personId}',
+    async handler(request, h) {
+      try {
+        // Reusable schema for fields allowing string (including empty), number (including unsafe), boolean, and null
+        const flexibleTypeSchema = Joi.alternatives().try(
+          Joi.string().allow(''),
+          Joi.number().unsafe(), // Allow any number, including unsafe ones
+          Joi.boolean(),
+          Joi.valid(null)
+        )
+
+        // Reusable schema for fields allowing string (including empty), number (including unsafe), and boolean
+        const requiredFlexibleTypeSchema = Joi.alternatives()
+          .try(
+            Joi.string().allow(''),
+            Joi.number().unsafe(), // Allow any number, including unsafe ones
+            Joi.boolean()
+          )
+          .required()
+
+        // Reusable schema for fields allowing object, array, string (including empty), and null
+        const contactInfoSchema = Joi.alternatives().try(
+          Joi.object(),
+          Joi.array(),
+          Joi.string().allow(''),
+          Joi.valid(null)
+        )
+
+        // Reusable schema for address subfields
+        const addressFieldSchema = Joi.alternatives().try(
+          Joi.object(),
+          Joi.array(),
+          Joi.string(),
+          Joi.number().unsafe(), // Allow any number, including unsafe ones
+          Joi.boolean(),
+          Joi.valid(null)
+        )
+
+        const schema = Joi.object({
+          title: flexibleTypeSchema,
+          otherTitle: flexibleTypeSchema,
+          firstName: requiredFlexibleTypeSchema,
+          middleName: flexibleTypeSchema,
+          lastName: requiredFlexibleTypeSchema,
+          dateOfBirth: Joi.alternatives().try(
+            Joi.number().unsafe().integer(), // Allow any integer number, including unsafe ones
+            Joi.string()
+              .pattern(/^(-?[1-9][0-9]{9})?$/)
+              .allow(''),
+            Joi.valid(null)
+          ),
+          landline: contactInfoSchema,
+          mobile: contactInfoSchema,
+          email: contactInfoSchema,
+          address: Joi.alternatives().try(
+            Joi.object({
+              address1: addressFieldSchema,
+              address2: addressFieldSchema,
+              address3: addressFieldSchema,
+              address4: addressFieldSchema,
+              address5: addressFieldSchema,
+              pafOrganisationName: addressFieldSchema,
+              flatName: addressFieldSchema,
+              buildingNumberRange: addressFieldSchema,
+              buildingName: addressFieldSchema,
+              street: addressFieldSchema,
+              city: addressFieldSchema,
+              county: addressFieldSchema,
+              postalCode: addressFieldSchema,
+              country: addressFieldSchema,
+              uprn: addressFieldSchema
+            }).unknown(true), // Allow arbitrary fields in address object
+            Joi.valid(null)
+          )
+        }).unknown(true) // Allow arbitrary fields at top level
+
+        await schema.validateAsync(request.payload)
+      } catch (err) {
+        console.log(err)
+        throw Boom.badData('HTTP 422')
+      }
+
+      const personId = parseInt(request.params.personId, 10)
+
+      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
+      updatePerson(personId, request.payload)
+
+      return h.response().code(204)
     }
   }
 ]
