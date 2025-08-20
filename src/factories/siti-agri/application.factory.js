@@ -68,7 +68,7 @@ const intermediateTransitions = [
 ]
 
 export const createHistory = (overrides = {}) => ({
-  dt_transition: transformDate(faker.date.recent()),
+  dt_transition: transformDate(faker.date.recent({ refDate: '2023-01-01' })),
   check_status: faker.helpers.weightedArrayElement([
     { weight: 14, value: 'PASSED' },
     { weight: 1, value: 'NOT PASSED' }
@@ -114,7 +114,7 @@ export const createHistoryFromTransition = (transition, overrides = {}) => {
 }
 
 export const createApplication = (sbi, overrides = {}) => {
-  const year = faker.date.recent().getFullYear()
+  const year = faker.date.recent({ refDate: '2023-01-01' }).getFullYear()
   const { status, code, portal, transition } = faker.helpers.weightedArrayElement(statusMappings)
   const transition_id = overrides?.transition_id || fakeId()
 
@@ -129,7 +129,7 @@ export const createApplication = (sbi, overrides = {}) => {
     status_code_p: 'STADOM', // always seems to be 'STADOM'
     status_code_s: code,
     status,
-    submission_date: transformDate(faker.date.recent()),
+    submission_date: transformDate(faker.date.recent({ refDate: '2023-01-01' })),
     portal_status_p: 'DOMPRS', // always seems to be 'DOMPRS'
     // portal_status_s is often `null`, otherwise follows normal pattern from mappings
     portal_status_s: nullOrFake(() => portal, 0.2),
