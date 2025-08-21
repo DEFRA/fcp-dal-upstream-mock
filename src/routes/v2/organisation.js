@@ -113,5 +113,31 @@ export const organisation = [
         _data: updateOrganisation(request.params.organisationId, request.payload)
       })
     }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/lock',
+    handler: async (request, h) => {
+      const organisationId = parseInt(request.params.organisationId, 10)
+
+      if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
+      return h.response()
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/unlock',
+    handler: async (request, h) => {
+      const organisationId = parseInt(request.params.organisationId, 10)
+
+      if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
+      return h.response()
+    }
   }
 ]
