@@ -1,5 +1,5 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
-import { fakeId, nullOrFake, transformDate } from '../common.js'
+import { fakeId, nullOrFake, toTitleCase, transformDate } from '../common.js'
 import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
 
 const applications = {}
@@ -133,6 +133,8 @@ export const createApplication = (sbi, overrides = {}) => {
     portal_status_p: 'DOMPRS', // always seems to be 'DOMPRS'
     // portal_status_s is often `null`, otherwise follows normal pattern from mappings
     portal_status_s: nullOrFake(() => portal, 0.2),
+    // sometimes duplicates portal_status_s
+    portal_status: nullOrFake(() => toTitleCase(status), 0.5),
     fg_active: 'Yes', // always seems to be 'Yes'
     transition_id,
     transition_name: transition,

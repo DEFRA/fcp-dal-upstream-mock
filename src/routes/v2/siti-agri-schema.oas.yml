@@ -143,6 +143,7 @@ components:
         - submission_date
         - portal_status_p
         - portal_status_s
+        - portal_status
         - fg_active
         - transition_id
         - transition_name
