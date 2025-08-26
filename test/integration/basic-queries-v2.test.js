@@ -128,5 +128,98 @@ describe('Basic queries for faked routes', () => {
         })
       )
     })
+
+    test('Should return data for /organisation/create/{organisationId}', async () => {
+      const response = await mockServer.inject({
+        method: 'POST',
+        url: '/extapi/organisation/create/1111111111',
+        payload: {
+          legalStatus: {
+            id: 102101
+          },
+          businessType: {
+            id: 101422
+          },
+          address: {
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: 'BODYCHENAN',
+            street: null,
+            city: 'PWLLHELI',
+            county: null,
+            postalCode: 'LL53 8NT',
+            country: 'United Kingdom',
+            uprn: '10070366332',
+            dependentLocality: 'LLANGWNADL',
+            doubleDependentLocality: null
+          },
+          name: 'test unique 123',
+          email: 'test@test.com',
+          landline: '01234613020',
+          mobile: '07111222333',
+          companiesHouseRegistrationNumber: null,
+          charityCommissionRegistrationNumber: '12312312',
+          businessReference: '1106599951',
+          hasAdditionalBusinessActivities: true,
+          taxRegistrationNumber: '123456789'
+        }
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data.id).toBeDefined()
+      expect(json._data).toEqual(
+        // snippet only, due to size of org object
+        expect.objectContaining({
+          legalStatus: {
+            id: 102101,
+            type: 'Not set'
+          },
+          businessType: {
+            id: 101422,
+            type: 'Not set'
+          },
+          address: {
+            address1: null,
+            address2: null,
+            address3: null,
+            address4: null,
+            address5: null,
+            addressTypeId: null,
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: 'BODYCHENAN',
+            street: null,
+            city: 'PWLLHELI',
+            county: null,
+            postalCode: 'LL53 8NT',
+            country: 'United Kingdom',
+            uprn: '10070366332',
+            dependentLocality: 'LLANGWNADL',
+            doubleDependentLocality: null,
+            pafOrganisationName: null
+          },
+          correspondenceAddress: null,
+          correspondenceFax: null,
+          deactivated: false,
+          fax: null,
+          name: 'test unique 123',
+          email: 'test@test.com',
+          landline: '01234613020',
+          mobile: '07111222333',
+          landConfirmed: null,
+          lastUpdatedOn: null,
+          companiesHouseRegistrationNumber: null,
+          charityCommissionRegistrationNumber: '12312312',
+          businessReference: '1106599951',
+          confirmed: true,
+          locked: false,
+          persons: [],
+          additionalSbiIds: [],
+          additionalBusinessActivities: null,
+          hasAdditionalBusinessActivities: true,
+          taxRegistrationNumber: '123456789'
+        })
+      )
+    })
   })
 })

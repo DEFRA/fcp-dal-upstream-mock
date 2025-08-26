@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
-import { retrievePerson } from '../../factories/person/person.factory.js'
+import { retrievePerson, retrievePersonOrgs } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 
 export const person = [
@@ -90,6 +90,32 @@ export const person = [
           }
         ],
         _page: pagination
+      })
+    }
+  },
+  {
+    method: 'GET',
+    path: '/organisation/person/{personId}/summary',
+    handler: async (request, h) => {
+      let personId = parseInt(request.params.personId, 10)
+      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+        throw Boom.forbidden(
+          `bad personId: ${personId}, is not an integer in the acceptable range`,
+          request
+        )
+      }
+
+      const orgs = retrievePersonOrgs(personId)
+
+      return h.response({
+        _data: orgs,
+        _page: {
+          number: 1,
+          size: 500,
+          totalPages: 1,
+          numberOfElements: orgs.length,
+          totalElements: orgs.length
+        }
       })
     }
   }
