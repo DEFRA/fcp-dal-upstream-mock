@@ -42,3 +42,5 @@ export const nullOrFake = (fakeFn, nullWeight = 0.5) =>
 // replicate non-standard kits date format, e.g. '2019-01-30T12:25:23:023+0000'
 // NOTE: the seconds:milliseconds separator is a colon `:`, not a dot `.` !!
 export const transformDate = (date) => date.toISOString().replace('.', ':')
+
+export const toTitleCase = (str) => str.toLocaleLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
