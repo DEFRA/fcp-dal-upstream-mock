@@ -166,7 +166,7 @@ export const person = [
           dateOfBirth: Joi.alternatives().try(
             Joi.number().unsafe().integer(),
             Joi.string()
-              .pattern(/^(-?[1-9][0-9]{9})?$/)
+              .pattern(/^([-]?\d+)?$/)
               .allow(''),
             Joi.valid(null)
           ),
@@ -197,6 +197,7 @@ export const person = [
 
         await schema.validateAsync(request.payload)
       } catch (err) {
+        console.log(err)
         throw Boom.badData()
       }
 
