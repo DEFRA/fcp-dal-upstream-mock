@@ -22,11 +22,13 @@ export const person = [
         )
       }
       const personData = retrievePerson(personId)
-      delete personData.role
-      delete personData.privileges
-      delete personData.lastUpdatedOn
+      const copy = { ...personData }
 
-      return h.response({ _data: personData })
+      delete copy.role
+      delete copy.privileges
+      delete copy.lastUpdatedOn
+
+      return h.response({ _data: copy })
     }
   },
   {
