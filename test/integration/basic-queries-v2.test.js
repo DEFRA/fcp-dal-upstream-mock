@@ -163,6 +163,29 @@ describe('Basic queries for faked routes', () => {
         })
       )
     })
+
+    test('Should return data /organisation/person/{personId}/summary', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111111/summary`
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data).toHaveLength(1)
+      expect(json._data[0]).toEqual(
+        // snippet only, due to size of person object
+        expect.objectContaining({
+          additionalSbiIds: [],
+          confirmed: true,
+          deactivated: false,
+          id: 1111111111,
+          landConfirmed: false,
+          locked: false,
+          name: 'Lowe - Wolf',
+          sbi: 1111111111
+        })
+      )
+    })
   })
 
   describe('Organisation routes', () => {
@@ -263,7 +286,7 @@ describe('Basic queries for faked routes', () => {
     test('Should return data for /organisation/create/{personId}', async () => {
       const response = await mockServer.inject({
         method: 'POST',
-        url: '/extapi/organisation/create/1111111111',
+        url: '/extapi/organisation/create/11111111',
         payload: {
           legalStatus: {
             id: 102101
@@ -349,6 +372,50 @@ describe('Basic queries for faked routes', () => {
           additionalBusinessActivities: null,
           hasAdditionalBusinessActivities: true,
           taxRegistrationNumber: '123456789'
+        })
+      )
+
+      // Also check org added to person
+      const personResponse = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111111/summary`
+      })
+
+      expect(personResponse.statusCode).toBe(200)
+      const personJson = JSON.parse(personResponse.payload)
+      expect(personJson._data).toHaveLength(2)
+      expect(personJson._data[1].id).toEqual(json._data.id)
+    })
+
+    test('Should return data for /authorisation/organisation/{organisationId}', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/1111111111'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data[0]).toEqual(
+        // snippet only, due to size of org object
+        expect.objectContaining({
+          confirmed: true,
+          firstName: 'Gerhard',
+          id: 11111111,
+          lastName: 'Purdy',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree',
+            'ELM_APPLICATION_SUBMIT'
+          ],
+          role: 'Business Partner'
         })
       )
     })

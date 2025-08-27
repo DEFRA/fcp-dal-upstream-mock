@@ -63,11 +63,6 @@ export const retrievePerson = (personId) => {
     return person
   }
 
-  const crn = personIdToCRN[personId]
-  if (crn) {
-    return generatePerson(personId, crn)
-  }
-
   throw Boom.notFound(`person with personId ${personId} not found`)
 }
 

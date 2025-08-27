@@ -2,7 +2,7 @@ import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
 import { orgIdToPersonIds, orgIdToSbi, personIdToOrgIds } from '../../factories/id-lookups.js'
 import { fakeAddress, fakeIds, nft, nullOrFake } from '../common.js'
-import { people } from '../person/person.factory.js'
+import { people, retrievePerson } from '../person/person.factory.js'
 
 export const organisations = {}
 
@@ -18,6 +18,7 @@ function generateOrgId() {
 }
 
 export const createOrganisation = (personId, payload) => {
+  retrievePerson(personId)
   const orgId = generateOrgId()
   const name = payload.name
   const org = {
@@ -109,7 +110,7 @@ export const createOrganisation = (personId, payload) => {
   }
 
   organisations[orgId] = org
-  personIdToOrgIds[personId] = orgId
+  personIdToOrgIds[personId].push(orgId)
   orgIdToPersonIds[orgId] = personId
 
   return org
