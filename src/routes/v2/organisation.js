@@ -121,7 +121,7 @@ export const organisation = [
     path: '/organisation/create/{personId}',
     handler: async (request, h) => {
       return h.response({
-        _data: createOrganisation(request.payload)
+        _data: createOrganisation(request.params.personId, request.payload)
       })
     }
   }

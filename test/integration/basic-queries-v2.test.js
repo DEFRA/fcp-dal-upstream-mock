@@ -26,12 +26,42 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          id: 11111111,
+          address: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            pafOrganisationName: null,
+            postalCode: 'SV14 7HI',
+            street: null,
+            uprn: '807723943667',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Crona-on-West',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null
+          },
+          confirmed: true,
           customerReferenceNumber: 'crn-11111111',
-          firstName: 'Lauren',
-          lastName: 'Sanford',
-          email: 'lauren.sanford@immaculate-shark.info',
-          address: expect.objectContaining({}) // just used to assert the `address` field name
+          deactivated: false,
+          doNotContact: false,
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          emailValidated: true,
+          firstName: 'Gerhard',
+          id: 11111111,
+          landline: '055 2317 9411',
+          lastName: 'Purdy',
+          locked: false,
+          middleName: 'Shayna',
+          mobile: '01650 95852',
+          otherTitle: 'MD',
+          personalIdentifiers: ['2356939974', '2348412591'],
+          title: 'Mr.'
         })
       )
     })
@@ -47,12 +77,42 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          id: 11111111,
+          address: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            pafOrganisationName: null,
+            postalCode: 'SV14 7HI',
+            street: null,
+            uprn: '807723943667',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Crona-on-West',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null
+          },
+          confirmed: true,
           customerReferenceNumber: 'crn-11111111',
-          firstName: 'Lauren',
-          lastName: 'Sanford',
-          email: 'lauren.sanford@immaculate-shark.info',
-          address: expect.objectContaining({}) // just used to assert the `address` field name
+          deactivated: false,
+          doNotContact: false,
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          emailValidated: true,
+          firstName: 'Gerhard',
+          id: 11111111,
+          landline: '055 2317 9411',
+          lastName: 'Purdy',
+          locked: false,
+          middleName: 'Shayna',
+          mobile: '01650 95852',
+          otherTitle: 'MD',
+          personalIdentifiers: ['2356939974', '2348412591'],
+          title: 'Mr.'
         })
       )
     })
@@ -72,12 +132,34 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          fullName: 'Lauren Sanford',
-          nationalInsuranceNumber: null, // available in search, not the summary!!
-          id: 11111111,
           customerReference: 'crn-11111111',
-          // line below is just used to assert the `primaryAddress` field name
-          primaryAddress: expect.objectContaining({})
+          deactivated: false,
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          fullName: 'Gerhard Purdy',
+          id: 11111111,
+          locked: false,
+          nationalInsuranceNumber: null,
+          personalIdentifiers: ['2356939974', '2348412591'],
+          primaryAddress: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Crona-on-West',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null,
+            pafOrganisationName: null,
+            postalCode: 'SV14 7HI',
+            street: null,
+            uprn: '807723943667'
+          }
         })
       )
     })
@@ -94,13 +176,37 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          id: 1111111111,
-          name: 'Maggio, Murray and Dicki',
-          sbi: 1111111111,
+          additionalSbiIds: [],
+          address: {
+            address1: '51',
+            address2: '527 Alicia Bank',
+            address3: 'Kiehn-over-Mosciski',
+            address4: 'XP4 7DL',
+            address5: 'Puerto Rico',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Mooreingham',
+            country: 'Wales',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null,
+            pafOrganisationName: 'Lowe - Wolf',
+            postalCode: 'UY42 9SO',
+            street: null,
+            uprn: '903411609185'
+          },
           confirmed: true,
-          landline: '010952 63723',
+          correspondenceAddress: null,
           deactivated: false,
-          locked: false
+          id: 1111111111,
+          isCorrespondenceAsBusinessAddr: null,
+          isFinancialToBusinessAddr: true,
+          landConfirmed: false,
+          locked: false,
+          name: 'Lowe - Wolf',
+          sbi: 1111111111
         })
       )
     })
@@ -119,17 +225,42 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          id: 1111111111,
-          name: 'Maggio, Murray and Dicki',
-          sbi: 1111111111,
+          additionalSbiIds: [],
+          address: {
+            address1: '51',
+            address2: '527 Alicia Bank',
+            address3: 'Kiehn-over-Mosciski',
+            address4: 'XP4 7DL',
+            address5: 'Puerto Rico',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Mooreingham',
+            country: 'Wales',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null,
+            pafOrganisationName: 'Lowe - Wolf',
+            postalCode: 'UY42 9SO',
+            street: null,
+            uprn: '903411609185'
+          },
           confirmed: true,
+          correspondenceAddress: null,
           deactivated: false,
-          locked: false
+          id: 1111111111,
+          isCorrespondenceAsBusinessAddr: null,
+          isFinancialToBusinessAddr: true,
+          landConfirmed: false,
+          locked: false,
+          name: 'Lowe - Wolf',
+          sbi: 1111111111
         })
       )
     })
 
-    test('Should return data for /organisation/create/{organisationId}', async () => {
+    test('Should return data for /organisation/create/{personId}', async () => {
       const response = await mockServer.inject({
         method: 'POST',
         url: '/extapi/organisation/create/1111111111',
