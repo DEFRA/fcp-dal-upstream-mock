@@ -323,6 +323,12 @@ components:
           type: [string, 'null']
         uprn:
           type: [string, 'null']
+        dependentLocality:
+          type: [string, 'null']
+        doubleDependentLocality:
+          type: [string, 'null']
+        addressTypeId:
+          type: [string, 'null']
       required:
         - 'address1'
         - 'address2'

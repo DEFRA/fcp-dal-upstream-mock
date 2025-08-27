@@ -130,24 +130,17 @@ export const person = [
     path: '/person/{personId}',
     async handler(request, h) {
       try {
-        // Reusable schema for fields allowing string (including empty), number (including unsafe), boolean, and null
         const flexibleTypeSchema = Joi.alternatives().try(
           Joi.string().allow(''),
-          Joi.number().unsafe(), // Allow any number, including unsafe ones
+          Joi.number().unsafe(),
           Joi.boolean(),
           Joi.valid(null)
         )
 
-        // Reusable schema for fields allowing string (including empty), number (including unsafe), and boolean
         const requiredFlexibleTypeSchema = Joi.alternatives()
-          .try(
-            Joi.string().allow(''),
-            Joi.number().unsafe(), // Allow any number, including unsafe ones
-            Joi.boolean()
-          )
+          .try(Joi.string().allow(''), Joi.number().unsafe(), Joi.boolean())
           .required()
 
-        // Reusable schema for fields allowing object, array, string (including empty), and null
         const contactInfoSchema = Joi.alternatives().try(
           Joi.object(),
           Joi.array(),
@@ -155,12 +148,11 @@ export const person = [
           Joi.valid(null)
         )
 
-        // Reusable schema for address subfields
         const addressFieldSchema = Joi.alternatives().try(
           Joi.object(),
           Joi.array(),
           Joi.string(),
-          Joi.number().unsafe(), // Allow any number, including unsafe ones
+          Joi.number().unsafe(),
           Joi.boolean(),
           Joi.valid(null)
         )
@@ -172,7 +164,7 @@ export const person = [
           middleName: flexibleTypeSchema,
           lastName: requiredFlexibleTypeSchema,
           dateOfBirth: Joi.alternatives().try(
-            Joi.number().unsafe().integer(), // Allow any integer number, including unsafe ones
+            Joi.number().unsafe().integer(),
             Joi.string()
               .pattern(/^(-?[1-9][0-9]{9})?$/)
               .allow(''),
@@ -198,21 +190,20 @@ export const person = [
               postalCode: addressFieldSchema,
               country: addressFieldSchema,
               uprn: addressFieldSchema
-            }).unknown(true), // Allow arbitrary fields in address object
+            }).unknown(true),
             Joi.valid(null)
           )
-        }).unknown(true) // Allow arbitrary fields at top level
+        }).unknown(true)
 
         await schema.validateAsync(request.payload)
       } catch (err) {
-        console.log(err)
-        throw Boom.badData('HTTP 422')
+        throw Boom.badData()
       }
 
       const personId = parseInt(request.params.personId, 10)
 
       if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
-        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+        throw Boom.forbidden()
       }
 
       updatePerson(personId, request.payload)
