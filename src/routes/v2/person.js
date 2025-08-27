@@ -129,6 +129,27 @@ export const person = [
     method: 'PUT',
     path: '/person/{personId}',
     async handler(request, h) {
+      const body = request.payload
+      const personId = parseInt(request.params.personId, 10)
+
+      // personId must be a valid integer in range, and email header must be a user on the system
+      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
+        throw Boom.forbidden(
+          `bad personId: ${personId}, is not an integer in the acceptable range`,
+          request
+        )
+      }
+      // body must not be empty
+      if (body === '' || body === null) {
+        throw Boom.badRequest('empty request body not allowed', request)
+        // TODO: should respond with `"source cannot be null"`
+      }
+      // body must be a parsable JSON object, not an array or other type
+      if (typeof body !== 'object' || Array.isArray(body)) {
+        throw Boom.badRequest('missing or invalid request body', request)
+        // TODO: should respond with `{"code":400,"message":"Unable to process JSON"}`
+      }
+      // validate the body against the person schema
       try {
         const flexibleTypeSchema = Joi.alternatives().try(
           Joi.string().allow(''),
@@ -197,17 +218,10 @@ export const person = [
 
         await schema.validateAsync(request.payload)
       } catch (err) {
-        console.log(err)
-        throw Boom.badData()
+        throw Boom.badData('validation error while processing input', { error: err, request })
       }
 
-      const personId = parseInt(request.params.personId, 10)
-
-      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
-        throw Boom.forbidden()
-      }
-
-      updatePerson(personId, request.payload)
+      updatePerson(personId, body)
 
       return h.response().code(204)
     }
