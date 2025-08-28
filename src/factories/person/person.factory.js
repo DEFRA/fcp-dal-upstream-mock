@@ -2,9 +2,9 @@ import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
 import { orgIdToSbi, personIdToCRN, personIdToOrgIds } from '../../factories/id-lookups.js'
 import { fakeAddress, fakeIds } from '../common.js'
-import { organisations } from '../organisation/organisation.factory.js'
+import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
-export const people = {}
+const people = {}
 
 const generatePerson = (personId, crn) => {
   faker.seed(personId)
@@ -59,17 +59,21 @@ Object.entries(personIdToCRN).forEach(([personId, crn]) => {
 
 export const retrievePerson = (personId) => {
   const person = people[personId]
+  const crn = personIdToCRN[personId]
   if (person) {
     return person
   }
+  if (!crn) {
+    throw Boom.notFound(`person with personId ${personId} not found`)
+  }
 
-  throw Boom.notFound(`person with personId ${personId} not found`)
+  return generatePerson(personId, crn)
 }
 
 export const retrievePersonOrgs = (personId) => {
   const orgIds = personIdToOrgIds[personId] || []
   const orgs = orgIds.map((orgId) => {
-    const org = organisations[orgId]
+    const org = retrieveOrganisation(orgId)
     return {
       id: orgId,
       sbi: orgIdToSbi[orgId],

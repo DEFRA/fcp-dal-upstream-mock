@@ -2,19 +2,19 @@ import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
 import { orgIdToPersonIds, orgIdToSbi, personIdToOrgIds } from '../../factories/id-lookups.js'
 import { fakeAddress, fakeIds, nft, nullOrFake } from '../common.js'
-import { people, retrievePerson } from '../person/person.factory.js'
+import { retrievePerson } from '../person/person.factory.js'
 
-export const organisations = {}
+const organisations = {}
+let startingOrgId = 1000000
 
 function generateOrgId() {
   // exclude existing orgIds
   const excludeList = Object.keys(orgIdToSbi)
-  let num
   do {
-    num = faker.number.int({ min: 1000000, max: 9999999 })
-  } while (excludeList.includes(num))
+    startingOrgId += 1
+  } while (excludeList.includes(startingOrgId))
 
-  return num
+  return startingOrgId
 }
 
 export const createOrganisation = (personId, payload) => {
@@ -179,19 +179,8 @@ const generateOrganisation = (orgId) => {
   return org
 }
 
-Object.keys(orgIdToSbi).forEach((orgId) => {
-  organisations[orgId] = generateOrganisation(orgId)
-})
-
 export const updateOrganisation = (orgId, updatesToOrg) => {
-  let org
-  if (organisations[orgId]) {
-    org = organisations[orgId]
-  } else if (!orgIdToSbi[orgId]) {
-    throw Boom.notFound(`organisation with orgId ${orgId} not found`)
-  } else {
-    org = generateOrganisation(orgId)
-  }
+  const org = retrieveOrganisation(orgId)
   const newOrg = Object.assign(org, updatesToOrg)
   organisations[orgId] = newOrg
   return newOrg
@@ -211,7 +200,7 @@ export const retrieveOrganisation = (orgId) => {
 export const retrieveOrganisationCustomers = (orgId) => {
   const personIds = orgIdToPersonIds[orgId] || []
   const orgPeople = personIds.map((personId) => {
-    const person = people[personId]
+    const person = retrievePerson(personId)
     return {
       id: personId,
       firstName: person.firstName,

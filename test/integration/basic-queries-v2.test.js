@@ -179,9 +179,9 @@ describe('Basic queries for faked routes', () => {
           confirmed: true,
           deactivated: false,
           id: 1111111111,
-          landConfirmed: false,
+          landConfirmed: true,
           locked: false,
-          name: 'Lowe - Wolf',
+          name: 'Maggio, Murray and Dicki',
           sbi: 1111111111
         })
       )
@@ -199,37 +199,69 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
+          additionalBusinessActivities: null,
           additionalSbiIds: [],
           address: {
-            address1: '51',
-            address2: '527 Alicia Bank',
-            address3: 'Kiehn-over-Mosciski',
-            address4: 'XP4 7DL',
-            address5: 'Puerto Rico',
+            address1: '14',
+            address2: '16 Fourth Avenue',
+            address3: 'Miller-under-Raynor',
+            address4: 'XP0 6TX',
+            address5: 'Saint Helena',
             addressTypeId: null,
             buildingName: null,
             buildingNumberRange: null,
-            city: 'Mooreingham',
-            country: 'Wales',
+            city: 'South Witting Green',
+            country: 'England',
             county: null,
             dependentLocality: null,
             doubleDependentLocality: null,
             flatName: null,
-            pafOrganisationName: 'Lowe - Wolf',
-            postalCode: 'UY42 9SO',
+            pafOrganisationName: 'Maggio, Murray and Dicki',
+            postalCode: 'IH1 1MM',
             street: null,
-            uprn: '903411609185'
+            uprn: '563449849116'
           },
+          businessReference: '5305137528',
+          businessType: {
+            id: 962248,
+            type: 'Not Specified'
+          },
+          charityCommissionRegistrationNumber: 'UtKAQapw',
+          companiesHouseRegistrationNumber: 'yPDmr5q7',
           confirmed: true,
           correspondenceAddress: null,
+          correspondenceEmail: 'Anita4@hotmail.com',
+          correspondenceEmailValidated: true,
+          correspondenceFax: null,
+          correspondenceLandline: '0813 645 0023',
+          correspondenceMobile: '0800 531443',
           deactivated: false,
+          email: 'Joe_Pollich@gmail.com',
+          emailValidated: true,
+          fax: null,
+          hasAdditionalBusinessActivities: false,
+          hasLandInNorthernIreland: null,
+          hasLandInScotland: false,
+          hasLandInWales: true,
           id: 1111111111,
+          isAccountablePeopleDeclarationCompleted: null,
           isCorrespondenceAsBusinessAddr: null,
-          isFinancialToBusinessAddr: true,
-          landConfirmed: false,
+
+          isFinancialToBusinessAddr: null,
+          landConfirmed: true,
+          landline: '010952 63723',
+          legalStatus: {
+            id: 671956,
+            type: 'Sole Proprietorship'
+          },
           locked: false,
-          name: 'Lowe - Wolf',
-          sbi: 1111111111
+          mobile: '0800 008521',
+          name: 'Maggio, Murray and Dicki',
+          persons: [],
+          sbi: 1111111111,
+          taxRegistrationNumber: '2272858234',
+          traderNumber: '338653',
+          vendorNumber: null
         })
       )
     })
@@ -250,34 +282,34 @@ describe('Basic queries for faked routes', () => {
         expect.objectContaining({
           additionalSbiIds: [],
           address: {
-            address1: '51',
-            address2: '527 Alicia Bank',
-            address3: 'Kiehn-over-Mosciski',
-            address4: 'XP4 7DL',
-            address5: 'Puerto Rico',
+            address1: '14',
+            address2: '16 Fourth Avenue',
+            address3: 'Miller-under-Raynor',
+            address4: 'XP0 6TX',
+            address5: 'Saint Helena',
             addressTypeId: null,
             buildingName: null,
             buildingNumberRange: null,
-            city: 'Mooreingham',
-            country: 'Wales',
+            city: 'South Witting Green',
+            country: 'England',
             county: null,
             dependentLocality: null,
             doubleDependentLocality: null,
             flatName: null,
-            pafOrganisationName: 'Lowe - Wolf',
-            postalCode: 'UY42 9SO',
+            pafOrganisationName: 'Maggio, Murray and Dicki',
+            postalCode: 'IH1 1MM',
             street: null,
-            uprn: '903411609185'
+            uprn: '563449849116'
           },
           confirmed: true,
           correspondenceAddress: null,
           deactivated: false,
           id: 1111111111,
           isCorrespondenceAsBusinessAddr: null,
-          isFinancialToBusinessAddr: true,
-          landConfirmed: false,
+          isFinancialToBusinessAddr: null,
+          landConfirmed: true,
           locked: false,
-          name: 'Lowe - Wolf',
+          name: 'Maggio, Murray and Dicki',
           sbi: 1111111111
         })
       )
