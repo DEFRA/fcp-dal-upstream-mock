@@ -88,3 +88,20 @@ export const retrievePersonOrgs = (personId) => {
   })
   return orgs
 }
+
+export const updatePerson = (personId, updatesToPerson) => {
+  if (!people[personId] && !personIdToCRN[personId]) {
+    throw Boom.notFound(`Person with ID ${personId} not found`)
+  }
+
+  const person = people[personId] || createPerson(personId)
+
+  return (people[personId] = {
+    ...person,
+    ...updatesToPerson,
+    address: {
+      ...person.address,
+      ...(updatesToPerson.address || {})
+    }
+  })
+}

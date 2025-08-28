@@ -1,8 +1,13 @@
 import Boom from '@hapi/boom'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
-import { retrievePerson, retrievePersonOrgs } from '../../factories/person/person.factory.js'
+import {
+  retrievePerson,
+  retrievePersonOrgs,
+  updatePerson
+} from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
+import { validatePayload } from '../../utils/validatePayload.js'
 
 export const person = [
   {
@@ -118,6 +123,47 @@ export const person = [
           totalElements: orgs.length
         }
       })
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/person/{personId}',
+    async handler(request, h) {
+      const body = request.payload
+      const personId = parseInt(request.params.personId, 10)
+
+      // personId must be a valid integer in range, and email header must be a user on the system
+      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
+        throw Boom.forbidden(
+          `bad personId: ${personId}, is not an integer in the acceptable range`,
+          request
+        )
+      }
+      // body must not be empty
+      if (body === '' || body === null) {
+        throw Boom.badRequest('empty request body not allowed', request)
+        // TODO: should respond with `"source cannot be null"`
+      }
+      // body must be a parsable JSON object, not an array or other type
+      if (typeof body !== 'object' || Array.isArray(body)) {
+        throw Boom.badRequest('missing or invalid request body', request)
+        // TODO: should respond with `{"code":400,"message":"Unable to process JSON"}`
+      }
+
+      const { errors } = await validatePayload(
+        'routes/v2/person-schema.oas.yml',
+        (schema) =>
+          schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema,
+        request.payload
+      )
+
+      if (errors) {
+        throw Boom.badData('validation error while processing input', { error: errors, request })
+      }
+
+      updatePerson(personId, body)
+
+      return h.response().code(204)
     }
   }
 ]
