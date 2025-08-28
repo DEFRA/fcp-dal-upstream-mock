@@ -103,7 +103,7 @@ export const person = [
     method: 'GET',
     path: '/organisation/person/{personId}/summary',
     handler: async (request, h) => {
-      let personId = parseInt(request.params.personId, 10)
+      const personId = parseInt(request.params.personId, 10)
       if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
         throw Boom.forbidden(
           `bad personId: ${personId}, is not an integer in the acceptable range`,
