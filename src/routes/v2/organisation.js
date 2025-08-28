@@ -1,7 +1,9 @@
 import Boom from '@hapi/boom'
 import { sbiToOrgId } from '../../factories/id-lookups.js'
 import {
+  createOrganisation,
   retrieveOrganisation,
+  retrieveOrganisationCustomers,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
@@ -102,7 +104,7 @@ export const organisation = [
     method: 'GET',
     path: '/authorisation/organisation/{organisationId}',
     handler: async (request, h) => {
-      return h.response({ _data: retrieveOrganisation(request.params.organisationId) })
+      return h.response({ _data: retrieveOrganisationCustomers(request.params.organisationId) })
     }
   },
   {
@@ -111,6 +113,15 @@ export const organisation = [
     handler: async (request, h) => {
       return h.response({
         _data: updateOrganisation(request.params.organisationId, request.payload)
+      })
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/create/{personId}',
+    handler: async (request, h) => {
+      return h.response({
+        _data: createOrganisation(request.params.personId, request.payload)
       })
     }
   }

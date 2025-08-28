@@ -59,5 +59,7 @@
     "https://spec.openapis.org/oas/3.1/schema/2022-10-07": ["*.oas.yaml", "*.oas.yml"]
   },
   "yaml.validate": true,
-  "yaml.format.enable": true
+  "yaml.format.enable": true,
+  "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules ./node_modules/jest/bin/jest.js",
+  "jestrunner.runOptions": ["--runInBand", "--coverage"]
 }
