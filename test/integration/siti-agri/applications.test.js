@@ -1,6 +1,6 @@
 import Hapi from '@hapi/hapi'
 import { sitiagri } from '../../../src/routes/v2/siti-agri.js'
-import { loadSchema } from '../../helpers.js'
+import { loadSchema } from '../../../src/utils/validatePayload.js'
 
 describe('Fake Authenticate data', () => {
   let server, schema
@@ -9,7 +9,7 @@ describe('Fake Authenticate data', () => {
     server.route(sitiagri)
     await Promise.all([
       server.initialize(),
-      loadSchema('src/routes/v2/siti-agri-schema.oas.yml').then((s) => (schema = s))
+      loadSchema('/routes/v2/siti-agri-schema.oas.yml').then((s) => (schema = s))
     ])
   })
 

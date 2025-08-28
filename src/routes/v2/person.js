@@ -1,5 +1,4 @@
 import Boom from '@hapi/boom'
-import Joi from 'joi'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
@@ -8,6 +7,7 @@ import {
   updatePerson
 } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
+import { validatePayload } from '../../utils/validatePayload.js'
 
 export const person = [
   {
@@ -149,76 +149,16 @@ export const person = [
         throw Boom.badRequest('missing or invalid request body', request)
         // TODO: should respond with `{"code":400,"message":"Unable to process JSON"}`
       }
-      // validate the body against the person schema
-      try {
-        const flexibleTypeSchema = Joi.alternatives().try(
-          Joi.string().allow(''),
-          Joi.number().unsafe(),
-          Joi.boolean(),
-          Joi.valid(null)
-        )
 
-        const requiredFlexibleTypeSchema = Joi.alternatives()
-          .try(Joi.string().allow(''), Joi.number().unsafe(), Joi.boolean())
-          .required()
+      const { errors } = await validatePayload(
+        'routes/v2/person-schema.oas.yml',
+        (schema) =>
+          schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema,
+        request.payload
+      )
 
-        const contactInfoSchema = Joi.alternatives().try(
-          Joi.object(),
-          Joi.array(),
-          Joi.string().allow(''),
-          Joi.valid(null)
-        )
-
-        const addressFieldSchema = Joi.alternatives().try(
-          Joi.object(),
-          Joi.array(),
-          Joi.string(),
-          Joi.number().unsafe(),
-          Joi.boolean(),
-          Joi.valid(null)
-        )
-
-        const schema = Joi.object({
-          title: flexibleTypeSchema,
-          otherTitle: flexibleTypeSchema,
-          firstName: requiredFlexibleTypeSchema,
-          middleName: flexibleTypeSchema,
-          lastName: requiredFlexibleTypeSchema,
-          dateOfBirth: Joi.alternatives().try(
-            Joi.number().unsafe().integer(),
-            Joi.string()
-              .pattern(/^([-]?\d+)?$/)
-              .allow(''),
-            Joi.valid(null)
-          ),
-          landline: contactInfoSchema,
-          mobile: contactInfoSchema,
-          email: contactInfoSchema,
-          address: Joi.alternatives().try(
-            Joi.object({
-              address1: addressFieldSchema,
-              address2: addressFieldSchema,
-              address3: addressFieldSchema,
-              address4: addressFieldSchema,
-              address5: addressFieldSchema,
-              pafOrganisationName: addressFieldSchema,
-              flatName: addressFieldSchema,
-              buildingNumberRange: addressFieldSchema,
-              buildingName: addressFieldSchema,
-              street: addressFieldSchema,
-              city: addressFieldSchema,
-              county: addressFieldSchema,
-              postalCode: addressFieldSchema,
-              country: addressFieldSchema,
-              uprn: addressFieldSchema
-            }).unknown(true),
-            Joi.valid(null)
-          )
-        }).unknown(true)
-
-        await schema.validateAsync(request.payload)
-      } catch (err) {
-        throw Boom.badData('validation error while processing input', { error: err, request })
+      if (errors) {
+        throw Boom.badData('validation error while processing input', { error: errors, request })
       }
 
       updatePerson(personId, body)
