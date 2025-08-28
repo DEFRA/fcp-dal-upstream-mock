@@ -26,12 +26,42 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          id: 11111111,
+          address: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            pafOrganisationName: null,
+            postalCode: 'SV14 7HI',
+            street: null,
+            uprn: '807723943667',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Crona-on-West',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null
+          },
+          confirmed: true,
           customerReferenceNumber: 'crn-11111111',
-          firstName: 'Lauren',
-          lastName: 'Sanford',
-          email: 'lauren.sanford@immaculate-shark.info',
-          address: expect.objectContaining({}) // just used to assert the `address` field name
+          deactivated: false,
+          doNotContact: false,
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          emailValidated: true,
+          firstName: 'Gerhard',
+          id: 11111111,
+          landline: '055 2317 9411',
+          lastName: 'Purdy',
+          locked: false,
+          middleName: 'Shayna',
+          mobile: '01650 95852',
+          otherTitle: 'MD',
+          personalIdentifiers: ['2356939974', '2348412591'],
+          title: 'Mr.'
         })
       )
     })
@@ -47,12 +77,42 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          id: 11111111,
+          address: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            pafOrganisationName: null,
+            postalCode: 'SV14 7HI',
+            street: null,
+            uprn: '807723943667',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Crona-on-West',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null
+          },
+          confirmed: true,
           customerReferenceNumber: 'crn-11111111',
-          firstName: 'Lauren',
-          lastName: 'Sanford',
-          email: 'lauren.sanford@immaculate-shark.info',
-          address: expect.objectContaining({}) // just used to assert the `address` field name
+          deactivated: false,
+          doNotContact: false,
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          emailValidated: true,
+          firstName: 'Gerhard',
+          id: 11111111,
+          landline: '055 2317 9411',
+          lastName: 'Purdy',
+          locked: false,
+          middleName: 'Shayna',
+          mobile: '01650 95852',
+          otherTitle: 'MD',
+          personalIdentifiers: ['2356939974', '2348412591'],
+          title: 'Mr.'
         })
       )
     })
@@ -72,12 +132,57 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          fullName: 'Lauren Sanford',
-          nationalInsuranceNumber: null, // available in search, not the summary!!
-          id: 11111111,
           customerReference: 'crn-11111111',
-          // line below is just used to assert the `primaryAddress` field name
-          primaryAddress: expect.objectContaining({})
+          deactivated: false,
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          fullName: 'Gerhard Purdy',
+          id: 11111111,
+          locked: false,
+          nationalInsuranceNumber: null,
+          personalIdentifiers: ['2356939974', '2348412591'],
+          primaryAddress: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'Crona-on-West',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null,
+            pafOrganisationName: null,
+            postalCode: 'SV14 7HI',
+            street: null,
+            uprn: '807723943667'
+          }
+        })
+      )
+    })
+
+    test('Should return data /organisation/person/{personId}/summary', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111111/summary`
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data).toHaveLength(1)
+      expect(json._data[0]).toEqual(
+        // snippet only, due to size of person object
+        expect.objectContaining({
+          additionalSbiIds: [],
+          confirmed: true,
+          deactivated: false,
+          id: 1111111111,
+          landConfirmed: true,
+          locked: false,
+          name: 'Maggio, Murray and Dicki',
+          sbi: 1111111111
         })
       )
     })
@@ -94,13 +199,69 @@ describe('Basic queries for faked routes', () => {
       expect(json._data).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          id: 1111111111,
-          name: 'Maggio, Murray and Dicki',
-          sbi: 1111111111,
+          additionalBusinessActivities: null,
+          additionalSbiIds: [],
+          address: {
+            address1: '14',
+            address2: '16 Fourth Avenue',
+            address3: 'Miller-under-Raynor',
+            address4: 'XP0 6TX',
+            address5: 'Saint Helena',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'South Witting Green',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null,
+            pafOrganisationName: 'Maggio, Murray and Dicki',
+            postalCode: 'IH1 1MM',
+            street: null,
+            uprn: '563449849116'
+          },
+          businessReference: '5305137528',
+          businessType: {
+            id: 962248,
+            type: 'Not Specified'
+          },
+          charityCommissionRegistrationNumber: 'UtKAQapw',
+          companiesHouseRegistrationNumber: 'yPDmr5q7',
           confirmed: true,
-          landline: '010952 63723',
+          correspondenceAddress: null,
+          correspondenceEmail: 'Anita4@hotmail.com',
+          correspondenceEmailValidated: true,
+          correspondenceFax: null,
+          correspondenceLandline: '0813 645 0023',
+          correspondenceMobile: '0800 531443',
           deactivated: false,
-          locked: false
+          email: 'Joe_Pollich@gmail.com',
+          emailValidated: true,
+          fax: null,
+          hasAdditionalBusinessActivities: false,
+          hasLandInNorthernIreland: null,
+          hasLandInScotland: false,
+          hasLandInWales: true,
+          id: 1111111111,
+          isAccountablePeopleDeclarationCompleted: null,
+          isCorrespondenceAsBusinessAddr: null,
+
+          isFinancialToBusinessAddr: null,
+          landConfirmed: true,
+          landline: '010952 63723',
+          legalStatus: {
+            id: 671956,
+            type: 'Sole Proprietorship'
+          },
+          locked: false,
+          mobile: '0800 008521',
+          name: 'Maggio, Murray and Dicki',
+          persons: [],
+          sbi: 1111111111,
+          taxRegistrationNumber: '2272858234',
+          traderNumber: '338653',
+          vendorNumber: null
         })
       )
     })
@@ -119,12 +280,174 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          id: 1111111111,
-          name: 'Maggio, Murray and Dicki',
-          sbi: 1111111111,
+          additionalSbiIds: [],
+          address: {
+            address1: '14',
+            address2: '16 Fourth Avenue',
+            address3: 'Miller-under-Raynor',
+            address4: 'XP0 6TX',
+            address5: 'Saint Helena',
+            addressTypeId: null,
+            buildingName: null,
+            buildingNumberRange: null,
+            city: 'South Witting Green',
+            country: 'England',
+            county: null,
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            flatName: null,
+            pafOrganisationName: 'Maggio, Murray and Dicki',
+            postalCode: 'IH1 1MM',
+            street: null,
+            uprn: '563449849116'
+          },
           confirmed: true,
+          correspondenceAddress: null,
           deactivated: false,
-          locked: false
+          id: 1111111111,
+          isCorrespondenceAsBusinessAddr: null,
+          isFinancialToBusinessAddr: null,
+          landConfirmed: true,
+          locked: false,
+          name: 'Maggio, Murray and Dicki',
+          sbi: 1111111111
+        })
+      )
+    })
+
+    test('Should return data for /organisation/create/{personId}', async () => {
+      const response = await mockServer.inject({
+        method: 'POST',
+        url: '/extapi/organisation/create/11111111',
+        payload: {
+          legalStatus: {
+            id: 102101
+          },
+          businessType: {
+            id: 101422
+          },
+          address: {
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: 'BODYCHENAN',
+            street: null,
+            city: 'PWLLHELI',
+            county: null,
+            postalCode: 'LL53 8NT',
+            country: 'United Kingdom',
+            uprn: '10070366332',
+            dependentLocality: 'LLANGWNADL',
+            doubleDependentLocality: null
+          },
+          name: 'test unique 123',
+          email: 'test@test.com',
+          landline: '01234613020',
+          mobile: '07111222333',
+          companiesHouseRegistrationNumber: null,
+          charityCommissionRegistrationNumber: '12312312',
+          businessReference: '1106599951',
+          hasAdditionalBusinessActivities: true,
+          taxRegistrationNumber: '123456789'
+        }
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data.id).toBeDefined()
+      expect(json._data).toEqual(
+        // snippet only, due to size of org object
+        expect.objectContaining({
+          legalStatus: {
+            id: 102101,
+            type: 'Not set'
+          },
+          businessType: {
+            id: 101422,
+            type: 'Not set'
+          },
+          address: {
+            address1: null,
+            address2: null,
+            address3: null,
+            address4: null,
+            address5: null,
+            addressTypeId: null,
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: 'BODYCHENAN',
+            street: null,
+            city: 'PWLLHELI',
+            county: null,
+            postalCode: 'LL53 8NT',
+            country: 'United Kingdom',
+            uprn: '10070366332',
+            dependentLocality: 'LLANGWNADL',
+            doubleDependentLocality: null,
+            pafOrganisationName: null
+          },
+          correspondenceAddress: null,
+          correspondenceFax: null,
+          deactivated: false,
+          fax: null,
+          name: 'test unique 123',
+          email: 'test@test.com',
+          landline: '01234613020',
+          mobile: '07111222333',
+          landConfirmed: null,
+          lastUpdatedOn: null,
+          companiesHouseRegistrationNumber: null,
+          charityCommissionRegistrationNumber: '12312312',
+          businessReference: '1106599951',
+          confirmed: true,
+          locked: false,
+          persons: [],
+          additionalSbiIds: [],
+          additionalBusinessActivities: null,
+          hasAdditionalBusinessActivities: true,
+          taxRegistrationNumber: '123456789'
+        })
+      )
+
+      // Also check org added to person
+      const personResponse = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111111/summary`
+      })
+
+      expect(personResponse.statusCode).toBe(200)
+      const personJson = JSON.parse(personResponse.payload)
+      expect(personJson._data).toHaveLength(2)
+      expect(personJson._data[1].id).toEqual(json._data.id)
+    })
+
+    test('Should return data for /authorisation/organisation/{organisationId}', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/1111111111'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data[0]).toEqual(
+        // snippet only, due to size of org object
+        expect.objectContaining({
+          confirmed: true,
+          firstName: 'Gerhard',
+          id: 11111111,
+          lastName: 'Purdy',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree',
+            'ELM_APPLICATION_SUBMIT'
+          ],
+          role: 'Business Partner'
         })
       )
     })
