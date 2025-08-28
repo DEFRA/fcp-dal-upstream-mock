@@ -186,6 +186,83 @@ describe('Basic queries for faked routes', () => {
         })
       )
     })
+
+    test('Should return data /person/search', async () => {
+      const response = await mockServer.inject({
+        method: 'POST',
+        url: '/extapi/person/search',
+        payload: {
+          primarySearchPhrase: 'crn-11111111',
+          searchFieldType: 'CUSTOMER_REFERENCE'
+        }
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data).toHaveLength(1)
+      expect(json._data[0]).toEqual(
+        // snippet only, due to size of person object
+        expect.objectContaining({
+          fullName: 'Lauren Sanford',
+          nationalInsuranceNumber: null, // available in search, not the summary!!
+          id: 11111111,
+          customerReference: 'crn-11111111',
+          // line below is just used to assert the `primaryAddress` field name
+          primaryAddress: expect.objectContaining({})
+        })
+      )
+    })
+
+    test('Should return data PUT /person/{personId}', async () => {
+      const response = await mockServer.inject({
+        method: 'PUT',
+        url: '/extapi/person/11111111',
+        headers: {
+          email: 'test@defra.gov.uk'
+        },
+        payload: {
+          id: 11111111,
+          title: 'Mr.',
+          otherTitle: 'MD',
+          firstName: 'Gerhard',
+          middleName: 'Shayna',
+          lastName: 'Purdy',
+          dateOfBirth: -442932358962,
+          landline: '055 2317 9411',
+          mobile: '01650 95852',
+          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
+          doNotContact: false,
+          emailValidated: true,
+          address: {
+            address1: '635',
+            address2: '72 Evert Green',
+            address3: 'Kessler-upon-Altenwerth',
+            address4: 'CO5 5GC',
+            address5: 'Uzbekistan',
+            pafOrganisationName: null,
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: null,
+            street: null,
+            city: 'Crona-on-West',
+            county: null,
+            postalCode: 'SV14 7HI',
+            country: 'England',
+            uprn: '807723943667',
+            dependentLocality: null,
+            doubleDependentLocality: null,
+            addressTypeId: null
+          },
+          locked: false,
+          confirmed: false,
+          customerReferenceNumber: 'crn-11111111',
+          personalIdentifiers: ['2356939974', '2348412591'],
+          deactivated: false
+        }
+      })
+
+      expect(response.statusCode).toBe(204)
+      expect(response.payload).toBe('')
+    })
   })
 
   describe('Organisation routes', () => {
