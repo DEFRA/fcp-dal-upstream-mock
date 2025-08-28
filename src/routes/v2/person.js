@@ -21,14 +21,9 @@ export const person = [
           request
         )
       }
-      const personData = retrievePerson(personId)
-      const copy = { ...personData }
+      const { role, privileges, lastUpdatedOn, ...personData } = retrievePerson(personId)
 
-      delete copy.role
-      delete copy.privileges
-      delete copy.lastUpdatedOn
-
-      return h.response({ _data: copy })
+      return h.response({ _data: personData })
     }
   },
   {
@@ -103,7 +98,7 @@ export const person = [
     method: 'GET',
     path: '/organisation/person/{personId}/summary',
     handler: async (request, h) => {
-      const personId = parseInt(request.params.personId, 10)
+      let personId = parseInt(request.params.personId, 10)
       if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
         throw Boom.forbidden(
           `bad personId: ${personId}, is not an integer in the acceptable range`,
