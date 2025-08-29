@@ -17,11 +17,13 @@ export const createOrganisation = (personId, payload) => {
   retrievePerson(personId)
   startingOrgId = generateId(startingOrgId, Object.keys(orgIdToSbi))
   startingSbi = generateId(startingSbi, Object.keys(sbiToOrgId))
+  const id = startingOrgId
+  const sbi = startingSbi
   const name = payload.name
   const org = {
-    id: startingOrgId,
+    id,
     name,
-    sbi: startingSbi,
+    sbi,
     additionalSbiIds: [],
     confirmed: true,
     lastUpdatedOn: null,
@@ -106,11 +108,11 @@ export const createOrganisation = (personId, payload) => {
     additionalBusinessActivities: null
   }
 
-  organisations[orgId] = org
-  orgIdToSbi[orgId] = sbi
-  sbiToOrgId[sbi] = orgId
-  personIdToOrgIds[personId].push(orgId)
-  orgIdToPersonIds[orgId] = personId
+  organisations[id] = org
+  orgIdToSbi[id] = sbi
+  sbiToOrgId[sbi] = id
+  personIdToOrgIds[personId].push(id)
+  orgIdToPersonIds[id] = personId
 
   return org
 }
