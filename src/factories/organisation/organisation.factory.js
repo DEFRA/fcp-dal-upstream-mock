@@ -15,13 +15,13 @@ let startingSbi = 100000000
 
 export const createOrganisation = (personId, payload) => {
   retrievePerson(personId)
-  const orgId = generateId(startingOrgId, Object.keys(orgIdToSbi))
-  const sbi = generateId(startingSbi, Object.keys(sbiToOrgId))
+  startingOrgId = generateId(startingOrgId, Object.keys(orgIdToSbi))
+  startingSbi = generateId(startingSbi, Object.keys(sbiToOrgId))
   const name = payload.name
   const org = {
-    id: orgId,
+    id: startingOrgId,
     name,
-    sbi,
+    sbi: startingSbi,
     additionalSbiIds: [],
     confirmed: true,
     lastUpdatedOn: null,
