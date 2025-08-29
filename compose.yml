@@ -3,14 +3,14 @@ services:
     build:
       context: .
     ports:
-      - '3000:3000'
+      - '3100:3100'
     environment:
       MOCK_LOG_LEVEL: info
       MOCK_SERVER_COLLECTION: all
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3100
     healthcheck:
-      test: curl -s http://localhost:3000/health
+      test: curl -s http://localhost:3100/health
       interval: 3s
       timeout: 10s
       retries: 3

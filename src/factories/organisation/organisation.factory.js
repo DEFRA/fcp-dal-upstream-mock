@@ -1,30 +1,27 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
-import { orgIdToPersonIds, orgIdToSbi, personIdToOrgIds } from '../../factories/id-lookups.js'
-import { fakeAddress, fakeIds, nft, nullOrFake } from '../common.js'
+import {
+  orgIdToPersonIds,
+  orgIdToSbi,
+  personIdToOrgIds,
+  sbiToOrgId
+} from '../../factories/id-lookups.js'
+import { fakeAddress, fakeIds, generateId, nft, nullOrFake } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
 
 const organisations = {}
 let startingOrgId = 1000000
-
-function generateOrgId() {
-  // exclude existing orgIds
-  const excludeList = Object.keys(orgIdToSbi)
-  do {
-    startingOrgId += 1
-  } while (excludeList.includes(startingOrgId))
-
-  return startingOrgId
-}
+let startingSbi = 100000000
 
 export const createOrganisation = (personId, payload) => {
   retrievePerson(personId)
-  const orgId = generateOrgId()
+  const orgId = generateId(startingOrgId, Object.keys(orgIdToSbi))
+  const sbi = generateId(startingSbi, Object.keys(sbiToOrgId))
   const name = payload.name
   const org = {
     id: orgId,
     name,
-    sbi: payload.sbi,
+    sbi,
     additionalSbiIds: [],
     confirmed: true,
     lastUpdatedOn: null,
@@ -110,6 +107,8 @@ export const createOrganisation = (personId, payload) => {
   }
 
   organisations[orgId] = org
+  orgIdToSbi[orgId] = sbi
+  sbiToOrgId[sbi] = orgId
   personIdToOrgIds[personId].push(orgId)
   orgIdToPersonIds[orgId] = personId
 
@@ -205,7 +204,7 @@ export const retrieveOrganisationCustomers = (orgId) => {
       id: personId,
       firstName: person.firstName,
       lastName: person.lastName,
-      customerReference: person.customerReference,
+      customerReference: person.customerReferenceNumber,
       confirmed: person.confirmed,
       lastUpdatedOn: person.lastUpdatedOn,
       role: person.role,
