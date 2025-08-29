@@ -352,10 +352,11 @@ describe('Basic queries for faked routes', () => {
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
-      expect(json._data.id).toBeDefined()
       expect(json._data).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
+          id: 1000001,
+          sbi: 100000001,
           legalStatus: {
             id: 102101,
             type: 'Not set'
@@ -408,13 +409,13 @@ describe('Basic queries for faked routes', () => {
       )
 
       // Also check org added to person
-      const personResponse = await mockServer.inject({
+      const personOrgs = await mockServer.inject({
         method: 'GET',
         url: `/extapi/organisation/person/11111111/summary`
       })
 
-      expect(personResponse.statusCode).toBe(200)
-      const personJson = JSON.parse(personResponse.payload)
+      expect(personOrgs.statusCode).toBe(200)
+      const personJson = JSON.parse(personOrgs.payload)
       expect(personJson._data).toHaveLength(2)
       expect(personJson._data[1].id).toEqual(json._data.id)
     })
@@ -432,6 +433,7 @@ describe('Basic queries for faked routes', () => {
           confirmed: true,
           firstName: 'Gerhard',
           id: 11111111,
+          customerReference: 'crn-11111111',
           lastName: 'Purdy',
           privileges: [
             'Full permission - business',
