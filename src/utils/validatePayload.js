@@ -15,10 +15,9 @@ export async function loadSchema(schema) {
 export const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
-export async function validatePayload(schemaPath, path, payload) {
+export async function createPayloadValidator(schemaPath, path) {
   const schema = path(await loadSchema(schemaPath))
   const validate = ajv.compile(schema)
-  validate(payload)
 
   return validate
 }

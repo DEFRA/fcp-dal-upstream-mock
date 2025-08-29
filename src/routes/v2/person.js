@@ -7,7 +7,12 @@ import {
   updatePerson
 } from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { validatePayload } from '../../utils/validatePayload.js'
+import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const validateUpdatePersonPayload = await createPayloadValidator(
+  'routes/v2/person-schema.oas.yml',
+  (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
+)
 
 export const person = [
   {
@@ -128,6 +133,7 @@ export const person = [
   {
     method: 'PUT',
     path: '/person/{personId}',
+
     async handler(request, h) {
       const body = request.payload
       const personId = parseInt(request.params.personId, 10)
@@ -150,19 +156,11 @@ export const person = [
         // TODO: should respond with `{"code":400,"message":"Unable to process JSON"}`
       }
 
-      const { errors } = await validatePayload(
-        'routes/v2/person-schema.oas.yml',
-        (schema) =>
-          schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema,
-        request.payload
-      )
-
-      if (errors) {
-        throw Boom.badData('validation error while processing input', { error: errors, request })
+      if (!validateUpdatePersonPayload(request.payload)) {
+        throw Boom.badData('validation error while processing input', { request })
       }
 
       updatePerson(personId, body)
-
       return h.response().code(204)
     }
   }
