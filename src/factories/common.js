@@ -44,3 +44,11 @@ export const nullOrFake = (fakeFn, nullWeight = 0.5) =>
 export const transformDate = (date) => date.toISOString().replace('.', ':')
 
 export const toTitleCase = (str) => str.toLocaleLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+
+export function generateId(startingId, excludeList) {
+  do {
+    startingId += 1
+  } while (excludeList.includes(startingId))
+
+  return startingId
+}
