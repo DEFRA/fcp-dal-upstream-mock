@@ -166,8 +166,16 @@ export const crnToPersonId = Object.fromEntries(
 export const sbiToOrgId = {}
 export const orgIdToSbi = {}
 export const orgIdToPersonIds = {}
+export const personIdToOrgIds = {}
+
 Object.entries(orgIdLookup).forEach(([orgId, { sbi, customers }]) => {
   orgIdToSbi[orgId] = sbi
   sbiToOrgId[sbi] = orgId
   orgIdToPersonIds[orgId] = customers
+  customers.forEach((personId) => {
+    if (!personIdToOrgIds[personId]) {
+      personIdToOrgIds[personId] = []
+    }
+    personIdToOrgIds[personId].push(Number(orgId))
+  })
 })
