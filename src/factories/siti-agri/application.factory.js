@@ -1,5 +1,5 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
-import { fakeId, nullOrFake, toTitleCase, transformDate } from '../common.js'
+import { fakeId, fakeIds, nullOrFake, toTitleCase, transformDate } from '../common.js'
 import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
 
 const applications = {}
@@ -122,23 +122,32 @@ export const createApplication = (sbi, overrides = {}) => {
     sbi,
     subject_id: fakeId(),
     year,
-    application_name: faker.lorem.words({ min: 2, max: 10 }).toUpperCase(),
-    module_code: `${faker.lorem.words({ min: 2, max: 3 }).toUpperCase().replaceAll(' ', '_')}_${year}`,
-    scheme: faker.lorem.words({ min: 3, max: 6 }).toUpperCase(),
+    application_name: nullOrFake(() => faker.lorem.words({ min: 2, max: 10 }).toUpperCase(), 0.1),
+    module_code: nullOrFake(
+      () => `${faker.lorem.words({ min: 2, max: 3 }).toUpperCase().replaceAll(' ', '_')}_${year}`,
+      0.1
+    ),
+    scheme: nullOrFake(() => faker.lorem.words({ min: 3, max: 6 }).toUpperCase(), 0.1),
     application_id: fakeId(),
-    status_code_p: 'STADOM', // always seems to be 'STADOM'
-    status_code_s: code,
+    status_code_p: nullOrFake(() => 'STADOM', 0.1), // always seems to be 'STADOM'
+    status_code_s: nullOrFake(() => code, 0.1),
     status,
-    submission_date: transformDate(faker.date.recent({ refDate: '2023-01-01' })),
-    portal_status_p: 'DOMPRS', // always seems to be 'DOMPRS'
+    submission_date: nullOrFake(() => transformDate(faker.date.recent({ refDate: '2023-01-01' }))),
+    portal_status_p: nullOrFake(() => 'DOMPRS', 0.1), // always seems to be 'DOMPRS'
     // portal_status_s is often `null`, otherwise follows normal pattern from mappings
     portal_status_s: nullOrFake(() => portal, 0.2),
     // sometimes duplicates portal_status_s
     portal_status: nullOrFake(() => toTitleCase(status), 0.5),
-    fg_active: 'Yes', // always seems to be 'Yes'
+    fg_active: nullOrFake(() => 'Yes', 0.1), // always seems to be 'Yes'
     transition_id,
     transition_name: transition,
-    agreement_ref: nullOrFake(() => `${fakeId()}`), // sometimes refers to multiple agreements!!
+    // can sometimes refer to multiple agreements
+    agreement_ref: nullOrFake(
+      () =>
+        nullOrFake(() => `${fakeId()}`, 0.2) ??
+        fakeIds(faker.number.int({ min: 3, max: 10 })).join(', '),
+      0.3
+    ),
     ...overrides,
     application_history:
       // priority to provided history, then current transition, then fake history
