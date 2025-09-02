@@ -27,8 +27,9 @@ export const fakeAddress = (overrides = {}) => ({
   ...overrides
 })
 
-export const fakeId = () => faker.number.int({ min: 100_000_000, max: 9_999_999_999 })
-export const fakeIds = (count) => Array.from({ length: count }, fakeId)
+export const fakeId = (min = 100_000_000, max = 9_999_999_999) => faker.number.int({ min, max })
+export const fakeIds = (count, min, max) =>
+  Array.from({ length: count }, () => faker.number.int({ min, max }))
 
 export const nft = (...weights) =>
   faker.helpers.weightedArrayElement([

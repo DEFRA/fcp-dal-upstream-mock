@@ -465,4 +465,78 @@ describe('Basic queries for faked routes', () => {
       )
     })
   })
+
+  describe('Notifications routes', () => {
+    test('Should return data for /notifications', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/notifications?personId=11111111&organisationId=1111111111'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual({
+        notifications: [
+          {
+            archive: null,
+            archivedAt: null,
+            bespokeNotificationId: null,
+            body: '<p>Tabgo sunt tot atrocitas decimus taedium cito concido derideo timor.</p>',
+            category: 'OrganisationLevel',
+            createdAt: 6353721337460,
+            id: 8756824,
+            messageId: 8528869,
+            organisationId: 1865095,
+            personId: 2317941,
+            readAt: 28000,
+            title: 'Amo ipsam expedita minima cavus alius vitiosus vester ars viduo.'
+          },
+          {
+            archive: null,
+            archivedAt: null,
+            bespokeNotificationId: null,
+            body: '<p>Beneficium pauper amiculum verto conspergo adduco cresco dedecor vulticulus.</p>',
+            category: 'OrganisationLevel',
+            createdAt: 7758367211338,
+            id: 772394,
+            messageId: 6341876,
+            organisationId: 2291324,
+            personId: 3667985,
+            readAt: 28000,
+            title: 'Caelum tollo comprehendo coerceo cibus somnus inflammatio bis nihil quidem.'
+          },
+          {
+            archive: null,
+            archivedAt: null,
+            bespokeNotificationId: null,
+            body: '<p>Caries trucido acervus volaticus cariosus suscipit voluptatem deprimo.</p>',
+            category: 'OrganisationLevel',
+            createdAt: 5062780700137,
+            id: 9779606,
+            messageId: 3482337,
+            organisationId: 5067640,
+            personId: 3453095,
+            readAt: 24000,
+            title: 'Conor ventus at celebrer terga agnosco abeo armarium verbum atrox.'
+          },
+          {
+            archive: null,
+            archivedAt: null,
+            bespokeNotificationId: null,
+            body: '<p>Adulatio suasoria amo ipsam celebrer patruus solitudo tristis.</p>',
+            category: 'OrganisationLevel',
+            createdAt: 309947138734,
+            id: 1353432,
+            messageId: 3530898,
+            organisationId: 3284925,
+            personId: 4341222,
+            readAt: null,
+            title: 'Curia universe saepe decimus tres vigor articulus defleo ancilla sol.'
+          }
+        ],
+        readCount: 3,
+        resultCount: 4,
+        unreadCount: 1
+      })
+    })
+  })
 })

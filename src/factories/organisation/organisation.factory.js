@@ -168,7 +168,7 @@ const generateOrganisation = (orgId) => {
     traderNumber: nullOrFake(() => faker.string.numeric(6)),
     isAccountablePeopleDeclarationCompleted: nft(7, 1, 2),
     additionalBusinessActivities: hasAdditionalBusinessActivities
-      ? fakeIds(faker.number.int({ min: 1, max: 3 })).map((id, i) => ({
+      ? fakeIds(faker.number.int({ min: 1, max: 3 }), 164946, 964946).map((id, i) => ({
           id: parseInt(id, 10),
           type: `Additional Business Activity ${i}`
         }))
