@@ -91,19 +91,19 @@ components:
         year:
           type: integer
         application_name:
-          type: string
+          type: [string, 'null']
         module_code:
-          type: string
+          type: [string, 'null']
         scheme:
-          type: string
+          type: [string, 'null']
         application_id:
           type: integer
         status_code_p:
-          type: string
+          type: [string, 'null']
         status_code_s:
-          type: string
+          type: [string, 'null']
         status:
-          type: string
+          type: [string, 'null']
         submission_date:
           oneOf:
             - type: string
@@ -112,13 +112,13 @@ components:
             - type: 'null'
           type: [string, 'null']
         portal_status_p:
-          type: string
+          type: [string, 'null']
         portal_status_s:
           type: [string, 'null']
         portal_status:
           type: [string, 'null']
         fg_active:
-          type: string
+          type: [string, 'null']
         transition_id:
           type: integer
         transition_name:
