@@ -418,6 +418,17 @@ describe('Basic queries for faked routes', () => {
       const personJson = JSON.parse(personOrgs.payload)
       expect(personJson._data).toHaveLength(2)
       expect(personJson._data[1].id).toEqual(json._data.id)
+
+      // Also check person added to org
+      const orgPersons = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/authorisation/organisation/${json._data.id}`
+      })
+
+      expect(orgPersons.statusCode).toBe(200)
+      const orgJson = JSON.parse(orgPersons.payload)
+      expect(orgJson._data).toHaveLength(1)
+      expect(orgJson._data[0].id).toEqual('11111111')
     })
 
     test('Should return data for /authorisation/organisation/{organisationId}', async () => {
