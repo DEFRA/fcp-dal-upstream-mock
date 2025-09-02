@@ -112,7 +112,7 @@ export const createOrganisation = (personId, payload) => {
   orgIdToSbi[id] = sbi
   sbiToOrgId[sbi] = id
   personIdToOrgIds[personId].push(id)
-  orgIdToPersonIds[id] = personId
+  orgIdToPersonIds[id] = [personId]
 
   return org
 }
