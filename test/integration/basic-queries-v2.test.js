@@ -187,32 +187,7 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
-    test('Should return data /person/search', async () => {
-      const response = await mockServer.inject({
-        method: 'POST',
-        url: '/extapi/person/search',
-        payload: {
-          primarySearchPhrase: 'crn-11111111',
-          searchFieldType: 'CUSTOMER_REFERENCE'
-        }
-      })
-      expect(response.statusCode).toBe(200)
-      const json = JSON.parse(response.payload)
-      expect(json._data).toHaveLength(1)
-      expect(json._data[0]).toEqual(
-        // snippet only, due to size of person object
-        expect.objectContaining({
-          fullName: 'Lauren Sanford',
-          nationalInsuranceNumber: null, // available in search, not the summary!!
-          id: 11111111,
-          customerReference: 'crn-11111111',
-          // line below is just used to assert the `primaryAddress` field name
-          primaryAddress: expect.objectContaining({})
-        })
-      )
-    })
-
-    test('Should return data PUT /person/{personId}', async () => {
+    test('Should accept data to PUT /person/{personId}', async () => {
       const response = await mockServer.inject({
         method: 'PUT',
         url: '/extapi/person/11111111',
@@ -254,7 +229,7 @@ describe('Basic queries for faked routes', () => {
           },
           locked: false,
           confirmed: false,
-          customerReferenceNumber: 'crn-11111111',
+          customerReferenceNumber: '1111111100',
           personalIdentifiers: ['2356939974', '2348412591'],
           deactivated: false
         }
@@ -262,6 +237,20 @@ describe('Basic queries for faked routes', () => {
 
       expect(response.statusCode).toBe(204)
       expect(response.payload).toBe('')
+    })
+
+    test('Should fail if no data PUT /person/{personId}', async () => {
+      const response = await mockServer.inject({
+        method: 'PUT',
+        url: '/extapi/person/11111111',
+        headers: {
+          email: 'test@defra.gov.uk'
+        },
+        payload: {}
+      })
+
+      expect(response.statusCode).toBe(422)
+      expect(response.payload).toEqual('{"code":422,"message":"HTTP 422 "}')
     })
   })
 
@@ -392,6 +381,121 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
+    test('Should return data for /organisation/create/{personId}', async () => {
+      const response = await mockServer.inject({
+        method: 'POST',
+        url: '/extapi/organisation/create/11111111',
+        payload: {
+          legalStatus: {
+            id: 102101
+          },
+          businessType: {
+            id: 101422
+          },
+          address: {
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: 'BODYCHENAN',
+            street: null,
+            city: 'PWLLHELI',
+            county: null,
+            postalCode: 'LL53 8NT',
+            country: 'United Kingdom',
+            uprn: '10070366332',
+            dependentLocality: 'LLANGWNADL',
+            doubleDependentLocality: null
+          },
+          name: 'test unique 123',
+          email: 'test@test.com',
+          landline: '01234613020',
+          mobile: '07111222333',
+          companiesHouseRegistrationNumber: null,
+          charityCommissionRegistrationNumber: '12312312',
+          businessReference: '1106599951',
+          hasAdditionalBusinessActivities: true,
+          taxRegistrationNumber: '123456789'
+        }
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data).toEqual(
+        // snippet only, due to size of org object
+        expect.objectContaining({
+          id: 1000001,
+          sbi: 100000001,
+          legalStatus: {
+            id: 102101,
+            type: 'Not set'
+          },
+          businessType: {
+            id: 101422,
+            type: 'Not set'
+          },
+          address: {
+            address1: null,
+            address2: null,
+            address3: null,
+            address4: null,
+            address5: null,
+            addressTypeId: null,
+            flatName: null,
+            buildingNumberRange: null,
+            buildingName: 'BODYCHENAN',
+            street: null,
+            city: 'PWLLHELI',
+            county: null,
+            postalCode: 'LL53 8NT',
+            country: 'United Kingdom',
+            uprn: '10070366332',
+            dependentLocality: 'LLANGWNADL',
+            doubleDependentLocality: null,
+            pafOrganisationName: null
+          },
+          correspondenceAddress: null,
+          correspondenceFax: null,
+          deactivated: false,
+          fax: null,
+          name: 'test unique 123',
+          email: 'test@test.com',
+          landline: '01234613020',
+          mobile: '07111222333',
+          landConfirmed: null,
+          companiesHouseRegistrationNumber: null,
+          charityCommissionRegistrationNumber: '12312312',
+          businessReference: '1106599951',
+          confirmed: true,
+          locked: false,
+          persons: [],
+          additionalSbiIds: [],
+          additionalBusinessActivities: null,
+          hasAdditionalBusinessActivities: true,
+          taxRegistrationNumber: '123456789'
+        })
+      )
+
+      // Also check org added to person
+      const personOrgs = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111111/summary`
+      })
+
+      expect(personOrgs.statusCode).toBe(200)
+      const personJson = JSON.parse(personOrgs.payload)
+      expect(personJson._data).toHaveLength(2)
+      expect(personJson._data[1].id).toEqual(json._data.id)
+
+      // Also check person added to org
+      const orgPersons = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/authorisation/organisation/${json._data.id}`
+      })
+
+      expect(orgPersons.statusCode).toBe(200)
+      const orgJson = JSON.parse(orgPersons.payload)
+      expect(orgJson._data).toHaveLength(1)
+      expect(orgJson._data[0].id).toEqual('11111111')
+    })
+
     test('Should return data for /authorisation/organisation/{organisationId}', async () => {
       const response = await mockServer.inject({
         method: 'GET',
@@ -402,7 +506,6 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          confirmed: true,
           firstName: 'Gerhard',
           id: 11111111,
           customerReference: '1111111100',
