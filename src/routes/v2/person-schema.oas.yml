@@ -155,11 +155,11 @@ components:
               # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
               # numbers, rationals, and exponents will be flagged as false negatives!!!
       examples:
-        - primarySearchPhrase: 'crn-11111111'
+        - primarySearchPhrase: '9111111100'
           searchFieldType: 'CUSTOMER_REFERENCE'
-        - primarySearchPhrase: 'crn-11111122'
+        - primarySearchPhrase: '9111112200'
           searchFieldType: 'CUSTOMER_REFERENCE'
-        - primarySearchPhrase: 'crn-22222222'
+        - primarySearchPhrase: '9222222201'
           searchFieldType: 'CUSTOMER_REFERENCE'
       required:
         - 'searchFieldType'

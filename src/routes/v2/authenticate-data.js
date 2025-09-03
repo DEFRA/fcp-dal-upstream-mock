@@ -9,11 +9,8 @@ export const authenticate = [
       const crn = request.params.crn
 
       // Validate the CRN format
-      if (!/crn-\d{6,16}/.test(crn)) {
-        throw Boom.forbidden(
-          `bad CRN: ${crn}, does not begin 'crn-' followed by an integer in the acceptable range`,
-          request
-        )
+      if (!/\d{10,20}/.test(crn)) {
+        throw Boom.forbidden(`bad CRN: ${crn}, is not an integer in the acceptable range`, request)
       }
 
       // handle valid request

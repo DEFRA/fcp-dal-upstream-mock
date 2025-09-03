@@ -29,13 +29,13 @@ paths:
           required: true
           schema:
             type: 'string'
-            pattern: '^crn-[1-9][0-9]{7,17}$'
+            pattern: '^[1-9][0-9]{9,19}$'
             examples:
-              - 'crn-11111111'
-              - 'crn-11111112'
-              - 'crn-11111113'
-              - 'crn-11111114'
-              - 'crn-11111115'
+              - '9111111100'
+              - '9111111200'
+              - '9111111300'
+              - '9111111400'
+              - '9111111500'
       responses:
         '200':
           description: 'Security answers retrieved successfully.'
