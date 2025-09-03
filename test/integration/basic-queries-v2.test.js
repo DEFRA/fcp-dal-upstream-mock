@@ -47,7 +47,7 @@ describe('Basic queries for faked routes', () => {
             flatName: null
           },
           confirmed: true,
-          customerReferenceNumber: 'crn-11111111',
+          customerReferenceNumber: '1111111100',
           deactivated: false,
           doNotContact: false,
           email: 'gerhard.purdy@uncommon-sideboard.org.uk',
@@ -70,7 +70,7 @@ describe('Basic queries for faked routes', () => {
       const response = await mockServer.inject({
         method: 'GET',
         url: `/extapi/person/${config.get('personIdOverride')}/summary`,
-        headers: { crn: 'crn-11111111' }
+        headers: { crn: '1111111100' }
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
@@ -98,7 +98,7 @@ describe('Basic queries for faked routes', () => {
             flatName: null
           },
           confirmed: true,
-          customerReferenceNumber: 'crn-11111111',
+          customerReferenceNumber: '1111111100',
           deactivated: false,
           doNotContact: false,
           email: 'gerhard.purdy@uncommon-sideboard.org.uk',
@@ -122,7 +122,7 @@ describe('Basic queries for faked routes', () => {
         method: 'POST',
         url: '/extapi/person/search',
         payload: {
-          primarySearchPhrase: 'crn-11111111',
+          primarySearchPhrase: '1111111100',
           searchFieldType: 'CUSTOMER_REFERENCE'
         }
       })
@@ -132,7 +132,7 @@ describe('Basic queries for faked routes', () => {
       expect(json._data[0]).toEqual(
         // snippet only, due to size of person object
         expect.objectContaining({
-          customerReference: 'crn-11111111',
+          customerReference: '1111111100',
           deactivated: false,
           email: 'gerhard.purdy@uncommon-sideboard.org.uk',
           fullName: 'Gerhard Purdy',
@@ -444,7 +444,7 @@ describe('Basic queries for faked routes', () => {
           confirmed: true,
           firstName: 'Gerhard',
           id: 11111111,
-          customerReference: 'crn-11111111',
+          customerReference: '1111111100',
           lastName: 'Purdy',
           privileges: [
             'Full permission - business',

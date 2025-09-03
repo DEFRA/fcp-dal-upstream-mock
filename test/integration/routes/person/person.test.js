@@ -31,7 +31,7 @@ describe('Fake Person', () => {
       url: '/person/search',
       payload: {
         searchFieldType: 'CUSTOMER_REFERENCE',
-        primarySearchPhrase: 'crn-11111111'
+        primarySearchPhrase: '1111111100'
       }
     })
     expect(statusCode).toBe(200)
