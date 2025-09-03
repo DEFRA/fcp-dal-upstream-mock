@@ -465,4 +465,52 @@ describe('Basic queries for faked routes', () => {
       )
     })
   })
+
+  describe('Notifications routes', () => {
+    test('Should return data for /notifications', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/notifications?personId=11111111&organisationId=1111111111'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual({
+        notifications: [
+          {
+            id: 8776831,
+            personId: 5827629,
+            organisationId: 7316417,
+            messageId: 9745207,
+            readAt: null,
+            archivedAt: null,
+            archive: null,
+            createdAt: 1792323602125,
+            title:
+              'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
+            body: '<p>Strues cras triduana tempore stabilis vomica adsum culpo asporto atque.</p>',
+            category: 'OrganisationLevel',
+            bespokeNotificationId: null
+          },
+          {
+            id: 5244065,
+            personId: 5456657,
+            organisationId: 729076,
+            messageId: 5877233,
+            readAt: null,
+            archivedAt: null,
+            archive: null,
+            createdAt: 2580178053430,
+            title:
+              'Corrumpo adulatio coadunatio bene impedit creator molestias amicitia conculco cui.',
+            body: '<p>Stips thymbra ciminatio valens deporto magni usque absque appono repellat.</p>',
+            category: 'OrganisationLevel',
+            bespokeNotificationId: null
+          }
+        ],
+        resultCount: 2,
+        readCount: 0,
+        unreadCount: 2
+      })
+    })
+  })
 })

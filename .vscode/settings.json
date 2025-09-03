@@ -61,5 +61,10 @@
   "yaml.validate": true,
   "yaml.format.enable": true,
   "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules ./node_modules/jest/bin/jest.js",
-  "jestrunner.runOptions": ["--runInBand", "--coverage"]
+  "jestrunner.runOptions": ["--runInBand", "--coverage"],
+  "jestrunner.debugOptions": {
+    "env": {
+      "NODE_OPTIONS": "--experimental-vm-modules"
+    }
+  }
 }
