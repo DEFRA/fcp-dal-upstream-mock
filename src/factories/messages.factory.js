@@ -47,8 +47,7 @@ export const retrieveMessages = (orgId, personId) => {
   if (messages) {
     return messages
   }
-  faker.seed(orgId)
-  faker.seed(personId)
+  faker.seed([orgId, personId])
   const messagesPayload = generateMessagesPayload(faker.number.int({ min: 0, max: 10 }))
   businessPersonMessages[`${orgId}-${personId}`] = messagesPayload
   return messagesPayload
