@@ -153,7 +153,6 @@ paths:
                     example: 'HTTP 422'
         '400':
           description: 'Invalid JSON, or valid JSON that does not match the body schema'
-          $ref: '#/components/responses/BadRequest'
 
 components:
   responses:
@@ -185,23 +184,6 @@ components:
                 </body></html>
     BadRequest:
       description: Bad Request
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-                example: 400
-              message:
-                type: string
-                example:
-                  - 'HTTP 400 Bad Request'
-                  - Unable to process JSON
-        text/plain:
-          schema:
-            type: string
-            example: source cannot be null
 
   schemas:
     # request objects
@@ -435,7 +417,7 @@ components:
             - type: integer
               format: int64
             - type: string
-              pattern: '^([-]?\d+)?$'
+              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
             - type: 'null'
         landline:
           type: [object, array, string, 'null']
