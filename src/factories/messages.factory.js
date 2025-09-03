@@ -20,12 +20,13 @@ const createMessageMock = () => ({
 
 const generateMessagesPayload = (numMessages) => {
   const notifications = Array.from({ length: numMessages }, () => createMessageMock())
+  const readCount = notifications.filter((n) => n.readAt).length
 
   return {
     notifications,
     resultCount: notifications.length,
-    readCount: notifications.filter((n) => n.readAt).length,
-    unreadCount: notifications.filter((n) => !n.readAt).length
+    readCount,
+    unreadCount: notifications.length - readCount
   }
 }
 
