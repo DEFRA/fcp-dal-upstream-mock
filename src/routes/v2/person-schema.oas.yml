@@ -46,32 +46,11 @@ paths:
                   - '_data'
                 additionalProperties: false
         '403':
-          description: >
-            Getting an internal user's details is forbidden, or a WAF rule has been triggered.
-          content:
-            text/html:
-              schema:
-                type: string
-              examples:
-                forbidden:
-                  summary: Forbidden HTML response
-                  value: |
-                    <html><body><h1>403 Forbidden</h1>
-                    Request forbidden by administrative rules.
-                    </body></html>
+          description: Getting an internal user's details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
         '404':
-          description: 'Person not found.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 404
-                  message:
-                    type: string
-                    example: 'HTTP 404 Not Found'
+          description: 'Person not found'
+          $ref: '#/components/responses/NotFound'
   /person/search:
     post:
       tags:
@@ -105,17 +84,7 @@ paths:
                 additionalProperties: false
         '400':
           description: 'breached search string length'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: 'HTTP 400 Bad Request'
+          $ref: '#/components/responses/BadRequest'
         '500':
           description: 'Internal server error, or only `searchFieldType` was provided.'
           content:
@@ -130,8 +99,110 @@ paths:
                     type: string
                     example: >
                       There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+  /person/{personId}:
+    put:
+      tags:
+        - 'person'
+      summary: 'Update Person Details.'
+      description: 'Request to update a person with the specified details.'
+      operationId: 'updatePersonDetails'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'The unique ID of the requested person.'
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples: [11111111, 11112222, 22222222]
+        - name: 'email'
+          in: 'header'
+          description: 'Email'
+          schema:
+            type: string
+            format: email
+      requestBody:
+        description: 'Person data to update'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalUpdateRequest'
+      responses:
+        '204':
+          description: 'Successfully updated person details.'
+        '403':
+          description: Getting an internal user's details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 'Person not found'
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: 'Required fields are missing'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 422
+                  message:
+                    type: string
+                    example: 'HTTP 422'
+        '400':
+          description: 'Invalid JSON, or valid JSON that does not match the body schema'
+          $ref: '#/components/responses/BadRequest'
 
 components:
+  responses:
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: HTTP 404 Not Found
+    Forbidden:
+      description: Forbidden
+      content:
+        text/html:
+          schema:
+            type: string
+          examples:
+            forbidden:
+              summary: Forbidden HTML response
+              value: |
+                <html><body><h1>403 Forbidden</h1>
+                Request forbidden by administrative rules.
+                </body></html>
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example:
+                  - 'HTTP 400 Bad Request'
+                  - Unable to process JSON
+        text/plain:
+          schema:
+            type: string
+            example: source cannot be null
+
   schemas:
     # request objects
     SearchRequestBody:
@@ -185,7 +256,7 @@ components:
         customerReference:
           type: string
         email:
-          type: string
+          type: [string, 'null']
         locked:
           type: boolean
         deactivated:
@@ -257,26 +328,27 @@ components:
         doubleDependentLocality:
           type: [string, 'null']
         addressTypeId:
-          type: [integer, 'null']
+          type: [string, 'null']
       required:
         - 'address1'
         - 'address2'
         - 'address3'
         - 'address4'
         - 'address5'
-        - 'pafOrganisationName'
-        - 'flatName'
-        - 'buildingNumberRange'
+        - 'addressTypeId'
         - 'buildingName'
-        - 'street'
+        - 'buildingNumberRange'
         - 'city'
-        - 'county'
-        - 'postalCode'
         - 'country'
-        - 'uprn'
+        - 'county'
         - 'dependentLocality'
         - 'doubleDependentLocality'
-        - 'addressTypeId'
+        - 'flatName'
+        - 'pafOrganisationName'
+        - 'postalCode'
+        - 'street'
+        - 'uprn'
+
     FullPersonDetails:
       type: object
       additionalProperties: false
@@ -338,6 +410,78 @@ components:
         - 'customerReferenceNumber'
         - 'personalIdentifiers'
         - 'deactivated'
+
+    PersonalUpdateRequest:
+      type: 'object'
+      properties:
+        title:
+          type: [string, number, boolean, 'null']
+          description: 'Title of the person (e.g., Mr, Mrs)'
+        otherTitle:
+          type: [string, number, boolean, 'null']
+          description: 'Alternative or additional title'
+        firstName:
+          type: [string, number, boolean]
+          description: 'First name of the person'
+        middleName:
+          type: [string, number, boolean, 'null']
+          description: 'Middle name of the person'
+        lastName:
+          type: [string, number, boolean]
+          description: 'Last name of the person'
+        dateOfBirth:
+          description: 'Date of birth as a Unix timestamp'
+          oneOf:
+            - type: integer
+              format: int64
+            - type: string
+              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
+            - type: 'null'
+        landline:
+          type: [object, array, string, 'null']
+          description: 'Landline phone number'
+        mobile:
+          type: [object, array, string, 'null']
+          description: 'Mobile phone number'
+        email:
+          type: [object, array, string, 'null']
+          description: 'Email address'
+        address:
+          type: [object, 'null']
+          properties:
+            address1:
+              type: [object, array, string, number, boolean, 'null']
+            address2:
+              type: [object, array, string, number, boolean, 'null']
+            address3:
+              type: [object, array, string, number, boolean, 'null']
+            address4:
+              type: [object, array, string, number, boolean, 'null']
+            address5:
+              type: [object, array, string, number, boolean, 'null']
+            pafOrganisationName:
+              type: [object, array, string, number, boolean, 'null']
+            flatName:
+              type: [object, array, string, number, boolean, 'null']
+            buildingNumberRange:
+              type: [object, array, string, number, boolean, 'null']
+            buildingName:
+              type: [object, array, string, number, boolean, 'null']
+            street:
+              type: [object, array, string, number, boolean, 'null']
+            city:
+              type: [object, array, string, number, boolean, 'null']
+            county:
+              type: [object, array, string, number, boolean, 'null']
+            postalCode:
+              type: [object, array, string, number, boolean, 'null']
+            country:
+              type: [object, array, string, number, boolean, 'null']
+            uprn:
+              type: [object, array, string, number, boolean, 'null']
+      required:
+        - firstName
+        - lastName
 
   securitySchemes:
     mTLS:

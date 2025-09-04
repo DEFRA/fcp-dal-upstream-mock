@@ -1,6 +1,8 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
+import { personUpdateSchema } from '../../common/update-schemas.js'
 import { orgIdToSbi, personIdToCRN, personIdToOrgIds } from '../../factories/id-lookups.js'
+import { applyUpdates } from '../../utils/applyUpdates.js'
 import { fakeAddress, fakeIds } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
@@ -87,4 +89,10 @@ export const retrievePersonOrgs = (personId) => {
     }
   })
   return orgs
+}
+
+export const updatePerson = (personId, updatesToPerson) => {
+  const person = retrievePerson(personId)
+
+  return (people[personId] = applyUpdates(personUpdateSchema, person, updatesToPerson))
 }
