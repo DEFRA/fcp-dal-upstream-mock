@@ -49,7 +49,7 @@ describe('applyUpdates', () => {
     expect(result).toEqual({ profile: { name: '123', verified: false } })
   })
 
-  test('handles nested objects with schema', () => {
+  test('handles null input', () => {
     const schema = {
       name: { type: 'string', default: null }
     }
