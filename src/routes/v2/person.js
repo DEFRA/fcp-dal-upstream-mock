@@ -1,26 +1,44 @@
 import Boom from '@hapi/boom'
 import { config } from '../../config.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
-import { retrievePerson, retrievePersonOrgs } from '../../factories/person/person.factory.js'
+import {
+  retrievePerson,
+  retrievePersonOrgs,
+  updatePerson
+} from '../../factories/person/person.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
+import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const validateUpdatePersonPayload = await createPayloadValidator(
+  'routes/v2/person-schema.oas.yml',
+  (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
+)
+
+const checkPersonId = (request) => {
+  const personId = parseInt(request.params.personId, 10)
+
+  if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+    throw Boom.forbidden(
+      `bad personId: ${personId}, is not an integer in the acceptable range`,
+      request
+    )
+  }
+
+  return personId
+}
 
 export const person = [
   {
     method: 'GET',
     path: '/person/{personId}/summary',
     handler: async (request, h) => {
-      let personId = parseInt(request.params.personId, 10)
+      let personId = checkPersonId(request)
+
       if (personId === config.get('personIdOverride')) {
         const crn = request?.headers?.crn
-        // override with personId obtained from crn request header
         personId = crnToPersonId[crn]
       }
-      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
-        throw Boom.forbidden(
-          `bad personId: ${personId}, is not an integer in the acceptable range`,
-          request
-        )
-      }
+
       const { role, privileges, lastUpdatedOn, ...personData } = retrievePerson(personId)
 
       return h.response({ _data: personData })
@@ -98,13 +116,7 @@ export const person = [
     method: 'GET',
     path: '/organisation/person/{personId}/summary',
     handler: async (request, h) => {
-      let personId = parseInt(request.params.personId, 10)
-      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
-        throw Boom.forbidden(
-          `bad personId: ${personId}, is not an integer in the acceptable range`,
-          request
-        )
-      }
+      const personId = checkPersonId(request)
 
       const orgs = retrievePersonOrgs(personId)
 
@@ -118,6 +130,29 @@ export const person = [
           totalElements: orgs.length
         }
       })
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/person/{personId}',
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
+      const body = request.payload
+
+      if (body === '' || body === null) {
+        throw Boom.badRequest('empty request body not allowed', request)
+      }
+
+      if (typeof body !== 'object' || Array.isArray(body)) {
+        throw Boom.badRequest('missing or invalid request body', request)
+      }
+
+      if (!validateUpdatePersonPayload(request.payload)) {
+        throw Boom.badData('validation error while processing input', request)
+      }
+
+      updatePerson(personId, body)
+      return h.response().code(204)
     }
   }
 ]

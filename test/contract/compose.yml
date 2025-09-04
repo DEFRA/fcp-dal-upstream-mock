@@ -19,6 +19,7 @@ services:
         fi
         exit $$result
     depends_on:
-      - dal-mock
+      dal-mock:
+        condition: service_healthy
     networks:
       - default

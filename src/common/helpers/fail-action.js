@@ -36,6 +36,9 @@ export const emulateUpstreamErrors = (request, h) => {
     // Replace payload for client with standard upstream error responses
     if (code === 400) {
       return h.response({ code, message: 'HTTP 400 Bad Request' }).code(code)
+      // TODO: decide when put endpoints should respond with:
+      //   `{"code":400,"message":"Unable to process JSON"}`
+      //   `"source cannot be null"`
     }
     if (code === 403) {
       return h
@@ -47,6 +50,9 @@ export const emulateUpstreamErrors = (request, h) => {
     }
     if (code === 404) {
       return h.response({ code, message: 'HTTP 404 Not Found' }).code(code)
+    }
+    if (code === 422) {
+      return h.response({ code, message: 'HTTP 422 ' }).code(code)
     }
     if (code === 500) {
       return h
