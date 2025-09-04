@@ -14,23 +14,31 @@ const validateUpdatePersonPayload = await createPayloadValidator(
   (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
 )
 
+const checkPersonId = (request) => {
+  const personId = parseInt(request.params.personId, 10)
+
+  if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+    throw Boom.forbidden(
+      `bad personId: ${personId}, is not an integer in the acceptable range`,
+      request
+    )
+  }
+
+  return personId
+}
+
 export const person = [
   {
     method: 'GET',
     path: '/person/{personId}/summary',
     handler: async (request, h) => {
-      let personId = parseInt(request.params.personId, 10)
+      let personId = checkPersonId(request)
+
       if (personId === config.get('personIdOverride')) {
         const crn = request?.headers?.crn
-        // override with personId obtained from crn request header
         personId = crnToPersonId[crn]
       }
-      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
-        throw Boom.forbidden(
-          `bad personId: ${personId}, is not an integer in the acceptable range`,
-          request
-        )
-      }
+
       const { role, privileges, lastUpdatedOn, ...personData } = retrievePerson(personId)
 
       return h.response({ _data: personData })
@@ -108,13 +116,7 @@ export const person = [
     method: 'GET',
     path: '/organisation/person/{personId}/summary',
     handler: async (request, h) => {
-      let personId = parseInt(request.params.personId, 10)
-      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
-        throw Boom.forbidden(
-          `bad personId: ${personId}, is not an integer in the acceptable range`,
-          request
-        )
-      }
+      const personId = checkPersonId(request)
 
       const orgs = retrievePersonOrgs(personId)
 
@@ -133,31 +135,20 @@ export const person = [
   {
     method: 'PUT',
     path: '/person/{personId}',
-
-    async handler(request, h) {
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
       const body = request.payload
-      const personId = parseInt(request.params.personId, 10)
 
-      // personId must be a valid integer in range, and email header must be a user on the system
-      if (isNaN(personId) || personId < 0 || `${personId}`.length > 20 || !request.headers.email) {
-        throw Boom.forbidden(
-          `bad personId: ${personId}, is not an integer in the acceptable range`,
-          request
-        )
-      }
-      // body must not be empty
       if (body === '' || body === null) {
         throw Boom.badRequest('empty request body not allowed', request)
-        // TODO: should respond with `"source cannot be null"`
       }
-      // body must be a parsable JSON object, not an array or other type
+
       if (typeof body !== 'object' || Array.isArray(body)) {
         throw Boom.badRequest('missing or invalid request body', request)
-        // TODO: should respond with `{"code":400,"message":"Unable to process JSON"}`
       }
 
       if (!validateUpdatePersonPayload(request.payload)) {
-        throw Boom.badData('validation error while processing input', { request })
+        throw Boom.badData('validation error while processing input', request)
       }
 
       updatePerson(personId, body)
