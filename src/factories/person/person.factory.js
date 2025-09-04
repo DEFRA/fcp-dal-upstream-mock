@@ -92,11 +92,7 @@ export const retrievePersonOrgs = (personId) => {
 }
 
 export const updatePerson = (personId, updatesToPerson) => {
-  if (!people[personId]) {
-    throw Boom.notFound(`Person with ID ${personId} not found`)
-  }
-
-  const person = people[personId] || createPerson(personId)
+  const person = retrievePerson(personId)
 
   return (people[personId] = applyUpdates(personUpdateSchema, person, updatesToPerson))
 }
