@@ -117,8 +117,7 @@ export const createOrganisation = (personId, payload) => {
   return org
 }
 
-const generateOrganisation = (orgId) => {
-  const sbi = orgIdToSbi[orgId]
+const generateOrganisation = (orgId, sbi) => {
   faker.seed(orgId)
   const name = faker.company.name()
   const hasAdditionalBusinessActivities = nft(4, 2, 3)
@@ -182,20 +181,41 @@ const generateOrganisation = (orgId) => {
 
 export const updateOrganisation = (orgId, updatesToOrg) => {
   const org = retrieveOrganisation(orgId)
-  const newOrg = Object.assign(org, updatesToOrg)
-  organisations[orgId] = newOrg
-  return newOrg
+  return Object.assign(org, updatesToOrg)
+}
+export const updateAdditionalOrganisationDetails = (
+  orgId,
+  {
+    legalStatus,
+    businessType,
+    companiesHouseRegistrationNumber,
+    charityCommissionRegistrationNumber,
+    dateStartedFarming
+  }
+) => {
+  const org = retrieveOrganisation(orgId)
+  const newLegalStatus = { id: legalStatus.id, type: legalStatus.type ?? 'Set from reference data' }
+  const newBusinessType = {
+    id: businessType.id,
+    type: businessType.type ?? 'Set from reference data'
+  }
+  Object.assign(org, {
+    legalStatus: newLegalStatus,
+    businessType: newBusinessType,
+    companiesHouseRegistrationNumber: companiesHouseRegistrationNumber ?? null,
+    charityCommissionRegistrationNumber: charityCommissionRegistrationNumber ?? null,
+    dateStartedFarming: new Date(dateStartedFarming).getTime() || null
+  })
 }
 
 export const retrieveOrganisation = (orgId) => {
-  if (organisations[orgId]) {
-    return organisations[orgId]
-  }
-  if (!orgIdToSbi[orgId]) {
+  const sbi = orgIdToSbi[orgId]
+
+  if (!sbi) {
     throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   }
 
-  return generateOrganisation(orgId)
+  return organisations[orgId] ?? generateOrganisation(orgId, sbi)
 }
 
 export const retrieveOrganisationCustomers = (orgId) => {
