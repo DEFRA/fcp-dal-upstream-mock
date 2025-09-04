@@ -4,23 +4,29 @@ import {
   createOrganisation,
   retrieveOrganisation,
   retrieveOrganisationCustomers,
+  updateAdditionalOrganisationDetails,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
+
+const checkOrganisationId = (request) => {
+  const organisationId = parseInt(request.params.organisationId, 10)
+
+  if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
+    throw Boom.forbidden(
+      `bad organisationId: ${organisationId}, is not an integer in the acceptable range`,
+      request
+    )
+  }
+  return organisationId
+}
 
 export const organisation = [
   {
     method: 'GET',
     path: '/organisation/{organisationId}',
     handler: async (request, h) => {
-      const organisationId = parseInt(request.params.organisationId, 10)
-
-      if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
-        throw Boom.forbidden(
-          `bad organisationId: ${organisationId}, is not an integer in the acceptable range`,
-          request
-        )
-      }
+      const organisationId = checkOrganisationId(request)
 
       return h.response({ _data: retrieveOrganisation(organisationId) })
     }
@@ -114,6 +120,37 @@ export const organisation = [
       return h.response({
         _data: updateOrganisation(request.params.organisationId, request.payload)
       })
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/organisation/{organisationId}/additional-business-details',
+    handler: async (request, h) => {
+      const organisationId = checkOrganisationId(request)
+      const body = request.payload
+
+      if (
+        typeof body !== 'object' ||
+        Array.isArray(body) ||
+        body === null ||
+        // required fields
+        !body.businessType?.id ||
+        !body.legalStatus?.id
+      ) {
+        throw Boom.badRequest(`bad payload: ${body}, expected an object`, request)
+      }
+
+      try {
+        updateAdditionalOrganisationDetails(organisationId, body)
+      } catch (e) {
+        if (e.isBoom) {
+          // 404 is a 500 upstream!!
+          throw Boom.internal(`Organisation with ID: ${organisationId} not found`, request)
+        }
+        throw e
+      }
+
+      return h.response().code(204)
     }
   },
   {
