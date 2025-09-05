@@ -1,7 +1,7 @@
 import Hapi from '@hapi/hapi'
 import { retrieveOrganisationAgreements } from '../../../src/factories/siti-agri/agreement.factory.js'
 import { sitiagri } from '../../../src/routes/v2/siti-agri.js'
-import { loadSchema } from '../../helpers.js'
+import { loadSchema } from '../../../src/utils/validatePayload.js'
 
 describe('Basic queries for faked routes', () => {
   let server, schema
@@ -10,7 +10,7 @@ describe('Basic queries for faked routes', () => {
     server.route(sitiagri)
     await Promise.all([
       server.initialize(),
-      loadSchema('src/routes/v2/siti-agri-schema.oas.yml').then((s) => (schema = s))
+      loadSchema('routes/v2/siti-agri-schema.oas.yml').then((s) => (schema = s))
     ])
   })
 
