@@ -5,7 +5,6 @@ import { notifications } from '../routes/rural-payments/messages.js'
 import { organisation } from '../routes/rural-payments/organisation.js'
 import { person } from '../routes/rural-payments/person.js'
 import { sitiAgri } from '../routes/rural-payments/siti-agri.js'
-import { sitiagri } from '../routes/v2/siti-agri.js'
 
 const router = {
   plugin: {
@@ -18,11 +17,7 @@ const router = {
         ...authenticate,
         ...lms,
         ...notifications,
-        ...sitiAgri,
-        ...sitiagri.map((route) => ({
-          ...route,
-          path: `/v1${route.path}` // change path to v1
-        }))
+        ...sitiAgri
       ])
     }
   }
