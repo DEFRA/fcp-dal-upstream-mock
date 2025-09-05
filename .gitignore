@@ -10,6 +10,6 @@ coverage
 .cache
 .eslintcache
 test/contract/tmp/
-
 *.crt
 *.key
+.env*

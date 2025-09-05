@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { retrieveOrganisationAgreements } from '../../factories/siti-agri/agreement.factory.js'
 import { retrieveApplications } from '../../factories/siti-agri/application.factory.js'
 
 const responseWrapper = { errorString: null, success: true }
@@ -14,6 +15,23 @@ export const sitiagri = [
       if (applications) return h.response({ ...responseWrapper, data: applications })
 
       throw Boom.forbidden(`organisation with SBI: ${sbi} not found`, request) // YES, 404 is a 403!!
+    }
+  },
+  {
+    method: 'GET',
+    path: '/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list',
+    handler: async (request, h) => {
+      const sbi = parseInt(request.params.sbi, 10)
+
+      if (isNaN(sbi) || sbi < 0 || `${sbi}`.length > 20) {
+        throw Boom.forbidden('Request forbidden by administrative rules.', request)
+      }
+
+      return h.response({
+        data: retrieveOrganisationAgreements(sbi),
+        success: true,
+        errorString: null
+      })
     }
   }
 ]

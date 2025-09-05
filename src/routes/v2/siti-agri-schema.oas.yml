@@ -63,6 +63,63 @@ paths:
                     <html><body><h1>403 Forbidden</h1>
                     Request forbidden by administrative rules.
                     </body></html>
+  /SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list:
+    get:
+      tags:
+        - 'siti-agri'
+        - 'agreements'
+      summary: 'Find Agreements by SBI.'
+      description: 'Find Agreements by SBI'
+      operationId: 'findAgreementsBySBI'
+      parameters:
+        - name: 'sbi'
+          in: 'path'
+          description: 'sbi'
+          required: true
+          schema:
+            type: 'integer'
+            maximum: 99999999999999999999
+            minimum: 1
+            examples:
+              - '1000000000'
+              - '1111111111'
+              - '2222222222'
+      responses:
+        '200':
+          description: 'Returns full organisation details.'
+          content:
+            application/json:
+              schema:
+                type: 'object'
+                additionalProperties: false
+                properties:
+                  data:
+                    type: 'array'
+                    items:
+                      $ref: '#/components/schemas/AgreementsResponse'
+                  success:
+                    type: 'boolean'
+                  errorString:
+                    type: [string, 'null']
+                    description: 'Error string if present, otherwise can be null'
+                required:
+                  - 'data'
+                  - 'success'
+                  - 'errorString'
+        '403':
+          description: "Getting an internal user's details is forbidden, or a WAF\
+            \ rule has been triggered"
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
 components:
   schemas:
     ApplicationsResponse:
@@ -169,6 +226,104 @@ components:
         - transition_id
         - transition_name
       additionalProperties: false
+    AgreementsResponse:
+      type: 'object'
+      properties:
+        sbi:
+          type: 'string'
+          description: 'SBI of the business'
+        contract_id:
+          type: 'string'
+          description: 'Contract ID'
+        agreement_name:
+          type: 'string'
+          description: 'Name of the agreement'
+        status:
+          type: 'string'
+          description: 'Status of the agreement'
+        contract_type:
+          type: 'string'
+          description: 'Type of contract'
+        scheme_year:
+          type: 'integer'
+          description: 'Scheme year'
+        start_date:
+          type: 'string'
+          description: 'Start date of the agreement'
+        end_date:
+          type: 'string'
+          description: 'End date of the agreement'
+        payment_schedules:
+          type: 'array'
+          description: 'List of payment schedules'
+          items:
+            $ref: '#/components/schemas/AgreementsPaymentScheduleResponse'
+      required:
+        - sbi
+        - contract_id
+        - agreement_name
+        - status
+        - contract_type
+        - scheme_year
+        - start_date
+        - end_date
+        - payment_schedules
+    AgreementsPaymentScheduleResponse:
+      type: 'object'
+      properties:
+        option_code:
+          type: 'string'
+          description: 'Option code'
+        option_description:
+          type: 'string'
+          description: 'Description of the option'
+        commitment_group_start_date:
+          type: 'string'
+          description: 'Commitment group start date'
+        commitment_group_end_date:
+          type: 'string'
+          description: 'Commitment group end date'
+        year:
+          type: 'integer'
+          description: 'Year of the payment schedule'
+        sheet_name:
+          type: [string, 'null']
+          description: 'Sheet name'
+        parcel_name:
+          type: [string, 'null']
+          description: 'Parcel name'
+        action_area:
+          type: [integer, 'null']
+          description: 'Action area'
+        action_mtl:
+          type: [integer, 'null']
+          description: 'Action MTL'
+        action_units:
+          type: [number, 'null']
+          description: 'Action units'
+        parcel_total_area:
+          type: [integer, 'null']
+          description: 'Total area of the parcel'
+        payment_schedule_start_date:
+          type: 'string'
+          description: 'Payment schedule start date'
+        payment_schedule_end_date:
+          type: 'string'
+          description: 'Payment schedule end date'
+      required:
+        - option_code
+        - option_description
+        - commitment_group_start_date
+        - commitment_group_end_date
+        - year
+        - sheet_name
+        - parcel_name
+        - action_area
+        - action_mtl
+        - action_units
+        - parcel_total_area
+        - payment_schedule_start_date
+        - payment_schedule_end_date
   securitySchemes:
     mTLS:
       type: mutualTLS
