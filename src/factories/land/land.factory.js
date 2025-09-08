@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
+import { Boom } from '@hapi/boom'
 import fs from 'fs'
-import { retrieveOrganisation } from '../organisation/organisation.factory'
+import { orgIdToSbi } from '../../factories/id-lookups.js'
 
 const parcelsAndCovers = JSON.parse(
   // Generated using scripts/generate_geometries.sh
@@ -68,7 +69,16 @@ const createLand = (orgId) => {
 }
 
 const retrieveOrgLand = (orgId) => {
-  retrieveOrganisation(orgId) // ensure organisation exists
+  if (!orgIdToSbi[orgId]) {
+    // Don't create land for non-existent orgs
+    // But don't throw error as the API generally returns empty arrays
+    return {
+      parcelsDetailsGeo: [],
+      parcels: [],
+      covers: [],
+      coversSummary: []
+    }
+  }
   if (!land[orgId]) {
     land[orgId] = createLand(orgId)
   }
@@ -111,6 +121,10 @@ export const retrieveCovers = (orgId, sheetId, parcelId) => {
 }
 
 export const retrieveCoversSummary = (orgId) => {
+  // Strangely this API does actually throw an error for non-existent orgId
+  if (!orgIdToSbi[orgId]) {
+    return Boom.internal('Org not found')
+  }
   const { coversSummary } = retrieveOrgLand(orgId)
   return coversSummary
 }

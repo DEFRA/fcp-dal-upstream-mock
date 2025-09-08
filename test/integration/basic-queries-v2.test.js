@@ -1248,7 +1248,7 @@ describe('Basic queries for faked routes', () => {
       })
     })
 
-    test('Should return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate}', async () => {
+    test('Should return data for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate}', async () => {
       const response = await mockServer.inject({
         method: 'GET',
         url: '/extapi/lms/organisation/1111111111/covers-summary/historic/01-Jan-25'
@@ -1272,6 +1272,14 @@ describe('Basic queries for faked routes', () => {
           area: 0
         }
       ])
+    })
+
+    test('Should throw error for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate} if org does not exist', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/doesntexist/covers-summary/historic/01-Jan-25'
+      })
+      expect(response.statusCode).toBe(500)
     })
   })
 })
