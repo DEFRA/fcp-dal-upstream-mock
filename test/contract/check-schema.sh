@@ -93,11 +93,6 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.oas.yml
 
 set +e
 
-# resolve KITS_URL
-if [ -z "${KITS_URL}" ]; then
-  KITS_URL="https://chs-upgrade-api.ruraldev.org.uk:8446/extapi"
-fi
-
 # run schemathesis tests
 docker run --rm --network=host \
   -v ${baseDir}/tmp:/tmp \
@@ -110,7 +105,7 @@ docker run --rm --network=host \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
-      --url "${KITS_URL}"
+      --url "${KITS_URL:-https://chs-upgrade-api.ruraldev.org.uk:8446/extapi}"
 
 # cleanup
 rm -rf ./tmp

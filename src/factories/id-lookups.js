@@ -116,11 +116,11 @@ export const orgIdLookup = {
       },
       {
         contract_id: '1111111112',
-        payment_schedules: [1111111111, 1111111112, 1111111113]
+        payment_schedules: [1111111121, 1111111122, 1111111123]
       },
       {
         contract_id: '1111111113',
-        payment_schedules: [1111111111, 1111111112, 1111111113]
+        payment_schedules: [1111111131, 1111111132, 1111111133]
       }
     ]
   },

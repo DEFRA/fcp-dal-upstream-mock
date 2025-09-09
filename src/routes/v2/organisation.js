@@ -8,18 +8,7 @@ import {
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-
-const checkOrganisationId = (request) => {
-  const organisationId = parseInt(request.params.organisationId, 10)
-
-  if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
-    throw Boom.forbidden(
-      `bad organisationId: ${organisationId}, is not an integer in the acceptable range`,
-      request
-    )
-  }
-  return organisationId
-}
+import { checkOrganisationId } from '../../utils/shared-datatypes.js'
 
 export const organisation = [
   {

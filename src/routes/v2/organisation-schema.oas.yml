@@ -78,6 +78,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
   /organisation/search:
     post:
       tags:

@@ -63,6 +63,20 @@ paths:
                     <html><body><h1>403 Forbidden</h1>
                     Request forbidden by administrative rules.
                     </body></html>
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
   /SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list:
     get:
       tags:
@@ -120,6 +134,20 @@ paths:
                     <html><body><h1>403 Forbidden</h1>
                     Request forbidden by administrative rules.
                     </body></html>
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
 components:
   schemas:
     ApplicationsResponse:
@@ -268,6 +296,7 @@ components:
         - start_date
         - end_date
         - payment_schedules
+      additionalProperties: false
     AgreementsPaymentScheduleResponse:
       type: 'object'
       properties:
@@ -324,6 +353,7 @@ components:
         - parcel_total_area
         - payment_schedule_start_date
         - payment_schedule_end_date
+      additionalProperties: false
   securitySchemes:
     mTLS:
       type: mutualTLS

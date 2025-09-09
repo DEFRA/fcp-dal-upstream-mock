@@ -1,5 +1,4 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
-import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { fakeIds, nullOrFake, transformDate } from '../common.js'
 import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
@@ -69,30 +68,24 @@ export const retrieveOrganisationAgreements = (sbi) => {
       )
       return {
         contract_id: `${id}`,
-        payment_schedules: paymentSchedules || []
+        payment_schedules: paymentSchedules
       }
     })
 
   const agreements =
     orgIdLookup[sbiToOrgId[sbi]].agreements || nullOrFake(fakeAgreements, 0.3333) || []
 
-  try {
-    return agreements.map((agreement) => {
-      const paymentSchedules = agreement.payment_schedules
-        ? agreement.payment_schedules.map(() => createPaymentSchedule())
-        : nullOrFake(
-            () =>
-              Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, createPaymentSchedule),
-            0.3333
-          )
+  return agreements.map((agreement) => {
+    const paymentSchedules = agreement.payment_schedules
+      ? agreement.payment_schedules.map(() => createPaymentSchedule())
+      : nullOrFake(
+          () => Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, createPaymentSchedule),
+          0.3333
+        )
 
-      return createAgreementMock(sbi, {
-        ...agreement,
-        payment_schedules: paymentSchedules || []
-      })
+    return createAgreementMock(sbi, {
+      ...agreement,
+      payment_schedules: paymentSchedules || []
     })
-  } catch (error) {
-    logger.error(error)
-    throw error
-  }
+  })
 }
