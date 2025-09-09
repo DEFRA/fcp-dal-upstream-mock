@@ -33,9 +33,14 @@ paths:
             maximum: 99999999999999999999
             minimum: 1
             examples:
-              - '1000000000'
-              - '1111111111'
-              - '2222222222'
+              - 1000000000
+              - 1111111111
+              - 2222222222
+              - 107167406
+              - 107097991
+              - 106354662
+              - 106221605
+              - 106440483
       responses:
         '200':
           description: Returns Agreements details for the target organisation.
@@ -114,7 +119,6 @@ paths:
               - 106354662
               - 106221605
               - 106440483
-              - 200665008
         - name: pointInTime
           in: query
           description: >

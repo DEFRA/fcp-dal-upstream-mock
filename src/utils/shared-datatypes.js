@@ -1,22 +1,11 @@
-export const checkSbi = (request) => {
-  const sbi = parseInt(request?.params?.sbi, 10)
+import Boom from '@hapi/boom'
 
-  if (isNaN(sbi) || sbi < 0 || `${sbi}`.length > 20) {
-    throw Boom.forbidden('Request forbidden by administrative rules.', request)
+export const checkId = (request, idName) => {
+  const id = parseInt({ ...request?.params }[idName], 10)
+
+  if (isNaN(id) || id < 0 || `${id}`.length > 20) {
+    throw Boom.forbidden(`bad ${idName}: ${id}, is not an integer in the acceptable range`, request)
   }
 
-  return sbi
-}
-
-export const checkOrganisationId = (request) => {
-  const organisationId = parseInt(request?.params?.organisationId, 10)
-
-  if (isNaN(organisationId) || organisationId < 0 || `${organisationId}`.length > 20) {
-    throw Boom.forbidden(
-      `bad organisationId: ${organisationId}, is not an integer in the acceptable range`,
-      request
-    )
-  }
-
-  return organisationId
+  return `${id}`
 }

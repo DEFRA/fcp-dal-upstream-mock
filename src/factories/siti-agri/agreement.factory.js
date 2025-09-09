@@ -49,13 +49,9 @@ const createAgreementMock = (sbi, attributes = {}) => ({
   ...attributes
 })
 
-export const retrieveOrganisationAgreements = (sbi) => {
+export const retrieveOrganisationAgreements = (sbi, orgId) => {
   if (agreementsStore[sbi]) {
     return agreementsStore[sbi]
-  }
-  if (!sbiToOrgId[sbi]) {
-    // KITS return error if sbi not found
-    throw Boom.forbidden('Request forbidden by administrative rules.')
   }
 
   faker.seed(sbi)
@@ -68,7 +64,7 @@ export const retrieveOrganisationAgreements = (sbi) => {
     }
   })
 
-  const agreements = orgIdLookup[sbiToOrgId[sbi]].agreements || fakeAgreements
+  const agreements = orgIdLookup[orgId].agreements || fakeAgreements
 
   const agreementsResponse = agreements.map((agreement) => {
     const paymentSchedules = agreement.payment_schedules
