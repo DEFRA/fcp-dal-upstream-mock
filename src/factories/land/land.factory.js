@@ -15,7 +15,7 @@ const generateParcels = (geometries) => {
     const validFrom = faker.date.past().getTime()
     const validTo = validFrom + faker.number.int({ min: 1, max: 3 }) * 24 * 60 * 60 * 1000
     return {
-      parcelId: parcel.id,
+      id: parcel.id,
       sheetId: parcel.properties.sheetId,
       parcelId: parcel.properties.parcelId,
       area: parseFloat(parcel.properties.area),
@@ -54,10 +54,13 @@ const createLand = (orgId) => {
   const parcelsDetailsGeo = geometries.map(({ parcel }) => ({ parcel }))
   const parcels = generateParcels(parcelsDetailsGeo)
 
-  const covers = geometries.reduce((result, { parcel, covers: parcelCovers }) => ({
-    ...result,
-    [`${parcel.properties.sheetId}${parcel.properties.parcelId}`]: parcelCovers
-  }), {})
+  const covers = geometries.reduce(
+    (result, { parcel, covers: parcelCovers }) => ({
+      ...result,
+      [`${parcel.properties.sheetId}${parcel.properties.parcelId}`]: parcelCovers
+    }),
+    {}
+  )
   const coversSummary = generateCoversSummary(Object.values(covers).flat())
 
   return {
@@ -86,7 +89,7 @@ export const retrieveParcels = (orgId) => {
   const { parcels } = retrieveOrgLand(orgId)
   return parcels.map((parcel) => {
     return {
-      id: parcel.parcelId,
+      id: parcel.id,
       sheetId: parcel.sheetId,
       parcelId: parcel.parcelId,
       area: parcel.area,
