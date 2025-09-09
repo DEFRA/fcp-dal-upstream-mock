@@ -54,10 +54,10 @@ const createLand = (orgId) => {
   const parcelsDetailsGeo = geometries.map(({ parcel }) => ({ parcel }))
   const parcels = generateParcels(parcelsDetailsGeo)
 
-  let covers = {}
-  geometries.forEach(({ parcel, covers: parcelCovers }) => {
-    covers[`${parcel.properties.sheetId}${parcel.properties.parcelId}`] = parcelCovers
-  })
+  const covers = geometries.reduce((result, { parcel, covers: parcelCovers }) => ({
+    ...result,
+    [`${parcel.properties.sheetId}${parcel.properties.parcelId}`]: parcelCovers
+  }), {})
   const coversSummary = generateCoversSummary(Object.values(covers).flat())
 
   return {
