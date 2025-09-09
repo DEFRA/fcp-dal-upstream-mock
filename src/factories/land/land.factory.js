@@ -79,10 +79,7 @@ const retrieveOrgLand = (orgId) => {
       coversSummary: []
     }
   }
-  if (!land[orgId]) {
-    land[orgId] = createLand(orgId)
-  }
-  return land[orgId]
+  return land[orgId] ?? createLand(orgId)
 }
 
 export const retrieveParcels = (orgId) => {
