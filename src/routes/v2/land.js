@@ -26,7 +26,7 @@ export const land = [
   },
   {
     method: 'GET',
-    path: '/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/land-covers',
+    path: '/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers',
     handler: async (request, h) => {
       const { sheetId, parcelId, organisationId } = request.params
       const covers = retrieveCovers(organisationId, sheetId, parcelId)

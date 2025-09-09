@@ -944,10 +944,10 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
-    test('Should return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate}', async () => {
+    test('Should return data for /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6828/parcel-id/3818/land-covers'
+        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6828/parcel-id/3818/historic/01-Jan-25/land-covers'
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
