@@ -87,27 +87,23 @@ const retrieveOrgLand = (orgId) => {
 
 export const retrieveParcels = (orgId) => {
   const { parcels } = retrieveOrgLand(orgId)
-  return parcels.map((parcel) => {
-    return {
-      id: parcel.id,
-      sheetId: parcel.sheetId,
-      parcelId: parcel.parcelId,
-      area: parcel.area,
-      pendingDigitisation: parcel.pendingDigitisation
-    }
-  })
+  return parcels.map(({ id, sheetId, parcelId, area, pendingDigitisation }) => ({
+    id,
+    sheetId,
+    parcelId,
+    area,
+    pendingDigitisation
+  }))
 }
 
 export const retrieveParcelDetails = (orgId) => {
   const { parcels } = retrieveOrgLand(orgId)
-  return parcels.map((parcel) => {
-    return {
-      sheetId: parcel.sheetId,
-      parcelId: parcel.parcelId,
-      validFrom: parcel.validFrom,
-      validTo: parcel.validTo
-    }
-  })
+  return parcels.map(({ sheetId, parcelId, validTo, validFrom }) => ({
+    sheetId,
+    parcelId,
+    validTo,
+    validFrom
+  }))
 }
 
 export const retrieveCovers = (orgId, sheetId, parcelId) => {
