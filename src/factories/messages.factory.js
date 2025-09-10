@@ -19,7 +19,7 @@ const createMessageMock = () => ({
 })
 
 const generateMessagesPayload = (numMessages) => {
-  const notifications = Array.from({ length: numMessages }, () => createMessageMock())
+  const notifications = Array.from({ length: numMessages }, createMessageMock)
   const readCount = notifications.filter((n) => n.readAt).length
 
   return {
@@ -30,11 +30,13 @@ const generateMessagesPayload = (numMessages) => {
   }
 }
 
-export const retrieveMessages = (orgId, personId) => {
+export const retrieveMessages = (orgId, personId, page = 1) => {
+  const totalPages = faker.number.int({ min: 1, max: 3 })
+
   // check person exists and org is related to the person
   // Very strangely the upstream returns a succesful response if they don't exist
   const orgIds = personIdToOrgIds[personId]
-  if (!orgIds || !orgIds.includes(orgId)) {
+  if (!orgIds || !orgIds.includes(orgId) || page > totalPages) {
     return {
       notifications: [],
       resultCount: 0,
