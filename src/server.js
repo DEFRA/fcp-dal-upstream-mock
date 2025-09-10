@@ -12,11 +12,12 @@ import { router } from './plugins/router.js'
 import { schemata } from './routes/schemata.js'
 
 const logger = createLogger()
-export const startServer = async () => {
+export const startServer = async (listener) => {
   let server
 
   try {
     server = Hapi.server({
+      listener,
       host: config.get('host'),
       port: config.get('port'),
       routes: {

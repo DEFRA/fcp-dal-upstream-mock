@@ -176,13 +176,10 @@ components:
         text/html:
           schema:
             type: string
-          examples:
-            forbidden:
-              summary: Forbidden HTML response
-              value: |
-                <html><body><h1>403 Forbidden</h1>
-                Request forbidden by administrative rules.
-                </body></html>
+            example: |
+              <html><body><h1>403 Forbidden</h1>
+              Request forbidden by administrative rules.
+              </body></html>
     BadRequest:
       description: Bad Request
       content:
@@ -202,7 +199,13 @@ components:
           schema:
             type: string
             example: source cannot be null
-
+        text/html:
+          schema:
+            type: string
+            example: |
+              <html><body><h1>400 Bad request</h1>
+              Your browser sent an invalid request.
+              </body></html>
   schemas:
     # request objects
     SearchRequestBody:
