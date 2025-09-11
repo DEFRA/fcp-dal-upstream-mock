@@ -70,7 +70,7 @@ export const retrieveOrganisationAgreements = (sbi) => {
 
   const agreements = orgIdLookup[sbiToOrgId[sbi]].agreements || fakeAgreements
 
-  return agreements.map((agreement) => {
+  const agreementsResponse = agreements.map((agreement) => {
     const paymentSchedules = agreement.payment_schedules
       ? agreement.payment_schedules.map(() => createPaymentSchedule())
       : Array.from({ length: faker.number.int({ min: 0, max: 3 }) }, createPaymentSchedule)
@@ -80,4 +80,7 @@ export const retrieveOrganisationAgreements = (sbi) => {
       payment_schedules: paymentSchedules
     })
   })
+
+  agreementsStore[sbi] = agreementsResponse
+  return agreementsResponse
 }
