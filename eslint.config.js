@@ -11,5 +11,5 @@ export default defineConfig([
       }
     }
   },
-  globalIgnores(['coverage'])
+  globalIgnores(['coverage', 'version1-open-api-spec'])
 ])
