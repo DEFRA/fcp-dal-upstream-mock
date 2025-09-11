@@ -83,15 +83,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 500
-                  message:
-                    type: string
-                    example: >
-                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+                $ref: '#/components/schemas/ApplicationError'
   /organisation/search:
     post:
       tags:
@@ -133,15 +125,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 500
-                  message:
-                    type: string
-                    example: >
-                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+                $ref: '#/components/schemas/ApplicationError'
 
 components:
   schemas:
@@ -473,7 +457,16 @@ components:
         message:
           type: string
           example: 'HTTP 400 Bad Request'
-
+    ApplicationError:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: >
+            There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
   securitySchemes:
     mTLS:
       type: mutualTLS

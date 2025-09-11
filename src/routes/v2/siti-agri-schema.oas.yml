@@ -55,28 +55,13 @@ paths:
           content:
             text/html:
               schema:
-                type: string
-              examples:
-                forbidden:
-                  summary: Forbidden HTML response
-                  value: |
-                    <html><body><h1>403 Forbidden</h1>
-                    Request forbidden by administrative rules.
-                    </body></html>
+                $ref: '#/components/schemas/ApplicationForbiddenError'
         '500':
           description: 'Internal server error.'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 500
-                  message:
-                    type: string
-                    example: >
-                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+                $ref: '#/components/schemas/ApplicationError'
   /SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list:
     get:
       tags:
@@ -126,28 +111,13 @@ paths:
           content:
             text/html:
               schema:
-                type: string
-              examples:
-                forbidden:
-                  summary: Forbidden HTML response
-                  value: |
-                    <html><body><h1>403 Forbidden</h1>
-                    Request forbidden by administrative rules.
-                    </body></html>
+                $ref: '#/components/schemas/ApplicationForbiddenError'
         '500':
           description: 'Internal server error.'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 500
-                  message:
-                    type: string
-                    example: >
-                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+                $ref: '#/components/schemas/ApplicationError'
 components:
   schemas:
     ApplicationsResponse:
@@ -354,6 +324,22 @@ components:
         - payment_schedule_start_date
         - payment_schedule_end_date
       additionalProperties: false
+    ApplicationError:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: >
+            There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+    ApplicationForbiddenError:
+      type: string
+      example: |
+        <html><body><h1>403 Forbidden</h1>
+        Request forbidden by administrative rules.
+        </body></html>
   securitySchemes:
     mTLS:
       type: mutualTLS

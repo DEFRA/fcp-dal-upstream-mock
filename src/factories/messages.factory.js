@@ -31,6 +31,8 @@ const generateMessagesPayload = (numMessages) => {
 }
 
 export const retrieveMessages = (orgId, personId, page = 1) => {
+  faker.seed(orgId)
+
   const totalPages = faker.number.int({ min: 1, max: 3 })
 
   // check person exists and org is related to the person

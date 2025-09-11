@@ -60,32 +60,24 @@ export const retrieveOrganisationAgreements = (sbi) => {
 
   faker.seed(sbi)
 
-  const fakeAgreements = () =>
-    fakeIds(faker.number.int({ min: 1, max: 3 })).map((id) => {
-      const paymentSchedules = nullOrFake(
-        () => fakeIds(faker.number.int({ min: 1, max: 3 })),
-        0.3333
-      )
-      return {
-        contract_id: `${id}`,
-        payment_schedules: paymentSchedules
-      }
-    })
+  const fakeAgreements = fakeIds(faker.number.int({ min: 0, max: 3 })).map((id) => {
+    const paymentSchedules = fakeIds(faker.number.int({ min: 0, max: 3 }))
+    return {
+      contract_id: `${id}`,
+      payment_schedules: paymentSchedules
+    }
+  })
 
-  const agreements =
-    orgIdLookup[sbiToOrgId[sbi]].agreements || nullOrFake(fakeAgreements, 0.3333) || []
+  const agreements = orgIdLookup[sbiToOrgId[sbi]].agreements || fakeAgreements
 
   return agreements.map((agreement) => {
     const paymentSchedules = agreement.payment_schedules
       ? agreement.payment_schedules.map(() => createPaymentSchedule())
-      : nullOrFake(
-          () => Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, createPaymentSchedule),
-          0.3333
-        )
+      : Array.from({ length: faker.number.int({ min: 0, max: 3 }) }, createPaymentSchedule)
 
     return createAgreementMock(sbi, {
       ...agreement,
-      payment_schedules: paymentSchedules || []
+      payment_schedules: paymentSchedules
     })
   })
 }
