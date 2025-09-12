@@ -12,7 +12,7 @@ const land = {}
 
 const generateParcels = (geometries) => {
   return geometries.map(({ parcel }) => {
-    const validFrom = faker.date.past().getTime()
+    const validFrom = faker.date.past({ refDate: new Date('2025-01-01') }).getTime()
     const validTo = validFrom + faker.number.int({ min: 1, max: 3 }) * 24 * 60 * 60 * 1000
     return {
       id: parcel.id,
