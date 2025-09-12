@@ -1,5 +1,9 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 
+// set default ref date to 2025-01-01 to ensure consistent dates using faker.seed
+// https://fakerjs.dev/api/faker#setdefaultrefdate:~:text=faker.setDefaultRefDate()%3A%20For%20generating%20reproducible%20dates.
+faker.setDefaultRefDate(new Date('2025-01-01'))
+
 export const fakeAddress = (overrides = {}) => ({
   address1: faker.location.buildingNumber(),
   address2: faker.location.streetAddress(),

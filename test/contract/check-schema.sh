@@ -15,6 +15,7 @@ usage() {
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
   echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
   echo "  CDP_PROXY - the URL of the CDP HTTPS proxy to use"
+  echo "  KITS_URL  - the URL of the KITS API to use"
 }
 
 # resolve KITS_KEY
@@ -73,7 +74,8 @@ case "$1" in
   s | sa | siti-agri)
     schema="siti-agri"
     mutations='. |
-.paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [821174131,800697200,807120488,817713636,800694241,800721391,819897756]'
+.paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [821174131,800697200,807120488,817713636,800694241,800721391,819897756] |
+.paths["/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [890000001,890000004,850000507]'
     ;;
   h | help | --help | -h)
     usage
@@ -103,7 +105,7 @@ docker run --rm --network=host \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
-      --url "https://chs-upgrade-api.ruraldev.org.uk:8446/extapi"
+      --url "${KITS_URL:-https://chs-upgrade-api.ruraldev.org.uk:8446/extapi}"
 
 # cleanup
 rm -rf ./tmp

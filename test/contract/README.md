@@ -24,6 +24,7 @@ test/contract/check-schema.sh help
 export KITS_KEY=path/to/upgrade.key
 export KITS_CERT=path/to/upgrade.cert
 export CDP_PROXY=https://<user>:<pass>@proxy.dev.cdp-int.defra.cloud
+export KITS_URL=https://chs-upgrade-api.ruraldev.org.uk:8446/extapi
 test/contract/check-schema.sh person
 ```
 
