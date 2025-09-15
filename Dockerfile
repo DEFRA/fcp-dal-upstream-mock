@@ -30,7 +30,6 @@ USER node
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-COPY fixtures ./fixtures
 COPY src ./src
 
 ARG PORT
