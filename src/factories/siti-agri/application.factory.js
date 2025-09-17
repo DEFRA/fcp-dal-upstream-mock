@@ -1,6 +1,6 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 import { fakeId, fakeIds, nullOrFake, toTitleCase, transformDate } from '../common.js'
-import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
+import { orgIdLookup } from '../id-lookups.js'
 
 const applications = {}
 
@@ -67,7 +67,7 @@ const intermediateTransitions = [
   { weight: 1, value: 'DATA ALIGNMENT DRAFT CONTRACT' }
 ]
 
-export const createHistory = (overrides = {}) => ({
+const createHistory = (overrides = {}) => ({
   dt_transition: transformDate(faker.date.recent({ refDate: '2023-01-01' })),
   check_status: faker.helpers.weightedArrayElement([
     { weight: 14, value: 'PASSED' },
@@ -77,11 +77,11 @@ export const createHistory = (overrides = {}) => ({
   transition_name: faker.helpers.weightedArrayElement(intermediateTransitions),
   ...overrides
 })
-export const createIntermediateHistory = (count = 1, overrides = {}) =>
+const createIntermediateHistory = (count = 1, overrides = {}) =>
   Array.from({ length: faker.number.int({ min: count * 2, max: count * 12 }) }, () =>
     createHistory(overrides)
   )
-export const createHistoryFromTransition = (transition, overrides = {}) => {
+const createHistoryFromTransition = (transition, overrides = {}) => {
   const history = [
     ...faker.helpers.weightedArrayElement([
       {
@@ -113,7 +113,7 @@ export const createHistoryFromTransition = (transition, overrides = {}) => {
     : [createHistory({ transition_name: 'CREATION' })]
 }
 
-export const createApplication = (sbi, overrides = {}) => {
+const createApplication = (sbi, overrides = {}) => {
   const year = faker.date.recent({ refDate: '2023-01-01' }).getFullYear()
   const { status, code, portal, transition } = faker.helpers.weightedArrayElement(statusMappings)
   const transition_id = overrides?.transition_id || fakeId()
@@ -175,12 +175,11 @@ export const createApplications = (orgId, sbi) => {
   return applicationsData
 }
 
-export const retrieveApplications = (sbi) => {
+export const retrieveApplications = (sbi, orgId) => {
   const cachedApplications = applications[sbi]
-  if (cachedApplications) return cachedApplications
+  if (cachedApplications) {
+    return cachedApplications
+  }
 
-  const organisationId = sbiToOrgId[sbi]
-  if (organisationId) return createApplications(organisationId, sbi)
-
-  return false
+  return createApplications(orgId, sbi)
 }

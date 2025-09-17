@@ -15,6 +15,46 @@ tags:
   - name: 'siti-agri'
     description: 'Operations related to siti-agri management'
 paths:
+  /SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list:
+    get:
+      tags:
+        - 'siti-agri'
+        - 'agreements'
+      summary: 'Find Agreements by SBI.'
+      description: 'Find Agreements by SBI'
+      operationId: 'findAgreementsBySBI'
+      parameters:
+        - name: 'sbi'
+          in: 'path'
+          description: 'SBI of the business to retrieve agreements for.'
+          required: true
+          schema:
+            type: 'integer'
+            maximum: 99999999999999999999
+            minimum: 1
+            examples:
+              - 1000000000
+              - 1111111111
+              - 2222222222
+              - 107167406
+              - 107097991
+              - 106354662
+              - 106221605
+              - 106440483
+      responses:
+        '200':
+          description: Returns Agreements details for the target organisation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementsResponse'
+        '403':
+          description: >
+            Getting Agreements data is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: 'Internal server error.'
+          $ref: '#/components/responses/InternalServerError'
   /SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list:
     get:
       tags:
@@ -43,7 +83,7 @@ paths:
               - 106440483
       responses:
         '200':
-          description: 'Returns full organisation details.'
+          description: 'Returns full organisation details, with complete transition history.'
           content:
             application/json:
               schema:
@@ -52,81 +92,117 @@ paths:
           description: >
             Getting Application details is forbidden, or a WAF rule has been triggered, or the SBI
              was not found (i.e. 404!).
-          content:
-            text/html:
-              schema:
-                $ref: '#/components/schemas/ApplicationForbiddenError'
-        '500':
-          description: 'Internal server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationError'
-  /SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list:
+          $ref: '#/components/responses/Forbidden'
+  /SitiAgriApi/cv/cphByBusiness/sbi/{sbi}/list:
     get:
       tags:
         - 'siti-agri'
-        - 'agreements'
-      summary: 'Find Agreements by SBI.'
-      description: 'Find Agreements by SBI'
-      operationId: 'findAgreementsBySBI'
+        - 'cph'
+      summary: 'List CPHs for a business.'
+      description: 'Gets details for CPHs for a business specified by SBI.'
+      operationId: 'getCPHsBySBI'
       parameters:
         - name: 'sbi'
-          in: 'path'
-          description: 'sbi'
+          in: path
+          description: 'SBI of the business to retrieve CPHs for.'
           required: true
           schema:
-            type: 'integer'
+            type: integer
             maximum: 99999999999999999999
             minimum: 1
             examples:
-              - '1000000000'
-              - '1111111111'
-              - '2222222222'
+              - 1000000000
+              - 1111111111
+              - 2222222222
+              - 107167406
+              - 107097991
+              - 106354662
+              - 106221605
+              - 106440483
+        - name: pointInTime
+          in: query
+          description: >
+            An optional date/date-time/timestamp to filter the CPHs by.
+            If provided, only CPHs that were active at that point in time will be returned.
+            Otherwise, all CPHs will be returned.
+          required: false
+          schema:
+            type: string
+            format: date-time
+            pattern: '^(\d{4}-\d{2}-\d{2}[ +]\d{2}:\d{2}:\d{2}|)$'
+            examples:
+              - '2023-01-30+12:25:23'
+              - ''
       responses:
         '200':
-          description: 'Returns full organisation details.'
+          description: Returns all CPH details, unless filtered by a specified `pointInTime`.
           content:
             application/json:
               schema:
-                type: 'object'
-                additionalProperties: false
-                properties:
-                  data:
-                    type: 'array'
-                    items:
-                      $ref: '#/components/schemas/AgreementsResponse'
-                  success:
-                    type: 'boolean'
-                  errorString:
-                    type: [string, 'null']
-                    description: 'Error string if present, otherwise can be null'
-                required:
-                  - 'data'
-                  - 'success'
-                  - 'errorString'
+                $ref: '#/components/schemas/CPHResponse'
         '403':
-          description: "Getting an internal user's details is forbidden, or a WAF\
-            \ rule has been triggered"
-          content:
-            text/html:
-              schema:
-                $ref: '#/components/schemas/ApplicationForbiddenError'
-        '500':
-          description: 'Internal server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationError'
+          description: >
+            Getting CPH details is forbidden, or a WAF rule has been triggered,
+            or the SBI was not found (i.e. 404!).
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The `pointInTime` parameter was not conform to the expected pattern.
+          $ref: '#/components/responses/NotFound'
+
 components:
+  responses:
+    Forbidden:
+      description: Forbidden response
+      content:
+        text/html:
+          schema:
+            type: string
+          examples:
+            forbidden:
+              summary: Forbidden HTML response
+              value: |
+                <html><body><h1>403 Forbidden</h1>
+                Request forbidden by administrative rules.
+                </body></html>
+    NotFound:
+      description: Not Found response
+      content:
+        text/html:
+          schema:
+            type: string
+          examples:
+            notFound:
+              summary: Not Found HTML response
+              value: >
+                <!doctype html><html lang="en">
+                <head>
+                <title>HTTP Status 404 – Not Found</title>
+                </head>
+                <body>
+                <h1>HTTP Status 404 – Not Found</h1>
+                </body>
+                </html>
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: >
+                  There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
+
   schemas:
-    ApplicationsResponse:
+    ResponseWrapper:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Application'
+          type: array # items left abstract, to be overridden in specific responses
         errorString:
           type: [string, 'null']
         success:
@@ -135,6 +211,133 @@ components:
         - data
         - errorString
         - success
+      additionalProperties: false
+    AgreementsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ResponseWrapper'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Agreement'
+    ApplicationsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ResponseWrapper'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Application'
+    CPHResponse:
+      allOf:
+        - $ref: '#/components/schemas/ResponseWrapper'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CPH'
+    Agreement:
+      type: 'object'
+      properties:
+        sbi:
+          type: 'string'
+          description: 'SBI of the business'
+        contract_id:
+          type: 'string'
+          description: 'Contract ID'
+        agreement_name:
+          type: 'string'
+          description: 'Name of the agreement'
+        status:
+          type: 'string'
+          description: 'Status of the agreement'
+        contract_type:
+          type: 'string'
+          description: 'Type of contract'
+        scheme_year:
+          type: 'integer'
+          description: 'Scheme year'
+        start_date:
+          type: 'string'
+          description: 'Start date of the agreement'
+        end_date:
+          type: 'string'
+          description: 'End date of the agreement'
+        payment_schedules:
+          type: 'array'
+          description: 'List of payment schedules'
+          items:
+            $ref: '#/components/schemas/PaymentSchedule'
+      required:
+        - sbi
+        - contract_id
+        - agreement_name
+        - status
+        - contract_type
+        - scheme_year
+        - start_date
+        - end_date
+        - payment_schedules
+      additionalProperties: false
+    PaymentSchedule:
+      type: 'object'
+      properties:
+        option_code:
+          type: 'string'
+          description: 'Option code'
+        option_description:
+          type: 'string'
+          description: 'Description of the option'
+        commitment_group_start_date:
+          type: 'string'
+          description: 'Commitment group start date'
+        commitment_group_end_date:
+          type: 'string'
+          description: 'Commitment group end date'
+        year:
+          type: 'integer'
+          description: 'Year of the payment schedule'
+        sheet_name:
+          type: [string, 'null']
+          description: 'Sheet name'
+        parcel_name:
+          type: [string, 'null']
+          description: 'Parcel name'
+        action_area:
+          type: [integer, 'null']
+          description: 'Action area'
+        action_mtl:
+          type: [integer, 'null']
+          description: 'Action MTL'
+        action_units:
+          type: [number, 'null']
+          description: 'Action units'
+        parcel_total_area:
+          type: [integer, 'null']
+          description: 'Total area of the parcel'
+        payment_schedule_start_date:
+          type: 'string'
+          description: 'Payment schedule start date'
+        payment_schedule_end_date:
+          type: 'string'
+          description: 'Payment schedule end date'
+      required:
+        - option_code
+        - option_description
+        - commitment_group_start_date
+        - commitment_group_end_date
+        - year
+        - sheet_name
+        - parcel_name
+        - action_area
+        - action_mtl
+        - action_units
+        - parcel_total_area
+        - payment_schedule_start_date
+        - payment_schedule_end_date
       additionalProperties: false
     Application:
       type: object
@@ -224,122 +427,70 @@ components:
         - transition_id
         - transition_name
       additionalProperties: false
-    AgreementsResponse:
-      type: 'object'
-      properties:
-        sbi:
-          type: 'string'
-          description: 'SBI of the business'
-        contract_id:
-          type: 'string'
-          description: 'Contract ID'
-        agreement_name:
-          type: 'string'
-          description: 'Name of the agreement'
-        status:
-          type: 'string'
-          description: 'Status of the agreement'
-        contract_type:
-          type: 'string'
-          description: 'Type of contract'
-        scheme_year:
-          type: 'integer'
-          description: 'Scheme year'
-        start_date:
-          type: 'string'
-          description: 'Start date of the agreement'
-        end_date:
-          type: 'string'
-          description: 'End date of the agreement'
-        payment_schedules:
-          type: 'array'
-          description: 'List of payment schedules'
-          items:
-            $ref: '#/components/schemas/AgreementsPaymentScheduleResponse'
-      required:
-        - sbi
-        - contract_id
-        - agreement_name
-        - status
-        - contract_type
-        - scheme_year
-        - start_date
-        - end_date
-        - payment_schedules
-      additionalProperties: false
-    AgreementsPaymentScheduleResponse:
-      type: 'object'
-      properties:
-        option_code:
-          type: 'string'
-          description: 'Option code'
-        option_description:
-          type: 'string'
-          description: 'Description of the option'
-        commitment_group_start_date:
-          type: 'string'
-          description: 'Commitment group start date'
-        commitment_group_end_date:
-          type: 'string'
-          description: 'Commitment group end date'
-        year:
-          type: 'integer'
-          description: 'Year of the payment schedule'
-        sheet_name:
-          type: [string, 'null']
-          description: 'Sheet name'
-        parcel_name:
-          type: [string, 'null']
-          description: 'Parcel name'
-        action_area:
-          type: [integer, 'null']
-          description: 'Action area'
-        action_mtl:
-          type: [integer, 'null']
-          description: 'Action MTL'
-        action_units:
-          type: [number, 'null']
-          description: 'Action units'
-        parcel_total_area:
-          type: [integer, 'null']
-          description: 'Total area of the parcel'
-        payment_schedule_start_date:
-          type: 'string'
-          description: 'Payment schedule start date'
-        payment_schedule_end_date:
-          type: 'string'
-          description: 'Payment schedule end date'
-      required:
-        - option_code
-        - option_description
-        - commitment_group_start_date
-        - commitment_group_end_date
-        - year
-        - sheet_name
-        - parcel_name
-        - action_area
-        - action_mtl
-        - action_units
-        - parcel_total_area
-        - payment_schedule_start_date
-        - payment_schedule_end_date
-      additionalProperties: false
-    ApplicationError:
+    CPH:
       type: object
       properties:
-        code:
-          type: integer
-          example: 500
-        message:
+        sbi:
           type: string
-          example: >
-            There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
-    ApplicationForbiddenError:
-      type: string
-      example: |
-        <html><body><h1>403 Forbidden</h1>
-        Request forbidden by administrative rules.
-        </body></html>
+        dt_insert:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2019-01-30T12:25:23:023+0000'
+        dt_delete:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2019-01-30T12:25:23:023+0000'
+        cph_number:
+          type: string
+          pattern: '^\d{2}/\d{3}/\d{4}$'
+          example: '12/345/6789'
+        parish:
+          type: [string, 'null']
+        species:
+          type: string
+        start_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2019-01-30T12:25:23:023+0000'
+        end_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2019-01-30T12:25:23:023+0000'
+        address:
+          type: [string, 'null']
+          examples:
+            - 'Farm, Village, Town, County, Postcode'
+            - '350952, 515333 NADDLE FARM, CA10 2RP'
+            # 'x-cord, y-cord Farm-name, Postcode' - not the same as x/y of the CPH below!
+        x:
+          oneOf:
+            - type: integer
+              minimum: 0
+              maximum: 0
+            - type: integer
+              minimum: 5515
+              maximum: 655654
+        y:
+          oneOf:
+            - type: integer
+              minimum: 0
+              maximum: 0
+            - type: integer
+              minimum: 5335
+              maximum: 1220301
+      required:
+        - sbi
+        - dt_insert
+        - dt_delete
+        - cph_number
+        - parish
+        - start_date
+        - end_date
+        - species
+        - x
+        - y
+      additionalProperties: false
+
   securitySchemes:
     mTLS:
       type: mutualTLS
