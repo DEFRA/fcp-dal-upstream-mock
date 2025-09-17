@@ -8,14 +8,14 @@ import {
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { checkOrganisationId } from '../../utils/shared-datatypes.js'
+import { checkId } from '../../utils/shared-datatypes.js'
 
 export const organisation = [
   {
     method: 'GET',
     path: '/organisation/{organisationId}',
     handler: async (request, h) => {
-      const organisationId = checkOrganisationId(request)
+      const organisationId = checkId(request, 'organisationId')
 
       return h.response({ _data: retrieveOrganisation(organisationId) })
     }
@@ -115,7 +115,7 @@ export const organisation = [
     method: 'PUT',
     path: '/organisation/{organisationId}/additional-business-details',
     handler: async (request, h) => {
-      const organisationId = checkOrganisationId(request)
+      const organisationId = checkId(request, 'organisationId')
       const body = request.payload
 
       if (

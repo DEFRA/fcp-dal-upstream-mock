@@ -180,7 +180,12 @@ export const orgIdLookup = {
   5374662: { sbi: 850000025, customers: [5069674] },
   5467167: { sbi: 850000614, customers: [5069674] },
   // temporarily add v1 data for testing Applications
-  5565448: { sbi: 890000001, customers: [], applications: [{ application_history: [{}] }] }, // 1 app
+  5565448: {
+    sbi: 890000001,
+    customers: [],
+    applications: [{ application_history: [{}] }], // 1 application with 1 transition entry
+    cphs: Array.from({ length: 8 }, () => ({})) // 8 CPHs
+  },
   5559799: { sbi: 890000002, customers: [] },
   5560725: { sbi: 890000003, customers: [] },
   5625145: { sbi: 890000004, customers: [] },

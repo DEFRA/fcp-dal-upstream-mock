@@ -1,4 +1,4 @@
-set -e
+set -ex
 
 # setup
 baseDir=`cd $(dirname $0) ; pwd`
@@ -49,35 +49,35 @@ fi
 
 # check arguments
 case "$1" in
-  p | person)
+  p | person )
     schema="person"
     mutations='. |
 .paths["/person/{personId}/summary"].get.parameters[0].schema.examples] = [5858232,5108985,5108989] |
-.components.schemas.PartySearchRequest["x-examples"][0].primarySearchPhrase = "9105658066" |
-.components.schemas.PartySearchRequest["x-examples"][1].primarySearchPhrase = "9101089857" |
-.components.schemas.PartySearchRequest["x-examples"][2].primarySearchPhrase = "9101089899"'
+.components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "9105658066" |
+.components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "9101089857" |
+.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "9101089899"'
     ;;
-  o | org | organisation)
+  o | org | organisation )
     schema="organisation"
     mutations='. |
 .paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5491723,5680131,5849659,5852711,5858233 ] |
-.components.schemas.PartySearchRequest["x-examples"][0].primarySearchPhrase = "806554744" |
-.components.schemas.PartySearchRequest["x-examples"][1].primarySearchPhrase = "800629003" |
-.components.schemas.PartySearchRequest["x-examples"][2].primarySearchPhrase = "800665008"'
+.components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "806554744" |
+.components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "800629003" |
+.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "800665008"'
     ;;
   a | auth | authenticate )
     schema="authenticate"
     mutations='. |
-.paths["/external-auth/security-answers/{crn}"].get.parameters[0].pattern = "^[1-9][0-9]{9,19}$" |
-.paths["/external-auth/security-answers/{crn}"].get.parameters[0].schema.examples] = [9105739979,9106046692,9106077237,9100932879,9105430162]'
+.paths["/external-auth/security-answers/{crn}"].get.parameters[0].schema.examples = [9105739979,9106046692,9106077237,9100932879,9105430162]'
     ;;
-  s | sa | siti-agri)
+  s | sa | siti-agri )
     schema="siti-agri"
     mutations='. |
 .paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [821174131,800697200,807120488,817713636,800694241,800721391,819897756] |
-.paths["/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [890000001,890000004,850000507]'
+.paths["/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [890000001,890000004,850000507] |
+.paths["/SitiAgriApi/cv/cphByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [821174131,800697200,807120488,817713636,800694241,800721391,819897756]'
     ;;
-  h | help | --help | -h)
+  h | help | --help | -h )
     usage
     exit 0
     ;;
