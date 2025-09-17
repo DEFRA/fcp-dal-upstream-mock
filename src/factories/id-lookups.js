@@ -122,7 +122,8 @@ export const orgIdLookup = {
         contract_id: '1111111113',
         payment_schedules: [1111111131, 1111111132, 1111111133]
       }
-    ]
+    ],
+    applications: [{ application_history: [{}] }]
   },
   2222222222: {
     sbi: 2222222222,
