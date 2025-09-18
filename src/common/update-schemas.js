@@ -24,7 +24,7 @@ export const personUpdateSchema = {
   firstName: { type: 'string', default: null },
   middleName: { type: 'string', default: null },
   lastName: { type: 'string', default: null },
-  dateOfBirth: { type: 'string', default: null },
+  dateOfBirth: { type: 'number', default: null },
   landline: { type: 'string', default: null },
   mobile: { type: 'string', default: null },
   email: { type: 'string', default: null },
