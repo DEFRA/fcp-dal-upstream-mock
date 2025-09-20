@@ -35,12 +35,25 @@ const generateCHPInfo = (
         'OTHER'
       ])
       .join(','),
-    // NOTE: the min/max coordinates cover all of Great Britain (MAGiC maps has no NI coverage!)
-    // ...except for "Rockall" (furthest West, but unfindable on MAGiC maps)
-    // min easting: 5515   / northing: 5335    (furtherest west/south)
-    // max easting: 655654 / northing: 1220301 (furtherest east/north)
-    x: nullOrFake(() => faker.number.int({ min: 5515, max: 655654 }), 0.1) ?? 0,
-    y: nullOrFake(() => faker.number.int({ min: 5335, max: 1220301 }), 0.1) ?? 0,
+    address: [
+      `${faker.lorem.words({ min: 1, max: 3 })} Farm`,
+      faker.location.street(),
+      faker.location.city(),
+      faker.location.zipCode()
+    ]
+      .join(', ')
+      .toUpperCase(),
+    ...(nullOrFake(
+      () => ({
+        // NOTE: the min/max coordinates cover all of Great Britain (MAGiC maps has no NI coverage!)
+        // ...except for "Rockall" (furthest West, but unfindable on MAGiC maps)
+        // min easting: 5515   / northing: 5335    (furtherest west/south)
+        // max easting: 655654 / northing: 1220301 (furtherest east/north)
+        x: faker.number.int({ min: 5515, max: 655654 }),
+        y: faker.number.int({ min: 5335, max: 1220301 })
+      }),
+      0.1
+    ) ?? { x: 0, y: 0 }), // the upstream test data sometimes contains 0,0 !
     ...override
   }
 }
