@@ -123,7 +123,8 @@ export const orgIdLookup = {
         payment_schedules: [1111111131, 1111111132, 1111111133]
       }
     ],
-    applications: [{ application_history: [{}] }]
+    applications: [{ application_history: [{}] }],
+    cphs: [{}] // 1 CPH
   },
   2222222222: {
     sbi: 2222222222,

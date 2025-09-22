@@ -487,6 +487,7 @@ components:
         - start_date
         - end_date
         - species
+        - address
         - x
         - y
       additionalProperties: false
