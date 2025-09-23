@@ -30,6 +30,14 @@ export const emulateUpstreamErrors = (request, h) => {
         message: response.message,
         stack_trace: response.stack
       },
+      // capture any request body schema validation errors from AJV checks
+      ...(response?.data?.validationErrors && {
+        event: {
+          reason: `Request body validation errors:\n${response.data.validationErrors
+            .map((e) => `${e.instancePath ?? 'Body'} ${e.keyword} ${e.message}.`)
+            .join('\n')}`
+        }
+      }),
       message: `${method}${payload ? ' ' + JSON.stringify(payload) : ''} ${path} ${code}`
     })
 
