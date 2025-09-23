@@ -148,7 +148,10 @@ export const person = [
       }
 
       if (!validateUpdatePersonPayload(request.payload)) {
-        throw Boom.badData('validation error while processing input', request)
+        throw Boom.badData('validation error while processing input', {
+          ...request,
+          validationErrors: validateUpdatePersonPayload.errors
+        })
       }
 
       updatePerson(personId, body)
