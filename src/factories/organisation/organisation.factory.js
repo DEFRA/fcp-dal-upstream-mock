@@ -154,7 +154,7 @@ const generateOrganisation = (orgId, sbi) => {
       id: faker.number.int({ min: 164946, max: 964946 }),
       type: 'Sole Proprietorship'
     },
-    dateStartedFarming: faker.date.past().toISOString(),
+    dateStartedFarming: faker.date.past().getTime(),
     companiesHouseRegistrationNumber: nullOrFake(() => faker.string.alphanumeric(8)),
     charityCommissionRegistrationNumber: nullOrFake(() => faker.string.alphanumeric(8)),
     persons: [],
@@ -203,7 +203,9 @@ export const updateAdditionalOrganisationDetails = (
     businessType: newBusinessType,
     companiesHouseRegistrationNumber: companiesHouseRegistrationNumber ?? null,
     charityCommissionRegistrationNumber: charityCommissionRegistrationNumber ?? null,
-    dateStartedFarming: new Date(dateStartedFarming).getTime() || null
+    // ensure date is either null (when input is empty or null)...
+    // or a timestamp with milliseconds rounded to `000` (when input is a valid date or epoch)
+    dateStartedFarming: new Date(dateStartedFarming ?? '').setMilliseconds(0) || null
   })
 }
 
