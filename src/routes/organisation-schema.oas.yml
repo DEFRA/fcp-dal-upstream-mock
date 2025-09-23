@@ -258,17 +258,24 @@ components:
         - 'primarySearchPhrase'
 
     # update objects
+    ObjectWithId:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: foreign-key
+          minimum: 1
+        # NOTE: `type` is completely ignored, it comes from reference data that matches the `id`.
+        type:
+          type: string
+      required:
+        - 'id'
     AdditionalBusinessDetailsRequestBody:
       type: 'object'
       properties:
         legalStatus:
-          $ref: '#/components/schemas/TypeWithId'
-          required:
-            - 'id'
-            # NOTE: `type` is completely ignored, it comes from reference data that matches the `id`.
+          $ref: '#/components/schemas/ObjectWithId'
           examples:
-            - id: 101404
-              type: 'Farmer'
             - id: 102106
               type: 'Limited Partnership (LP)'
             - id: 102108
@@ -276,10 +283,7 @@ components:
             - id: 102111
               type: 'Sole Proprietorship'
         businessType:
-          $ref: '#/components/schemas/TypeWithId'
-          required:
-            - 'id'
-            # NOTE: `type` is completely ignored, it comes from reference data that matches the `id`.
+          $ref: '#/components/schemas/ObjectWithId'
           examples:
             - id: 101402
               type: 'Agency/Agent'
@@ -294,7 +298,8 @@ components:
         charityCommissionRegistrationNumber:
           type: 'string'
         dateStartedFarming:
-          description: ISO 8601 date-time (or empty) string, or null.
+          description: >
+            ISO 8601 date/date-time (or empty) string, integer of milliseconds since the epoch, or null.
           oneOf:
             - type: integer
               minimum: -210835180800000 # 4712-11-24T00:00:00.000Z BCE!!
@@ -303,10 +308,12 @@ components:
                 Timestamp in milliseconds since the epoch.
                 NOTE: the last 3 digits are always rounded down to 000.
             - type: 'string'
-              format: 'date-time'
-            - type: 'null'
-            - type: 'string'
               pattern: '^$'
+            - type: 'string'
+              format: 'date-time'
+            - type: 'string'
+              format: 'date'
+            - type: 'null'
       required:
         - 'legalStatus'
         - 'businessType'
@@ -468,6 +475,7 @@ components:
           type: boolean
         lastUpdatedOn:
           type: integer
+          format: 'int64'
           description: Timestamp in milliseconds since epoch.
         landConfirmed:
           type: boolean
@@ -517,6 +525,7 @@ components:
           type: boolean
         lastUpdatedOn:
           type: integer
+          format: 'int64'
           description: Timestamp in milliseconds since epoch.
         landConfirmed:
           type: boolean
@@ -561,8 +570,11 @@ components:
         legalStatus:
           $ref: '#/components/schemas/TypeWithId'
         dateStartedFarming:
-          type: [string, 'null']
-          format: 'date-time'
+          oneOf:
+            - type: integer
+              format: 'int64'
+              description: Timestamp in milliseconds since epoch.
+            - type: 'null'
         companiesHouseRegistrationNumber:
           type: [string, 'null']
         charityCommissionRegistrationNumber:
