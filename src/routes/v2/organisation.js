@@ -2,13 +2,15 @@ import Boom from '@hapi/boom'
 import { sbiToOrgId } from '../../factories/id-lookups.js'
 import {
   createOrganisation,
+  lockOrganisation,
   retrieveOrganisation,
   retrieveOrganisationCustomers,
+  unlockOrganisation,
   updateAdditionalOrganisationDetails,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { checkId } from '../../utils/shared-datatypes.js'
+import { checkId, checkLockUnlockRequestBody } from '../../utils/shared-datatypes.js'
 
 export const organisation = [
   {
@@ -149,6 +151,30 @@ export const organisation = [
       return h.response({
         _data: createOrganisation(request.params.personId, request.payload)
       })
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/lock',
+    handler: async (request, h) => {
+      const organisationId = checkId(request, 'organisationId')
+      checkLockUnlockRequestBody(request, 'LockOrganisation')
+
+      lockOrganisation(organisationId)
+
+      return h.response()
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/unlock',
+    handler: async (request, h) => {
+      const organisationId = checkId(request, 'organisationId')
+      checkLockUnlockRequestBody(request, 'UnlockOrganisation')
+
+      unlockOrganisation(organisationId)
+
+      return h.response()
     }
   }
 ]

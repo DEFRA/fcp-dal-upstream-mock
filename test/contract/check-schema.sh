@@ -63,7 +63,9 @@ case "$1" in
 .paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5491723,5680131,5849659,5852711,5858233 ] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "106554744" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "200629003" |
-.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "200665008"'
+.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "200665008" |
+.paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5491723,5680131,5849659,5852711,5858233] |
+.paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5491723,5680131,5849659,5852711,5858233]'
     ;;
   a | auth | authenticate )
     schema="authenticate"

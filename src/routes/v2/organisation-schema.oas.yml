@@ -126,7 +126,114 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationError'
-
+  /organisation/{organisationId}/lock:
+    post:
+      tags:
+        - 'organisation'
+      summary: 'Lock Organisation.'
+      description: 'Request to Lock an Organisation by party Id.'
+      operationId: 'lockOrganisation'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: 'organisationId'
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples: [1000000000, 1111111111, 2222222222]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockRequestBody'
+      responses:
+        '200':
+          description: 'Successfully locked Organisation'
+        '204':
+          description: 'Successfully locked Organisation'
+        '400':
+          description: 'Invalid reason and notes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '403':
+          description: >
+            Locking an organisation is forbidden, or a WAF rule has been triggered.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '500':
+          description: 'organisationId must not be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationError'
+  /organisation/{organisationId}/unlock:
+    post:
+      tags:
+        - 'organisation'
+      summary: 'unlock Organisation.'
+      description: 'Request to unlock an Organisation by party Id.'
+      operationId: 'unlockOrganisation'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: 'organisationId'
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples: [1000000000, 1111111111, 2222222222]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlockRequestBody'
+      responses:
+        '200':
+          description: 'Successfully unlocked Organisation'
+        '204':
+          description: 'Successfully unlocked Organisation'
+        '400':
+          description: 'Invalid reason and notes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '403':
+          description: >
+            Unlocking an organisation is forbidden, or a WAF rule has been triggered.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '500':
+          description: 'organisationId must not be empty'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationError'
 components:
   schemas:
     # request objects
@@ -160,6 +267,70 @@ components:
       required:
         - 'searchFieldType'
         - 'primarySearchPhrase'
+    LockRequestBody:
+      type: object
+      examples:
+        - partyNoteType: 'LockOrganisation'
+          reason: 'Business Structure Changes'
+        - partyNoteType: 'LockOrganisation'
+          note: 'testing locking'
+      oneOf:
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'LockOrganisation'
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+          required: ['partyNoteType', 'reason']
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'LockOrganisation'
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+          required: ['partyNoteType', 'note']
+    UnlockRequestBody:
+      type: object
+      examples:
+        - partyNoteType: 'UnlockOrganisation'
+          note: 'testing unlocking'
+        - partyNoteType: 'UnlockOrganisation'
+          reason: 'Business Structure Changes'
+      oneOf:
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'UnlockOrganisation'
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+          required: ['partyNoteType', 'reason']
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'UnlockOrganisation'
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+          required: ['partyNoteType', 'note']
 
     # response objects
     TypeWithId:

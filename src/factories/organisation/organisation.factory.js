@@ -235,3 +235,35 @@ export const retrieveOrganisationCustomers = (orgId) => {
   })
   return orgPeople
 }
+
+export const lockOrganisation = (orgId) => {
+  try {
+    const org = retrieveOrganisation(orgId)
+
+    // TODO: Uncomment this when we have a way to run prime contract tests in correct state
+    // if (org.locked) {
+    //   throw new Error(`organisation with orgId ${orgId} is already locked`)
+    // }
+
+    org.locked = true
+  } catch (e) {
+    // If not found or already locked, throw internal error to match upstream
+    throw Boom.internal(e.message)
+  }
+}
+
+export const unlockOrganisation = (orgId) => {
+  try {
+    const org = retrieveOrganisation(orgId)
+
+    // TODO: Uncomment this when we have a way to run prime contract tests in correct state
+    // if (!org.locked) {
+    //   throw new Error(`organisation with orgId ${orgId} is already unlocked`)
+    // }
+
+    org.locked = false
+  } catch (e) {
+    // If not found or already unlocked, throw internal error to match upstream
+    throw Boom.internal(e.message)
+  }
+}
