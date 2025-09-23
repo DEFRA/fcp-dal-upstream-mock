@@ -9,6 +9,7 @@ services:
         for schema in person organisation authenticate siti-agri ; do
           echo "Running contract tests for schema: $${schema}"
           schemathesis run --exclude-checks=unsupported_method,not_a_server_error \
+            --report-vcr-path /tmp/vcr.yaml \
             "http://dal-mock:3100/schemata/$${schema}.yml"
           result=$((result | $?))
         done
@@ -23,3 +24,6 @@ services:
         condition: service_healthy
     networks:
       - default
+    # volumes:
+    #   - ./test/contract:/tmp
+    # ☝️uncomment the `volumes` definition to capture schemathesis VCR logs (useful for debugging!)

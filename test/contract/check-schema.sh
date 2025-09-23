@@ -98,7 +98,7 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 # run schemathesis tests
-docker run --rm --network=host --pull always \
+docker run --rm --network=host -q --pull always \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
