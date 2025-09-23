@@ -1,4 +1,4 @@
-set -ex
+set -e
 
 # setup
 baseDir=`cd $(dirname $0) ; pwd`
@@ -60,11 +60,11 @@ case "$1" in
   o | org | organisation )
     schema="organisation"
     mutations='. |
-.paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5680131,5849659,5852711,5858233 ] |
-.components.schemas.PartySearchRequest["x-examples"][0].primarySearchPhrase = "106554744" |
+.paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5849659,5852711,5858233 ] |
+.components.schemas.PartySearchRequest["x-examples"][0].primarySearchPhrase = "121174131" |
 .components.schemas.PartySearchRequest["x-examples"][1].primarySearchPhrase = "200629003" |
 .components.schemas.PartySearchRequest["x-examples"][2].primarySearchPhrase = "200665008" |
-.paths["/organisation/{organisationId}/additional-business-details"].put.parameters[0].schema.examples = [5680131,5849659,5852711,5858233 ]'
+.paths["/organisation/{organisationId}/additional-business-details"].put.parameters[0].schema.examples = [5849659,5852711,5858233 ]'
     ;;
   a | auth | authenticate )
     schema="authenticate"
@@ -95,7 +95,7 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.oas.yml
 set +e
 
 # run schemathesis tests
-docker run --rm --network=host \
+docker run --rm --network=host -q --pull always \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
