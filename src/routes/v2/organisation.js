@@ -9,6 +9,14 @@ import {
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 import { checkId } from '../../utils/shared-datatypes.js'
+import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const validateAdditionalDetailsUpdatePayload = await createPayloadValidator(
+  'routes/v2/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/additional-business-details'].put.requestBody
+      .content['application/json'].schema
+)
 
 export const organisation = [
   {
@@ -118,6 +126,7 @@ export const organisation = [
       const organisationId = checkId(request, 'organisationId')
       const body = request.payload
 
+      // validate the payload body
       if (
         typeof body !== 'object' ||
         Array.isArray(body) ||
@@ -126,7 +135,18 @@ export const organisation = [
         !body.businessType?.id ||
         !body.legalStatus?.id
       ) {
-        throw Boom.badRequest(`bad payload: ${body}, expected an object`, request)
+        throw Boom.badRequest(
+          `bad payload: ${body}, expected an object with at least businessType and legalStatus`,
+          request
+        )
+      }
+
+      const valid = validateAdditionalDetailsUpdatePayload(body)
+      if (!valid) {
+        throw Boom.internal(
+          'update additional organisation details request body did not match the schema',
+          { ...request, validationErrors: validateAdditionalDetailsUpdatePayload.errors }
+        )
       }
 
       try {
