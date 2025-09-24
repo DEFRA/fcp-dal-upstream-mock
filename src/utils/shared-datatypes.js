@@ -15,36 +15,16 @@ export const checkId = (request, idName) => {
   return `${id}`
 }
 
-export const isDefined = (param) => param !== undefined
-export const isValidBoolean = (param) => param === true || param === false
-export const isValidString = (param) => typeof param === 'string' && param.length > 0
-export const isValidNumber = (param) => typeof param === 'number'
+export const checkRequestBody = (request) => {
+  const body = request.payload
 
-export const checkLockUnlockRequestBody = (request, partyNoteValidType) => {
-  const { partyNoteType, note, reason } = request?.payload
-
-  if (!partyNoteType || partyNoteType != partyNoteValidType) {
-    throw Boom.badRequest(`partyNoteType expected to be '${partyNoteValidType}'`)
+  if (body === '' || body === null) {
+    throw Boom.badRequest('empty request body not allowed', request)
   }
 
-  const parametersToValidate = [note, reason].filter(isDefined)
-
-  const isValidType = (param) => {
-    const type = typeof param
-    switch (type) {
-      case 'string':
-        return isValidString(param)
-      case 'boolean':
-        return isValidBoolean(param)
-      case 'number':
-        return isValidNumber(param)
-      default:
-        return false
-    }
+  if (typeof body !== 'object' || Array.isArray(body)) {
+    throw Boom.badRequest('missing or invalid request body', request)
   }
-  const validParameters = parametersToValidate.filter(isValidType)
 
-  if (validParameters.length !== 1) {
-    throw Boom.badRequest(`Expected '${validParameters}' to be a valid`)
-  }
+  return body
 }

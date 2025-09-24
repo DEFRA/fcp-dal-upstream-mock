@@ -10,7 +10,23 @@ import {
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { checkId, checkLockUnlockRequestBody } from '../../utils/shared-datatypes.js'
+import { checkId, checkRequestBody } from '../../utils/shared-datatypes.js'
+import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const validateLockOrganisationPayload = await createPayloadValidator(
+  'routes/v2/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/lock'].post.requestBody.content['application/json']
+      .schema
+)
+
+const validateUnlockOrganisationPayload = await createPayloadValidator(
+  'routes/v2/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/unlock'].post.requestBody.content[
+      'application/json'
+    ].schema
+)
 
 export const organisation = [
   {
@@ -158,7 +174,11 @@ export const organisation = [
     path: '/organisation/{organisationId}/lock',
     handler: async (request, h) => {
       const organisationId = checkId(request, 'organisationId')
-      checkLockUnlockRequestBody(request, 'LockOrganisation')
+      checkRequestBody(request)
+
+      if (!validateLockOrganisationPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
 
       lockOrganisation(organisationId)
 
@@ -170,7 +190,11 @@ export const organisation = [
     path: '/organisation/{organisationId}/unlock',
     handler: async (request, h) => {
       const organisationId = checkId(request, 'organisationId')
-      checkLockUnlockRequestBody(request, 'UnlockOrganisation')
+      checkRequestBody(request)
+
+      if (!validateUnlockOrganisationPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
 
       unlockOrganisation(organisationId)
 
