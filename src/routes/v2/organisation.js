@@ -2,13 +2,31 @@ import Boom from '@hapi/boom'
 import { sbiToOrgId } from '../../factories/id-lookups.js'
 import {
   createOrganisation,
+  lockOrganisation,
   retrieveOrganisation,
   retrieveOrganisationCustomers,
+  unlockOrganisation,
   updateAdditionalOrganisationDetails,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 import { checkId } from '../../utils/shared-datatypes.js'
+import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const validateLockOrganisationPayload = await createPayloadValidator(
+  'routes/v2/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/lock'].post.requestBody.content['application/json']
+      .schema
+)
+
+const validateUnlockOrganisationPayload = await createPayloadValidator(
+  'routes/v2/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/unlock'].post.requestBody.content[
+      'application/json'
+    ].schema
+)
 
 export const organisation = [
   {
@@ -149,6 +167,36 @@ export const organisation = [
       return h.response({
         _data: createOrganisation(request.params.personId, request.payload)
       })
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/lock',
+    handler: async (request, h) => {
+      const organisationId = checkId(request, 'organisationId')
+
+      if (!validateLockOrganisationPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      lockOrganisation(organisationId)
+
+      return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/unlock',
+    handler: async (request, h) => {
+      const organisationId = checkId(request, 'organisationId')
+
+      if (!validateUnlockOrganisationPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      unlockOrganisation(organisationId)
+
+      return h.response().code(204)
     }
   }
 ]
