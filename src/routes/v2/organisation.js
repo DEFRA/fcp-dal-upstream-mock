@@ -10,7 +10,7 @@ import {
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { checkId, checkRequestBody } from '../../utils/shared-datatypes.js'
+import { checkId } from '../../utils/shared-datatypes.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
 
 const validateLockOrganisationPayload = await createPayloadValidator(
@@ -174,7 +174,6 @@ export const organisation = [
     path: '/organisation/{organisationId}/lock',
     handler: async (request, h) => {
       const organisationId = checkId(request, 'organisationId')
-      checkRequestBody(request)
 
       if (!validateLockOrganisationPayload(request.payload)) {
         throw Boom.badRequest('validation error while processing input', request)
@@ -182,7 +181,7 @@ export const organisation = [
 
       lockOrganisation(organisationId)
 
-      return h.response()
+      return h.response().code(204)
     }
   },
   {
@@ -190,7 +189,6 @@ export const organisation = [
     path: '/organisation/{organisationId}/unlock',
     handler: async (request, h) => {
       const organisationId = checkId(request, 'organisationId')
-      checkRequestBody(request)
 
       if (!validateUnlockOrganisationPayload(request.payload)) {
         throw Boom.badRequest('validation error while processing input', request)
@@ -198,7 +196,7 @@ export const organisation = [
 
       unlockOrganisation(organisationId)
 
-      return h.response()
+      return h.response().code(204)
     }
   }
 ]

@@ -150,8 +150,6 @@ paths:
             schema:
               $ref: '#/components/schemas/LockRequestBody'
       responses:
-        '200':
-          description: 'Successfully locked Organisation'
         '204':
           description: 'Successfully locked Organisation'
         '400':
@@ -204,8 +202,6 @@ paths:
             schema:
               $ref: '#/components/schemas/UnlockRequestBody'
       responses:
-        '200':
-          description: 'Successfully unlocked Organisation'
         '204':
           description: 'Successfully unlocked Organisation'
         '400':

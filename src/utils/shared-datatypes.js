@@ -14,17 +14,3 @@ export const checkId = (request, idName) => {
 
   return `${id}`
 }
-
-export const checkRequestBody = (request) => {
-  const body = request.payload
-
-  if (body === '' || body === null) {
-    throw Boom.badRequest('empty request body not allowed', request)
-  }
-
-  if (typeof body !== 'object' || Array.isArray(body)) {
-    throw Boom.badRequest('missing or invalid request body', request)
-  }
-
-  return body
-}
