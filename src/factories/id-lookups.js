@@ -94,14 +94,19 @@ export const personIdToCRN = {
   5040517: '1100405178',
   5042160: '1100421602',
   5042346: '1100423469',
-  5069674: '1100696741'
+  5069674: '1100696741',
+  // customers not in any org - useful for DAL acceptance tests and the like
+  9000000: '9000000000',
+  9000001: '9000000001'
 }
 
 export const orgIdLookup = {
   1000000000: {
     sbi: 1000000000,
     customers: [], // org with no customers
-    agreements: []
+    agreements: [], // ... no agreements
+    applications: [], // ... no applications
+    cphs: [] // ... no CPHs
   },
   1111111111: {
     sbi: 1111111111,
