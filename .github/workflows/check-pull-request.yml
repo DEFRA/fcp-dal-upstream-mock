@@ -37,4 +37,4 @@ jobs:
           docker compose \
             -f compose.yml \
             -f test/contract/compose.yml \
-            run --build --quiet-pull --rm contract-tests
+            run --build --quiet-pull --pull always --rm contract-tests
