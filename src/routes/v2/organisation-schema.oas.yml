@@ -29,7 +29,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples: [1000000000, 1111111111, 2222222222]
       responses:
@@ -140,7 +140,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples: [1000000000, 1111111111, 2222222222]
       requestBody:
@@ -192,7 +192,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples: [1000000000, 1111111111, 2222222222]
       requestBody:

@@ -29,7 +29,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples: [11111111, 11112222, 22222222]
       responses:
@@ -113,7 +113,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples: [11111111, 11112222, 22222222]
         - name: 'email'
@@ -221,6 +221,7 @@ components:
               minLength: 10
               # pattern: '^[0-9]{10,}$' # not just CRN upstream, other searches are also allowed
             - type: integer
+              format: int64
               minimum: 1000000000
               description: 'If the CRN is a number it must have at least 10 digits.'
               # This is because the upstream checks the character length of the number.
