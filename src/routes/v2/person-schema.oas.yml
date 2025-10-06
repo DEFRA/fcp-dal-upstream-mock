@@ -98,7 +98,7 @@ paths:
                   message:
                     type: string
                     example: >
-                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
   /person/{personId}:
     put:
       tags:
