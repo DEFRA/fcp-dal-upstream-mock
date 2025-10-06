@@ -1,4 +1,4 @@
-set -ex
+set -e
 
 # setup
 baseDir=`cd $(dirname $0) ; pwd`
@@ -52,7 +52,7 @@ case "$1" in
   p | person )
     schema="person"
     mutations='. |
-.paths["/person/{personId}/summary"].get.parameters[0].schema.examples] = [5858232,5108985,5108989] |
+.paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899"'
@@ -103,7 +103,7 @@ docker run --rm --network=host \
   schemathesis/schemathesis \
     run /tmp/schema.json \
       --proxy "${CDP_PROXY}" \
-      --header 'email: test.user01@defra.gov.uk' \
+      --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
