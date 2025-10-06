@@ -93,20 +93,25 @@ components:
       type: 'object'
       additionalProperties: false
       properties:
-        memorableDate:
+        customerReference:
           type: 'string'
+          pattern: '^[1-9][0-9]{7,19}$'
+          description: 'Customer Reference Number (CRN) of the person.'
+        memorableDate:
+          type: [string, 'null']
           description: 'Memorable date for the person.'
         memorableEvent:
-          type: 'string'
+          type: [string, 'null']
           description: 'Memorable event for the person.'
         memorableLocation:
-          type: 'string'
+          type: [string, 'null']
           description: 'Memorable location for the person.'
         lastUpdatedOn:
-          type: 'string'
+          type: [string, 'null']
           format: 'date-time'
           description: 'Timestamp of the last update to the authenticate data.'
       required:
+        - 'customerReference'
         - 'memorableDate'
         - 'memorableEvent'
         - 'memorableLocation'

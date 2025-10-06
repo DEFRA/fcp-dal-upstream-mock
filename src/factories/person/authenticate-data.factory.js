@@ -7,11 +7,21 @@ const authenticateData = {}
 
 const createAuthenticateData = (crn) => {
   faker.seed(crn)
-  const data = {
-    memorableDate: faker.date.past().toLocaleDateString(),
-    memorableEvent: faker.lorem.word({ length: { min: 5, max: 10 } }),
-    memorableLocation: faker.location.city(),
-    lastUpdatedOn: faker.date.recent().toISOString()
+  const data = nullOrFake(
+    () => ({
+      customerReference: crn,
+      memorableDate: faker.date.past().toLocaleDateString(),
+      memorableEvent: faker.lorem.word({ length: { min: 5, max: 10 } }),
+      memorableLocation: faker.location.city(),
+      lastUpdatedOn: faker.date.recent().toISOString()
+    }),
+    0.3
+  ) ?? {
+    customerReference: crn,
+    memorableDate: null,
+    memorableEvent: null,
+    memorableLocation: null,
+    lastUpdatedOn: null
   }
   authenticateData[crn] = data
 
