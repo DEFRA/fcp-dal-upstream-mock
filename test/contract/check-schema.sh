@@ -1,4 +1,4 @@
-set -ex
+set -e
 
 # setup
 baseDir=`cd $(dirname $0) ; pwd`
@@ -52,7 +52,7 @@ case "$1" in
   p | person )
     schema="person"
     mutations='. |
-.paths["/person/{personId}/summary"].get.parameters[0].schema.examples] = [5858232,5108985,5108989] |
+.paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899"'
@@ -76,7 +76,7 @@ case "$1" in
     schema="siti-agri"
     mutations='. |
 .paths["/SitiAgriApi/cv/appByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [121174131,200697200,107120488,117713636,200694241,200721391,119897756] |
-.paths["/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [107183280,107591843,106327021] |
+.paths["/SitiAgriApi/cv/agreementsByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [107183280,200697200,107120488,117713636,200694241] |
 .paths["/SitiAgriApi/cv/cphByBusiness/sbi/{sbi}/list"].get.parameters[0].schema.examples = [121174131,200697200,107120488,117713636,200694241,200721391,119897756]'
     ;;
   h | help | --help | -h )
@@ -93,20 +93,19 @@ esac
 yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
-set +e
-
 # run schemathesis tests
-docker run --rm --network=host \
+docker run --rm --network=host --pull always \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
   schemathesis/schemathesis \
     run /tmp/schema.json \
       --proxy "${CDP_PROXY}" \
-      --header 'email: test.user01@defra.gov.uk' \
+      --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
       --exclude-checks=unsupported_method,not_a_server_error \
       --request-cert /kits.crt \
       --request-cert-key /kits.key \
+      --report-vcr-path /tmp/vcr.yaml \
       --url "${KITS_URL:-https://chs-upgrade-api.ruraldev.org.uk:8446/extapi}"
 
 # cleanup

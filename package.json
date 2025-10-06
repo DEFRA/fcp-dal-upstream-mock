@@ -22,7 +22,7 @@
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
     "test:contract": "docker compose -f compose.yml -f test/contract/compose.yml run --quiet-pull --build --rm contract-tests",
     "verify:schemata": "redocly lint src/routes/v2/**/*-schema*.yml",
-    "test:contract:local": "dotenv -- bash -c './test/contract/check-schema.sh'"
+    "test:contract:local": "dotenv -- ./test/contract/check-schema.sh"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",

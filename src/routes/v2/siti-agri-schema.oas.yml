@@ -29,8 +29,8 @@ paths:
           description: 'SBI of the business to retrieve agreements for.'
           required: true
           schema:
-            type: 'integer'
-            maximum: 99999999999999999999
+            type: integer
+            format: int64
             minimum: 1
             examples:
               - 1000000000
@@ -70,7 +70,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples:
               - 1000000000
@@ -108,7 +108,7 @@ paths:
           required: true
           schema:
             type: integer
-            maximum: 99999999999999999999
+            format: int64
             minimum: 1
             examples:
               - 1000000000
