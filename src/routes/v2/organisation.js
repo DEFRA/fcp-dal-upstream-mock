@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { pagination, pagination0 } from '../../factories/common.js'
 import { sbiToOrgId } from '../../factories/id-lookups.js'
 import {
   createOrganisation,
@@ -9,7 +10,6 @@ import {
   updateAdditionalOrganisationDetails,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
-import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 import { checkId } from '../../utils/shared-datatypes.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
 

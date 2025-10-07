@@ -1,12 +1,12 @@
 import Boom from '@hapi/boom'
 import { config } from '../../config.js'
+import { pagination, pagination0 } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
   retrievePerson,
   retrievePersonOrgs,
   updatePerson
 } from '../../factories/person/person.factory.js'
-import { pagination, pagination0 } from '../../plugins/data/pagination.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
 
 const validateUpdatePersonPayload = await createPayloadValidator(
