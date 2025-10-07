@@ -15,6 +15,18 @@ describe('Basic queries for faked routes', () => {
     mockServer.stop({ timeout: 0 })
   })
 
+  describe('Health route', () => {
+    it('Should respond successfully for /health', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/health'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual({ message: 'success' })
+    })
+  })
+
   describe('Person route', () => {
     test('Should return data /person/{personId}/summary', async () => {
       const response = await mockServer.inject({
