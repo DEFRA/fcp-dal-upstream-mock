@@ -3,7 +3,7 @@ import {
   retrieveCoversSummary,
   retrieveParcelDetails,
   retrieveParcels
-} from '../../factories/land/land.factory.js'
+} from '../factories/land/land.factory.js'
 
 export const land = [
   {

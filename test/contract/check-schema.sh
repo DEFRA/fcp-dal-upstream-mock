@@ -90,7 +90,7 @@ case "$1" in
 esac
 
 # mutate target schema - NOTE: the use of `tee` is intentional!!
-yq eval -o=json "${mutations}" ${rootDir}/src/routes/v2/${schema}-schema.oas.yml \
+yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 # run schemathesis tests

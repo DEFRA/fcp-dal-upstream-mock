@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { retrieveMessages } from '../../factories/messages.factory.js'
+import { retrieveMessages } from '../factories/messages.factory.js'
 
 export const notifications = [
   {

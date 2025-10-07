@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { retrieveAuthenticateData } from '../../factories/person/authenticate-data.factory.js'
+import { retrieveAuthenticateData } from '../factories/person/authenticate-data.factory.js'
 
 export const authenticate = [
   {

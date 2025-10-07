@@ -1,5 +1,5 @@
 import Hapi from '@hapi/hapi'
-import { authenticate } from '../../../../src/routes/v2/authenticate-data.js'
+import { authenticate } from '../../../../src/routes/authenticate-data.js'
 import { loadSchema } from '../../../../src/utils/validatePayload.js'
 
 describe('Fake Authenticate data', () => {
@@ -9,7 +9,7 @@ describe('Fake Authenticate data', () => {
     server.route(authenticate)
     await Promise.all([
       server.initialize(),
-      loadSchema('/routes/v2/authenticate-schema.oas.yml').then((s) => (schema = s))
+      loadSchema('/routes/authenticate-schema.oas.yml').then((s) => (schema = s))
     ])
   })
 
