@@ -8,8 +8,8 @@ import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
 import { router } from './plugins/fake-router.js'
-import { health } from './routes/health.js'
-import { schemata } from './routes/schemata.js'
+import { health } from './plugins/health.js'
+import { schemata } from './plugins/schemata.js'
 
 const logger = createLogger()
 export const startServer = async (listener) => {
