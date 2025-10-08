@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
-import { sbiToOrgId } from '../../factories/id-lookups.js'
+import { pagination, pagination0 } from '../factories/common.js'
+import { sbiToOrgId } from '../factories/id-lookups.js'
 import {
   createOrganisation,
   lockOrganisation,
@@ -8,20 +9,19 @@ import {
   unlockOrganisation,
   updateAdditionalOrganisationDetails,
   updateOrganisation
-} from '../../factories/organisation/organisation.factory.js'
-import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { checkId } from '../../utils/shared-datatypes.js'
-import { createPayloadValidator } from '../../utils/validatePayload.js'
+} from '../factories/organisation/organisation.factory.js'
+import { checkId } from '../utils/shared-datatypes.js'
+import { createPayloadValidator } from '../utils/validatePayload.js'
 
 const validateLockOrganisationPayload = await createPayloadValidator(
-  'routes/v2/organisation-schema.oas.yml',
+  'routes/organisation-schema.oas.yml',
   (schema) =>
     schema.paths['/organisation/{organisationId}/lock'].post.requestBody.content['application/json']
       .schema
 )
 
 const validateUnlockOrganisationPayload = await createPayloadValidator(
-  'routes/v2/organisation-schema.oas.yml',
+  'routes/organisation-schema.oas.yml',
   (schema) =>
     schema.paths['/organisation/{organisationId}/unlock'].post.requestBody.content[
       'application/json'

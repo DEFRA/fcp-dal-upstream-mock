@@ -1,5 +1,5 @@
 import Hapi from '@hapi/hapi'
-import { person } from '../../../../src/routes/v2/person.js'
+import { person } from '../../../../src/routes/person.js'
 import { loadSchema } from '../../../../src/utils/validatePayload.js'
 
 describe('Fake Person', () => {
@@ -9,7 +9,7 @@ describe('Fake Person', () => {
     server.route(person)
     await Promise.all([
       server.initialize(),
-      loadSchema('/routes/v2/person-schema.oas.yml').then((s) => (schema = s))
+      loadSchema('/routes/person-schema.oas.yml').then((s) => (schema = s))
     ])
   })
 

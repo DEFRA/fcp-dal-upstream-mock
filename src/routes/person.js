@@ -1,16 +1,16 @@
 import Boom from '@hapi/boom'
-import { config } from '../../config.js'
-import { crnToPersonId } from '../../factories/id-lookups.js'
+import { config } from '../config.js'
+import { pagination, pagination0 } from '../factories/common.js'
+import { crnToPersonId } from '../factories/id-lookups.js'
 import {
   retrievePerson,
   retrievePersonOrgs,
   updatePerson
-} from '../../factories/person/person.factory.js'
-import { pagination, pagination0 } from '../../plugins/data/pagination.js'
-import { createPayloadValidator } from '../../utils/validatePayload.js'
+} from '../factories/person/person.factory.js'
+import { createPayloadValidator } from '../utils/validatePayload.js'
 
 const validateUpdatePersonPayload = await createPayloadValidator(
-  'routes/v2/person-schema.oas.yml',
+  'routes/person-schema.oas.yml',
   (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
 )
 
