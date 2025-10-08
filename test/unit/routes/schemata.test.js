@@ -1,6 +1,6 @@
 import Hapi from '@hapi/hapi'
 import inert from '@hapi/inert'
-import { schemata } from '../../../src/routes/schemata.js'
+import { schemata } from '../../../src/plugins/schemata.js'
 
 describe('Fake Person', () => {
   let server

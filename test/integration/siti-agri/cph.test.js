@@ -1,5 +1,5 @@
 import Hapi from '@hapi/hapi'
-import { sitiagri } from '../../../src/routes/v2/siti-agri.js'
+import { sitiagri } from '../../../src/routes/siti-agri.js'
 import { loadSchema } from '../../../src/utils/validatePayload.js'
 
 describe('Fake CPH data', () => {
@@ -9,7 +9,7 @@ describe('Fake CPH data', () => {
     server.route(sitiagri)
     await Promise.all([
       server.initialize(),
-      loadSchema('/routes/v2/siti-agri-schema.oas.yml').then(
+      loadSchema('/routes/siti-agri-schema.oas.yml').then(
         (s) =>
           (schema =
             s.paths['/SitiAgriApi/cv/cphByBusiness/sbi/{sbi}/list'].get.responses['200'].content[

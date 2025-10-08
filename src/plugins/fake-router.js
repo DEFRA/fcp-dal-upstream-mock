@@ -1,9 +1,9 @@
-import { authenticate } from '../routes/v2/authenticate-data.js'
-import { land } from '../routes/v2/land.js'
-import { notifications } from '../routes/v2/messages.js'
-import { organisation } from '../routes/v2/organisation.js'
-import { person } from '../routes/v2/person.js'
-import { sitiagri } from '../routes/v2/siti-agri.js'
+import { authenticate } from '../routes/authenticate-data.js'
+import { land } from '../routes/land.js'
+import { notifications } from '../routes/messages.js'
+import { organisation } from '../routes/organisation.js'
+import { person } from '../routes/person.js'
+import { sitiagri } from '../routes/siti-agri.js'
 
 const router = {
   plugin: {
