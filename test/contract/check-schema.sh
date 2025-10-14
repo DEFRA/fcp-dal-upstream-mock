@@ -98,7 +98,7 @@ docker run --rm --network=host --pull always \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
-  schemathesis/schemathesis \
+  schemathesis/schemathesis:stable \
     run /tmp/schema.json \
       --proxy "${CDP_PROXY}" \
       --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \

@@ -97,7 +97,14 @@ export const personIdToCRN = {
   5069674: '9500011000',
   // customers not in any org - useful for DAL acceptance tests and the like
   9000000: '9000000000',
-  9000001: '9000000001'
+  9000001: '9000000001',
+  // from dev CRM
+  5302028: '9800001000',
+  // from dev CRM, but do not exist on `upgrade`
+  9900000: '9562286973',
+  9900001: '9638563942',
+  9900002: '9170633316',
+  9900003: '9343571956'
 }
 
 export const orgIdLookup = {
@@ -185,17 +192,18 @@ export const orgIdLookup = {
   5783443: { sbi: 850000024, customers: [5042346] },
   5374662: { sbi: 850000025, customers: [5069674] },
   5467167: { sbi: 850000614, customers: [5069674] },
-  // temporarily add v1 data for testing Applications
+  // business from dev CRM
   5565448: {
     sbi: 890000001,
     customers: [],
     applications: [{ application_history: [{}] }], // 1 application with 1 transition entry
     cphs: Array.from({ length: 8 }, () => ({})) // 8 CPHs
   },
-  5559799: { sbi: 890000002, customers: [] },
-  5560725: { sbi: 890000003, customers: [] },
-  5625145: { sbi: 890000004, customers: [] },
-  5447505: { sbi: 890000005, customers: [] },
+  5559799: { sbi: 890000002, customers: [5302028] },
+  5560725: { sbi: 890000003, customers: [5302028, 9900000, 9900001, 9900002, 9900003] },
+  5625145: { sbi: 890000004, customers: [5302028] },
+  5447505: { sbi: 890000005, customers: [5302028] },
+  // for DAL mutation tests
   9000001: { sbi: 800000001, customers: [] },
   9000002: { sbi: 800000002, customers: [] }
 }

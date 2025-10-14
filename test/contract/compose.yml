@@ -1,6 +1,6 @@
 services:
   contract-tests:
-    image: schemathesis/schemathesis
+    image: schemathesis/schemathesis:stable
     entrypoint: sh
     command:
       - -c
