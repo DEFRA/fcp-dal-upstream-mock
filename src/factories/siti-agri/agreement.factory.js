@@ -1,8 +1,5 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
-import { createLogger } from '../../common/helpers/logging/logger.js'
-import { fakeIds, nullOrFake, transformDate } from '../common.js'
-import { orgIdLookup, sbiToOrgId } from '../id-lookups.js'
-const logger = createLogger()
+import { fakeIds, faker, nullOrFake, safeSeed, transformDate } from '../common.js'
+import { orgIdLookup } from '../id-lookups.js'
 
 const agreementsStore = {}
 
@@ -54,7 +51,7 @@ export const retrieveOrganisationAgreements = (sbi, orgId) => {
     return agreementsStore[sbi]
   }
 
-  faker.seed(sbi)
+  safeSeed(sbi)
 
   const fakeAgreements = fakeIds(faker.number.int({ min: 0, max: 3 })).map((id) => {
     const paymentSchedules = fakeIds(faker.number.int({ min: 0, max: 3 }))

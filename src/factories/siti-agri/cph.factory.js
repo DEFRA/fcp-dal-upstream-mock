@@ -1,5 +1,4 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
-import { nullOrFake, transformTimestamp } from '../common.js'
+import { faker, nullOrFake, safeSeed, transformTimestamp } from '../common.js'
 import { orgIdLookup } from '../id-lookups.js'
 import { parishes } from './parishes.js'
 
@@ -71,7 +70,7 @@ export const retrieveCPHs = (sbi, orgId) => {
     return cphs
   }
 
-  faker.seed(sbi)
+  safeSeed(sbi)
   return generateCHPs(
     sbi,
     orgIdLookup[orgId]?.cphs ?? Array.from({ length: faker.number.int({ min: 0, max: 30 }) })

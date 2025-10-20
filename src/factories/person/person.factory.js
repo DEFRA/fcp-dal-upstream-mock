@@ -1,19 +1,18 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
 import { personUpdateSchema } from '../../common/update-schemas.js'
 import { orgIdToSbi, personIdToCRN, personIdToOrgIds } from '../../factories/id-lookups.js'
 import { applyUpdates } from '../../utils/applyUpdates.js'
-import { fakeAddress, fakeIds } from '../common.js'
+import { fakeAddress, fakeIds, faker, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const people = {}
 
 const generatePerson = (personId, crn) => {
-  faker.seed(personId)
+  personId = safeSeed(personId)
   const firstName = faker.person.firstName()
   const lastName = faker.person.lastName()
   const person = {
-    id: parseInt(personId),
+    id: personId,
     title: faker.person.prefix(),
     otherTitle: faker.person.suffix(),
     firstName,
@@ -46,8 +45,7 @@ const generatePerson = (personId, crn) => {
       'Submit - cs agree',
       'ELM_APPLICATION_SUBMIT'
     ],
-    lastUpdatedOn: faker.date.recent().getTime(),
-    confirmed: true
+    lastUpdatedOn: faker.date.recent().getTime()
   }
 
   people[personId] = person
