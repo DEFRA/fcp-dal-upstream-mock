@@ -28,6 +28,46 @@ describe('Basic queries for faked routes', () => {
   })
 
   describe('Person route', () => {
+    const personFixture = {
+      address: {
+        address1: '65',
+        address2: '1 McCullough Path',
+        address3: 'Newton Ratkedon',
+        address4: 'MS9 8BJ',
+        address5: 'North Macedonia',
+        addressTypeId: null,
+        buildingName: null,
+        buildingNumberRange: null,
+        city: 'Newton Bruen',
+        country: 'Wales',
+        county: null,
+        dependentLocality: null,
+        doubleDependentLocality: null,
+        flatName: null,
+        pafOrganisationName: null,
+        postalCode: 'TC2 8KP',
+        street: null,
+        uprn: '790214962932'
+      },
+      confirmed: false,
+      customerReferenceNumber: '1111111100',
+      dateOfBirth: 91391413473,
+      deactivated: false,
+      doNotContact: false,
+      email: 'lauren.sanford@immaculate-shark.info',
+      emailValidated: false,
+      firstName: 'Lauren',
+      id: 11111111,
+      landline: '055 4582 4488',
+      lastName: 'Sanford',
+      locked: false,
+      middleName: 'Daryl',
+      mobile: '056 8967 5108',
+      otherTitle: 'I',
+      personalIdentifiers: ['8568845789', '370030956', '7899566034'],
+      title: 'Mrs.'
+    }
+
     test('Should return data /person/{personId}/summary', async () => {
       const response = await mockServer.inject({
         method: 'GET',
@@ -35,47 +75,7 @@ describe('Basic queries for faked routes', () => {
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
-      expect(json._data).toEqual(
-        // snippet only, due to size of person object
-        expect.objectContaining({
-          address: {
-            address1: '635',
-            address2: '72 Evert Green',
-            address3: 'Kessler-upon-Altenwerth',
-            address4: 'CO5 5GC',
-            address5: 'Uzbekistan',
-            pafOrganisationName: null,
-            postalCode: 'SV14 7HI',
-            street: null,
-            uprn: '807723943667',
-            addressTypeId: null,
-            buildingName: null,
-            buildingNumberRange: null,
-            city: 'Crona-on-West',
-            country: 'England',
-            county: null,
-            dependentLocality: null,
-            doubleDependentLocality: null,
-            flatName: null
-          },
-          confirmed: true,
-          customerReferenceNumber: '1111111100',
-          deactivated: false,
-          doNotContact: false,
-          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
-          emailValidated: true,
-          firstName: 'Gerhard',
-          id: 11111111,
-          landline: '055 2317 9411',
-          lastName: 'Purdy',
-          locked: false,
-          middleName: 'Shayna',
-          mobile: '01650 95852',
-          otherTitle: 'MD',
-          personalIdentifiers: ['2356939974', '2348412591'],
-          title: 'Mr.'
-        })
-      )
+      expect(json._data).toEqual(personFixture)
     })
 
     test('Should return data /person/{personId}/summary corresponding to crn for personIdOverride', async () => {
@@ -86,47 +86,7 @@ describe('Basic queries for faked routes', () => {
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
-      expect(json._data).toEqual(
-        // snippet only, due to size of person object
-        expect.objectContaining({
-          address: {
-            address1: '635',
-            address2: '72 Evert Green',
-            address3: 'Kessler-upon-Altenwerth',
-            address4: 'CO5 5GC',
-            address5: 'Uzbekistan',
-            pafOrganisationName: null,
-            postalCode: 'SV14 7HI',
-            street: null,
-            uprn: '807723943667',
-            addressTypeId: null,
-            buildingName: null,
-            buildingNumberRange: null,
-            city: 'Crona-on-West',
-            country: 'England',
-            county: null,
-            dependentLocality: null,
-            doubleDependentLocality: null,
-            flatName: null
-          },
-          confirmed: true,
-          customerReferenceNumber: '1111111100',
-          deactivated: false,
-          doNotContact: false,
-          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
-          emailValidated: true,
-          firstName: 'Gerhard',
-          id: 11111111,
-          landline: '055 2317 9411',
-          lastName: 'Purdy',
-          locked: false,
-          middleName: 'Shayna',
-          mobile: '01650 95852',
-          otherTitle: 'MD',
-          personalIdentifiers: ['2356939974', '2348412591'],
-          title: 'Mr.'
-        })
-      )
+      expect(json._data).toEqual(expect.objectContaining(personFixture))
     })
 
     test('Should return data /person/search', async () => {
@@ -141,39 +101,17 @@ describe('Basic queries for faked routes', () => {
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
       expect(json._data).toHaveLength(1)
-      expect(json._data[0]).toEqual(
-        // snippet only, due to size of person object
-        expect.objectContaining({
-          customerReference: '1111111100',
-          deactivated: false,
-          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
-          fullName: 'Gerhard Purdy',
-          id: 11111111,
-          locked: false,
-          nationalInsuranceNumber: null,
-          personalIdentifiers: ['2356939974', '2348412591'],
-          primaryAddress: {
-            address1: '635',
-            address2: '72 Evert Green',
-            address3: 'Kessler-upon-Altenwerth',
-            address4: 'CO5 5GC',
-            address5: 'Uzbekistan',
-            addressTypeId: null,
-            buildingName: null,
-            buildingNumberRange: null,
-            city: 'Crona-on-West',
-            country: 'England',
-            county: null,
-            dependentLocality: null,
-            doubleDependentLocality: null,
-            flatName: null,
-            pafOrganisationName: null,
-            postalCode: 'SV14 7HI',
-            street: null,
-            uprn: '807723943667'
-          }
-        })
-      )
+      expect(json._data[0]).toEqual({
+        customerReference: '1111111100',
+        deactivated: false,
+        email: 'lauren.sanford@immaculate-shark.info',
+        fullName: 'Lauren Sanford',
+        id: 11111111,
+        locked: false,
+        nationalInsuranceNumber: null,
+        personalIdentifiers: ['8568845789', '370030956', '7899566034'],
+        primaryAddress: personFixture.address
+      })
     })
 
     test('Should return data /organisation/person/{personId}/summary', async () => {
@@ -200,55 +138,73 @@ describe('Basic queries for faked routes', () => {
     })
 
     test('Should accept data to PUT /person/{personId}', async () => {
+      const payload = {
+        id: 11111111,
+        title: 'test-title',
+        otherTitle: 'test-other-title',
+        firstName: 'test-first-name',
+        middleName: 'test-middle-name',
+        lastName: 'test-last-name',
+        dateOfBirth: -2,
+        landline: 'test-landline',
+        mobile: 'test-mobile',
+        email: 'test-email@test.com',
+        doNotContact: !personFixture.doNotContact,
+        emailValidated: !personFixture.emailValidated,
+        address: {
+          address1: 'test-line-1',
+          address2: 'test-line-2',
+          address3: 'test-line-3',
+          address4: 'test-line-4',
+          address5: 'test-line-5',
+          addressTypeId: null,
+          buildingName: 'test-building-name',
+          buildingNumberRange: 'test-building-number-range',
+          city: 'test-city',
+          country: 'test-country',
+          county: 'test-county',
+          dependentLocality: 'test-dependent-locality',
+          doubleDependentLocality: 'test-double-dependent-locality',
+          flatName: 'test-flat-name',
+          pafOrganisationName: 'test-paf-organisation-name',
+          postalCode: 'test-postal-code',
+          street: 'test-street',
+          uprn: 'test-uprn'
+        },
+        locked: !personFixture.locked,
+        confirmed: !personFixture.confirmed,
+        customerReferenceNumber: 'test-crn',
+        personalIdentifiers: ['not', 'set'],
+        deactivated: !personFixture.deactivated
+      }
+
       const response = await mockServer.inject({
         method: 'PUT',
         url: '/extapi/person/11111111',
         headers: {
           email: 'test@defra.gov.uk'
         },
-        payload: {
-          id: 11111111,
-          title: 'Mr.',
-          otherTitle: 'MD',
-          firstName: 'Gerhard',
-          middleName: 'Shayna',
-          lastName: 'Purdy',
-          dateOfBirth: -442932358962,
-          landline: '055 2317 9411',
-          mobile: '01650 95852',
-          email: 'gerhard.purdy@uncommon-sideboard.org.uk',
-          doNotContact: false,
-          emailValidated: true,
-          address: {
-            address1: '635',
-            address2: '72 Evert Green',
-            address3: 'Kessler-upon-Altenwerth',
-            address4: 'CO5 5GC',
-            address5: 'Uzbekistan',
-            pafOrganisationName: null,
-            flatName: null,
-            buildingNumberRange: null,
-            buildingName: null,
-            street: null,
-            city: 'Crona-on-West',
-            county: null,
-            postalCode: 'SV14 7HI',
-            country: 'England',
-            uprn: '807723943667',
-            dependentLocality: null,
-            doubleDependentLocality: null,
-            addressTypeId: null
-          },
-          locked: false,
-          confirmed: false,
-          customerReferenceNumber: '1111111100',
-          personalIdentifiers: ['2356939974', '2348412591'],
-          deactivated: false
-        }
+        payload: { ...payload, address: { ...payload.address, extra: 'chuff' }, more: 'jazz' }
       })
-
       expect(response.statusCode).toBe(204)
       expect(response.payload).toBe('')
+
+      const updated = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/person/11111111/summary'
+      })
+      expect(updated.statusCode).toBe(200)
+      const json = JSON.parse(updated.payload)
+      expect(json._data).toEqual({
+        ...payload,
+        // data which should not be updated remains the same
+        customerReferenceNumber: personFixture.customerReferenceNumber,
+        emailValidated: personFixture.emailValidated,
+        confirmed: personFixture.confirmed,
+        locked: personFixture.locked,
+        deactivated: personFixture.deactivated,
+        personalIdentifiers: personFixture.personalIdentifiers
+      })
     })
 
     test('Should fail if no data PUT /person/{personId}', async () => {
@@ -515,13 +471,14 @@ describe('Basic queries for faked routes', () => {
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
-      expect(json._data[0]).toEqual(
+      expect(json._data[1]).toEqual(
         // snippet only, due to size of org object
         expect.objectContaining({
-          firstName: 'Gerhard',
-          id: 11111111,
-          customerReference: '1111111100',
-          lastName: 'Purdy',
+          firstName: 'Kristy',
+          id: 11111112,
+          customerReference: '1111111200',
+          lastName: 'Stiedemann',
+          lastUpdatedOn: 1735660238275,
           privileges: [
             'Full permission - business',
             'SUBMIT - CS APP - SA',
@@ -551,41 +508,39 @@ describe('Basic queries for faked routes', () => {
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
       expect(json).toEqual({
-        notifications: [
+        notifications: expect.arrayContaining([
           {
-            id: 8776831,
-            personId: 5827629,
-            organisationId: 7316417,
-            messageId: 9745207,
-            readAt: null,
-            archivedAt: null,
             archive: null,
-            createdAt: 1792323602125,
-            title:
-              'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
-            body: '<p>Strues cras triduana tempore stabilis vomica adsum culpo asporto atque.</p>',
+            archivedAt: null,
+            bespokeNotificationId: null,
+            body: '<p>Absconditus tripudio coadunatio.</p>',
             category: 'OrganisationLevel',
-            bespokeNotificationId: null
+            createdAt: 1703107872884,
+            id: 4773520611,
+            messageId: 4434992522,
+            organisationId: 1111111111,
+            personId: 11111111,
+            readAt: 1733430747000,
+            title: 'Amissio quae cado delicate antea nostrum.'
           },
           {
-            id: 5244065,
-            personId: 5456657,
-            organisationId: 729076,
-            messageId: 5877233,
-            readAt: null,
-            archivedAt: null,
             archive: null,
-            createdAt: 2580178053430,
-            title:
-              'Corrumpo adulatio coadunatio bene impedit creator molestias amicitia conculco cui.',
-            body: '<p>Stips thymbra ciminatio valens deporto magni usque absque appono repellat.</p>',
+            archivedAt: null,
+            bespokeNotificationId: null,
+            body: '<p>Umbra aeger texo similique alveus vulgivagus.</p>',
             category: 'OrganisationLevel',
-            bespokeNotificationId: null
+            createdAt: 1690586859290,
+            id: 761422798,
+            messageId: 2021325969,
+            organisationId: 1111111111,
+            personId: 11111111,
+            readAt: 1709228434000,
+            title: 'Comitatus aperio cito cruciamentum corrigo aureus.'
           }
-        ],
-        resultCount: 2,
-        readCount: 0,
-        unreadCount: 2
+        ]),
+        resultCount: 9,
+        readCount: 5,
+        unreadCount: 4
       })
     })
   })

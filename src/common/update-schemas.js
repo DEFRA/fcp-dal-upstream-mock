@@ -29,6 +29,5 @@ export const personUpdateSchema = {
   mobile: { type: 'string', default: null },
   email: { type: 'string', default: null },
   doNotContact: { type: 'boolean', default: false },
-  emailValidated: { type: 'boolean', default: false },
   address: addressUpdateSchema
 }
