@@ -136,7 +136,18 @@ export const orgIdLookup = {
       }
     ],
     applications: [{ application_history: [{}] }],
-    cphs: [{}] // 1 CPH
+    cphs: [{}], // 1 CPH
+    landParcels: [
+      {
+        sheet: 'SS6528',
+        parcel: '3756',
+        uses: [
+          {
+            lu_code: 'WO25'
+          }
+        ]
+      }
+    ]
   },
   2222222222: {
     sbi: 2222222222,

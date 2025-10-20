@@ -148,6 +148,64 @@ paths:
         '404':
           description: The `pointInTime` parameter was not conform to the expected pattern.
           $ref: '#/components/responses/NotFound'
+  /SitiAgriApi/cv/landUseByBusinessParcel/sheet/{sheet}/parcel/{parcel}/sbi/{sbi}/list:
+    get:
+      tags:
+        - 'siti-agri'
+        - 'land use'
+      summary: 'List Land Use for a business.'
+      description: 'Gets details for Land Use for a business specified by SBI.'
+      operationId: 'getLandUseBySheetAndParcelAndSBI'
+      parameters:
+        - name: 'sheet'
+          in: path
+          description: 'Sheet of the business to retrieve land use for.'
+          required: true
+          schema:
+            type: string
+            examples:
+              - 'SS6528'
+              - 'SS6529'
+        - name: 'parcel'
+          in: path
+          description: 'Parcel of the business to retrieve land use for.'
+          required: true
+          schema:
+            type: string
+            examples:
+              - '5662'
+              - '5663'
+        - name: 'sbi'
+          in: path
+          description: 'SBI of the business to retrieve land use for a specific parcel on a specific sheet.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            examples:
+              - 1000000000
+              - 1111111111
+              - 2222222222
+              - 107167406
+              - 107097991
+              - 106354662
+              - 106221605
+              - 106440483
+      responses:
+        '200':
+          description: Returns all Land Use details for the specified sheet, parcel, and SBI.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandUseByBusinessParcelResponse'
+        '403':
+          description: >
+            Getting Land Use details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The sheet, parcel, or SBI was not found (i.e. 404!).
+          $ref: '#/components/responses/NotFound'
 
 components:
   responses:
@@ -239,6 +297,15 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CPH'
+    LandUseByBusinessParcelResponse:
+      allOf:
+        - $ref: '#/components/schemas/ResponseWrapper'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/LandUseByBusinessParcel'
     Agreement:
       type: 'object'
       properties:
@@ -426,6 +493,63 @@ components:
         - check_status
         - transition_id
         - transition_name
+      additionalProperties: false
+    LandUseByBusinessParcel:
+      type: object
+      properties:
+        start_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2021-01-01T00:00:00:000+0000'
+        end_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '9999-12-31T00:00:00:000+0000'
+        dt_insert:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2021-03-01T12:09:09:009+0000'
+        dt_delete:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}\+\d{4}$'
+          example: '2019-01-30T12:25:23:023+0000'
+        area:
+          type: number
+          example: 1000
+        lu_code:
+          type: string
+          example: 'WO25'
+        length:
+          type: [number, 'null']
+          example: 1000
+        landuse:
+          type: string
+          example: 'SCRUB - UNGRAZEABLE'
+        campaign:
+          type: integer
+          example: 2021
+        sbi:
+          type: string
+          example: '107183280'
+        sheet_name:
+          type: string
+          example: 'SS6528'
+        parcel_name:
+          type: string
+          example: '3756'
+      required:
+        - dt_delete
+        - end_date
+        - area
+        - lu_code
+        - length
+        - landuse
+        - campaign
+        - sbi
+        - dt_insert
+        - sheet_name
+        - parcel_name
+        - start_date
       additionalProperties: false
     CPH:
       type: object
