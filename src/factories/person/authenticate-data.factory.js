@@ -34,7 +34,7 @@ export const retrieveAuthenticateData = (crn) => {
   const personId = crnToPersonId[crn]
   if (personId) {
     safeSeed(personId) // Ensure consistent data for the same person
-    return nullOrFake(() => createAuthenticateData(crnToPersonId[crn]))
+    return nullOrFake(() => createAuthenticateData(crn))
   }
 
   throw Boom.notFound(`person with CRN ${crn} not found`)

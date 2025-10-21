@@ -27,6 +27,7 @@ describe('Fake Authenticate data', () => {
       url: '/external-auth/security-answers/1111111200'
     })
     expect(statusCode).toBe(200)
+    expect(result.customerReference).toBe('1111111200')
     expect(result).toConformToSchema(
       schema.paths['/external-auth/security-answers/{crn}'].get.responses['200'].content[
         'application/json'
