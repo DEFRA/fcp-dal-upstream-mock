@@ -1,25 +1,30 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
 import { personIdToOrgIds } from '../factories/id-lookups.js'
+import { fakeId, faker, nullOrFake, safeSeed } from './common.js'
 
 const businessPersonMessages = {}
 
-const createMessageMock = () => ({
-  id: +faker.string.numeric(7),
-  personId: +faker.string.numeric(7),
-  organisationId: +faker.string.numeric(7),
-  messageId: +faker.string.numeric(7),
-  readAt: faker.datatype.boolean() ? faker.date.anytime().getDate() * 1000 : null,
-  archivedAt: null,
-  archive: null,
-  createdAt: +faker.string.numeric(13),
-  title: faker.lorem.sentence(10),
-  body: `<p>${faker.lorem.sentence()}</p>`,
-  category: 'OrganisationLevel',
-  bespokeNotificationId: null
-})
+const createMessageMock = (orgId, personId) => {
+  const readAt = nullOrFake(() => Number.parseInt(faker.date.past().getTime() / 1000) * 1000)
+  return {
+    id: fakeId(),
+    personId,
+    organisationId: orgId,
+    messageId: fakeId(),
+    readAt,
+    archivedAt: null,
+    archive: null,
+    createdAt: faker.date.past(readAt ? { refDate: readAt } : undefined).getTime(),
+    title: faker.lorem.sentence({ min: 3, max: 10 }),
+    body: `<p>${faker.lorem.sentence()}</p>`,
+    category: 'OrganisationLevel',
+    bespokeNotificationId: null
+  }
+}
 
-const generateMessagesPayload = (numMessages) => {
-  const notifications = Array.from({ length: numMessages }, createMessageMock)
+const generateMessagesPayload = (orgId, personId, numMessages) => {
+  const notifications = Array.from({ length: numMessages }, () =>
+    createMessageMock(orgId, personId)
+  )
   const readCount = notifications.filter((n) => n.readAt).length
 
   return {
@@ -31,14 +36,14 @@ const generateMessagesPayload = (numMessages) => {
 }
 
 export const retrieveMessages = (orgId, personId, page = 1) => {
-  faker.seed(orgId)
+  ;[orgId, personId] = safeSeed([orgId, personId])
 
   const totalPages = faker.number.int({ min: 1, max: 3 })
 
   // check person exists and org is related to the person
-  // Very strangely the upstream returns a succesful response if they don't exist
+  // Very strangely the upstream returns a successful response if they don't exist
   const orgIds = personIdToOrgIds[personId]
-  if (!orgIds || !orgIds.includes(orgId) || page > totalPages) {
+  if (!orgIds?.includes(orgId) || page > totalPages) {
     return {
       notifications: [],
       resultCount: 0,
@@ -51,8 +56,11 @@ export const retrieveMessages = (orgId, personId, page = 1) => {
   if (messages) {
     return messages
   }
-  faker.seed([orgId, personId])
-  const messagesPayload = generateMessagesPayload(faker.number.int({ min: 0, max: 10 }))
+  const messagesPayload = generateMessagesPayload(
+    orgId,
+    personId,
+    faker.number.int({ min: 0, max: 10 })
+  )
   businessPersonMessages[`${orgId}-${personId}`] = messagesPayload
   return messagesPayload
 }

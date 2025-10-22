@@ -1,7 +1,4 @@
 import convict from 'convict'
-import convictFormatWithValidator from 'convict-format-with-validator'
-
-convict.addFormats(convictFormatWithValidator)
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
@@ -16,7 +13,7 @@ const config = convict({
   },
   host: {
     doc: 'The IP address to bind',
-    format: 'ipaddress',
+    format: (host) => new URL(`http://${host}`),
     default: '0.0.0.0',
     env: 'HOST'
   },

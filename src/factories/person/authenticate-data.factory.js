@@ -1,12 +1,10 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
 import { crnToPersonId } from '../../factories/id-lookups.js'
-import { nullOrFake } from '../common.js'
+import { faker, nullOrFake, safeSeed } from '../common.js'
 
 const authenticateData = {}
 
 const createAuthenticateData = (crn) => {
-  faker.seed(crn)
   const data = nullOrFake(
     () => ({
       customerReference: crn,
@@ -35,8 +33,8 @@ export const retrieveAuthenticateData = (crn) => {
 
   const personId = crnToPersonId[crn]
   if (personId) {
-    faker.seed(personId) // Ensure consistent data for the same person
-    return nullOrFake(() => createAuthenticateData(crnToPersonId[crn]))
+    safeSeed(personId) // Ensure consistent data for the same person
+    return nullOrFake(() => createAuthenticateData(crn))
   }
 
   throw Boom.notFound(`person with CRN ${crn} not found`)

@@ -1,8 +1,21 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
+import { fakerEN_GB } from '@faker-js/faker'
+
+export const faker = fakerEN_GB
 
 // set default ref date to 2025-01-01 to ensure consistent dates using faker.seed
 // https://fakerjs.dev/api/faker#setdefaultrefdate:~:text=faker.setDefaultRefDate()%3A%20For%20generating%20reproducible%20dates.
 faker.setDefaultRefDate(new Date('2025-01-01'))
+
+const intOrValue = (value) => {
+  const integer = Number.parseInt(value, 10)
+  return Number.isNaN(integer) ? value : integer
+}
+export const safeSeed = (seed) => {
+  if (Array.isArray(seed)) {
+    return faker.seed(seed.map((s) => intOrValue(s)))
+  }
+  return faker.seed(intOrValue(seed))
+}
 
 export const fakeAddress = (overrides = {}) => ({
   address1: faker.location.buildingNumber(),

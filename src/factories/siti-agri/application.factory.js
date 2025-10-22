@@ -1,5 +1,12 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
-import { fakeId, fakeIds, nullOrFake, toTitleCase, transformDate } from '../common.js'
+import {
+  fakeId,
+  fakeIds,
+  faker,
+  nullOrFake,
+  safeSeed,
+  toTitleCase,
+  transformDate
+} from '../common.js'
 import { orgIdLookup } from '../id-lookups.js'
 
 const applications = {}
@@ -165,7 +172,7 @@ const createApplication = (sbi, overrides = {}) => {
 }
 
 export const createApplications = (orgId, sbi) => {
-  faker.seed(orgId)
+  safeSeed(orgId)
   const applicationsData =
     orgIdLookup[orgId]?.applications?.map((application) => createApplication(sbi, application)) ||
     Array.from({ length: faker.helpers.arrayElement([0, 5, 60, 350]) }, () =>
