@@ -1,5 +1,5 @@
-import Boom from '@hapi/boom'
 import { retrieveAuthenticateData } from '../factories/person/authenticate-data.factory.js'
+import { checkId } from '../utils/shared-datatypes.js'
 
 export const authenticate = [
   {
@@ -9,9 +9,7 @@ export const authenticate = [
       const crn = request.params.crn
 
       // Validate the CRN format
-      if (!/\d{10,20}/.test(crn)) {
-        throw Boom.forbidden(`bad CRN: ${crn}, is not an integer in the acceptable range`, request)
-      }
+      checkId(request, 'crn')
 
       // handle valid request
       const authenticateData = retrieveAuthenticateData(crn)

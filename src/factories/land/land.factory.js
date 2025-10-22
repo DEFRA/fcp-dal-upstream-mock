@@ -1,7 +1,7 @@
-import { faker } from '@faker-js/faker'
 import { Boom } from '@hapi/boom'
-import fs from 'fs'
+import fs from 'node:fs'
 import { orgIdToSbi } from '../../factories/id-lookups.js'
+import { faker, safeSeed } from '../common.js'
 
 const parcelsAndCovers = JSON.parse(
   // Generated using scripts/generate_geometries.sh
@@ -18,7 +18,7 @@ const generateParcels = (geometries) => {
       id: parcel.id,
       sheetId: parcel.properties.sheetId,
       parcelId: parcel.properties.parcelId,
-      area: parseFloat(parcel.properties.area),
+      area: Number.parseFloat(parcel.properties.area),
       pendingDigitisation: faker.datatype.boolean(0.1),
       validFrom,
       validTo
@@ -34,41 +34,43 @@ const generateCoversSummary = (covers) => {
     140: { code: '140', name: 'Permanent Crops', area: 0 }
   }
 
-  covers.forEach((cover) => {
-    const { code, area } = cover.properties
+  covers.forEach(({ properties }) => {
+    const { code, area } = properties
     if (summaryMap[code]) {
-      summaryMap[code].area += parseFloat(area)
+      summaryMap[code].area += Number.parseFloat(area)
     }
   })
 
   // Round areas to 2 decimal places
   return Object.values(summaryMap).map((item) => ({
     ...item,
-    area: parseFloat(item.area.toFixed(2))
+    area: Number.parseFloat(item.area.toFixed(2))
   }))
 }
 
 const createLand = (orgId) => {
-  faker.seed(orgId)
-  const geometries = faker.helpers.arrayElements(parcelsAndCovers)
+  safeSeed(orgId)
+  const geometries = faker.helpers.arrayElements(parcelsAndCovers, { min: 1, max: 15 })
   const parcelsDetailsGeo = geometries.map(({ parcel }) => ({ parcel }))
   const parcels = generateParcels(parcelsDetailsGeo)
 
   const covers = geometries.reduce(
     (result, { parcel, covers: parcelCovers }) => ({
       ...result,
-      [`${parcel.properties.sheetId}${parcel.properties.parcelId}`]: parcelCovers
+      [`${parcel.properties.sheetId}-${parcel.properties.parcelId}`]: parcelCovers
     }),
     {}
   )
   const coversSummary = generateCoversSummary(Object.values(covers).flat())
 
-  return {
+  const landData = {
     parcelsDetailsGeo,
     parcels,
     covers,
     coversSummary
   }
+  land[orgId] = landData
+  return landData
 }
 
 const retrieveOrgLand = (orgId) => {
@@ -109,7 +111,7 @@ export const retrieveParcelDetails = (orgId) => {
 export const retrieveCovers = (orgId, sheetId, parcelId) => {
   const { covers: orgCovers } = retrieveOrgLand(orgId)
   // API returns empty array if no covers found even if invalid parcel reference
-  const covers = orgCovers[`${sheetId}${parcelId}`] || []
+  const covers = orgCovers[`${sheetId}-${parcelId}`] || []
   return {
     type: 'FeatureCollection',
     features: covers

@@ -1,4 +1,3 @@
-import { fakerEN_GB as faker } from '@faker-js/faker'
 import Boom from '@hapi/boom'
 import {
   orgIdToPersonIds,
@@ -6,7 +5,7 @@ import {
   personIdToOrgIds,
   sbiToOrgId
 } from '../../factories/id-lookups.js'
-import { fakeAddress, fakeIds, generateId, nft, nullOrFake } from '../common.js'
+import { fakeAddress, fakeIds, faker, generateId, nft, nullOrFake, safeSeed } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
 
 const organisations = {}
@@ -118,13 +117,13 @@ export const createOrganisation = (personId, payload) => {
 }
 
 const generateOrganisation = (orgId, sbi) => {
-  faker.seed(orgId)
+  orgId = safeSeed(orgId)
   const name = faker.company.name()
   const hasAdditionalBusinessActivities = nft(4, 2, 3)
   const org = {
-    id: parseInt(orgId),
+    id: orgId,
     name,
-    sbi: sbi,
+    sbi,
     additionalSbiIds: [],
     confirmed: faker.datatype.boolean(0.9),
     lastUpdatedOn: faker.date.recent().getTime(),

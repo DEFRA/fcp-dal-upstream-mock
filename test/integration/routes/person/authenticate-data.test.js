@@ -16,7 +16,7 @@ describe('Fake Authenticate data', () => {
   it('should return 204 if person found with no authenticate data set', async () => {
     const { statusCode } = await server.inject({
       method: 'GET',
-      url: '/external-auth/security-answers/1111111100'
+      url: '/external-auth/security-answers/1111111400'
     })
     expect(statusCode).toBe(204)
   })
@@ -27,6 +27,7 @@ describe('Fake Authenticate data', () => {
       url: '/external-auth/security-answers/1111111200'
     })
     expect(statusCode).toBe(200)
+    expect(result.customerReference).toBe('1111111200')
     expect(result).toConformToSchema(
       schema.paths['/external-auth/security-answers/{crn}'].get.responses['200'].content[
         'application/json'
