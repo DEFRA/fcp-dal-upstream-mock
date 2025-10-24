@@ -201,11 +201,9 @@ paths:
                 $ref: '#/components/schemas/LandUseByBusinessParcelResponse'
         '403':
           description: >
-            Getting Land Use details is forbidden, or a WAF rule has been triggered.
+            Getting Land Use details is forbidden, or a WAF rule has been triggered,
+            or the SBI was not found (i.e. 404!).
           $ref: '#/components/responses/Forbidden'
-        '404':
-          description: The sheet, parcel, or SBI was not found.
-          $ref: '#/components/responses/NotFound'
 
 components:
   responses:

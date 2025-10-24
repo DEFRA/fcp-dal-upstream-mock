@@ -65,4 +65,30 @@ describe('Fake Land Use data', () => {
     expect(result.data.every((landUse) => landUse.sbi === '2222222222')).toBe(true)
     expect(result.data[0].lu_code).toBe('QDC')
   })
+
+  it('should return empty array when no parcel found', async () => {
+    const { statusCode, result } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/SS6528/parcel/NOTFOUND/sbi/1111111111/list'
+    })
+    expect(statusCode).toBe(200)
+    expect(result.data.length).toBe(0)
+  })
+
+  it('should return empty array when no sheet found', async () => {
+    const { statusCode, result } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/NOTFOUND/parcel/3756/sbi/1111111111/list'
+    })
+    expect(statusCode).toBe(200)
+    expect(result.data.length).toBe(0)
+  })
+
+  it('should return 403 when SBI not found', async () => {
+    const { statusCode } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/SS6528/parcel/0000/sbi/NOTFOUND/list'
+    })
+    expect(statusCode).toBe(403)
+  })
 })
