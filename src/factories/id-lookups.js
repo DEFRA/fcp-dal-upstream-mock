@@ -113,7 +113,8 @@ export const orgIdLookup = {
     customers: [], // org with no customers
     agreements: [], // ... no agreements
     applications: [], // ... no applications
-    cphs: [] // ... no CPHs
+    cphs: [], // ... no CPHs
+    landParcels: [] // ... no land parcels
   },
   1111111111: {
     sbi: 1111111111,
@@ -146,6 +147,11 @@ export const orgIdLookup = {
             lu_code: 'WO25'
           }
         ]
+      },
+      {
+        sheet: 'SS6828',
+        parcel: '3818',
+        uses: [{}]
       }
     ]
   },

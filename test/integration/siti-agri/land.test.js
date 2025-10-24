@@ -41,4 +41,28 @@ describe('Fake Land Use data', () => {
     expect(result.data.every((landUse) => landUse.sbi === '1111111111')).toBe(true)
     expect(result.data.every((landUse) => landUse.lu_code === 'WO25')).toBe(true)
   })
+
+  it('should GET no land use data', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/SS6528/parcel/3756/sbi/1000000000/list'
+    })
+
+    expect(statusCode).toBe(200)
+    expect(result).toConformToSchema(schema)
+    expect(result.data.length).toBe(0)
+  })
+
+  it('should GET same fake generated land use data', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/SS6528/parcel/3756/sbi/2222222222/list'
+    })
+
+    expect(statusCode).toBe(200)
+    expect(result).toConformToSchema(schema)
+    expect(result.data.length).toBeGreaterThan(0)
+    expect(result.data.every((landUse) => landUse.sbi === '2222222222')).toBe(true)
+    expect(result.data[0].lu_code).toBe('QDC')
+  })
 })

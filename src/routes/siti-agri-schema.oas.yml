@@ -204,7 +204,7 @@ paths:
             Getting Land Use details is forbidden, or a WAF rule has been triggered.
           $ref: '#/components/responses/Forbidden'
         '404':
-          description: The sheet, parcel, or SBI was not found (i.e. 404!).
+          description: The sheet, parcel, or SBI was not found.
           $ref: '#/components/responses/NotFound'
 
 components:

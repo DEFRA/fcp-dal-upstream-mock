@@ -81,8 +81,8 @@ export const generateLandUseInfo = (
   overrides = {},
   refDate = faker.date.past({ years: 5, refDate: '2025-01-01T00:00:00.000Z' })
 ) => ({
-  dt_insert: `${faker.date.past({ refDate }).toISOString().substring(0, 10)}T00:00:00:000+0000`,
-  dt_delete: `${faker.date.future({ refDate }).toISOString().substring(0, 10)}T00:00:00:000+0000`,
+  dt_insert: transformTimestamp(refDate),
+  dt_delete: nullOrFake(() => transformTimestamp(faker.date.soon({ refDate }))) ?? maxDate,
   campaign: faker.number.int({ min: 2021, max: 2025 }),
   lu_code: faker.string.alpha({ length: 3 }).toUpperCase(),
   landuse: faker.helpers.arrayElement([
@@ -100,21 +100,21 @@ export const generateLandUseInfo = (
     'RESIDENTIAL',
     'OTHER'
   ]),
-  start_date: `${faker.date.soon({ refDate }).toISOString().substring(0, 10)}T00:00:00:000+0000`,
-  end_date: `${faker.date.future({ years: 10 }).toISOString().substring(0, 10)}T00:00:00:000+0000`,
+  start_date: transformTimestamp(faker.date.past({ refDate })),
+  end_date: transformTimestamp(faker.date.future({ refDate, years: 10 })),
   area: faker.number.int({ min: 0, max: 1000 }),
   length: nullOrFake(() => faker.number.int({ min: 0, max: 1000 }), 0.1),
   ...overrides
 })
 
 const cachedLandUses = {}
-const generateLandUses = (sbi, sheetId, parcelId, overrides) => {
-  const generatedLandUses = overrides.map((override) =>
+const generateLandUses = (sbi, sheetId, parcelId, useOverrides = []) => {
+  const generatedLandUses = useOverrides.map((useOverride = {}) =>
     generateLandUseInfo({
       sheet_name: sheetId,
       parcel_name: parcelId,
       sbi,
-      ...override
+      ...useOverride
     })
   )
 
@@ -129,9 +129,13 @@ export const retrieveLandUseBySBIAndSheetAndParcel = (sbi, sheetId, parcelId, or
 
   faker.seed(sbi)
 
-  const landParcels = orgIdLookup[orgId]?.landParcels ?? []
-  const parcel = landParcels.find((l) => l.sheet === sheetId && l.parcel === parcelId)
-  const overrides = parcel?.uses || Array.from({ length: faker.number.int({ min: 0, max: 10 }) })
+  if (orgIdLookup[orgId]?.landParcels === undefined) {
+    const uses = Array.from({ length: faker.number.int({ min: 0, max: 10 }) })
+    return generateLandUses(sbi, sheetId, parcelId, uses)
+  }
 
-  return generateLandUses(sbi, sheetId, parcelId, overrides)
+  const landParcels = orgIdLookup[orgId]?.landParcels
+  const parcel = landParcels.find((l) => l.sheet === sheetId && l.parcel === parcelId)
+
+  return generateLandUses(sbi, sheetId, parcelId, parcel?.uses)
 }
