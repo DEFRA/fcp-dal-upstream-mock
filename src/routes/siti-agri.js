@@ -3,7 +3,10 @@ import { createLogger } from '../common/helpers/logging/logger.js'
 import { sbiToOrgId } from '../factories/id-lookups.js'
 import { retrieveOrganisationAgreements } from '../factories/siti-agri/agreement.factory.js'
 import { retrieveApplications } from '../factories/siti-agri/application.factory.js'
-import { retrieveCPHs } from '../factories/siti-agri/cph.factory.js'
+import {
+  retrieveCPHs,
+  retrieveLandUseBySBIAndSheetAndParcel
+} from '../factories/siti-agri/cph.factory.js'
 import { checkId } from '../utils/shared-datatypes.js'
 
 const logger = createLogger('siti-agri.route')
@@ -60,6 +63,19 @@ export const sitiagri = [
       }
 
       return h.response({ ...responseWrapper, data: retrieveCPHs(sbi, orgId) })
+    }
+  },
+  {
+    method: 'GET',
+    path: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/{sheetId}/parcel/{parcelId}/sbi/{sbi}/list',
+    handler: async (request, h) => {
+      const { orgId, sbi } = defaultResponse(request)
+      const { sheetId, parcelId } = request?.params ?? {}
+
+      return h.response({
+        ...responseWrapper,
+        data: retrieveLandUseBySBIAndSheetAndParcel(sbi, sheetId, parcelId, orgId)
+      })
     }
   }
 ]

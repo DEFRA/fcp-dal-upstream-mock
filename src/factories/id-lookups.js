@@ -113,7 +113,8 @@ export const orgIdLookup = {
     customers: [], // org with no customers
     agreements: [], // ... no agreements
     applications: [], // ... no applications
-    cphs: [] // ... no CPHs
+    cphs: [], // ... no CPHs
+    landParcels: [] // ... no land parcels
   },
   1111111111: {
     sbi: 1111111111,
@@ -136,7 +137,23 @@ export const orgIdLookup = {
       }
     ],
     applications: [{ application_history: [{}] }],
-    cphs: [{}] // 1 CPH
+    cphs: [{}], // 1 CPH
+    landParcels: [
+      {
+        sheet: 'SS6528',
+        parcel: '3756',
+        uses: [
+          {
+            lu_code: 'WO25'
+          }
+        ]
+      },
+      {
+        sheet: 'SS6828',
+        parcel: '3818',
+        uses: [{}]
+      }
+    ]
   },
   2222222222: {
     sbi: 2222222222,
