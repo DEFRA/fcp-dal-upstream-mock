@@ -270,7 +270,10 @@ components:
           reason: 'Business Structure Changes'
         - partyNoteType: 'LockOrganisation'
           note: 'testing locking'
-      oneOf:
+        - partyNoteType: 'LockOrganisation'
+          note: 'testing locking'
+          reason: 'Business Structure Changes'
+      anyOf:
         - properties:
             partyNoteType:
               type: string
@@ -282,6 +285,14 @@ components:
                 - type: boolean
                 - type: string
                   minLength: 1
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: object
+                - type: 'null'
+                - type: array
           required: ['partyNoteType', 'reason']
         - properties:
             partyNoteType:
@@ -294,6 +305,14 @@ components:
                 - type: boolean
                 - type: string
                   minLength: 1
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: object
+                - type: 'null'
+                - type: array
           required: ['partyNoteType', 'note']
     UnlockRequestBody:
       type: object
@@ -302,7 +321,10 @@ components:
           note: 'testing unlocking'
         - partyNoteType: 'UnlockOrganisation'
           reason: 'Business Structure Changes'
-      oneOf:
+        - partyNoteType: 'UnlockOrganisation'
+          reason: 'Business Structure Changes'
+          note: 'testing unlocking'
+      anyOf:
         - properties:
             partyNoteType:
               type: string
@@ -314,6 +336,14 @@ components:
                 - type: boolean
                 - type: string
                   minLength: 1
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: object
+                - type: 'null'
+                - type: array
           required: ['partyNoteType', 'reason']
         - properties:
             partyNoteType:
@@ -326,6 +356,14 @@ components:
                 - type: boolean
                 - type: string
                   minLength: 1
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: object
+                - type: 'null'
+                - type: array
           required: ['partyNoteType', 'note']
 
     # response objects
