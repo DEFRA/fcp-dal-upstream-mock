@@ -1,12 +1,6 @@
 import { Boom } from '@hapi/boom'
-import fs from 'node:fs'
 import { orgIdToSbi } from '../../factories/id-lookups.js'
-import { faker, safeSeed } from '../common.js'
-
-const parcelsAndCovers = JSON.parse(
-  // Generated using scripts/generate_geometries.sh
-  fs.readFileSync(new URL('./valid-parcels-with-covers.json', import.meta.url))
-)
+import { faker, getLandParcels, safeSeed } from '../common.js'
 
 const land = {}
 
@@ -26,7 +20,7 @@ const generateParcels = (geometries) => {
   })
 }
 
-const generateCoversSummary = (covers) => {
+const generateCoversSummary = (covers = []) => {
   // Initialize summary map with required codes and names
   const summaryMap = {
     110: { code: '110', name: 'Arable Land', area: 0 },
@@ -50,14 +44,13 @@ const generateCoversSummary = (covers) => {
 
 const createLand = (orgId) => {
   safeSeed(orgId)
-  const geometries = faker.helpers.arrayElements(parcelsAndCovers, { min: 1, max: 15 })
-  const parcelsDetailsGeo = geometries.map(({ parcel }) => ({ parcel }))
+  const parcelDatas = getLandParcels(orgId, [])
+  const parcelsDetailsGeo = parcelDatas.map((parcel) => ({ parcel }))
   const parcels = generateParcels(parcelsDetailsGeo)
-
-  const covers = geometries.reduce(
-    (result, { parcel, covers: parcelCovers }) => ({
+  const covers = parcelDatas.reduce(
+    (result, parcel) => ({
       ...result,
-      [`${parcel.properties.sheetId}-${parcel.properties.parcelId}`]: parcelCovers
+      [`${parcel.properties.sheetId}-${parcel.properties.parcelId}`]: parcel.covers ?? []
     }),
     {}
   )
