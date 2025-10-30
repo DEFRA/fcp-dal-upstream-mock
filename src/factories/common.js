@@ -104,8 +104,7 @@ export const getLandParcels = (
     return orgIdLookup[orgId]?.land?.parcels || []
   }
 
-  const fakeLandParcels = parcelOverrides.map((parcelOverride = {}) => {
-    const { properties, ...rest } = parcelOverride
+  const fakeLandParcels = parcelOverrides.map(({ properties, ...rest } = {}) => {
     return {
       id: faker.number.int({ min: 1000000, max: 9999999 }),
       properties: {
