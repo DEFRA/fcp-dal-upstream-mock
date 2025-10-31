@@ -24,18 +24,18 @@ describe('Basic queries for faked routes', () => {
       expect(json).toEqual(
         expect.arrayContaining([
           {
-            area: 3429.03,
-            id: 6919136,
-            parcelId: '3649',
-            pendingDigitisation: true,
-            sheetId: 'SS6830'
+            area: 10270.39,
+            id: 7386091,
+            parcelId: '5662',
+            pendingDigitisation: false,
+            sheetId: 'SS6627'
           },
           {
-            area: 4269.22,
-            id: 6772251,
-            parcelId: '4244',
+            area: 10270.39,
+            id: 7386092,
+            parcelId: '3818',
             pendingDigitisation: false,
-            sheetId: 'SS6629'
+            sheetId: 'SS6828'
           }
         ])
       )
@@ -50,8 +50,8 @@ describe('Basic queries for faked routes', () => {
       const json = JSON.parse(response.payload)
       expect(json).toEqual(
         expect.arrayContaining([
-          { parcelId: '3649', sheetId: 'SS6830', validFrom: 1717315321902, validTo: 1717488121902 },
-          { parcelId: '4244', sheetId: 'SS6629', validFrom: 1724562694258, validTo: 1724821894258 }
+          { parcelId: '5662', sheetId: 'SS6627', validFrom: 1726213957868, validTo: 1726386757868 },
+          { parcelId: '3818', sheetId: 'SS6828', validFrom: 1710200284219, validTo: 1710373084219 }
         ])
       )
     })
@@ -59,7 +59,7 @@ describe('Basic queries for faked routes', () => {
     test('Should return data for /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6829/parcel-id/0448/historic/01-Mar-25/land-covers'
+        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers'
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
@@ -67,30 +67,26 @@ describe('Basic queries for faked routes', () => {
         type: 'FeatureCollection',
         features: expect.arrayContaining([
           {
-            id: 1558394,
+            id: 11769295,
+            properties: {
+              area: '10270.38',
+              code: '110',
+              name: 'Arable Land',
+              isBpsEligible: 'true'
+            },
+            type: 'Feature',
             geometry: {
               type: 'Polygon',
               coordinates: [
                 expect.arrayContaining([
-                  [268035.4069, 129537.1031],
-                  [268024.9301, 129533.7199],
-                  [268001.31, 129526.3199],
-                  [268000, 129525.8899],
-                  [267966.3901, 129514.9899],
-                  [267968.0101, 129513.0999],
-                  [267982.31, 129497.7999],
-                  [267985.1101, 129494.2999],
-                  [267988.9194, 129489.2799]
+                  [267996.4077, 128598.2581],
+                  [267996.918, 128598.085],
+                  [268028.15, 128535.31],
+                  [268031.3375, 128528.8885],
+                  [268039.0495, 128513.3517]
                 ])
               ]
-            },
-            properties: {
-              area: '9261.8',
-              code: '131',
-              name: 'Permanent Grassland',
-              isBpsEligible: 'true'
-            },
-            type: 'Feature'
+            }
           }
         ])
       })
@@ -107,17 +103,17 @@ describe('Basic queries for faked routes', () => {
         {
           code: '110',
           name: 'Arable Land',
-          area: 91844.34
+          area: 10270.38
         },
         {
           code: '130',
           name: 'Permanent Grassland',
-          area: 79758.61
+          area: 0
         },
         {
           code: '140',
           name: 'Permanent Crops',
-          area: 4886.29
+          area: 0
         }
       ])
     })

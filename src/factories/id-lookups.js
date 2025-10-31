@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+
 export const personIdToCRN = {
   // people in org 1111111111 only
   11111111: '1111111100',
@@ -107,6 +109,10 @@ export const personIdToCRN = {
   9900003: '1343571956'
 }
 
+const validGeometries = JSON.parse(
+  // Generated using scripts/generate_geometries.sh
+  fs.readFileSync(new URL('./valid-geometries.json', import.meta.url))
+)
 export const orgIdLookup = {
   1000000000: {
     sbi: 1000000000,
@@ -114,7 +120,7 @@ export const orgIdLookup = {
     agreements: [], // ... no agreements
     applications: [], // ... no applications
     cphs: [], // ... no CPHs
-    landParcels: [] // ... no land parcels
+    land: [] // ... no land
   },
   1111111111: {
     sbi: 1111111111,
@@ -138,22 +144,60 @@ export const orgIdLookup = {
     ],
     applications: [{ application_history: [{}] }],
     cphs: [{}], // 1 CPH
-    landParcels: [
-      {
-        sheet: 'SS6528',
-        parcel: '3756',
-        uses: [
-          {
-            lu_code: 'WO25'
-          }
-        ]
-      },
-      {
-        sheet: 'SS6828',
-        parcel: '3818',
-        uses: [{}]
-      }
-    ]
+    land: {
+      parcels: [
+        {
+          id: 7386091,
+          properties: {
+            area: '10270.39',
+            pendingDigitisation: false,
+            sheetId: 'SS6627',
+            parcelId: '5662'
+          },
+          geometry: validGeometries[0],
+          covers: [
+            {
+              id: 11769295,
+              properties: {
+                area: '10270.38',
+                code: '110',
+                name: 'Arable Land',
+                isBpsEligible: 'true'
+              },
+              type: 'Feature',
+              geometry: validGeometries[2]
+            },
+            {
+              id: 11769235,
+              properties: {
+                area: '25409.79',
+                code: '131',
+                name: 'Permanent Grassland',
+                isBpsEligible: 'true'
+              },
+              type: 'Feature',
+              geometry: validGeometries[3]
+            }
+          ],
+          uses: [
+            {
+              lu_code: 'WO25'
+            }
+          ]
+        },
+        {
+          id: 7386092,
+          properties: {
+            area: '10270.39',
+            pendingDigitisation: 'false',
+            sheetId: 'SS6828',
+            parcelId: '3818'
+          },
+          geometry: validGeometries[1],
+          uses: [{}]
+        }
+      ]
+    }
   },
   2222222222: {
     sbi: 2222222222,
