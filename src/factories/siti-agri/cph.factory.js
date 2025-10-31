@@ -127,7 +127,7 @@ export const retrieveLandUseBySBIAndSheetAndParcel = (sbi, sheetId, parcelId, or
   const cachedLandUse = cachedLandUses[`${sbi}-${sheetId}-${parcelId}`]
   if (cachedLandUse) return cachedLandUse
 
-  faker.seed(sbi)
+  safeSeed(sbi)
 
   const landParcels = getLandParcels(orgId, [{ properties: { sheetId, parcelId } }])
   const parcel = landParcels.find(

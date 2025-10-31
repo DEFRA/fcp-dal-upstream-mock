@@ -63,7 +63,7 @@ describe('Fake Land Use data', () => {
     expect(result).toConformToSchema(schema)
     expect(result.data.length).toBeGreaterThan(0)
     expect(result.data.every((landUse) => landUse.sbi === '2222222222')).toBe(true)
-    expect(result.data[0].lu_code).toBe('EYSQH')
+    expect(result.data[0].lu_code).toBe('RFMQP')
   })
 
   it('should return empty array when no parcel found', async () => {
