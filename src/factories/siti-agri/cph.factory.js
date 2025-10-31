@@ -1,4 +1,4 @@
-import { faker, nullOrFake, safeSeed, transformTimestamp } from '../common.js'
+import { faker, getLandParcels, nullOrFake, safeSeed, transformTimestamp } from '../common.js'
 import { orgIdLookup } from '../id-lookups.js'
 import { parishes } from './parishes.js'
 
@@ -127,15 +127,12 @@ export const retrieveLandUseBySBIAndSheetAndParcel = (sbi, sheetId, parcelId, or
   const cachedLandUse = cachedLandUses[`${sbi}-${sheetId}-${parcelId}`]
   if (cachedLandUse) return cachedLandUse
 
-  faker.seed(sbi)
+  safeSeed(sbi)
 
-  if (orgIdLookup[orgId]?.landParcels === undefined) {
-    const uses = Array.from({ length: faker.number.int({ min: 0, max: 10 }) })
-    return generateLandUses(sbi, sheetId, parcelId, uses)
-  }
-
-  const landParcels = orgIdLookup[orgId]?.landParcels
-  const parcel = landParcels.find((l) => l.sheet === sheetId && l.parcel === parcelId)
+  const landParcels = getLandParcels(orgId, [{ properties: { sheetId, parcelId } }])
+  const parcel = landParcels.find(
+    (l) => l.properties.sheetId === sheetId && l.properties.parcelId === parcelId
+  )
 
   return generateLandUses(sbi, sheetId, parcelId, parcel?.uses)
 }
