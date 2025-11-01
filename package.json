@@ -18,7 +18,7 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
     "start": "NODE_ENV=production node --use-strict . | jq .",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
-    "test:contract": "docker compose -f compose.yml -f test/contract/compose.yml run --quiet-pull --build --rm contract-tests",
+    "test:contract": "docker compose -f compose.yml -f test/contract/compose.yml run --quiet-pull --pull always --build --rm contract-tests",
     "verify:schemata": "redocly lint src/routes/**/*-schema*.yml",
     "test:contract:local": "dotenv -- ./test/contract/check-schema.sh"
   },
