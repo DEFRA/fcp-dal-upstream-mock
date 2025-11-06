@@ -1,5 +1,5 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -12,28 +12,28 @@ export const schemata = {
           method: 'GET',
           path: '/schemata/person.yml',
           handler: {
-            file: path.join(__dirname, '../routes/person-schema.oas.yml')
+            file: path.join(__dirname, '../routes/kits-v1/person-schema.oas.yml')
           }
         },
         {
           method: 'GET',
           path: '/schemata/organisation.yml',
           handler: {
-            file: path.join(__dirname, '../routes/organisation-schema.oas.yml')
+            file: path.join(__dirname, '../routes/kits-v1/organisation-schema.oas.yml')
           }
         },
         {
           method: 'GET',
           path: '/schemata/authenticate.yml',
           handler: {
-            file: path.join(__dirname, '../routes/authenticate-schema.oas.yml')
+            file: path.join(__dirname, '../routes/kits-v1/authenticate-schema.oas.yml')
           }
         },
         {
           method: 'GET',
           path: '/schemata/siti-agri.yml',
           handler: {
-            file: path.join(__dirname, '../routes/siti-agri-schema.oas.yml')
+            file: path.join(__dirname, '../routes/kits-v1/siti-agri-schema.oas.yml')
           }
         }
       ])

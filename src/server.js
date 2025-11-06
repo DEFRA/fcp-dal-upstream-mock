@@ -7,7 +7,7 @@ import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
-import { router } from './plugins/fake-router.js'
+import { router } from './plugins/kits-v1-router.js'
 import { health } from './plugins/health.js'
 import { schemata } from './plugins/schemata.js'
 
