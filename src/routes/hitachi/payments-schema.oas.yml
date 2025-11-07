@@ -1,0 +1,245 @@
+openapi: 3.1.0
+info:
+  title: Payments details API
+  description: API for Payments information and history
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+security:
+  - BearerAuth: []
+servers:
+  - url: 'https://orgcf202fa2.operations.eu.dynamics.com'
+    description: The test server for Hitachi payments APIs, a.k.a. FAT 202.
+tags:
+  - name: 'payments'
+    description: API for Payments information and history
+paths:
+  /api/services/RSFVendPaymentDetailsServiceGroup/RSFVendPaymentDetailsService/getSupplierPaymentsPackage:
+    post:
+      tags:
+        - 'payments'
+      summary: Get payments data for a business
+      description: >
+        Returns payments info and history for a business identified by the FRN in the request body.
+      operationId: getSupplierPaymentsData
+      requestBody:
+        description: >
+          FRN of the business to retrieve payments data for, and optionally a from AND to date.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentsRequest'
+      responses:
+        '200':
+          description: >
+            Returns payments data for the specified business, or a skeleton response with metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsData'
+        '401':
+          description: Unauthorized - missing or invalid authentication token - empty response body
+
+components:
+  schemas:
+    PaymentsRequest:
+      type: object
+      properties:
+        payment:
+          type: object
+          properties:
+            SupplierAccount:
+              description: The FRN of the business (10 digits).
+              type: string
+              pattern: '^\d{10}$'
+              examples:
+                - '1102397229'
+                - '1100640037'
+                - '1106593375'
+                - '1106269284'
+                - '1106434560'
+                - '1106161297'
+            FromDate:
+              description: Date in MM/DD/YYYY format (en-US locale).
+              type: string
+              pattern: '^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$'
+              example: '01/25/2024'
+            ToDate:
+              description: Date in MM/DD/YYYY format (en-US locale).
+              type: string
+              pattern: '^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$'
+              example: '03/25/2024'
+          oneOf:
+            - required:
+                - SupplierAccount
+            - required:
+                - SupplierAccount
+                - FromDate
+                - ToDate
+        audit:
+          type: object
+          properties:
+            requestedSystem:
+              description: GUID of the app-reg of the system making the request.
+              type: string
+              minimum: 1
+              maximum: 128
+              example: 'a22c6ad7-ae80-4f5a-a705-7fa63f6e8d0e'
+            requesterId:
+              description: Email address of the user making the request.
+              type: string
+              minimum: 1
+              maximum: 254
+              example: 'case.worker@defra.gov.uk'
+            userIP:
+              description: IP address of the user making the request, either IPv4 or IPv6.
+              type: string
+            resourceId:
+              description: Identifier for the resource being accessed (the SBI of the business).
+              type: string
+              minimum: 1
+              maximum: 32
+              example: '1234567890'
+            correlationId:
+              description: >
+                Correlation identifier for tracing the request.
+                Generated from the original user's request and passed through each layer/system.
+              type: string
+              minimum: 1
+              maximum: 32
+              examples:
+                - '3a6538ac904b3a2bdf3c4985f85c29c7'
+                - 'a22c6ad7-ae80-4f5a-a705-7fa63f6e8d0e'
+          required:
+            - requestedSystem
+            - requesterId
+            - userIP
+            - resourceId
+            - correlationId
+
+    # response objects
+    PaymentsData:
+      type: object
+      properties:
+        $id:
+          type: string
+        Result:
+          type: boolean
+        parmSupplierInfo:
+          type: object
+          properties:
+            $id:
+              type: string
+            parmSupplier:
+              description: The name of the business.
+              type: string
+            parmHoldCodes:
+              description: A list hold codes on the account.
+              type: array
+              items:
+                type: string
+            parmAccountLast4:
+              description: The last 4 digits of the account number, prefixed by 4 asterisks.
+              type: string
+              pattern: '^\*{4}\d{4}$'
+            parmSortCode:
+              description: The 6 digit sort code (NOT dash separated).
+              type: string
+              pattern: '^\d{6}$'
+          additionalProperties: false
+          required:
+            - $id
+            - parmSupplier
+            - parmHoldCodes
+            - parmAccountLast4
+            - parmSortCode
+        parmPayments:
+          description: A list of payments made to the business.
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+        InfoMessages:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+      required:
+        - $id
+        - Result
+        - parmSupplierInfo
+        - parmPayments
+        - InfoMessages
+    Payment:
+      type: object
+      properties:
+        $id:
+          type: string
+        parmPaymentReference:
+          description: The payment reference for this payment transaction.
+          type: string
+          example: 'PY0202826'
+        parmDate:
+          description: The date and time the payment was made.
+          type: string
+          format: date-time
+          example: '2024-03-15T00:00:00'
+        parmAmount:
+          description: The amount paid in this transaction.
+          type: number
+          example: 1500.75
+        parmCurrency:
+          description: The currency of the payment.
+          type: string
+          example: 'GBP'
+        parmLineItems:
+          description: A list of line items included in this payment.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentLineItem'
+      additionalProperties: false
+      required:
+        - $id
+        - parmPaymentReference
+        - parmDate
+        - parmAmount
+        - parmCurrency
+        - parmLineItems
+    PaymentLineItem:
+      type: object
+      properties:
+        $id:
+          type: string
+        parmAgreementNumber:
+          description: The agreement number associated with this line item.
+          type: string
+        parmClaimRefNumber:
+          description: The claim reference number associated with this line item.
+          type: string
+        parmScheme:
+          description: The ID of the scheme associated with this line item.
+          type: string
+        parmDescription:
+          description: Description of the line item.
+          type: string
+        parmMarketingYear:
+          description: The marketing year associated this line item.
+          type: string
+        parmAmount:
+          description: The amount for this line item.
+          type: number
+      required:
+        - $id
+        - parmAgreementNumber
+        - parmClaimRefNumber
+        - parmScheme
+        - parmDescription
+        - parmMarketingYear
+        - parmAmount
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
