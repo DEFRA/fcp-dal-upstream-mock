@@ -57,6 +57,17 @@ export const startServer = async (listener) => {
     server.logger.info('Server started successfully')
     server.logger.info(`Access mock on http://localhost:${config.get('port')}`)
 
+    server.ext('onRequest', (request, h) => {
+      // log the domain of the email that was passed in the `email` header
+      if (request.headers.email) {
+        request.logger = request.logger.child({
+          tenant: { id: request?.headers?.email?.split('@')[1] }
+        })
+      }
+
+      return h.continue
+    })
+
     return server
   } catch (error) {
     logger.info('Server failed to start :(')
