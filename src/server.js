@@ -60,7 +60,7 @@ export const startServer = async (listener) => {
 
     server.ext('onRequest', (request, h) => {
       // log the domain of the email that was passed in the `email` header
-      if (request.headers.email) {
+      if (request?.headers?.email) {
         request.logger = request.logger.child({
           tenant: { id: request?.headers?.email?.split('@')[1] }
         })
