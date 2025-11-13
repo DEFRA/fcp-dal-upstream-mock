@@ -192,6 +192,20 @@ paths:
               - 106354662
               - 106221605
               - 106440483
+        - name: pointInTime
+          in: query
+          description: >
+            An optional date/date-time/timestamp to filter the Land Use by.
+            If provided, only Land Use that were active at that point in time will be returned.
+            Otherwise, all Land Use will be returned.
+          required: false
+          schema:
+            type: string
+            format: date-time
+            pattern: '^(\d{4}-\d{2}-\d{2}[ +]\d{2}:\d{2}:\d{2}|)$'
+            examples:
+              - '2023-01-30+12:25:23'
+              - ''
       responses:
         '200':
           description: Returns all Land Use details for the specified sheet, parcel, and SBI.
@@ -204,6 +218,9 @@ paths:
             Getting Land Use details is forbidden, or a WAF rule has been triggered,
             or the SBI was not found (i.e. 404!).
           $ref: '#/components/responses/Forbidden'
+        '404':
+          description: HTTP Status 404 – Not Found
+          $ref: '#/components/responses/NotFound'
 
 components:
   responses:
