@@ -71,6 +71,21 @@ export const sitiagri = [
     handler: async (request, h) => {
       const { orgId, sbi } = defaultResponse(request)
       const { sheetId, parcelId } = request?.params ?? {}
+      const { pointInTime } = request?.query ?? {}
+
+      // specifically handle uniquely odd `pointInTime` format requirements and error response
+      if (!/^(\d{4}-\d{2}-\d{2}[ +]\d{2}:\d{2}:\d{2}|)$/.test(pointInTime ?? '')) {
+        logger.warn(
+          'pointInTime value must be empty, omitted, or match pattern: "YYYY-MM-DD hh:mm:ss"',
+          request
+        )
+        return h
+          .response(
+            `<!doctype html><html lang="en"><head><title>HTTP Status 404 – Not Found</title></head>
+                  <body><h1>HTTP Status 404 – Not Found</h1></body></html>`
+          )
+          .code(404)
+      }
 
       return h.response({
         ...responseWrapper,

@@ -66,6 +66,27 @@ describe('Fake Land Use data', () => {
     expect(result.data[0].lu_code).toBe('RFMQP')
   })
 
+  it('should GET same fake generated land use data with pointInTime filter', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/SS6528/parcel/3756/sbi/2222222222/list?pointInTime=2023-01-30+12:25:23'
+    })
+
+    expect(statusCode).toBe(200)
+    expect(result).toConformToSchema(schema)
+    expect(result.data.length).toBeGreaterThan(0)
+    expect(result.data.every((landUse) => landUse.sbi === '2222222222')).toBe(true)
+    expect(result.data[0].lu_code).toBe('RFMQP')
+  })
+
+  it('should return 404 when pointInTime filter is not conform to the expected pattern', async () => {
+    const { statusCode } = await server.inject({
+      method: 'GET',
+      url: '/SitiAgriApi/cv/landUseByBusinessParcel/sheet/SS6528/parcel/3756/sbi/2222222222/list?pointInTime=2023-01-30'
+    })
+    expect(statusCode).toBe(404)
+  })
+
   it('should return empty array when no parcel found', async () => {
     const { statusCode, result } = await server.inject({
       method: 'GET',
