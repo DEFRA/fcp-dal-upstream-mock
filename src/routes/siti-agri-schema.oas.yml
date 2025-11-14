@@ -219,7 +219,7 @@ paths:
             or the SBI was not found (i.e. 404!).
           $ref: '#/components/responses/Forbidden'
         '404':
-          description: The `pointInTime` parameter was not conform to the expected pattern.
+          description: The `pointInTime` parameter did not conform to the expected pattern, or no data could be found for the specified date.
           $ref: '#/components/responses/NotFound'
 
 components:
