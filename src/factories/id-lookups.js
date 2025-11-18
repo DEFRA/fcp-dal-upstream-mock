@@ -227,7 +227,7 @@ export const orgIdLookup = {
     ]
   },
   // SFD requested
-  5583575: { sbi: 107167406, customers: [5007704] },
+  5583575: { sbi: 107167406, customers: [5007704], cphs: [] }, // 0 CPHs
   5578463: { sbi: 107097991, customers: [5010242] },
   5501559: { sbi: 106354662, customers: [5002139] },
   5485593: { sbi: 106221605, customers: [5013725] },
