@@ -79,6 +79,7 @@ export const personIdToCRN = {
   22222277: '2222227700',
   22222278: '2222227800',
   22222279: '2222227900',
+
   // SFD requested
   5007704: '1100077049',
   5010242: '1100102426',
@@ -687,9 +688,12 @@ export const personIdToCRN = {
   5874670: '1105815528',
   5875755: '1105826023',
   5901993: '1106081692',
+  8000001: '8000000001',
+
   // customers not in any org - useful for DAL acceptance tests and the like
   9000000: '9000000000',
   9000001: '9000000001',
+
   // from dev CRM
   5302028: '1103020285',
   // from dev CRM, but do not exist on `upgrade`
@@ -816,6 +820,7 @@ export const orgIdLookup = {
       }
     ]
   },
+
   // SFD requested
   5583575: { sbi: 107167406, customers: [5007704] },
   5578463: { sbi: 107097991, customers: [5010242] },
@@ -1431,6 +1436,9 @@ export const orgIdLookup = {
   5886807: { sbi: 200771472, customers: [5195900] },
   5888685: { sbi: 200778446, customers: [5181489] },
   5891514: { sbi: 200789201, customers: [5335309] },
+  5467167: { sbi: 106430700, customers: [5069674] },
+  80000001: { sbi: 8000000001, customers: [8000001], cphs: [] }, // org with no CPH
+
   // business from dev CRM
   5565448: {
     sbi: 107183280,
@@ -1442,6 +1450,7 @@ export const orgIdLookup = {
   5560725: { sbi: 106284736, customers: [5302028, 9900000, 9900001, 9900002, 9900003] },
   5625145: { sbi: 107591843, customers: [5302028, 5692562] },
   5447505: { sbi: 121428499, customers: [5302028] },
+
   // for DAL mutation tests
   9000001: { sbi: 900000001, customers: [] },
   9000002: { sbi: 900000002, customers: [] }
