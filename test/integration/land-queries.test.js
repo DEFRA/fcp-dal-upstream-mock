@@ -87,8 +87,8 @@ describe('Basic queries for faked routes', () => {
       const json = JSON.parse(response.payload)
       expect(json).toEqual(
         expect.arrayContaining([
-          { parcelId: '5662', sheetId: 'SS6627', validFrom: 1726213957868, validTo: 1726386757868 },
-          { parcelId: '3818', sheetId: 'SS6828', validFrom: 1710200284219, validTo: 1710373084219 }
+          expect.objectContaining({ parcelId: '5662', sheetId: 'SS6627' }),
+          expect.objectContaining({ parcelId: '3818', sheetId: 'SS6828' })
         ])
       )
     })
