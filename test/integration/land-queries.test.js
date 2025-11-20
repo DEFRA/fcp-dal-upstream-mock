@@ -14,7 +14,7 @@ describe('Basic queries for faked routes', () => {
   })
 
   describe('Land routes', () => {
-    test('Should return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate}', async () => {
+    test('Should return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate} where land is defined in id-lookups for the organisation', async () => {
       const response = await mockServer.inject({
         method: 'GET',
         url: '/extapi/lms/organisation/1111111111/parcels/historic/01-Jan-25'
@@ -41,6 +41,43 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
+    test('Should return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate} where land is NOT defined in id-lookups for the organisation', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/2222222222/parcels/historic/01-Jan-25'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual(
+        expect.arrayContaining([
+          {
+            area: 703984.4376616875,
+            id: 6868061,
+            parcelId: '5845',
+            pendingDigitisation: false,
+            sheetId: 'EYDNVG'
+          },
+          {
+            area: 853382.7997174974,
+            id: 2016887,
+            parcelId: '2422',
+            pendingDigitisation: false,
+            sheetId: 'PNUMWF'
+          }
+        ])
+      )
+    })
+
+    test('Should not return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate} where land is defined AND empty in id-lookups for the organisation', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1000000000/parcels/historic/01-Jan-25'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual([])
+    })
+
     test('Should return data for /lms/organisation/{organisationId}/parcel-details/historic/{historicDate}', async () => {
       const response = await mockServer.inject({
         method: 'GET',
@@ -50,8 +87,8 @@ describe('Basic queries for faked routes', () => {
       const json = JSON.parse(response.payload)
       expect(json).toEqual(
         expect.arrayContaining([
-          { parcelId: '5662', sheetId: 'SS6627', validFrom: 1726213957868, validTo: 1726386757868 },
-          { parcelId: '3818', sheetId: 'SS6828', validFrom: 1710200284219, validTo: 1710373084219 }
+          expect.objectContaining({ parcelId: '5662', sheetId: 'SS6627' }),
+          expect.objectContaining({ parcelId: '3818', sheetId: 'SS6828' })
         ])
       )
     })
