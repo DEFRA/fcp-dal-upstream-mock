@@ -44,7 +44,7 @@ const generateCoversSummary = (covers = []) => {
 
 const createLand = (orgId) => {
   safeSeed(orgId)
-  const parcelDatas = getLandParcels(orgId, [])
+  const parcelDatas = getLandParcels(orgId)
   const parcelsDetailsGeo = parcelDatas.map((parcel) => ({ parcel }))
   const parcels = generateParcels(parcelsDetailsGeo)
   const covers = parcelDatas.reduce(
