@@ -97,6 +97,7 @@ export const personIdToCRN = {
   5042160: '1100421602',
   5042346: '1100423469',
   5069674: '1100696741',
+  // needed for SFD performance testing
   5001493: '1100014934',
   5041109: '1100411097',
   5041171: '1100411712',
@@ -138,7 +139,6 @@ export const personIdToCRN = {
   5064269: '1100642692',
   5066005: '1100660054',
   5067317: '1100673172',
-  // needed for SFD performance testing
   5015829: '1100158294',
   5042682: '1100426825',
   5044964: '1100449647',
@@ -842,6 +842,7 @@ export const orgIdLookup = {
   5705812: { sbi: 200089578, customers: [5042346] },
   5783443: { sbi: 200384417, customers: [5042346] },
   5374662: { sbi: 114301879, customers: [5069674] },
+  // needed for SFD performance testing
   5467167: { sbi: 106430700, customers: [5069674] },
   5350047: { sbi: 112939363, customers: [5307941] },
   5350308: { sbi: 106770165, customers: [5307904] },
