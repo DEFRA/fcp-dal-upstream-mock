@@ -13,7 +13,27 @@ export const staticPersonData = {
   11111116: { crn: '1111111600' },
   11111117: { crn: '1111111700' },
   11111118: { crn: '1111111800' },
-  11111119: { crn: '1111111900' },
+  11111119: {
+    // static data overrides example
+    crn: '1111111900',
+    firstName: 'Big',
+    middleName: null,
+    lastName: 'Skeleton',
+    address: {
+      address1: 'A dark dark cellar',
+      address2: 'A dark dark staircase',
+      address3: 'A dark dark house',
+      street: 'A dark dark street',
+      city: 'A dark dark town',
+      dependentLocality: 'A dark dark hill'
+    },
+    email: 'skeleton@the-closet.net',
+    emailValidated: true,
+    confirmed: true,
+    mobile: null,
+    title: null,
+    otherTitle: null
+  },
   // people in org 1111111111 and 2222222222
   11111122: { crn: '1111112200' },
   11111222: { crn: '1111122200' },

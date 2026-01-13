@@ -1,13 +1,13 @@
 import Boom from '@hapi/boom'
 import { personUpdateSchema } from '../../common/update-schemas.js'
-import { orgIdToSbi, personIdToCRN, personIdToOrgIds } from '../../factories/id-lookups.js'
+import { orgIdToSbi, personIdToOrgIds, staticPersonData } from '../../factories/id-lookups.js'
 import { applyUpdates } from '../../utils/applyUpdates.js'
 import { fakeAddress, fakeIds, faker, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const people = {}
 
-const generatePerson = (personId, crn) => {
+const generatePerson = (personId, crn, overrides = {}) => {
   personId = safeSeed(personId)
   const firstName = faker.person.firstName()
   const lastName = faker.person.lastName()
@@ -45,7 +45,8 @@ const generatePerson = (personId, crn) => {
       'Submit - cs agree',
       'ELM_APPLICATION_SUBMIT'
     ],
-    lastUpdatedOn: faker.date.recent().getTime()
+    lastUpdatedOn: faker.date.recent().getTime(),
+    ...overrides
   }
 
   people[personId] = person
@@ -53,13 +54,9 @@ const generatePerson = (personId, crn) => {
   return person
 }
 
-Object.entries(personIdToCRN).forEach(([personId, crn]) => {
-  people[personId] = generatePerson(personId, crn)
-})
-
 export const retrievePerson = (personId) => {
   const person = people[personId]
-  const crn = personIdToCRN[personId]
+  const { crn, ...overrides } = staticPersonData[personId]
   if (person) {
     return person
   }
@@ -67,7 +64,7 @@ export const retrievePerson = (personId) => {
     throw Boom.notFound(`person with personId ${personId} not found`)
   }
 
-  return generatePerson(personId, crn)
+  return generatePerson(personId, crn, overrides)
 }
 
 export const retrievePersonOrgs = (personId) => {
