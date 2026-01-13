@@ -110,10 +110,17 @@ export const staticPersonData = {
   // from dev CRM
   5302028: { crn: '1103020285' },
   // from dev CRM, but do not exist on `upgrade`
-  9900000: { crn: '8562286973' },
-  9900001: { crn: '1638563942' },
-  9900002: { crn: '3170633316' },
-  9900003: { crn: '1343571956' }
+  9900002: { crn: '8562286973' },
+  9900003: { crn: '1638563942' },
+  9900004: { crn: '3170633316' },
+  9900005: { crn: '1343571956' },
+
+  // midsummer birthdays for testing DoB edge cases - UTC timestamps as millis since the epoch
+  9000010: { crn: '9000001000', dateOfBirth: new Date('2000-06-30T00:00:00Z').getTime() },
+  9000011: { crn: '9000001100', dateOfBirth: new Date('1950-06-01T00:00:00Z').getTime() },
+  // midwinter birthdays for testing DoB edge cases - UTC timestamps as millis since the epoch
+  9000012: { crn: '9000001200', dateOfBirth: new Date('2000-01-01T00:00:00Z').getTime() },
+  9000013: { crn: '9000001300', dateOfBirth: new Date('1950-12-31T00:00:00Z').getTime() }
 }
 
 const validGeometries = JSON.parse(
