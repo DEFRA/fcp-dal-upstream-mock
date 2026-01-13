@@ -55,7 +55,8 @@ export const startServer = async (listener) => {
     await server.start()
 
     server.logger.info('Server started successfully')
-    server.logger.info(`Access mock on http://localhost:${config.get('port')}`)
+    const scheme = config.get('tls.key') && config.get('tls.cert') ? 'https' : 'http'
+    server.logger.info(`Access mock on ${scheme}://localhost:${config.get('port')}`)
 
     server.ext('onRequest', (request, h) => {
       // log the domain of the email that was passed in the `email` header
