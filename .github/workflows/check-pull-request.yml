@@ -33,8 +33,12 @@ jobs:
           npm t
 
       - name: Docker build, Contract test
-        run: >
-          docker compose \
-            -f compose.yml \
-            -f test/contract/compose.yml \
-            run --build --quiet-pull --pull always --rm contract-tests
+        run: |
+          mkdir -p test/contract/logs && chmod 777 test/contract/logs
+          npm run test:contract
+      - name: Upload contract test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-logs
+          path: test/contract/vcr.yaml
