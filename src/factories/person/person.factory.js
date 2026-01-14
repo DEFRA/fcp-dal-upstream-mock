@@ -56,10 +56,11 @@ const generatePerson = (personId, crn, overrides = {}) => {
 
 export const retrievePerson = (personId) => {
   const person = people[personId]
-  const { crn, ...overrides } = staticPersonData[personId]
   if (person) {
     return person
   }
+
+  const { crn, ...overrides } = staticPersonData[personId] ?? {}
   if (!crn) {
     throw Boom.notFound(`person with personId ${personId} not found`)
   }
