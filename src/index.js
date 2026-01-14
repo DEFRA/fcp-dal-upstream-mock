@@ -4,8 +4,11 @@ import { createLogger } from './common/helpers/logging/logger.js'
 import { startServer } from './server.js'
 
 const server = createServer()
+const logger = createLogger()
 
 server.on('clientError', (err, socket) => {
+  logger.warn('Client error on HTTP server', err)
+
   // Override default handling of invalid characters in header to match upstream behaviour
   if ((err.code = 'HPE_INVALID_HEADER_TOKEN')) {
     const body =
@@ -25,14 +28,13 @@ server.on('clientError', (err, socket) => {
       socket.write(response)
       socket.destroy()
     } else {
-      console.log('Socket is not writable, skipping response')
+      logger.info('Socket is not writable, skipping response')
       socket.destroy()
     }
   }
 })
 
 const hapi = await startServer(server)
-const logger = createLogger()
 
 process.on('unhandledRejection', async (error) => {
   logger.info('Unhandled rejection')
