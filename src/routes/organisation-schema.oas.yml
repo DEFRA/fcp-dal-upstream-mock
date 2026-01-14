@@ -8,7 +8,7 @@ info:
     url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
 tags:
   - name: 'organisation'
-    description: 'Operations related to organisation management'
+    description: Operations related to organisation management.
 security:
   - mTLS: []
 servers:
@@ -19,8 +19,8 @@ paths:
     get:
       tags:
         - 'organisation'
-      summary: 'Find an Organisation.'
-      description: 'Request to get details for an organisation with a specified ID.'
+      summary: Find an Organisation.
+      description: Request to get details for an organisation with a specified ID.
       operationId: 'getByPartyId'
       parameters:
         - name: 'organisationId'
@@ -34,7 +34,7 @@ paths:
             examples: [1000000000, 1111111111, 2222222222]
       responses:
         '200':
-          description: 'Returns full organisation details.'
+          description: Returns full organisation details.
           content:
             application/json:
               schema:
@@ -46,50 +46,24 @@ paths:
                   - '_data'
                 additionalProperties: false
         '400':
-          description: 'The organisationId must have 10 or more digits'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: 'HTTP 400 Bad Request'
+          description: The organisationId must have 10 or more digits.
+          $ref: '#/components/responses/BadRequest'
         '403':
           description: >
             Getting an organisation's details is forbidden, or a WAF rule has been triggered.
-          content:
-            text/html:
-              schema:
-                type: string
-              examples:
-                forbidden:
-                  summary: Forbidden HTML response
-                  value: |
-                    <html><body><h1>403 Forbidden</h1>
-                    Request forbidden by administrative rules.
-                    </body></html>
+          $ref: '#/components/responses/Forbidden'
         '404':
-          description: 'organisation details not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
+          description: Organisation details not found.
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: 'Internal server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationError'
+          description: Internal server error.
+          $ref: '#/components/responses/ServerError'
   /organisation/search:
     post:
       tags:
         - 'organisation'
-      summary: 'Search for organisation by SBI.'
-      description: 'Search for organisation by SBI (Single Business Identifier).'
+      summary: Search for organisation by SBI.
+      description: Search for organisation by SBI (Single Business Identifier).
       operationId: 'searchOrganisation'
       requestBody:
         required: true
@@ -99,7 +73,7 @@ paths:
               $ref: '#/components/schemas/SearchRequestBody'
       responses:
         '200':
-          description: 'Returns a list of Organisations with a paging object.'
+          description: Returns a list of Organisations with a paging object.
           content:
             application/json:
               schema:
@@ -115,17 +89,52 @@ paths:
                   - '_data'
                   - '_page'
         '400':
-          description: 'If searchFieldType is not "SBI"'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
+          description: If searchFieldType is not a value from the enum.
+          $ref: '#/components/responses/BadRequest'
         '500':
-          description: 'Internal server error, or only `searchFieldType` was provided.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationError'
+          description: >
+            Internal server error, or `searchFieldType` and/or `primarySearchPhrase` not provided.
+          $ref: '#/components/responses/ServerError'
+  /organisation/{organisationId}/additional-business-details:
+    put:
+      tags:
+        - 'organisation'
+        - 'additional-business-details'
+      summary: Update additional-business-details.
+      description: Request to Update additional-business-details.
+      operationId: 'updateAdditionalBusinessDetails'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: ID of the target Organisation
+          required: true
+          schema:
+            type: integer
+            maximum: 99999999999999999999
+            minimum: 1
+            examples: [1000000000, 1111111111, 2222222222]
+      requestBody:
+        description: Additional Organisation details to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdditionalBusinessDetailsRequestBody'
+      responses:
+        '204':
+          description: Successfully updated additional business details
+        '400':
+          description: >
+            Unable to validate additional business details,
+            empty or invalid body (e.g. array, or malformed JSON)
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: >
+            Updating additional business details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal server error, or Organisation not found (i.e. 404).
+          $ref: '#/components/responses/ServerError'
   /organisation/{organisationId}/lock:
     post:
       tags:
@@ -154,30 +163,14 @@ paths:
           description: 'Successfully locked Organisation'
         '400':
           description: 'Invalid reason and notes'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
+          $ref: '#/components/responses/BadRequest'
         '403':
           description: >
             Locking an organisation is forbidden, or a WAF rule has been triggered.
-          content:
-            text/html:
-              schema:
-                type: string
-              examples:
-                forbidden:
-                  summary: Forbidden HTML response
-                  value: |
-                    <html><body><h1>403 Forbidden</h1>
-                    Request forbidden by administrative rules.
-                    </body></html>
+          $ref: '#/components/responses/Forbidden'
         '500':
-          description: 'organisationId must not be empty'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationError'
+          description: 'The organisationId must not be empty, the org must not already be locked.'
+          $ref: '#/components/responses/ServerError'
   /organisation/{organisationId}/unlock:
     post:
       tags:
@@ -206,32 +199,32 @@ paths:
           description: 'Successfully unlocked Organisation'
         '400':
           description: 'Invalid reason and notes'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
+          $ref: '#/components/responses/BadRequest'
         '403':
           description: >
             Unlocking an organisation is forbidden, or a WAF rule has been triggered.
-          content:
-            text/html:
-              schema:
-                type: string
-              examples:
-                forbidden:
-                  summary: Forbidden HTML response
-                  value: |
-                    <html><body><h1>403 Forbidden</h1>
-                    Request forbidden by administrative rules.
-                    </body></html>
+          $ref: '#/components/responses/Forbidden'
         '500':
-          description: 'organisationId must not be empty'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationError'
+          description: 'The organisationId must not be empty, the org must not already be locked.'
+          $ref: '#/components/responses/ServerError'
+
 components:
   schemas:
+    # generic types
+    TypeWithId:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: foreign-key
+          minimum: 1
+        type:
+          type: string
+      required:
+        - 'id'
+        - 'type'
+
     # request objects
     SearchRequestBody:
       type: object
@@ -247,11 +240,11 @@ components:
               # pattern: '^[0-9]{9,}$' # not just SBI upstream, other searches are also allowed
             - type: integer
               minimum: 100000000
-              description: 'If the SBI is a number it must have at least 9 digits.'
+              description: If the SBI is a number it must have at least 9 digits.
               # This is because the upstream checks the character length of the number.
               # Unfortunately the upstream accepts any `number`, but this is the closest we can
               # replicate the type-space in this schema!
-              # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
+              # PAY ATTENTION when contract testing this schema against the upstream, as negative
               # numbers, rationals, and exponents will be flagged as false negatives!!!
       examples:
         - primarySearchPhrase: '1000000000'
@@ -263,6 +256,67 @@ components:
       required:
         - 'searchFieldType'
         - 'primarySearchPhrase'
+
+    # update objects
+    ObjectWithId:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: foreign-key
+          minimum: 1
+        # NOTE: `type` is completely ignored, it comes from reference data that matches the `id`.
+        type:
+          type: string
+      required:
+        - 'id'
+    AdditionalBusinessDetailsRequestBody:
+      type: 'object'
+      properties:
+        legalStatus:
+          $ref: '#/components/schemas/ObjectWithId'
+          examples:
+            - id: 102106
+              type: 'Limited Partnership (LP)'
+            - id: 102108
+              type: 'Partnership'
+            - id: 102111
+              type: 'Sole Proprietorship'
+        businessType:
+          $ref: '#/components/schemas/ObjectWithId'
+          examples:
+            - id: 101402
+              type: 'Agency/Agent'
+            - id: 101404
+              type: 'Farmer'
+            - id: 101445
+              type: 'Hobby livestock keeper'
+            - id: 101446
+              type: 'Professional livestock keeper'
+        companiesHouseRegistrationNumber:
+          type: 'string'
+        charityCommissionRegistrationNumber:
+          type: 'string'
+        dateStartedFarming:
+          description: >
+            ISO 8601 date/date-time (or empty) string, integer of milliseconds since the epoch, or null.
+          oneOf:
+            - type: integer
+              minimum: -210835180800000 # 4712-11-24T00:00:00.000Z BCE!!
+              maximum: 253402300799999 # 9999-12-31T23:59:59.999Z
+              description: >
+                Timestamp in milliseconds since the epoch.
+                NOTE: the last 3 digits are always rounded down to 000.
+            - type: 'string'
+              pattern: '^$'
+            - type: 'string'
+              format: 'date-time'
+            - type: 'string'
+              format: 'date'
+            - type: 'null'
+      required:
+        - 'legalStatus'
+        - 'businessType'
     LockRequestBody:
       type: object
       examples:
@@ -367,17 +421,6 @@ components:
           required: ['partyNoteType', 'note']
 
     # response objects
-    TypeWithId:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: integer
-        type:
-          type: string
-      required:
-        - 'id'
-        - 'type'
     AssociatedPersonResponse:
       # NOTE: this data never seems to be populated
       type: object
@@ -432,7 +475,8 @@ components:
           type: boolean
         lastUpdatedOn:
           type: integer
-          description: 'Timestamp in milliseconds since epoch'
+          format: 'int64'
+          description: Timestamp in milliseconds since epoch.
         landConfirmed:
           type: boolean
         deactivated:
@@ -481,7 +525,8 @@ components:
           type: boolean
         lastUpdatedOn:
           type: integer
-          description: 'Timestamp in milliseconds since epoch'
+          format: 'int64'
+          description: Timestamp in milliseconds since epoch.
         landConfirmed:
           type: boolean
         deactivated:
@@ -525,8 +570,11 @@ components:
         legalStatus:
           $ref: '#/components/schemas/TypeWithId'
         dateStartedFarming:
-          type: [string, 'null']
-          format: 'date-time'
+          oneOf:
+            - type: integer
+              format: 'int64'
+              description: Timestamp in milliseconds since epoch.
+            - type: 'null'
         companiesHouseRegistrationNumber:
           type: [string, 'null']
         charityCommissionRegistrationNumber:
@@ -652,26 +700,69 @@ components:
         addressTypeId:
           type: [integer, 'null']
 
-    # errors
+  # errors
+  responses:
     BadRequest:
-      type: object
-      properties:
-        code:
-          type: integer
-          example: 400
-        message:
-          type: string
-          example: 'HTTP 400 Bad Request'
-    ApplicationError:
-      type: object
-      properties:
-        code:
-          type: integer
-          example: 500
-        message:
-          type: string
-          example: >
-            There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                examples:
+                  - HTTP 400 Bad Request
+                  - Unable to process JSON
+        text/plain:
+          schema:
+            type: string
+            example: source cannot be null
+    Forbidden:
+      description: Forbidden
+      content:
+        text/html:
+          schema:
+            type: string
+          examples:
+            forbidden:
+              summary: Forbidden HTML response
+              value: |
+                <html><body><h1>403 Forbidden</h1>
+                Request forbidden by administrative rules.
+                </body></html>
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: HTTP 404 Not Found
+    ServerError:
+      description: Internal server error, or problematic data was provided.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                examples:
+                  - HTTP 500 Internal Server Error
+                  - There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
+
   securitySchemes:
     mTLS:
       type: mutualTLS

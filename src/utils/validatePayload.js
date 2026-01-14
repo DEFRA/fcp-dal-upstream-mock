@@ -13,7 +13,13 @@ export async function loadSchema(schema) {
 }
 
 export const ajv = new Ajv({ strict: false })
-addFormats(ajv)
+addFormats(ajv) // add common formats like 'date-time', 'email' etc.
+
+// register a custom "foreign-key" format validator
+ajv.addFormat('foreign-key', {
+  type: 'number',
+  validate: (id) => Number.isInteger(id) && id > 0
+})
 
 export async function createPayloadValidator(schemaPath, path) {
   const schema = path(await loadSchema(schemaPath))

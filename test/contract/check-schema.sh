@@ -60,12 +60,13 @@ case "$1" in
   o | org | organisation )
     schema="organisation"
     mutations='. |
-.paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5849659,5852711,5858233 ] |
+.paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5680131,5852711,5858233 ] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "106554744" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "200629003" |
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "200665008" |
-.paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233] |
-.paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233]'
+.paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5852711,5858233] |
+.paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5852711,5858233] |
+.paths["/organisation/{organisationId}/additional-business-details"].put.parameters[0].schema.examples = [5680131,5852711,5858233]'
     ;;
   a | auth | authenticate )
     schema="authenticate"
@@ -97,7 +98,7 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 # run schemathesis tests
-docker run --rm --network=host --pull always \
+docker run --rm --network=host -q --pull always \
   -v ${baseDir}/tmp:/tmp \
   -v ${KITS_KEY}:/kits.key \
   -v ${KITS_CERT}:/kits.crt \
