@@ -192,9 +192,9 @@ components:
                 example: 400
               message:
                 type: string
-                example:
+                examples:
                   - 'HTTP 400 Bad Request'
-                  - Unable to process JSON
+                  - 'Unable to process JSON'
         text/plain:
           schema:
             type: string
@@ -239,6 +239,77 @@ components:
       required:
         - 'searchFieldType'
         - 'primarySearchPhrase'
+    PersonalUpdateRequest:
+      type: 'object'
+      properties:
+        title:
+          type: [string, number, boolean, 'null']
+          description: 'Title of the person (e.g., Mr, Mrs)'
+        otherTitle:
+          type: [string, number, boolean, 'null']
+          description: 'Alternative or additional title'
+        firstName:
+          type: [string, number, boolean]
+          description: 'First name of the person'
+        middleName:
+          type: [string, number, boolean, 'null']
+          description: 'Middle name of the person'
+        lastName:
+          type: [string, number, boolean]
+          description: 'Last name of the person'
+        dateOfBirth:
+          description: 'Date of birth as a Unix timestamp'
+          oneOf:
+            - type: integer
+              format: int64
+            - type: string
+              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
+            - type: 'null'
+        landline:
+          type: [object, array, string, 'null']
+          description: 'Landline phone number'
+        mobile:
+          type: [object, array, string, 'null']
+          description: 'Mobile phone number'
+        email:
+          type: [object, array, string, 'null']
+          description: 'Email address'
+        address:
+          type: [object, 'null']
+          properties:
+            address1:
+              type: [object, array, string, number, boolean, 'null']
+            address2:
+              type: [object, array, string, number, boolean, 'null']
+            address3:
+              type: [object, array, string, number, boolean, 'null']
+            address4:
+              type: [object, array, string, number, boolean, 'null']
+            address5:
+              type: [object, array, string, number, boolean, 'null']
+            pafOrganisationName:
+              type: [object, array, string, number, boolean, 'null']
+            flatName:
+              type: [object, array, string, number, boolean, 'null']
+            buildingNumberRange:
+              type: [object, array, string, number, boolean, 'null']
+            buildingName:
+              type: [object, array, string, number, boolean, 'null']
+            street:
+              type: [object, array, string, number, boolean, 'null']
+            city:
+              type: [object, array, string, number, boolean, 'null']
+            county:
+              type: [object, array, string, number, boolean, 'null']
+            postalCode:
+              type: [object, array, string, number, boolean, 'null']
+            country:
+              type: [object, array, string, number, boolean, 'null']
+            uprn:
+              type: [object, array, string, number, boolean, 'null']
+      required:
+        - firstName
+        - lastName
 
     # response objects
     PersonSearchResponse:
@@ -414,78 +485,6 @@ components:
         - 'customerReferenceNumber'
         - 'personalIdentifiers'
         - 'deactivated'
-
-    PersonalUpdateRequest:
-      type: 'object'
-      properties:
-        title:
-          type: [string, number, boolean, 'null']
-          description: 'Title of the person (e.g., Mr, Mrs)'
-        otherTitle:
-          type: [string, number, boolean, 'null']
-          description: 'Alternative or additional title'
-        firstName:
-          type: [string, number, boolean]
-          description: 'First name of the person'
-        middleName:
-          type: [string, number, boolean, 'null']
-          description: 'Middle name of the person'
-        lastName:
-          type: [string, number, boolean]
-          description: 'Last name of the person'
-        dateOfBirth:
-          description: 'Date of birth as a Unix timestamp'
-          oneOf:
-            - type: integer
-              format: int64
-            - type: string
-              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
-            - type: 'null'
-        landline:
-          type: [object, array, string, 'null']
-          description: 'Landline phone number'
-        mobile:
-          type: [object, array, string, 'null']
-          description: 'Mobile phone number'
-        email:
-          type: [object, array, string, 'null']
-          description: 'Email address'
-        address:
-          type: [object, 'null']
-          properties:
-            address1:
-              type: [object, array, string, number, boolean, 'null']
-            address2:
-              type: [object, array, string, number, boolean, 'null']
-            address3:
-              type: [object, array, string, number, boolean, 'null']
-            address4:
-              type: [object, array, string, number, boolean, 'null']
-            address5:
-              type: [object, array, string, number, boolean, 'null']
-            pafOrganisationName:
-              type: [object, array, string, number, boolean, 'null']
-            flatName:
-              type: [object, array, string, number, boolean, 'null']
-            buildingNumberRange:
-              type: [object, array, string, number, boolean, 'null']
-            buildingName:
-              type: [object, array, string, number, boolean, 'null']
-            street:
-              type: [object, array, string, number, boolean, 'null']
-            city:
-              type: [object, array, string, number, boolean, 'null']
-            county:
-              type: [object, array, string, number, boolean, 'null']
-            postalCode:
-              type: [object, array, string, number, boolean, 'null']
-            country:
-              type: [object, array, string, number, boolean, 'null']
-            uprn:
-              type: [object, array, string, number, boolean, 'null']
-      required:
-        - firstName
-        - lastName
 
   securitySchemes:
     mTLS:

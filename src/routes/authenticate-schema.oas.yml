@@ -117,6 +117,7 @@ components:
         - 'memorableLocation'
         - 'lastUpdatedOn'
       example:
+        customerReference: '1111111100'
         memorableDate: '2020-01-01'
         memorableEvent: 'Graduation'
         memorableLocation: 'London'
