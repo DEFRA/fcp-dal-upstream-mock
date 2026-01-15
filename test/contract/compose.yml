@@ -1,6 +1,8 @@
 services:
   contract-tests:
-    image: schemathesis/schemathesis:stable
+    # NOTE: v4.7.7 is the latest version to avoid issues with checking for request
+    # payload bodies with the forbidden "__proto__" property name!!
+    image: schemathesis/schemathesis:4.7.7
     entrypoint: sh
     command:
       - -c
