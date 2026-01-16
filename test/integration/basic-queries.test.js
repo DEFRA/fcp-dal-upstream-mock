@@ -27,7 +27,7 @@ describe('Basic queries for faked routes', () => {
     })
   })
 
-  describe('Person route', () => {
+  describe('Person routes', () => {
     const personFixture = {
       address: {
         address1: '65',
@@ -219,6 +219,73 @@ describe('Basic queries for faked routes', () => {
 
       expect(response.statusCode).toBe(422)
       expect(response.payload).toEqual('{"code":422,"message":"HTTP 422 "}')
+    })
+
+    describe('with static person data overrides', () => {
+      const staticPersonFixture = {
+        // fake generated data
+        dateOfBirth: 1065270380449,
+        deactivated: false,
+        doNotContact: false,
+        id: 11111119,
+        landline: '01215 090627',
+        locked: false,
+        personalIdentifiers: ['6526436999', '3644818157', '7559856338'],
+        // static overridden data
+        customerReferenceNumber: '1111111900',
+        firstName: 'Big',
+        middleName: null,
+        lastName: 'Skeleton',
+        address: {
+          address1: 'A dark dark cellar',
+          address2: 'A dark dark staircase',
+          address3: 'A dark dark house',
+          street: 'A dark dark street',
+          city: 'A dark dark town',
+          dependentLocality: 'A dark dark hill'
+        },
+        email: 'skeleton@the-closet.net',
+        emailValidated: true,
+        confirmed: true,
+        mobile: null,
+        title: null,
+        otherTitle: null
+      }
+
+      test('Should return data /person/{personId}/summary', async () => {
+        const response = await mockServer.inject({
+          method: 'GET',
+          url: '/extapi/person/11111119/summary'
+        })
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toEqual(staticPersonFixture)
+      })
+
+      test('Should return data /person/search', async () => {
+        const response = await mockServer.inject({
+          method: 'POST',
+          url: '/extapi/person/search',
+          payload: {
+            primarySearchPhrase: '1111111900',
+            searchFieldType: 'CUSTOMER_REFERENCE'
+          }
+        })
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toHaveLength(1)
+        expect(json._data[0]).toEqual({
+          customerReference: '1111111900',
+          deactivated: false,
+          email: 'skeleton@the-closet.net',
+          fullName: 'Big Skeleton',
+          id: 11111119,
+          locked: false,
+          nationalInsuranceNumber: null,
+          personalIdentifiers: ['6526436999', '3644818157', '7559856338'],
+          primaryAddress: staticPersonFixture.address
+        })
+      })
     })
   })
 
