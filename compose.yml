@@ -6,7 +6,6 @@ services:
       - '3100:3100'
     environment:
       MOCK_LOG_LEVEL: info
-      MOCK_SERVER_COLLECTION: all
       NODE_ENV: production
       PORT: 3100
     healthcheck:
