@@ -14,7 +14,7 @@
     "lint": "eslint . && prettier --check . && npm run verify:schemata",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
-    "test": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand",
+    "test": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand --detectOpenHandles",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
     "start": "NODE_ENV=production node --use-strict . | jq .",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
