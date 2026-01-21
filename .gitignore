@@ -13,5 +13,7 @@ test/contract/tmp/
 test/contract/logs/*
 !test/contract/logs/.gitkeep
 *.crt
+*.csr
 *.key
+*.srl
 .env*

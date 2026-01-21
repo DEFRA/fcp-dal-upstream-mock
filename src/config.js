@@ -73,9 +73,49 @@ const config = convict({
     format: 'int',
     default: 3337243,
     env: 'KIT_EXT_PERSON_ID_OVERRIDE'
+  },
+  tls: {
+    key: {
+      doc: 'TLS private key',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'TLS_KEY'
+    },
+    cert: {
+      doc: 'TLS certificate',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'TLS_CERT'
+    },
+    ca: {
+      doc: 'TLS client CA certificate (for mTLS)',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'TLS_CA'
+    },
+    requireClientCert: {
+      doc: 'Require client certificate (mTLS) when the server is running in TLS mode',
+      format: Boolean,
+      nullable: true,
+      default: process.env.TLS_KEY && process.env.TLS_CERT,
+      env: 'TLS_REQUIRE_CLIENT_CERT'
+    }
   }
 })
 
 config.validate({ allowed: 'strict' })
+
+const decodeBase64Config = (value) => Buffer.from(value, 'base64').toString('utf-8').trim()
+
+if (config.get('tls.key') || config.get('tls.cert')) {
+  config.decodedTLS = {
+    key: config.get('tls.key') && decodeBase64Config(config.get('tls.key')),
+    cert: config.get('tls.cert') && decodeBase64Config(config.get('tls.cert'))
+  }
+  if (config.get('tls.ca')) config.decodedTLS.ca = decodeBase64Config(config.get('tls.ca'))
+}
 
 export { config }
