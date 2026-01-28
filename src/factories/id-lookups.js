@@ -271,7 +271,13 @@ export const orgIdLookup = {
   9000001: { sbi: 900000001, customers: [] },
   9000002: { sbi: 900000002, customers: [] },
   // for CV/DAL DoB edge case tests
-  9000003: { sbi: 900000003, customers: [9000010, 9000011, 9000012, 9000013] }
+  9000003: {
+    sbi: 900000003,
+    customers: [
+      9000010, 9000011, 9000012, 9000013, 9000014, 9000015, 9000016, 9000017, 9000018, 9000019,
+      9000020, 9000021
+    ]
+  }
 }
 
 // Derived inverses — calculated once
