@@ -120,7 +120,19 @@ export const staticPersonData = {
   9000011: { crn: '9000001100', dateOfBirth: new Date('1950-06-01T00:00:00Z').getTime() },
   // midwinter birthdays for testing DoB edge cases - UTC timestamps as millis since the epoch
   9000012: { crn: '9000001200', dateOfBirth: new Date('2000-01-01T00:00:00Z').getTime() },
-  9000013: { crn: '9000001300', dateOfBirth: new Date('1950-12-31T00:00:00Z').getTime() }
+  9000013: { crn: '9000001300', dateOfBirth: new Date('1950-12-31T00:00:00Z').getTime() },
+
+  // and now for something completely stupid; dates stored in random timezones 🤦
+  // midsummer birthdays for testing DoB edge cases
+  9000014: { crn: '9000001400', dateOfBirth: new Date('01 Jun 2001 GMT+1').getTime() },
+  9000015: { crn: '9000001500', dateOfBirth: new Date('30 Jun 1940 GMT+3').getTime() },
+  9000016: { crn: '9000001600', dateOfBirth: new Date('01 Jun 2001 GMT-1').getTime() },
+  9000017: { crn: '9000001700', dateOfBirth: new Date('30 Jun 1940 GMT-3').getTime() },
+  // midwinter birthdays for testing DoB edge cases
+  9000018: { crn: '9000001800', dateOfBirth: new Date('01 Jan 2001 GMT+3').getTime() },
+  9000019: { crn: '9000001900', dateOfBirth: new Date('31 Dec 1969 GMT+1').getTime() },
+  9000020: { crn: '9000002000', dateOfBirth: new Date('01 Jan 2001 GMT-3').getTime() },
+  9000021: { crn: '9000002100', dateOfBirth: new Date('31 Dec 1969 GMT-1').getTime() }
 }
 
 const validGeometries = JSON.parse(
