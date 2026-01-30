@@ -1,147 +1,148 @@
 export const sfdPersonLookup = {
   // SFD edge case test users - static entries for testing
-  // Mapped onto existing 50xxxxx person IDs and 11xxxxxx CRNs
-  // 10 examples per category
+  // Starting from person ID 3000000, CRN 3000000000
+  // 1000-person-ID buffer between categories, 10 examples per category
 
-  // Clean Control - All valid data for comparison
-  5038882: {
+  // Clean Control (3000000-3000099) - All valid data for comparison
+  3000000: {
     // Clean control user - example 1
-    crn: '1100388826',
+    crn: '3000000000',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5039001: {
+  3000001: {
     // Clean control user - example 2
-    crn: '1100390014',
+    crn: '3000000001',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5039196: {
+  3000002: {
     // Clean control user - example 3
-    crn: '1100391967',
+    crn: '3000000002',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5002021: {
+  3000003: {
     // Clean control user - example 4
-    crn: '1100020217',
+    crn: '3000000003',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5029327: {
+  3000004: {
     // Clean control user - example 5
-    crn: '1100293272',
+    crn: '3000000004',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5018617: {
+  3000005: {
     // Clean control user - example 6
-    crn: '1100186174',
+    crn: '3000000005',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5039002: {
+  3000006: {
     // Clean control user - example 7
-    crn: '1100390022',
+    crn: '3000000006',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5040517: {
+  3000007: {
     // Clean control user - example 8
-    crn: '1100405178',
+    crn: '3000000007',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5042160: {
+  3000008: {
     // Clean control user - example 9
-    crn: '1100421602',
+    crn: '3000000008',
     firstName: 'Clean',
     lastName: 'Control'
   },
-  5042346: {
+  3000009: {
     // Clean control user - example 10
-    crn: '1100423469',
+    crn: '3000000009',
     firstName: 'Clean',
     lastName: 'Control'
   },
 
-  // Future DOB - DOB in the future
-  5069674: {
+  // Future DOB (3001000-3001099) - DOB in the future
+  3001000: {
     // Future DOB - example 1 (DOB: 2030-01-01)
-    crn: '1100696741', // this crn doesn't seem to exist in dev
+    crn: '3001000000',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime()
   },
-  5001493: {
+  3001001: {
     // Future DOB - example 2 (DOB: 2031-06-15)
-    crn: '1100014934',
+    crn: '3001000001',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime()
   },
-  5015829: {
+  3001002: {
     // Future DOB - example 3 (DOB: 2029-12-31)
-    crn: '1100158294',
+    crn: '3001000002',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime()
   },
-  5041109: {
+  3001003: {
     // Future DOB - example 4 (DOB: 2035-03-20)
-    crn: '1100411097',
+    crn: '3001000003',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime()
   },
-  5041171: {
+  3001004: {
     // Future DOB - example 5 (DOB: 2040-01-01)
-    crn: '1100411712',
+    crn: '3001000004',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime()
   },
-  5041201: {
+  3001005: {
     // Future DOB - example 6 (DOB: 2028-07-04)
-    crn: '1100412018',
+    crn: '3001000005',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2028-07-04T00:00:00Z').getTime()
   },
-  5042682: {
+  3001006: {
     // Future DOB - example 7 (DOB: 2032-11-11)
-    crn: '1100426825',
+    crn: '3001000006',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime()
   },
-  5043037: {
+  3001007: {
     // Future DOB - example 8 (DOB: 2027-05-15)
-    crn: '1100430377',
+    crn: '3001000007',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime()
   },
-  5044939: {
+  3001008: {
     // Future DOB - example 9 (DOB: 2033-09-30)
-    crn: '1100449396',
+    crn: '3001000008',
     firstName: 'Future',
     lastName: 'Birthday',
     dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime()
   },
-  5044964: {
+  3001009: {
     // Future DOB - example 10 (DOB: 2026-02-29)
-    crn: '1100449647',
+    crn: '3001000009',
     firstName: 'Future',
     lastName: 'Birthday',
-    dateOfBirth: new Date('2045-02-29T00:00:00Z').getTime()
+    dateOfBirth: new Date('2026-02-29T00:00:00Z').getTime()
   },
 
-  // Missing Mandatory Address Fields - Missing address fields
-  // Missing address1, street, city
-  5045445: {
+  // Missing Mandatory Address Fields (3002000-3002999) - Missing address fields
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3002000-3002099: Missing address1, street, city
+  3002000: {
     // Missing address1, street, city - example 1
-    crn: '1100454454',
+    crn: '3002000000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -152,10 +153,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing address1 and street
-  5045474: {
+  // 3002100-3002199: Missing address1 and street
+  3002100: {
     // Missing address1 and street - example 1
-    crn: '1100454748',
+    crn: '3002100000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -166,10 +167,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing city and postalCode
-  5046532: {
+  // 3002200-3002299: Missing city and postalCode
+  3002200: {
     // Missing city and postalCode - example 1
-    crn: '1100465324',
+    crn: '3002200000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -180,10 +181,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing address1 only
-  5046590: {
+  // 3002300-3002399: Missing address1 only
+  3002300: {
     // Missing address1 only - example 1
-    crn: '1100465901',
+    crn: '3002300000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -194,10 +195,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing street only
-  5047414: {
+  // 3002400-3002499: Missing street only
+  3002400: {
     // Missing street only - example 1
-    crn: '1100474145',
+    crn: '3002400000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -208,10 +209,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing city only
-  5048716: {
+  // 3002500-3002599: Missing city only
+  3002500: {
     // Missing city only - example 1
-    crn: '1100487166',
+    crn: '3002500000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -222,10 +223,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing address1 and city
-  5048728: {
+  // 3002600-3002699: Missing address1 and city
+  3002600: {
     // Missing address1 and city - example 1
-    crn: '1100487289',
+    crn: '3002600000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -236,10 +237,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing street and city
-  5048984: {
+  // 3002700-3002799: Missing street and city
+  3002700: {
     // Missing street and city - example 1
-    crn: '1100489843',
+    crn: '3002700000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -250,10 +251,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing postalCode
-  5049069: {
+  // 3002800-3002899: Missing postalCode
+  3002800: {
     // Missing postalCode - example 1
-    crn: '1100490698',
+    crn: '3002800000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -264,10 +265,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing all address fields except country
-  5049281: {
+  // 3002900-3002999: Missing all address fields except country
+  3002900: {
     // Missing all address fields except country - example 1
-    crn: '1100492819',
+    crn: '3002900000',
     firstName: 'Missing',
     lastName: 'Address',
     address: {
@@ -279,185 +280,188 @@ export const sfdPersonLookup = {
     }
   },
 
-  // Invalid Email - Invalid email formats
-  // Invalid email format "not-an-email"
-  5049666: {
+  // Invalid Email (3003000-3003999) - Invalid email formats
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3003000-3003099: Invalid email format "not-an-email"
+  3003000: {
     // Invalid email "not-an-email" - example 1
-    crn: '1100496661',
+    crn: '3003000000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'not-an-email'
   },
-  // Missing @ symbol
-  5049707: {
+  // 3003100-3003199: Missing @ symbol
+  3003100: {
     // Missing @ symbol - example 1
-    crn: '1100497072',
+    crn: '3003100000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'invalidemail.com'
   },
-  // Missing domain
-  5049815: {
+  // 3003200-3003299: Missing domain
+  3003200: {
     // Missing domain - example 1
-    crn: '1100498159',
+    crn: '3003200000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'invalid@'
   },
-  // Missing local part
-  5051084: {
+  // 3003300-3003399: Missing local part
+  3003300: {
     // Missing local part - example 1
-    crn: '1100510842',
+    crn: '3003300000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: '@example.com'
   },
-  // Contains spaces
-  5051176: {
+  // 3003400-3003499: Contains spaces
+  3003400: {
     // Contains spaces - example 1
-    crn: '1100511768',
+    crn: '3003400000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'invalid email@example.com'
   },
-  // Multiple @ symbols
-  5051498: {
+  // 3003500-3003599: Multiple @ symbols
+  3003500: {
     // Multiple @ symbols - example 1
-    crn: '1100514988',
+    crn: '3003500000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'invalid@@example.com'
   },
-  // No TLD
-  5051873: {
+  // 3003600-3003699: No TLD
+  3003600: {
     // No TLD - example 1
-    crn: '1100518738',
+    crn: '3003600000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'invalid@example'
   },
-  // Just text (no @ or domain)
-  5052688: {
+  // 3003700-3003799: Just text (no @ or domain)
+  3003700: {
     // Just text - example 1
-    crn: '1100526889',
+    crn: '3003700000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'justtext'
   },
-  // Special characters
-  5052799: {
+  // 3003800-3003899: Special characters
+  3003800: {
     // Special characters - example 1
-    crn: '1100527990',
+    crn: '3003800000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: 'invalid!@#$%example.com'
   },
-  // Empty string
-  5053392: {
+  // 3003900-3003999: Empty string
+  3003900: {
     // Empty string - example 1
-    crn: '1100533923',
+    crn: '3003900000',
     firstName: 'Invalid',
     lastName: 'Email',
     email: ''
   },
 
-  // Invalid Phone - Invalid phone formats
-  // Invalid phone "not-a-phone"
-  5053942: {
+  // Invalid Phone (3004000-3004999) - Invalid phone formats
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3004000-3004099: Invalid phone "not-a-phone"
+  3004000: {
     // Invalid phone "not-a-phone" - example 1
-    crn: '1100539425',
+    crn: '3004000000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: 'not-a-phone'
   },
-  // Too short
-  5054215: {
+  // 3004100-3004199: Too short
+  3004100: {
     // Too short - example 1
-    crn: '1100542159',
+    crn: '3004100000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: '123'
   },
-  // Contains letters
-  5054324: {
+  // 3004200-3004299: Contains letters
+  3004200: {
     // Contains letters - example 1
-    crn: '1100543244',
+    crn: '3004200000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: 'abc-def-ghij'
   },
-  // Special characters only
-  5054716: {
+  // 3004300-3004399: Special characters only
+  3004300: {
     // Special characters only - example 1
-    crn: '1100547169',
+    crn: '3004300000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: '!@#$%^&*()'
   },
-  // Empty string
-  5055225: {
+  // 3004400-3004499: Empty string
+  3004400: {
     // Empty string - example 1
-    crn: '1100552251',
+    crn: '3004400000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: ''
   },
-  // Spaces only
-  5055279: {
+  // 3004500-3004599: Spaces only
+  3004500: {
     // Spaces only - example 1
-    crn: '1100552790',
+    crn: '3004500000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: '   '
   },
-  // Wrong format
-  5055810: {
+  // 3004600-3004699: Wrong format
+  3004600: {
     // Wrong format - example 1
-    crn: '1100558101',
+    crn: '3004600000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: '123-45'
   },
-  // Mixed invalid (letters and numbers)
-  5057823: {
+  // 3004700-3004799: Mixed invalid (letters and numbers)
+  3004700: {
     // Mixed invalid - example 1
-    crn: '1100578234',
+    crn: '3004700000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: '12abc34'
   },
-  // Too long
-  5059058: {
+  // 3004800-3004899: Too long
+  3004800: {
     // Too long - example 1
-    crn: '1100590587',
+    crn: '3004800000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: '12345678901234567890'
   },
-  // Null as string
-  5059461: {
+  // 3004900-3004999: Null as string
+  3004900: {
     // Null as string - example 1
-    crn: '1100594612',
+    crn: '3004900000',
     firstName: 'Invalid',
     lastName: 'Phone',
     mobile: 'null'
   },
 
-  // Multiple Invalid Fields - Multiple invalid fields
-  // Invalid email + phone + future DOB
-  5059931: {
+  // Multiple Invalid Fields (3005000-3005999) - Multiple invalid fields
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3005000-3005099: Invalid email + phone + future DOB
+  3005000: {
     // Invalid email + phone + future DOB - example 1
-    crn: '1100599312',
+    crn: '3005000000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     email: 'not-an-email',
     mobile: 'not-a-phone',
     dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime()
   },
-  // Invalid email + phone + missing address
-  5062416: {
+  // 3005100-3005199: Invalid email + phone + missing address
+  3005100: {
     // Invalid email + phone + missing address - example 1
-    crn: '1100624163',
+    crn: '3005100000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     email: 'invalid@',
@@ -470,10 +474,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Future DOB + invalid email + missing address
-  5062599: {
+  // 3005200-3005299: Future DOB + invalid email + missing address
+  3005200: {
     // Future DOB + invalid email + missing address - example 1
-    crn: '1100625992',
+    crn: '3005200000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     dateOfBirth: new Date('2035-06-15T00:00:00Z').getTime(),
@@ -486,10 +490,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Invalid phone + missing address + future DOB
-  5064269: {
+  // 3005300-3005399: Invalid phone + missing address + future DOB
+  3005300: {
     // Invalid phone + missing address + future DOB - example 1
-    crn: '1100642692',
+    crn: '3005300000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     mobile: 'abc',
@@ -502,10 +506,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // All invalid (email, phone, DOB, address)
-  5066005: {
+  // 3005400-3005499: All invalid (email, phone, DOB, address)
+  3005400: {
     // All invalid: email, phone, DOB, address - example 1
-    crn: '1100660054',
+    crn: '3005400000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     email: 'invalid@@example.com',
@@ -519,28 +523,28 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Invalid email + phone
-  5067317: {
+  // 3005500-3005599: Invalid email + phone
+  3005500: {
     // Invalid email + phone - example 1
-    crn: '1100673172',
+    crn: '3005500000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     email: 'bad@email',
     mobile: '12345'
   },
-  // Future DOB + invalid email
-  5067639: {
+  // 3005600-3005699: Future DOB + invalid email
+  3005600: {
     // Future DOB + invalid email - example 1
-    crn: '1100676392',
+    crn: '3005600000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime(),
     email: 'invalid email@example.com'
   },
-  // Invalid phone + missing address
-  5068216: {
+  // 3005700-3005799: Invalid phone + missing address
+  3005700: {
     // Invalid phone + missing address - example 1
-    crn: '1100682163',
+    crn: '3005700000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     mobile: '!@#$%',
@@ -552,10 +556,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Future DOB + missing address + invalid phone
-  5068821: {
+  // 3005800-3005899: Future DOB + missing address + invalid phone
+  3005800: {
     // Future DOB + missing address + invalid phone - example 1
-    crn: '1100688218',
+    crn: '3005800000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
@@ -568,10 +572,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Invalid email + phone + future DOB + missing address
-  5069745: {
+  // 3005900-3005999: Invalid email + phone + future DOB + missing address
+  3005900: {
     // Invalid email + phone + future DOB + missing address - example 1
-    crn: '1100697454',
+    crn: '3005900000',
     firstName: 'Multiple',
     lastName: 'Invalid',
     email: '',
@@ -586,35 +590,36 @@ export const sfdPersonLookup = {
     }
   },
 
-  // One Field Wrong - Single invalid field combinations
-  // Invalid DOB only
-  5069958: {
+  // One Field Wrong (3006000-3006999) - Single invalid field combinations
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3006000-3006099: Invalid DOB only
+  3006000: {
     // Invalid DOB only - example 1
-    crn: '1100699589',
+    crn: '3006000000',
     firstName: 'One',
     lastName: 'Wrong',
     dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime()
   },
-  // Invalid email only
-  5070141: {
+  // 3006100-3006199: Invalid email only
+  3006100: {
     // Invalid email only - example 1
-    crn: '1100701419',
+    crn: '3006100000',
     firstName: 'One',
     lastName: 'Wrong',
     email: 'not-an-email'
   },
-  // Invalid phone only
-  5072776: {
+  // 3006200-3006299: Invalid phone only
+  3006200: {
     // Invalid phone only - example 1
-    crn: '1100727760',
+    crn: '3006200000',
     firstName: 'One',
     lastName: 'Wrong',
     mobile: 'not-a-phone'
   },
-  // Missing address1 only
-  5072778: {
+  // 3006300-3006399: Missing address1 only
+  3006300: {
     // Missing address1 only - example 1
-    crn: '1100727787',
+    crn: '3006300000',
     firstName: 'One',
     lastName: 'Wrong',
     address: {
@@ -625,10 +630,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing street only
-  5073586: {
+  // 3006400-3006499: Missing street only
+  3006400: {
     // Missing street only - example 1
-    crn: '1100735860',
+    crn: '3006400000',
     firstName: 'One',
     lastName: 'Wrong',
     address: {
@@ -639,10 +644,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing city only
-  5073692: {
+  // 3006500-3006599: Missing city only
+  3006500: {
     // Missing city only - example 1
-    crn: '1100736921',
+    crn: '3006500000',
     firstName: 'One',
     lastName: 'Wrong',
     address: {
@@ -653,10 +658,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Missing postalCode only
-  5073988: {
+  // 3006600-3006699: Missing postalCode only
+  3006600: {
     // Missing postalCode only - example 1
-    crn: '1100739882',
+    crn: '3006600000',
     firstName: 'One',
     lastName: 'Wrong',
     address: {
@@ -667,54 +672,55 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Future DOB (different date)
-  5075275: {
+  // 3006700-3006799: Future DOB (different date)
+  3006700: {
     // Future DOB (different date) - example 1
-    crn: '1100752757',
+    crn: '3006700000',
     firstName: 'One',
     lastName: 'Wrong',
     dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime()
   },
-  // Invalid email (different format)
-  5077829: {
+  // 3006800-3006899: Invalid email (different format)
+  3006800: {
     // Invalid email (different format) - example 1
-    crn: '1100778292',
+    crn: '3006800000',
     firstName: 'One',
     lastName: 'Wrong',
     email: 'invalid@'
   },
-  // Invalid phone (different format)
-  5078204: {
+  // 3006900-3006999: Invalid phone (different format)
+  3006900: {
     // Invalid phone (different format) - example 1
-    crn: '1100782044',
+    crn: '3006900000',
     firstName: 'One',
     lastName: 'Wrong',
     mobile: '123'
   },
 
-  // Two Fields Wrong - Two invalid fields together
-  // DOB + email
-  5078231: {
+  // Two Fields Wrong (3007000-3007999) - Two invalid fields together
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3007000-3007099: DOB + email
+  3007000: {
     // DOB + email - example 1
-    crn: '1100782311',
+    crn: '3007000000',
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime(),
     email: 'not-an-email'
   },
-  // DOB + phone
-  5079668: {
+  // 3007100-3007199: DOB + phone
+  3007100: {
     // DOB + phone - example 1
-    crn: '1100796681',
+    crn: '3007100000',
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime(),
     mobile: 'not-a-phone'
   },
-  // Address + email
-  5080733: {
+  // 3007200-3007299: Address + email
+  3007200: {
     // Address + email - example 1
-    crn: '1100807330',
+    crn: '3007200000',
     firstName: 'Two',
     lastName: 'Wrong',
     address: {
@@ -726,10 +732,10 @@ export const sfdPersonLookup = {
     },
     email: 'invalid@'
   },
-  // Address + phone
-  5083064: {
+  // 3007300-3007399: Address + phone
+  3007300: {
     // Address + phone - example 1
-    crn: '1100830642',
+    crn: '3007300000',
     firstName: 'Two',
     lastName: 'Wrong',
     address: {
@@ -741,19 +747,19 @@ export const sfdPersonLookup = {
     },
     mobile: '123'
   },
-  // Email + phone
-  5084771: {
+  // 3007400-3007499: Email + phone
+  3007400: {
     // Email + phone - example 1
-    crn: '1100847715',
+    crn: '3007400000',
     firstName: 'Two',
     lastName: 'Wrong',
     email: 'bad-email',
     mobile: 'abc'
   },
-  // DOB + address
-  5085160: {
+  // 3007500-3007599: DOB + address
+  3007500: {
     // DOB + address - example 1
-    crn: '1100851607',
+    crn: '3007500000',
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
@@ -765,19 +771,19 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // DOB + email (different values)
-  5085354: {
+  // 3007600-3007699: DOB + email (different values)
+  3007600: {
     // DOB + email (different values) - example 1
-    crn: '1100853545',
+    crn: '3007600000',
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
     email: 'invalid email@example.com'
   },
-  // Address + phone (different fields)
-  5086754: {
+  // 3007700-3007799: Address + phone (different fields)
+  3007700: {
     // Address + phone (different fields) - example 1
-    crn: '1100867546',
+    crn: '3007700000',
     firstName: 'Two',
     lastName: 'Wrong',
     address: {
@@ -789,19 +795,19 @@ export const sfdPersonLookup = {
     },
     mobile: '!@#$%'
   },
-  // Email + phone (different formats)
-  5086756: {
+  // 3007800-3007899: Email + phone (different formats)
+  3007800: {
     // Email + phone (different formats) - example 1
-    crn: '1100867562',
+    crn: '3007800000',
     firstName: 'Two',
     lastName: 'Wrong',
     email: 'invalid@@example.com',
     mobile: '12345'
   },
-  // DOB + address (different combinations)
-  5087462: {
+  // 3007900-3007999: DOB + address (different combinations)
+  3007900: {
     // DOB + address (different combinations) - example 1
-    crn: '1100874623',
+    crn: '3007900000',
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
@@ -814,21 +820,22 @@ export const sfdPersonLookup = {
     }
   },
 
-  // Three+ Fields Wrong - Three or more invalid fields
-  // DOB + email + phone
-  5090033: {
+  // Three+ Fields Wrong (3008000-3008999) - Three or more invalid fields
+  // 100-person-ID buffer between different scenario types to allow expansion
+  // 3008000-3008099: DOB + email + phone
+  3008000: {
     // DOB + email + phone - example 1
-    crn: '1100900330',
+    crn: '3008000000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime(),
     email: 'not-an-email',
     mobile: 'not-a-phone'
   },
-  // DOB + email + address
-  5093202: {
+  // 3008100-3008199: DOB + email + address
+  3008100: {
     // DOB + email + address - example 1
-    crn: '1100932029',
+    crn: '3008100000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime(),
@@ -841,10 +848,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // DOB + phone + address
-  5093747: {
+  // 3008200-3008299: DOB + phone + address
+  3008200: {
     // DOB + phone + address - example 1
-    crn: '1100937471',
+    crn: '3008200000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
@@ -857,10 +864,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Email + phone + address
-  5094069: {
+  // 3008300-3008399: Email + phone + address
+  3008300: {
     // Email + phone + address - example 1
-    crn: '1100940693',
+    crn: '3008300000',
     firstName: 'Three',
     lastName: 'Plus',
     email: 'bad-email',
@@ -873,10 +880,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // DOB + email + phone + address
-  5094581: {
+  // 3008400-3008499: DOB + email + phone + address
+  3008400: {
     // DOB + email + phone + address - example 1
-    crn: '1100945814',
+    crn: '3008400000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
@@ -890,20 +897,20 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // DOB + email + phone (different values)
-  5095722: {
+  // 3008500-3008599: DOB + email + phone (different values)
+  3008500: {
     // DOB + email + phone (different values) - example 1
-    crn: '1100957227',
+    crn: '3008500000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
     email: 'invalid@@example.com',
     mobile: '12345'
   },
-  // DOB + email + address (different combinations)
-  5095777: {
+  // 3008600-3008699: DOB + email + address (different combinations)
+  3008600: {
     // DOB + email + address (different combinations) - example 1
-    crn: '1100957774',
+    crn: '3008600000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2028-07-04T00:00:00Z').getTime(),
@@ -916,10 +923,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // Email + phone + address (different fields)
-  5096223: {
+  // 3008700-3008799: Email + phone + address (different fields)
+  3008700: {
     // Email + phone + address (different fields) - example 1
-    crn: '1100962239',
+    crn: '3008700000',
     firstName: 'Three',
     lastName: 'Plus',
     email: '',
@@ -932,10 +939,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // DOB + phone + address (different combinations)
-  5096628: {
+  // 3008800-3008899: DOB + phone + address (different combinations)
+  3008800: {
     // DOB + phone + address (different combinations) - example 1
-    crn: '1100966285',
+    crn: '3008800000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime(),
@@ -948,10 +955,10 @@ export const sfdPersonLookup = {
       country: 'England'
     }
   },
-  // All four fields (DOB + email + phone + address)
-  5096759: {
+  // 3008900-3008999: All four fields (DOB + email + phone + address)
+  3008900: {
     // All four fields: DOB + email + phone + address - example 1
-    crn: '1100967591',
+    crn: '3008900000',
     firstName: 'Three',
     lastName: 'Plus',
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
@@ -966,7 +973,98 @@ export const sfdPersonLookup = {
     }
   },
 
+  // SFD requested
+  5038882: { crn: '1100388826' },
+  5039001: { crn: '1100390014' },
+  5039196: { crn: '1100391967' },
+  5002021: { crn: '1100020217' },
+  5029327: { crn: '1100293272' },
+  5018617: { crn: '1100186174' },
+  5039002: { crn: '1100390022' },
+  5040517: { crn: '1100405178' },
+  5042160: { crn: '1100421602' },
+  5042346: { crn: '1100423469' },
+  5069674: { crn: '1100696741' },
   // needed for SFD performance testing
+  5001493: { crn: '1100014934' },
+  5015829: { crn: '1100158294' },
+  5041109: { crn: '1100411097' },
+  5041171: { crn: '1100411712' },
+  5041201: { crn: '1100412018' },
+  5042682: { crn: '1100426825' },
+  5043037: { crn: '1100430377' },
+  5044939: { crn: '1100449396' },
+  5044964: { crn: '1100449647' },
+  5045445: { crn: '1100454454' },
+  5045474: { crn: '1100454748' },
+  5046532: { crn: '1100465324' },
+  5046590: { crn: '1100465901' },
+  5047414: { crn: '1100474145' },
+  5048716: { crn: '1100487166' },
+  5048728: { crn: '1100487289' },
+  5048984: { crn: '1100489843' },
+  5049069: { crn: '1100490698' },
+  5049281: { crn: '1100492819' },
+  5049666: { crn: '1100496661' },
+  5049707: { crn: '1100497072' },
+  5049815: { crn: '1100498159' },
+  5051084: { crn: '1100510842' },
+  5051176: { crn: '1100511768' },
+  5051498: { crn: '1100514988' },
+  5051873: { crn: '1100518738' },
+  5052688: { crn: '1100526889' },
+  5052799: { crn: '1100527990' },
+  5053392: { crn: '1100533923' },
+  5053942: { crn: '1100539425' },
+  5054215: { crn: '1100542159' },
+  5054324: { crn: '1100543244' },
+  5054716: { crn: '1100547169' },
+  5055225: { crn: '1100552251' },
+  5055279: { crn: '1100552790' },
+  5055810: { crn: '1100558101' },
+  5057823: { crn: '1100578234' },
+  5059058: { crn: '1100590587' },
+  5059461: { crn: '1100594612' },
+  5059931: { crn: '1100599312' },
+  5062416: { crn: '1100624163' },
+  5062599: { crn: '1100625992' },
+  5064269: { crn: '1100642692' },
+  5066005: { crn: '1100660054' },
+  5067317: { crn: '1100673172' },
+  5067639: { crn: '1100676392' },
+  5068216: { crn: '1100682163' },
+  5068821: { crn: '1100688218' },
+  5069745: { crn: '1100697454' },
+  5069958: { crn: '1100699589' },
+  5070141: { crn: '1100701419' },
+  5072776: { crn: '1100727760' },
+  5072778: { crn: '1100727787' },
+  5073586: { crn: '1100735860' },
+  5073692: { crn: '1100736921' },
+  5073988: { crn: '1100739882' },
+  5075275: { crn: '1100752757' },
+  5077829: { crn: '1100778292' },
+  5078204: { crn: '1100782044' },
+  5078231: { crn: '1100782311' },
+  5079668: { crn: '1100796681' },
+  5080733: { crn: '1100807330' },
+  5083064: { crn: '1100830642' },
+  5084771: { crn: '1100847715' },
+  5085160: { crn: '1100851607' },
+  5085354: { crn: '1100853545' },
+  5086754: { crn: '1100867546' },
+  5086756: { crn: '1100867562' },
+  5087462: { crn: '1100874623' },
+  5090033: { crn: '1100900330' },
+  5093202: { crn: '1100932029' },
+  5093747: { crn: '1100937471' },
+  5094069: { crn: '1100940693' },
+  5094581: { crn: '1100945814' },
+  5095722: { crn: '1100957227' },
+  5095777: { crn: '1100957774' },
+  5096223: { crn: '1100962239' },
+  5096628: { crn: '1100966285' },
+  5096759: { crn: '1100967591' },
   5096937: { crn: '1100969373' },
   5099117: { crn: '1100991174' },
   5099126: { crn: '1100991263' },
