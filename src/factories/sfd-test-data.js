@@ -345,70 +345,70 @@ export const sfdPersonLookup = {
     crn: '3001000000',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2074-01-01T00:00:00Z').getTime()
+    dateOfBirth: '2074-01-01'
   },
   3001001: {
     // DOB invalid - future date - example 2 (DOB: 2031-06-15)
     crn: '3001000001',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2096-06-15T00:00:00Z').getTime()
+    dateOfBirth: '2096-06-15'
   },
   3001002: {
     // DOB invalid - future date - example 3 (DOB: 2029-12-31)
     crn: '3001000002',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2094-12-31T00:00:00Z').getTime()
+    dateOfBirth: '2094-12-31'
   },
   3001003: {
     // DOB invalid - future date - example 4 (DOB: 2035-03-20)
     crn: '3001000003',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime()
+    dateOfBirth: '2035-03-20'
   },
   3001004: {
     // DOB invalid - future date - example 5 (DOB: 2040-01-01)
     crn: '3001000004',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime()
+    dateOfBirth: '2040-01-01'
   },
   3001005: {
     // DOB invalid - future date - example 6 (DOB: 2028-07-04)
     crn: '3001000005',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2079-07-04T00:00:00Z').getTime()
+    dateOfBirth: '2079-07-04'
   },
   3001006: {
     // DOB invalid - future date - example 7 (DOB: 2032-11-11)
     crn: '3001000006',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2067-11-11T00:00:00Z').getTime()
+    dateOfBirth: '2067-11-11'
   },
   3001007: {
     // DOB invalid - future date - example 8 (DOB: 2027-05-15)
     crn: '3001000007',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2088-05-15T00:00:00Z').getTime()
+    dateOfBirth: '2088-05-15'
   },
   3001008: {
     // DOB invalid - future date - example 9 (DOB: 2033-09-30)
     crn: '3001000008',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime()
+    dateOfBirth: '2033-09-30'
   },
   3001009: {
     // DOB invalid - future date - example 10 (DOB: 2050-02-28)
     crn: '3001000009',
     firstName: 'Invalid',
     lastName: 'dob',
-    dateOfBirth: new Date('2050-02-28T00:00:00Z').getTime()
+    dateOfBirth: '2050-02-28'
   },
 
   // Missing Mandatory Address Fields (3002000-3002999) - Missing address fields
@@ -1407,7 +1407,7 @@ export const sfdPersonLookup = {
     lastName: 'Invalid',
     email: 'not-an-email',
     mobile: 'not-a-phone',
-    dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime()
+    dateOfBirth: '2030-01-01'
   },
   // 3005100-3005199: Invalid email + phone + missing address
   3005100: {
@@ -1431,7 +1431,7 @@ export const sfdPersonLookup = {
     crn: '3005200000',
     firstName: 'Multiple',
     lastName: 'Invalid',
-    dateOfBirth: new Date('2035-06-15T00:00:00Z').getTime(),
+    dateOfBirth: '2035-06-15',
     email: 'bad-email',
     address: {
       address1: null,
@@ -1448,7 +1448,7 @@ export const sfdPersonLookup = {
     firstName: 'Multiple',
     lastName: 'Invalid',
     mobile: 'abc',
-    dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
+    dateOfBirth: '2029-12-31',
     address: {
       address1: null,
       street: 'Test Street',
@@ -1465,7 +1465,7 @@ export const sfdPersonLookup = {
     lastName: 'Invalid',
     email: 'invalid@@example.com',
     mobile: 'not-a-phone',
-    dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
+    dateOfBirth: '2040-01-01',
     address: {
       address1: null,
       street: null,
@@ -1489,7 +1489,7 @@ export const sfdPersonLookup = {
     crn: '3005600000',
     firstName: 'Multiple',
     lastName: 'Invalid',
-    dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime(),
+    dateOfBirth: '2032-11-11',
     email: 'invalid email@example.com'
   },
   // 3005700-3005799: Invalid phone + missing address
@@ -1513,7 +1513,7 @@ export const sfdPersonLookup = {
     crn: '3005800000',
     firstName: 'Multiple',
     lastName: 'Invalid',
-    dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
+    dateOfBirth: '2027-05-15',
     mobile: 'abc123',
     address: {
       address1: null,
@@ -1531,7 +1531,7 @@ export const sfdPersonLookup = {
     lastName: 'Invalid',
     email: '',
     mobile: '',
-    dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime(),
+    dateOfBirth: '2033-09-30',
     address: {
       address1: null,
       street: null,
@@ -1549,7 +1549,7 @@ export const sfdPersonLookup = {
     crn: '3006000000',
     firstName: 'One',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime()
+    dateOfBirth: '2030-01-01'
   },
   // 3006100-3006199: Invalid email only
   3006100: {
@@ -1629,7 +1629,7 @@ export const sfdPersonLookup = {
     crn: '3006700000',
     firstName: 'One',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime()
+    dateOfBirth: '2031-06-15'
   },
   // 3006800-3006899: Invalid email (different format)
   3006800: {
@@ -1656,7 +1656,7 @@ export const sfdPersonLookup = {
     crn: '3007000000',
     firstName: 'Two',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime(),
+    dateOfBirth: '2030-01-01',
     email: 'not-an-email'
   },
   // 3007100-3007199: DOB + phone
@@ -1665,7 +1665,7 @@ export const sfdPersonLookup = {
     crn: '3007100000',
     firstName: 'Two',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime(),
+    dateOfBirth: '2031-06-15',
     mobile: 'not-a-phone'
   },
   // 3007200-3007299: Address + email
@@ -1713,7 +1713,7 @@ export const sfdPersonLookup = {
     crn: '3007500000',
     firstName: 'Two',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
+    dateOfBirth: '2035-03-20',
     address: {
       address1: null,
       street: null,
@@ -1728,7 +1728,7 @@ export const sfdPersonLookup = {
     crn: '3007600000',
     firstName: 'Two',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
+    dateOfBirth: '2029-12-31',
     email: 'invalid email@example.com'
   },
   // 3007700-3007799: Address + phone (different fields)
@@ -1761,7 +1761,7 @@ export const sfdPersonLookup = {
     crn: '3007900000',
     firstName: 'Two',
     lastName: 'Wrong',
-    dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
+    dateOfBirth: '2040-01-01',
     address: {
       address1: null,
       street: null,
@@ -1779,7 +1779,7 @@ export const sfdPersonLookup = {
     crn: '3008000000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2030-01-01T00:00:00Z').getTime(),
+    dateOfBirth: '2030-01-01',
     email: 'not-an-email',
     mobile: 'not-a-phone'
   },
@@ -1789,7 +1789,7 @@ export const sfdPersonLookup = {
     crn: '3008100000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime(),
+    dateOfBirth: '2031-06-15',
     email: 'invalid@',
     address: {
       address1: null,
@@ -1805,7 +1805,7 @@ export const sfdPersonLookup = {
     crn: '3008200000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
+    dateOfBirth: '2035-03-20',
     mobile: '123',
     address: {
       address1: null,
@@ -1837,7 +1837,7 @@ export const sfdPersonLookup = {
     crn: '3008400000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
+    dateOfBirth: '2029-12-31',
     email: 'invalid email@example.com',
     mobile: '!@#$%',
     address: {
@@ -1854,7 +1854,7 @@ export const sfdPersonLookup = {
     crn: '3008500000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
+    dateOfBirth: '2040-01-01',
     email: 'invalid@@example.com',
     mobile: '12345'
   },
@@ -1864,7 +1864,7 @@ export const sfdPersonLookup = {
     crn: '3008600000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2028-07-04T00:00:00Z').getTime(),
+    dateOfBirth: '2028-07-04',
     email: 'bad@email',
     address: {
       address1: null,
@@ -1896,7 +1896,7 @@ export const sfdPersonLookup = {
     crn: '3008800000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime(),
+    dateOfBirth: '2032-11-11',
     email: 'invalid@',
     mobile: 'abc123',
     address: {
@@ -1913,7 +1913,7 @@ export const sfdPersonLookup = {
     crn: '3008900000',
     firstName: 'Three',
     lastName: 'Plus',
-    dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
+    dateOfBirth: '2027-05-15',
     email: 'invalid@',
     mobile: 'not-a-phone',
     address: {
