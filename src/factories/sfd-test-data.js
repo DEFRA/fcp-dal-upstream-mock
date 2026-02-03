@@ -424,7 +424,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002100-3002199: Missing address1 and street
@@ -438,7 +439,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002200-3002299: Missing city and postalCode
@@ -452,7 +454,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002300-3002399: Missing address1 only
@@ -466,7 +469,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: 'Test City',
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002400-3002499: Missing street only
@@ -480,7 +484,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002500-3002599: Missing city only
@@ -494,7 +499,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002600-3002699: Missing address1 and city
@@ -508,7 +514,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002700-3002799: Missing street and city
@@ -522,7 +529,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002800-3002899: Missing postalCode
@@ -536,7 +544,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: 'Test City',
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3002900-3002999: Missing all address fields except country
@@ -550,7 +559,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
 
@@ -1422,7 +1432,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3005200-3005299: Future DOB + invalid email + missing address
@@ -1438,7 +1449,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3005300-3005399: Invalid phone + missing address + future DOB
@@ -1454,7 +1466,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3005400-3005499: All invalid (email, phone, DOB, address)
@@ -1471,7 +1484,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3005500-3005599: Invalid email + phone
@@ -1504,7 +1518,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3005800-3005899: Future DOB + missing address + invalid phone
@@ -1520,7 +1535,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3005900-3005999: Invalid email + phone + future DOB + missing address
@@ -1537,7 +1553,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
 
@@ -1578,7 +1595,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: 'Test City',
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3006400-3006499: Missing street only
@@ -1592,7 +1610,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3006500-3006599: Missing city only
@@ -1606,7 +1625,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3006600-3006699: Missing postalCode only
@@ -1620,7 +1640,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: 'Test City',
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3006700-3006799: Future DOB (different date)
@@ -1679,7 +1700,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     },
     email: 'invalid@'
   },
@@ -1694,7 +1716,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     },
     mobile: '123'
   },
@@ -1719,7 +1742,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3007600-3007699: DOB + email (different values)
@@ -1742,7 +1766,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     },
     mobile: '!@#$%'
   },
@@ -1767,7 +1792,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
 
@@ -1796,7 +1822,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008200-3008299: DOB + phone + address
@@ -1812,7 +1839,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008300-3008399: Email + phone + address
@@ -1828,7 +1856,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008400-3008499: DOB + email + phone + address
@@ -1845,7 +1874,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008500-3008599: DOB + email + phone (different values)
@@ -1871,7 +1901,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: 'TE1 2ST',
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008700-3008799: Email + phone + address (different fields)
@@ -1887,7 +1918,8 @@ export const sfdPersonLookup = {
       street: null,
       city: 'Test City',
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008800-3008899: DOB + email + phone + address (different combinations)
@@ -1904,7 +1936,8 @@ export const sfdPersonLookup = {
       street: 'Test Street',
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
   // 3008900-3008999: All four fields (DOB + email + phone + address)
@@ -1921,7 +1954,8 @@ export const sfdPersonLookup = {
       street: null,
       city: null,
       postalCode: null,
-      country: 'England'
+      country: 'England',
+      uprn: null
     }
   },
 
