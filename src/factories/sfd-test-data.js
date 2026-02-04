@@ -1,7 +1,12 @@
+// TODO: Add a comment here with the expected object structure
+
 export const sfdPersonLookup = {
   // SFD edge case test users - static entries for testing
   // Starting from person ID 3000000, CRN 3000000000
   // 1000-person-ID buffer between categories, 10 examples per category
+
+  // TODO: move all the personal data into personal
+  // Or rename this file?
 
   // Clean Control (3000000-3000099) - All valid data for comparison
   3000000: {

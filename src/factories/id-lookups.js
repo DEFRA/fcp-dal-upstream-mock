@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data.js'
+import { sfdBusinessDetailsLookup, sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
 
 export const staticPersonData = {
   ...sfdPersonLookup,
@@ -133,6 +133,11 @@ export const staticPersonData = {
   9000019: { crn: '9000001900', dateOfBirth: new Date('31 Dec 1969 GMT+1').getTime() },
   9000020: { crn: '9000002000', dateOfBirth: new Date('01 Jan 2001 GMT-3').getTime() },
   9000021: { crn: '9000002100', dateOfBirth: new Date('31 Dec 1969 GMT-1').getTime() }
+}
+
+export const staticBusinessData = {
+  // Keep a stable "static overrides" entry point.
+  ...sfdBusinessDetailsLookup
 }
 
 const validGeometries = JSON.parse(

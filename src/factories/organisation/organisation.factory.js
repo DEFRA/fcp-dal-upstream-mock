@@ -3,7 +3,8 @@ import {
   orgIdToPersonIds,
   orgIdToSbi,
   personIdToOrgIds,
-  sbiToOrgId
+  sbiToOrgId,
+  staticBusinessData
 } from '../../factories/id-lookups.js'
 import { fakeAddress, fakeIds, faker, generateId, nft, nullOrFake, safeSeed } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
@@ -51,25 +52,25 @@ export const createOrganisation = (personId, payload) => {
     },
     correspondenceAddress: payload.correspondenceAddress
       ? {
-          address1: payload.correspondenceAddress?.address1 ?? null,
-          address2: payload.correspondenceAddress?.address2 ?? null,
-          address3: payload.correspondenceAddress?.address3 ?? null,
-          address4: payload.correspondenceAddress?.address4 ?? null,
-          address5: payload.correspondenceAddress?.address5 ?? null,
-          pafOrganisationName: payload.correspondenceAddress?.pafOrganisationName ?? null,
-          flatName: payload.correspondenceAddress?.flatName ?? null,
-          buildingNumberRange: payload.correspondenceAddress?.buildingNumberRange ?? null,
-          buildingName: payload.correspondenceAddress?.buildingName ?? null,
-          street: payload.correspondenceAddress?.street ?? null,
-          city: payload.correspondenceAddress?.city ?? null,
-          county: payload.correspondenceAddress?.county ?? null,
-          postalCode: payload.correspondenceAddress?.postalCode ?? null,
-          country: payload.correspondenceAddress?.country ?? null,
-          uprn: payload.correspondenceAddress?.uprn ?? null,
-          dependentLocality: payload.correspondenceAddress?.dependentLocality ?? null,
-          doubleDependentLocality: payload.correspondenceAddress?.doubleDependentLocality ?? null,
-          addressTypeId: payload.correspondenceAddress?.addressTypeId ?? null
-        }
+        address1: payload.correspondenceAddress?.address1 ?? null,
+        address2: payload.correspondenceAddress?.address2 ?? null,
+        address3: payload.correspondenceAddress?.address3 ?? null,
+        address4: payload.correspondenceAddress?.address4 ?? null,
+        address5: payload.correspondenceAddress?.address5 ?? null,
+        pafOrganisationName: payload.correspondenceAddress?.pafOrganisationName ?? null,
+        flatName: payload.correspondenceAddress?.flatName ?? null,
+        buildingNumberRange: payload.correspondenceAddress?.buildingNumberRange ?? null,
+        buildingName: payload.correspondenceAddress?.buildingName ?? null,
+        street: payload.correspondenceAddress?.street ?? null,
+        city: payload.correspondenceAddress?.city ?? null,
+        county: payload.correspondenceAddress?.county ?? null,
+        postalCode: payload.correspondenceAddress?.postalCode ?? null,
+        country: payload.correspondenceAddress?.country ?? null,
+        uprn: payload.correspondenceAddress?.uprn ?? null,
+        dependentLocality: payload.correspondenceAddress?.dependentLocality ?? null,
+        doubleDependentLocality: payload.correspondenceAddress?.doubleDependentLocality ?? null,
+        addressTypeId: payload.correspondenceAddress?.addressTypeId ?? null
+      }
       : null,
     isFinancialToBusinessAddr: payload.isFinancialToBusinessAddr,
     isCorrespondenceAsBusinessAddr: payload.isCorrespondenceAsBusinessAddr,
@@ -116,7 +117,7 @@ export const createOrganisation = (personId, payload) => {
   return org
 }
 
-const generateOrganisation = (orgId, sbi) => {
+const generateOrganisation = (orgId, sbi, overrides = {}) => {
   orgId = safeSeed(orgId)
   const name = faker.company.name()
   const hasAdditionalBusinessActivities = nft(4, 2, 3)
@@ -167,10 +168,11 @@ const generateOrganisation = (orgId, sbi) => {
     isAccountablePeopleDeclarationCompleted: nft(7, 1, 2),
     additionalBusinessActivities: hasAdditionalBusinessActivities
       ? fakeIds(faker.number.int({ min: 1, max: 3 }), 164946, 964946).map((id, i) => ({
-          id: parseInt(id, 10),
-          type: `Additional Business Activity ${i}`
-        }))
-      : null
+        id: parseInt(id, 10),
+        type: `Additional Business Activity ${i}`
+      }))
+      : null,
+    ...overrides
   }
 
   organisations[orgId] = org
@@ -214,7 +216,7 @@ export const retrieveOrganisation = (orgId) => {
     throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   }
 
-  return organisations[orgId] ?? generateOrganisation(orgId, sbi)
+  return organisations[orgId] ?? generateOrganisation(orgId, sbi, staticBusinessData[orgId])
 }
 
 export const retrieveOrganisationCustomers = (orgId) => {
