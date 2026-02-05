@@ -611,7 +611,7 @@ export const sfdPersonLookupPerformance = {
  * (orgId -> { sbi, customers }); merged into sfdBusinessLookup in business.js.
  */
 export const sfdBusinessLookupPerformance = {
-  5583575: { sbi: 107167406, customers: [5007704, 3001000] },
+  5583575: { sbi: 107167406, customers: [5007704] },
   5578463: { sbi: 107097991, customers: [5010242] },
   5501559: { sbi: 106354662, customers: [5002139] },
   5485593: { sbi: 106221605, customers: [5013725] },
@@ -623,7 +623,7 @@ export const sfdBusinessLookupPerformance = {
   5565032: { sbi: 107209382, customers: [5029327] },
   5364244: { sbi: 113775119, customers: [5018617] },
   5350297: { sbi: 112951133, customers: [5039002] },
-  5581458: { sbi: 106734901, customers: [5002021, 3001000] },
+  5581458: { sbi: 106734901, customers: [5002021] },
   5561253: { sbi: 106679425, customers: [5002021] },
   5654355: { sbi: 121824295, customers: [5002021] },
   5594216: { sbi: 106718650, customers: [5002021] },

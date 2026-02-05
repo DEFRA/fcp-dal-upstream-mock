@@ -16,12 +16,12 @@ export const sfdBusinessDetailsLookup = {
     name: 'Missing Address',
     address: {
       address1: null,
-      address2: 'Back entrance',
+      address2: null,
       address3: null,
-      city: 'Town',
+      city: null,
       county: null,
-      postalCode: 'KL8 9MN',
-      country: 'United Kingdom'
+      postalCode: null,
+      country: null
     }
   },
   3009005: {
