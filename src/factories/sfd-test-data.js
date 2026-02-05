@@ -2566,10 +2566,27 @@ export const sfdPersonLookup = {
   5874670: { crn: '1105815528' },
   5875755: { crn: '1105826023' },
   5901993: { crn: '1106081692' },
-  8000001: { crn: '8000000001' }
+  8000001: { crn: '8000000001' },
+
+  // Business details test user — CRN 3009000000, linked to orgs 3009000–3009007
+  3009100: {
+    crn: '3009000000',
+    firstName: 'Business',
+    lastName: 'Details Test'
+  }
 }
 
 export const sfdBusinessLookup = {
+  // Business details test data orgs (3009000–3009007); SBIs 3-prefix 9-digit; CRN 3009000000 (personId 3009100)
+  3009000: { sbi: 300900001, customers: [3009100] },
+  3009001: { sbi: 300900002, customers: [3009100] },
+  3009002: { sbi: 300900003, customers: [3009100] },
+  3009003: { sbi: 300900004, customers: [3009100] },
+  3009004: { sbi: 300900005, customers: [3009100] },
+  3009005: { sbi: 300900006, customers: [3009100] },
+  3009006: { sbi: 300900007, customers: [3009100] },
+  3009007: { sbi: 300900008, customers: [3009100] },
+
   // SFD requested
   3001458: {
     sbi: 300145801,
