@@ -1,3 +1,28 @@
+/**
+ * sfdBusinessDetailsLookup: orgId -> override object for business details.
+ * Entries are merged into staticBusinessData in id-lookups.js and applied as overrides in
+ * organisation.factory.js (generateOrganisation(orgId, sbi, staticBusinessData[orgId])).
+ * Only include the keys you need; other org fields come from the factory defaults.
+ *
+ * Example shape for the fields relevant to SFD business details (name, manual address, phones, email):
+ *
+ * {
+ *   name: 'Business Name',
+ *   address: {
+ *     address1: 'Line 1',
+ *     address2: null,
+ *     address3: null,
+ *     address4: null,
+ *     address5: null,
+ *     postalCode: 'AB1 2CD',
+ *     country: 'United Kingdom',
+ *     uprn: null  // Set to null for manual entry / test scenarios (no lookup)
+ *   },
+ *   landline: '01234567890',
+ *   mobile: '07123456789',
+ *   email: 'business@example.com'
+ * }
+ */
 export const sfdBusinessDetailsLookup = {
   // Business details test user (CRN 3009000000)
   3009000: {
