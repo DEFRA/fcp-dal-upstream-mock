@@ -34,6 +34,16 @@ export const staticPersonData = {
     title: null,
     otherTitle: null
   },
+  // Person in org 3333333333
+  11111120: {
+    crn: '1111111901',
+    title: 'Lady',
+    otherTitle: 'Lady',
+    firstName: null,
+    middleName: '',
+    lastName: 'Grey',
+    privileges: []
+  },
   // people in org 1111111111 and 2222222222
   11111122: { crn: '1111112200' },
   11111222: { crn: '1111122200' },
@@ -254,6 +264,7 @@ export const orgIdLookup = {
       }
     ]
   },
+  3333333333: { sbi: 3333333333, customers: [11111120] },
 
   // business from dev CRM
   5565448: {
