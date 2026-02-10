@@ -1978,12 +1978,12 @@ export const sfdPersonLookup = {
   },
   ...sfdPersonLookupPerformance,
 
-  // Person stub for the Business details test user. When the frontend signs in as CRN 3009000000
+  // Person stub for the Business details test user. When the frontend signs in as CRN 3020000000
   // (see defra-id.data.json), the DAL mock resolves that user to person ID 3009100 and returns this
   // data; the user is linked to orgs 3009000–3009007 in business.js. The name "Business Details Test"
   // is intentional so it is obvious in the UI and logs which test scenario this user represents.
   3009100: {
-    crn: '3009000000',
+    crn: '3020000000',
     firstName: 'Business',
     lastName: 'Details Test'
   }
