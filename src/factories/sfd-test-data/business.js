@@ -24,7 +24,7 @@
  * }
  *
  * Org IDs follow the same numbering/buffer approach as personal.js: 100-org-ID buffer between
- * different scenario types; 10 examples per scenario (or 1 per 100-block for Invalid business phone).
+ * different scenario types; 10 examples per scenario
  */
 const cleanAddress = {
   address1: '1 Clean Street',
@@ -473,7 +473,53 @@ export const sfdBusinessDetailsLookup = {
   3012206: { name: 'Email invalid format - example 7', email: '@nodomain.co' },
   3012207: { name: 'Email invalid format - example 8', email: '@nodomain.co' },
   3012208: { name: 'Email invalid format - example 9', email: 'nodot@domain' },
-  3012209: { name: 'Email invalid format - example 10', email: 'nodot@domain' }
+  3012209: { name: 'Email invalid format - example 10', email: 'nodot@domain' },
+
+  // Combined invalid (3012300-3012699) - multiple sections invalid per org for interrupter journey
+  // 3012300-3012309: Address + phone invalid (10)
+  3012300: { name: 'Address + phone invalid - example 1', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012301: { name: 'Address + phone invalid - example 2', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012302: { name: 'Address + phone invalid - example 3', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012303: { name: 'Address + phone invalid - example 4', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012304: { name: 'Address + phone invalid - example 5', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012305: { name: 'Address + phone invalid - example 6', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012306: { name: 'Address + phone invalid - example 7', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012307: { name: 'Address + phone invalid - example 8', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012308: { name: 'Address + phone invalid - example 9', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012309: { name: 'Address + phone invalid - example 10', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  // 3012400-3012409: Address + email invalid (10)
+  3012400: { name: 'Address + email invalid - example 1', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012401: { name: 'Address + email invalid - example 2', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012402: { name: 'Address + email invalid - example 3', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012403: { name: 'Address + email invalid - example 4', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012404: { name: 'Address + email invalid - example 5', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012405: { name: 'Address + email invalid - example 6', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012406: { name: 'Address + email invalid - example 7', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012407: { name: 'Address + email invalid - example 8', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012408: { name: 'Address + email invalid - example 9', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012409: { name: 'Address + email invalid - example 10', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  // 3012500-3012509: Phone + email invalid (10)
+  3012500: { name: 'Phone + email invalid - example 1', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012501: { name: 'Phone + email invalid - example 2', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012502: { name: 'Phone + email invalid - example 3', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012503: { name: 'Phone + email invalid - example 4', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012504: { name: 'Phone + email invalid - example 5', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012505: { name: 'Phone + email invalid - example 6', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012506: { name: 'Phone + email invalid - example 7', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012507: { name: 'Phone + email invalid - example 8', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012508: { name: 'Phone + email invalid - example 9', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012509: { name: 'Phone + email invalid - example 10', mobile: 'not-a-phone', email: 'not-an-email' },
+  // 3012600-3012609: All three invalid - address + phone + email (10)
+  3012600: { name: 'All three invalid - example 1', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012601: { name: 'All three invalid - example 2', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012602: { name: 'All three invalid - example 3', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012603: { name: 'All three invalid - example 4', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012604: { name: 'All three invalid - example 5', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012605: { name: 'All three invalid - example 6', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012606: { name: 'All three invalid - example 7', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012607: { name: 'All three invalid - example 8', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012608: { name: 'All three invalid - example 9', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
+  3012609: { name: 'All three invalid - example 10', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' }
 }
 
 import { sfdBusinessLookupPerformance } from './performance.js'
