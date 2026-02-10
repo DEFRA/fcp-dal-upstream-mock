@@ -1,10 +1,15 @@
 /**
- * sfdBusinessDetailsLookup: orgId -> override object for business details.
- * Entries are merged into staticBusinessData in id-lookups.js and applied as overrides in
- * organisation.factory.js (generateOrganisation(orgId, sbi, staticBusinessData[orgId])).
- * Only include the keys you need; other org fields come from the factory defaults.
+ * This file provides two lookups for the DAL mock:
  *
- * Example shape for the fields relevant to SFD business details (name, manual address, phones, email):
+ * sfdBusinessDetailsLookup: orgId -> override object for business details (name, address, phones,
+ * email). Entries are merged into staticBusinessData in id-lookups.js and applied as overrides in
+ * organisation.factory.js. Only include the keys you need; other org fields come from factory defaults.
+ *
+ * sfdBusinessLookupCore: orgId -> { sbi, customers } (edge-case org existence + SBI + customer IDs).
+ * The full sfdBusinessLookup (core + performance) is assembled in sfd-test-data/index.js and merged
+ * into orgIdLookup in id-lookups.js. Business details come from sfdBusinessDetailsLookup above.
+ *
+ * Example shape for sfdBusinessDetailsLookup entries:
  *
  * {
  *   name: 'Business Name',
@@ -24,8 +29,15 @@
  * }
  *
  * Org IDs follow the same numbering/buffer approach as personal.js: 100-org-ID buffer between
- * different scenario types; 10 examples per scenario
+ * different scenario types; 10 examples per scenario.
  */
+import { SHARED_TEST_ORG_PERSON_IDS } from './personal.js'
+
+// SFD test data IDs — used in lookups below
+const SHARED_TEST_ORG_ID = 3001458
+const BUSINESS_DETAILS_TEST_PERSON_ID = 3009100
+const ORG_ID_NO_CPH = 80000001
+
 const cleanAddress = {
   address1: '1 Clean Street',
   address2: null,
@@ -522,49 +534,48 @@ export const sfdBusinessDetailsLookup = {
   3012609: { name: 'All three invalid - example 10', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' }
 }
 
-import { sfdBusinessLookupPerformance } from './performance.js'
+/*
+ * Org/customer lookup: which orgs exist and who their "customers" are (person IDs).
+ *
+ * What: This data is the "org existence + SBI + customers" lookup. Each entry is
+ * orgId -> { sbi, customers }. It does not hold business details (name, address, phones,
+ * email); those come from sfdBusinessDetailsLookup.
+ *
+ * Where used: Merged into orgIdLookup in id-lookups.js, which drives orgIdToSbi and
+ * orgIdToPersonIds (and thus "which orgs exist" and "who are the customers of this org?").
+ *
+ * Why three parts: (1) Shared Test Org — one org (3001458) shared by many personal-details
+ * test users. (2) Business-details orgs — one org per sfdBusinessDetailsLookup entry, each
+ * with customer 3009100. (3) Other fixed orgs — e.g. org with no CPH for tests.
+ *
+ * Sync rule: Customers for the shared Test Org (3001458) are derived in personal.js
+ * (SHARED_TEST_ORG_PERSON_IDS = sfdPersonLookup keys except 3009100). When adding a new test user
+ * with org 3001458 in defra-id, add their person ID to sfdPersonLookup in personal.js; they appear
+ * in SHARED_TEST_ORG_PERSON_IDS automatically.
+ */
 
-// Build org lookup for every org ID in sfdBusinessDetailsLookup (CRN 3020000000, personId 3009100).
+const sharedTestOrgLookup = {
+  [SHARED_TEST_ORG_ID]: {
+    sbi: 300145801,
+    customers: SHARED_TEST_ORG_PERSON_IDS
+  }
+}
+
+// One org per sfdBusinessDetailsLookup entry; each has customer BUSINESS_DETAILS_TEST_PERSON_ID.
 const businessDetailsOrgLookup = Object.fromEntries(
   Object.keys(sfdBusinessDetailsLookup).map((orgId) => {
     const id = Number(orgId)
-    return [id, { sbi: 300900001 + (id - 3009000), customers: [3009100] }]
+    return [id, { sbi: 300900001 + (id - 3009000), customers: [BUSINESS_DETAILS_TEST_PERSON_ID] }]
   })
 )
 
-// All static personal.js test users who use the shared Test Org in defra-id.data.json (org 3001458).
-// Business details test data orgs are in sfdBusinessDetailsLookup; lookup built from it above.
-const sfdBusinessLookupCore = {
-  // Defra ID stub "Test User" / shared Test Org (defra-id.data.json) — org 3001458, SBI 300145801
-  3001458: {
-    sbi: 300145801,
-    customers: [
-      3000000, 3000001, 3000002, 3000003, 3000004, 3000005, 3000006, 3000007, 3000008, 3000009,
-      3010000, 3010001, 3010002, 3010003, 3010004, 3010005, 3010006, 3010007, 3010008, 3010009,
-      3010010, 3010011, 3010012, 3010013, 3010014, 3010015, 3010016, 3010017, 3010018, 3010019,
-      3010020, 3010021, 3010022, 3010023, 3010024, 3010025, 3010026, 3010027, 3010028, 3010029,
-      3010030, 3010031, 3010032, 3010033, 3010034, 3010035, 3010036, 3010037, 3010038, 3010039,
-      3001000, 3001001, 3001002, 3001003, 3001004, 3001005, 3001006, 3001007, 3001008, 3001009,
-      3002000, 3002100, 3002200, 3002300, 3002400, 3002500, 3002600, 3002700, 3002800, 3002900,
-      3010040, 3010041, 3010042, 3010043, 3010044, 3010045, 3010046, 3010047, 3010048, 3010049,
-      3010050, 3010051, 3010052, 3010053, 3010054, 3010055, 3010056, 3010057, 3010058, 3010059,
-      3010060, 3010061, 3010062, 3010063, 3010064, 3010065, 3010066, 3010067, 3010068, 3010069,
-      3010070, 3010071, 3010072, 3010073, 3010074, 3010075, 3010076, 3010077, 3010078, 3010079,
-      3004000, 3004100, 3004200, 3004300, 3004400, 3004500, 3004600, 3004700, 3004800, 3004900,
-      3010080, 3010081, 3010082, 3010083, 3010084, 3010085, 3010086, 3010087, 3010088, 3010089,
-      3010090, 3010091, 3010092, 3010093, 3010094, 3010095, 3010096, 3010097, 3010098, 3010099,
-      3003000, 3003100, 3003200, 3003300, 3003400, 3003500, 3003600, 3003700, 3003800, 3003900,
-      3005000, 3005100, 3005200, 3005300, 3005400, 3005500, 3005600, 3005700, 3005800, 3005900,
-      3006000, 3006100, 3006200, 3006300, 3006400, 3006500, 3006600, 3006700, 3006800, 3006900,
-      3007000, 3007100, 3007200, 3007300, 3007400, 3007500, 3007600, 3007700, 3007800, 3007900,
-      3008000, 3008100, 3008200, 3008300, 3008400, 3008500, 3008600, 3008700, 3008800, 3008900
-    ]
-  },
-  ...businessDetailsOrgLookup,
-  80000001: { sbi: 8000000001, customers: [8000001], cphs: [] } // org with no CPH
+// Other fixed orgs (e.g. org with no CPH for tests).
+const otherFixedOrgsLookup = {
+  [ORG_ID_NO_CPH]: { sbi: 8000000001, customers: [8000001], cphs: [] }
 }
 
-export const sfdBusinessLookup = {
-  ...sfdBusinessLookupCore,
-  ...sfdBusinessLookupPerformance
+export const sfdBusinessLookupCore = {
+  ...sharedTestOrgLookup,
+  ...businessDetailsOrgLookup,
+  ...otherFixedOrgsLookup
 }

@@ -2,6 +2,8 @@
  * sfdPersonLookup: Record<personId, PersonStub>
  * Keys are numeric person IDs; values are stubs merged into staticPersonData (id-lookups.js)
  * and used as overrides in person.factory.js generatePerson(personId, crn, overrides).
+ * Edge-case / business test data only. Performance-test person data is in performance.js
+ * and merged at sfd-test-data/index.js.
  *
  * PersonStub:
  *   - crn (string, required) — Customer Reference Number; must be present for the person to be resolvable.
@@ -14,8 +16,6 @@
  * TODO: AddressStub:
  *   address1, address2, address3, address4, address5, street, city, county, postalCode, country, uprn. etc.
  */
-import { sfdPersonLookupPerformance } from './performance.js'
-
 export const sfdPersonLookup = {
   // SFD edge case test users - static entries for testing
   // Starting from person ID 3000000, CRN 3000000000
@@ -1976,7 +1976,6 @@ export const sfdPersonLookup = {
       uprn: null
     }
   },
-  ...sfdPersonLookupPerformance,
 
   // Person stub for the Business details test user. When the frontend signs in as CRN 3020000000
   // (see defra-id.data.json), the DAL mock resolves that user to person ID 3009100 and returns this
@@ -1988,4 +1987,12 @@ export const sfdPersonLookup = {
     lastName: 'Details Test'
   }
 }
+
+// Person IDs that use the shared Test Org (3001458) in defra-id. Derived from sfdPersonLookup keys
+// excluding 3009100 (Business Details Test). When adding a test user with org 3001458 in defra-id,
+// add their person ID to sfdPersonLookup; they appear here automatically.
+export const SHARED_TEST_ORG_PERSON_IDS = Object.keys(sfdPersonLookup)
+  .map(Number)
+  .filter((id) => id !== 3009100)
+  .sort((a, b) => a - b)
 

@@ -1,6 +1,6 @@
 /**
  * Person stubs for SFD-requested and SFD performance-testing. Same shape as entries in personal.js
- * (person ID to PersonStub); merged into sfdPersonLookup in personal.js.
+ * (person ID to PersonStub); merged into sfdPersonLookup in sfd-test-data/index.js.
  */
 export const sfdPersonLookupPerformance = {
   5038882: { crn: '1100388826' },
@@ -608,7 +608,7 @@ export const sfdPersonLookupPerformance = {
 
 /**
  * Org lookups for SFD performance testing (and SFD-requested). Same shape as in business.js
- * (orgId -> { sbi, customers }); merged into sfdBusinessLookup in business.js.
+ * (orgId -> { sbi, customers }); merged into sfdBusinessLookup in sfd-test-data/index.js.
  */
 export const sfdBusinessLookupPerformance = {
   5583575: { sbi: 107167406, customers: [5007704] },
