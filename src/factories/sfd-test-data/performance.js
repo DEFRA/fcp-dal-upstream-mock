@@ -603,8 +603,8 @@ export const sfdPersonLookupPerformance = {
   5874670: { crn: '1105815528' },
   5875755: { crn: '1105826023' },
   5901993: { crn: '1106081692' },
-  8000001: { crn: '8000000001' },
-};
+  8000001: { crn: '8000000001' }
+}
 
 /**
  * Org lookups for SFD performance testing (and SFD-requested). Same shape as in business.js
@@ -1224,5 +1224,5 @@ export const sfdBusinessLookupPerformance = {
   5886807: { sbi: 200771472, customers: [5195900] },
   5888685: { sbi: 200778446, customers: [5181489] },
   5891514: { sbi: 200789201, customers: [5335309] },
-  5467167: { sbi: 106430700, customers: [5069674] },
-};
+  5467167: { sbi: 106430700, customers: [5069674] }
+}

@@ -145,52 +145,172 @@ export const sfdBusinessDetailsLookup = {
 
   // Address (3009300-3010399) - null/empty + invalid, 100-org-ID buffer per scenario type
   // 3009300-3009399: Address line 1 empty (10)
-  3009300: { name: 'Address line 1 empty - example 1', address: { ...minimalValidAddress, address1: '' } },
-  3009301: { name: 'Address line 1 empty - example 2', address: { ...minimalValidAddress, address1: '' } },
-  3009302: { name: 'Address line 1 empty - example 3', address: { ...minimalValidAddress, address1: '' } },
-  3009303: { name: 'Address line 1 empty - example 4', address: { ...minimalValidAddress, address1: '' } },
-  3009304: { name: 'Address line 1 empty - example 5', address: { ...minimalValidAddress, address1: '' } },
-  3009305: { name: 'Address line 1 empty - example 6', address: { ...minimalValidAddress, address1: '' } },
-  3009306: { name: 'Address line 1 empty - example 7', address: { ...minimalValidAddress, address1: '' } },
-  3009307: { name: 'Address line 1 empty - example 8', address: { ...minimalValidAddress, address1: '' } },
-  3009308: { name: 'Address line 1 empty - example 9', address: { ...minimalValidAddress, address1: '' } },
-  3009309: { name: 'Address line 1 empty - example 10', address: { ...minimalValidAddress, address1: '' } },
+  3009300: {
+    name: 'Address line 1 empty - example 1',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009301: {
+    name: 'Address line 1 empty - example 2',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009302: {
+    name: 'Address line 1 empty - example 3',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009303: {
+    name: 'Address line 1 empty - example 4',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009304: {
+    name: 'Address line 1 empty - example 5',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009305: {
+    name: 'Address line 1 empty - example 6',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009306: {
+    name: 'Address line 1 empty - example 7',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009307: {
+    name: 'Address line 1 empty - example 8',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009308: {
+    name: 'Address line 1 empty - example 9',
+    address: { ...minimalValidAddress, address1: '' }
+  },
+  3009309: {
+    name: 'Address line 1 empty - example 10',
+    address: { ...minimalValidAddress, address1: '' }
+  },
 
   // 3009400-3009499: Address line 1 too long (10) - ADDRESS_LINE_MAX 100
-  3009400: { name: 'Address line 1 too long - example 1', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009401: { name: 'Address line 1 too long - example 2', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009402: { name: 'Address line 1 too long - example 3', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009403: { name: 'Address line 1 too long - example 4', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009404: { name: 'Address line 1 too long - example 5', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009405: { name: 'Address line 1 too long - example 6', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009406: { name: 'Address line 1 too long - example 7', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009407: { name: 'Address line 1 too long - example 8', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009408: { name: 'Address line 1 too long - example 9', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
-  3009409: { name: 'Address line 1 too long - example 10', address: { ...minimalValidAddress, address1: 'A'.repeat(101) } },
+  3009400: {
+    name: 'Address line 1 too long - example 1',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009401: {
+    name: 'Address line 1 too long - example 2',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009402: {
+    name: 'Address line 1 too long - example 3',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009403: {
+    name: 'Address line 1 too long - example 4',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009404: {
+    name: 'Address line 1 too long - example 5',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009405: {
+    name: 'Address line 1 too long - example 6',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009406: {
+    name: 'Address line 1 too long - example 7',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009407: {
+    name: 'Address line 1 too long - example 8',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009408: {
+    name: 'Address line 1 too long - example 9',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
+  3009409: {
+    name: 'Address line 1 too long - example 10',
+    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+  },
 
   // 3009500-3009599: Address line 2 too long (10)
-  3009500: { name: 'Address line 2 too long - example 1', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009501: { name: 'Address line 2 too long - example 2', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009502: { name: 'Address line 2 too long - example 3', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009503: { name: 'Address line 2 too long - example 4', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009504: { name: 'Address line 2 too long - example 5', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009505: { name: 'Address line 2 too long - example 6', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009506: { name: 'Address line 2 too long - example 7', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009507: { name: 'Address line 2 too long - example 8', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009508: { name: 'Address line 2 too long - example 9', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
-  3009509: { name: 'Address line 2 too long - example 10', address: { ...minimalValidAddress, address2: 'A'.repeat(101) } },
+  3009500: {
+    name: 'Address line 2 too long - example 1',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009501: {
+    name: 'Address line 2 too long - example 2',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009502: {
+    name: 'Address line 2 too long - example 3',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009503: {
+    name: 'Address line 2 too long - example 4',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009504: {
+    name: 'Address line 2 too long - example 5',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009505: {
+    name: 'Address line 2 too long - example 6',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009506: {
+    name: 'Address line 2 too long - example 7',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009507: {
+    name: 'Address line 2 too long - example 8',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009508: {
+    name: 'Address line 2 too long - example 9',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
+  3009509: {
+    name: 'Address line 2 too long - example 10',
+    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+  },
 
   // 3009600-3009699: Address line 3 too long (10)
-  3009600: { name: 'Address line 3 too long - example 1', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009601: { name: 'Address line 3 too long - example 2', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009602: { name: 'Address line 3 too long - example 3', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009603: { name: 'Address line 3 too long - example 4', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009604: { name: 'Address line 3 too long - example 5', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009605: { name: 'Address line 3 too long - example 6', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009606: { name: 'Address line 3 too long - example 7', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009607: { name: 'Address line 3 too long - example 8', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009608: { name: 'Address line 3 too long - example 9', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
-  3009609: { name: 'Address line 3 too long - example 10', address: { ...minimalValidAddress, address3: 'A'.repeat(101) } },
+  3009600: {
+    name: 'Address line 3 too long - example 1',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009601: {
+    name: 'Address line 3 too long - example 2',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009602: {
+    name: 'Address line 3 too long - example 3',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009603: {
+    name: 'Address line 3 too long - example 4',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009604: {
+    name: 'Address line 3 too long - example 5',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009605: {
+    name: 'Address line 3 too long - example 6',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009606: {
+    name: 'Address line 3 too long - example 7',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009607: {
+    name: 'Address line 3 too long - example 8',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009608: {
+    name: 'Address line 3 too long - example 9',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
+  3009609: {
+    name: 'Address line 3 too long - example 10',
+    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+  },
 
   // 3009700-3009799: City empty (10)
   3009700: { name: 'City empty - example 1', address: { ...minimalValidAddress, city: '' } },
@@ -205,52 +325,172 @@ export const sfdBusinessDetailsLookup = {
   3009709: { name: 'City empty - example 10', address: { ...minimalValidAddress, city: '' } },
 
   // 3009800-3009899: City too long (10) - TOWN_CITY_MAX 60
-  3009800: { name: 'City too long - example 1', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009801: { name: 'City too long - example 2', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009802: { name: 'City too long - example 3', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009803: { name: 'City too long - example 4', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009804: { name: 'City too long - example 5', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009805: { name: 'City too long - example 6', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009806: { name: 'City too long - example 7', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009807: { name: 'City too long - example 8', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009808: { name: 'City too long - example 9', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
-  3009809: { name: 'City too long - example 10', address: { ...minimalValidAddress, city: 'A'.repeat(61) } },
+  3009800: {
+    name: 'City too long - example 1',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009801: {
+    name: 'City too long - example 2',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009802: {
+    name: 'City too long - example 3',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009803: {
+    name: 'City too long - example 4',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009804: {
+    name: 'City too long - example 5',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009805: {
+    name: 'City too long - example 6',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009806: {
+    name: 'City too long - example 7',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009807: {
+    name: 'City too long - example 8',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009808: {
+    name: 'City too long - example 9',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
+  3009809: {
+    name: 'City too long - example 10',
+    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+  },
 
   // 3009900-3009999: County too long (10) - COUNTY_MAX 60
-  3009900: { name: 'County too long - example 1', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009901: { name: 'County too long - example 2', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009902: { name: 'County too long - example 3', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009903: { name: 'County too long - example 4', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009904: { name: 'County too long - example 5', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009905: { name: 'County too long - example 6', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009906: { name: 'County too long - example 7', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009907: { name: 'County too long - example 8', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009908: { name: 'County too long - example 9', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
-  3009909: { name: 'County too long - example 10', address: { ...minimalValidAddress, county: 'A'.repeat(61) } },
+  3009900: {
+    name: 'County too long - example 1',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009901: {
+    name: 'County too long - example 2',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009902: {
+    name: 'County too long - example 3',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009903: {
+    name: 'County too long - example 4',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009904: {
+    name: 'County too long - example 5',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009905: {
+    name: 'County too long - example 6',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009906: {
+    name: 'County too long - example 7',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009907: {
+    name: 'County too long - example 8',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009908: {
+    name: 'County too long - example 9',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
+  3009909: {
+    name: 'County too long - example 10',
+    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+  },
 
   // 3010000-3010099: Postcode empty (10)
-  3010000: { name: 'Postcode empty - example 1', address: { ...minimalValidAddress, postalCode: '' } },
-  3010001: { name: 'Postcode empty - example 2', address: { ...minimalValidAddress, postalCode: '' } },
-  3010002: { name: 'Postcode empty - example 3', address: { ...minimalValidAddress, postalCode: '' } },
-  3010003: { name: 'Postcode empty - example 4', address: { ...minimalValidAddress, postalCode: '' } },
-  3010004: { name: 'Postcode empty - example 5', address: { ...minimalValidAddress, postalCode: '' } },
-  3010005: { name: 'Postcode empty - example 6', address: { ...minimalValidAddress, postalCode: '' } },
-  3010006: { name: 'Postcode empty - example 7', address: { ...minimalValidAddress, postalCode: '' } },
-  3010007: { name: 'Postcode empty - example 8', address: { ...minimalValidAddress, postalCode: '' } },
-  3010008: { name: 'Postcode empty - example 9', address: { ...minimalValidAddress, postalCode: '' } },
-  3010009: { name: 'Postcode empty - example 10', address: { ...minimalValidAddress, postalCode: '' } },
+  3010000: {
+    name: 'Postcode empty - example 1',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010001: {
+    name: 'Postcode empty - example 2',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010002: {
+    name: 'Postcode empty - example 3',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010003: {
+    name: 'Postcode empty - example 4',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010004: {
+    name: 'Postcode empty - example 5',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010005: {
+    name: 'Postcode empty - example 6',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010006: {
+    name: 'Postcode empty - example 7',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010007: {
+    name: 'Postcode empty - example 8',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010008: {
+    name: 'Postcode empty - example 9',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
+  3010009: {
+    name: 'Postcode empty - example 10',
+    address: { ...minimalValidAddress, postalCode: '' }
+  },
 
   // 3010100-3010199: Postcode too long (10) - POSTCODE_MAX 8
-  3010100: { name: 'Postcode too long - example 1', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010101: { name: 'Postcode too long - example 2', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010102: { name: 'Postcode too long - example 3', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010103: { name: 'Postcode too long - example 4', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010104: { name: 'Postcode too long - example 5', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010105: { name: 'Postcode too long - example 6', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010106: { name: 'Postcode too long - example 7', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010107: { name: 'Postcode too long - example 8', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010108: { name: 'Postcode too long - example 9', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
-  3010109: { name: 'Postcode too long - example 10', address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) } },
+  3010100: {
+    name: 'Postcode too long - example 1',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010101: {
+    name: 'Postcode too long - example 2',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010102: {
+    name: 'Postcode too long - example 3',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010103: {
+    name: 'Postcode too long - example 4',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010104: {
+    name: 'Postcode too long - example 5',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010105: {
+    name: 'Postcode too long - example 6',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010106: {
+    name: 'Postcode too long - example 7',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010107: {
+    name: 'Postcode too long - example 8',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010108: {
+    name: 'Postcode too long - example 9',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
+  3010109: {
+    name: 'Postcode too long - example 10',
+    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+  },
 
   // 3010200-3010299: Country empty (10)
   3010200: { name: 'Country empty - example 1', address: { ...minimalValidAddress, country: '' } },
@@ -265,16 +505,46 @@ export const sfdBusinessDetailsLookup = {
   3010209: { name: 'Country empty - example 10', address: { ...minimalValidAddress, country: '' } },
 
   // 3010300-3010399: Country too long (10) - COUNTRY_MAX 60
-  3010300: { name: 'Country too long - example 1', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010301: { name: 'Country too long - example 2', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010302: { name: 'Country too long - example 3', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010303: { name: 'Country too long - example 4', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010304: { name: 'Country too long - example 5', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010305: { name: 'Country too long - example 6', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010306: { name: 'Country too long - example 7', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010307: { name: 'Country too long - example 8', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010308: { name: 'Country too long - example 9', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
-  3010309: { name: 'Country too long - example 10', address: { ...minimalValidAddress, country: 'A'.repeat(61) } },
+  3010300: {
+    name: 'Country too long - example 1',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010301: {
+    name: 'Country too long - example 2',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010302: {
+    name: 'Country too long - example 3',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010303: {
+    name: 'Country too long - example 4',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010304: {
+    name: 'Country too long - example 5',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010305: {
+    name: 'Country too long - example 6',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010306: {
+    name: 'Country too long - example 7',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010307: {
+    name: 'Country too long - example 8',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010308: {
+    name: 'Country too long - example 9',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
+  3010309: {
+    name: 'Country too long - example 10',
+    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+  },
 
   // Phone (3010400-3010899) - both null + length invalid
   // 3010400-3010499: Both phones null (10)
@@ -302,16 +572,46 @@ export const sfdBusinessDetailsLookup = {
   3010509: { name: 'Landline too short - example 10', landline: '123' },
 
   // 3010600-3010699: Landline too long (10) - PHONE_NUMBER_MAX 50
-  3010600: { name: 'Landline too long - example 1', landline: '012345678901234567890123456789012345678901234567890' },
-  3010601: { name: 'Landline too long - example 2', landline: '012345678901234567890123456789012345678901234567890' },
-  3010602: { name: 'Landline too long - example 3', landline: '012345678901234567890123456789012345678901234567890' },
-  3010603: { name: 'Landline too long - example 4', landline: '012345678901234567890123456789012345678901234567890' },
-  3010604: { name: 'Landline too long - example 5', landline: '012345678901234567890123456789012345678901234567890' },
-  3010605: { name: 'Landline too long - example 6', landline: '012345678901234567890123456789012345678901234567890' },
-  3010606: { name: 'Landline too long - example 7', landline: '012345678901234567890123456789012345678901234567890' },
-  3010607: { name: 'Landline too long - example 8', landline: '012345678901234567890123456789012345678901234567890' },
-  3010608: { name: 'Landline too long - example 9', landline: '012345678901234567890123456789012345678901234567890' },
-  3010609: { name: 'Landline too long - example 10', landline: '012345678901234567890123456789012345678901234567890' },
+  3010600: {
+    name: 'Landline too long - example 1',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010601: {
+    name: 'Landline too long - example 2',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010602: {
+    name: 'Landline too long - example 3',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010603: {
+    name: 'Landline too long - example 4',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010604: {
+    name: 'Landline too long - example 5',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010605: {
+    name: 'Landline too long - example 6',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010606: {
+    name: 'Landline too long - example 7',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010607: {
+    name: 'Landline too long - example 8',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010608: {
+    name: 'Landline too long - example 9',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
+  3010609: {
+    name: 'Landline too long - example 10',
+    landline: '012345678901234567890123456789012345678901234567890'
+  },
 
   // 3010700-3010799: Mobile too short (10)
   3010700: { name: 'Mobile too short - example 1', mobile: '123' },
@@ -326,16 +626,46 @@ export const sfdBusinessDetailsLookup = {
   3010709: { name: 'Mobile too short - example 10', mobile: '123' },
 
   // 3010800-3010899: Mobile too long (10)
-  3010800: { name: 'Mobile too long - example 1', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010801: { name: 'Mobile too long - example 2', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010802: { name: 'Mobile too long - example 3', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010803: { name: 'Mobile too long - example 4', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010804: { name: 'Mobile too long - example 5', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010805: { name: 'Mobile too long - example 6', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010806: { name: 'Mobile too long - example 7', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010807: { name: 'Mobile too long - example 8', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010808: { name: 'Mobile too long - example 9', mobile: '012345678901234567890123456789012345678901234567890' },
-  3010809: { name: 'Mobile too long - example 10', mobile: '012345678901234567890123456789012345678901234567890' },
+  3010800: {
+    name: 'Mobile too long - example 1',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010801: {
+    name: 'Mobile too long - example 2',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010802: {
+    name: 'Mobile too long - example 3',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010803: {
+    name: 'Mobile too long - example 4',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010804: {
+    name: 'Mobile too long - example 5',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010805: {
+    name: 'Mobile too long - example 6',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010806: {
+    name: 'Mobile too long - example 7',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010807: {
+    name: 'Mobile too long - example 8',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010808: {
+    name: 'Mobile too long - example 9',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
+  3010809: {
+    name: 'Mobile too long - example 10',
+    mobile: '012345678901234567890123456789012345678901234567890'
+  },
 
   // Invalid business phone (3011000-3011999) - Invalid phone formats
   // 100-org-ID buffer between different scenario types to allow expansion
@@ -489,49 +819,239 @@ export const sfdBusinessDetailsLookup = {
 
   // Combined invalid (3012300-3012699) - multiple sections invalid per org for interrupter journey
   // 3012300-3012309: Address + phone invalid (10)
-  3012300: { name: 'Address + phone invalid - example 1', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012301: { name: 'Address + phone invalid - example 2', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012302: { name: 'Address + phone invalid - example 3', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012303: { name: 'Address + phone invalid - example 4', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012304: { name: 'Address + phone invalid - example 5', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012305: { name: 'Address + phone invalid - example 6', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012306: { name: 'Address + phone invalid - example 7', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012307: { name: 'Address + phone invalid - example 8', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012308: { name: 'Address + phone invalid - example 9', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
-  3012309: { name: 'Address + phone invalid - example 10', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null },
+  3012300: {
+    name: 'Address + phone invalid - example 1',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012301: {
+    name: 'Address + phone invalid - example 2',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012302: {
+    name: 'Address + phone invalid - example 3',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012303: {
+    name: 'Address + phone invalid - example 4',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012304: {
+    name: 'Address + phone invalid - example 5',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012305: {
+    name: 'Address + phone invalid - example 6',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012306: {
+    name: 'Address + phone invalid - example 7',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012307: {
+    name: 'Address + phone invalid - example 8',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012308: {
+    name: 'Address + phone invalid - example 9',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
+  3012309: {
+    name: 'Address + phone invalid - example 10',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null
+  },
   // 3012400-3012409: Address + email invalid (10)
-  3012400: { name: 'Address + email invalid - example 1', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012401: { name: 'Address + email invalid - example 2', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012402: { name: 'Address + email invalid - example 3', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012403: { name: 'Address + email invalid - example 4', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012404: { name: 'Address + email invalid - example 5', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012405: { name: 'Address + email invalid - example 6', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012406: { name: 'Address + email invalid - example 7', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012407: { name: 'Address + email invalid - example 8', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012408: { name: 'Address + email invalid - example 9', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
-  3012409: { name: 'Address + email invalid - example 10', address: { ...minimalValidAddress, address1: '' }, email: 'not-an-email' },
+  3012400: {
+    name: 'Address + email invalid - example 1',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012401: {
+    name: 'Address + email invalid - example 2',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012402: {
+    name: 'Address + email invalid - example 3',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012403: {
+    name: 'Address + email invalid - example 4',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012404: {
+    name: 'Address + email invalid - example 5',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012405: {
+    name: 'Address + email invalid - example 6',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012406: {
+    name: 'Address + email invalid - example 7',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012407: {
+    name: 'Address + email invalid - example 8',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012408: {
+    name: 'Address + email invalid - example 9',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
+  3012409: {
+    name: 'Address + email invalid - example 10',
+    address: { ...minimalValidAddress, address1: '' },
+    email: 'not-an-email'
+  },
   // 3012500-3012509: Phone + email invalid (10)
-  3012500: { name: 'Phone + email invalid - example 1', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012501: { name: 'Phone + email invalid - example 2', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012502: { name: 'Phone + email invalid - example 3', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012503: { name: 'Phone + email invalid - example 4', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012504: { name: 'Phone + email invalid - example 5', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012505: { name: 'Phone + email invalid - example 6', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012506: { name: 'Phone + email invalid - example 7', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012507: { name: 'Phone + email invalid - example 8', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012508: { name: 'Phone + email invalid - example 9', mobile: 'not-a-phone', email: 'not-an-email' },
-  3012509: { name: 'Phone + email invalid - example 10', mobile: 'not-a-phone', email: 'not-an-email' },
+  3012500: {
+    name: 'Phone + email invalid - example 1',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012501: {
+    name: 'Phone + email invalid - example 2',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012502: {
+    name: 'Phone + email invalid - example 3',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012503: {
+    name: 'Phone + email invalid - example 4',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012504: {
+    name: 'Phone + email invalid - example 5',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012505: {
+    name: 'Phone + email invalid - example 6',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012506: {
+    name: 'Phone + email invalid - example 7',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012507: {
+    name: 'Phone + email invalid - example 8',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012508: {
+    name: 'Phone + email invalid - example 9',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
+  3012509: {
+    name: 'Phone + email invalid - example 10',
+    mobile: 'not-a-phone',
+    email: 'not-an-email'
+  },
   // 3012600-3012609: All three invalid - address + phone + email (10)
-  3012600: { name: 'All three invalid - example 1', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012601: { name: 'All three invalid - example 2', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012602: { name: 'All three invalid - example 3', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012603: { name: 'All three invalid - example 4', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012604: { name: 'All three invalid - example 5', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012605: { name: 'All three invalid - example 6', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012606: { name: 'All three invalid - example 7', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012607: { name: 'All three invalid - example 8', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012608: { name: 'All three invalid - example 9', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' },
-  3012609: { name: 'All three invalid - example 10', address: { ...minimalValidAddress, address1: '' }, landline: null, mobile: null, email: 'not-an-email' }
+  3012600: {
+    name: 'All three invalid - example 1',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012601: {
+    name: 'All three invalid - example 2',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012602: {
+    name: 'All three invalid - example 3',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012603: {
+    name: 'All three invalid - example 4',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012604: {
+    name: 'All three invalid - example 5',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012605: {
+    name: 'All three invalid - example 6',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012606: {
+    name: 'All three invalid - example 7',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012607: {
+    name: 'All three invalid - example 8',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012608: {
+    name: 'All three invalid - example 9',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  },
+  3012609: {
+    name: 'All three invalid - example 10',
+    address: { ...minimalValidAddress, address1: '' },
+    landline: null,
+    mobile: null,
+    email: 'not-an-email'
+  }
 }
 
 /*

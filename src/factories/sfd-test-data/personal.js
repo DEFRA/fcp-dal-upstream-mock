@@ -34,7 +34,7 @@
  * different scenario types; 10 examples per scenario.
  */
 
-// Shared address shapes 
+// Shared address shapes
 const testAddressBase = {
   address1: '123 Test Street',
   address2: null,
@@ -140,39 +140,139 @@ export const sfdPersonLookup = {
   3010039: { crn: '3010000039', firstName: 'Invalid', lastName: 'dob', dateOfBirth: null },
 
   // DOB invalid - future date (3001000-3001099)
-  3001000: { crn: '3001000000', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2074-01-01T00:00:00Z').getTime() },
-  3001001: { crn: '3001000001', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2096-06-15T00:00:00Z').getTime() },
-  3001002: { crn: '3001000002', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2094-12-31T00:00:00Z').getTime() },
-  3001003: { crn: '3001000003', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime() },
-  3001004: { crn: '3001000004', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime() },
-  3001005: { crn: '3001000005', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2079-07-04T00:00:00Z').getTime() },
-  3001006: { crn: '3001000006', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2067-11-11T00:00:00Z').getTime() },
-  3001007: { crn: '3001000007', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2088-05-15T00:00:00Z').getTime() },
-  3001008: { crn: '3001000008', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime() },
-  3001009: { crn: '3001000009', firstName: 'Invalid', lastName: 'dob', dateOfBirth: new Date('2050-02-28T00:00:00Z').getTime() },
+  3001000: {
+    crn: '3001000000',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2074-01-01T00:00:00Z').getTime()
+  },
+  3001001: {
+    crn: '3001000001',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2096-06-15T00:00:00Z').getTime()
+  },
+  3001002: {
+    crn: '3001000002',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2094-12-31T00:00:00Z').getTime()
+  },
+  3001003: {
+    crn: '3001000003',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime()
+  },
+  3001004: {
+    crn: '3001000004',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime()
+  },
+  3001005: {
+    crn: '3001000005',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2079-07-04T00:00:00Z').getTime()
+  },
+  3001006: {
+    crn: '3001000006',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2067-11-11T00:00:00Z').getTime()
+  },
+  3001007: {
+    crn: '3001000007',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2088-05-15T00:00:00Z').getTime()
+  },
+  3001008: {
+    crn: '3001000008',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime()
+  },
+  3001009: {
+    crn: '3001000009',
+    firstName: 'Invalid',
+    lastName: 'dob',
+    dateOfBirth: new Date('2050-02-28T00:00:00Z').getTime()
+  },
 
   // Missing Mandatory Address Fields (3002000-3002999) - Missing address fields
   // 100-person-ID buffer between different scenario types to allow expansion
   // 3002000-3002099: Missing address1, street, city
-  3002000: { crn: '3002000000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, address1: null, street: null, city: null } },
+  3002000: {
+    crn: '3002000000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, address1: null, street: null, city: null }
+  },
   // 3002100-3002199: Missing address1 and street
-  3002100: { crn: '3002100000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, address1: null, street: null } },
+  3002100: {
+    crn: '3002100000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, address1: null, street: null }
+  },
   // 3002200-3002299: Missing city and postalCode
-  3002200: { crn: '3002200000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, city: null, postalCode: null } },
+  3002200: {
+    crn: '3002200000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, city: null, postalCode: null }
+  },
   // 3002300-3002399: Missing address1 only
-  3002300: { crn: '3002300000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, address1: null } },
+  3002300: {
+    crn: '3002300000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, address1: null }
+  },
   // 3002400-3002499: Missing street only
-  3002400: { crn: '3002400000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, street: null } },
+  3002400: {
+    crn: '3002400000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, street: null }
+  },
   // 3002500-3002599: Missing city only
-  3002500: { crn: '3002500000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, city: null } },
+  3002500: {
+    crn: '3002500000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, city: null }
+  },
   // 3002600-3002699: Missing address1 and city
-  3002600: { crn: '3002600000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, address1: null, city: null } },
+  3002600: {
+    crn: '3002600000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, address1: null, city: null }
+  },
   // 3002700-3002799: Missing street and city
-  3002700: { crn: '3002700000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, street: null, city: null } },
+  3002700: {
+    crn: '3002700000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, street: null, city: null }
+  },
   // 3002800-3002899: Missing postalCode
-  3002800: { crn: '3002800000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, postalCode: null } },
+  3002800: {
+    crn: '3002800000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, postalCode: null }
+  },
   // 3002900-3002999: Missing all address fields except country
-  3002900: { crn: '3002900000', firstName: 'Missing', lastName: 'Address', address: { ...testAddressBase, address1: null, street: null, city: null, postalCode: null } },
+  3002900: {
+    crn: '3002900000',
+    firstName: 'Missing',
+    lastName: 'Address',
+    address: { ...testAddressBase, address1: null, street: null, city: null, postalCode: null }
+  },
 
   // Address (3010040-3010059) - null/empty + invalid
   3010040: { crn: '3010000040', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
@@ -185,16 +285,66 @@ export const sfdPersonLookup = {
   3010047: { crn: '3010000047', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
   3010048: { crn: '3010000048', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
   3010049: { crn: '3010000049', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010050: { crn: '3010000050', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010051: { crn: '3010000051', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010052: { crn: '3010000052', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010053: { crn: '3010000053', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010054: { crn: '3010000054', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010055: { crn: '3010000055', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010056: { crn: '3010000056', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010057: { crn: '3010000057', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010058: { crn: '3010000058', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
-  3010059: { crn: '3010000059', firstName: 'Invalid', lastName: 'address', address: invalidAddressTooLong },
+  3010050: {
+    crn: '3010000050',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010051: {
+    crn: '3010000051',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010052: {
+    crn: '3010000052',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010053: {
+    crn: '3010000053',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010054: {
+    crn: '3010000054',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010055: {
+    crn: '3010000055',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010056: {
+    crn: '3010000056',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010057: {
+    crn: '3010000057',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010058: {
+    crn: '3010000058',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
+  3010059: {
+    crn: '3010000059',
+    firstName: 'Invalid',
+    lastName: 'address',
+    address: invalidAddressTooLong
+  },
 
   // Phone (3010060-3010079) - null/empty + invalid
   3010060: { crn: '3010000060', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
@@ -202,21 +352,111 @@ export const sfdPersonLookup = {
   3010062: { crn: '3010000062', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
   3010063: { crn: '3010000063', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
   3010064: { crn: '3010000064', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
-  3010065: { crn: '3010000065', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: null },
-  3010066: { crn: '3010000066', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: null },
-  3010067: { crn: '3010000067', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: null },
-  3010068: { crn: '3010000068', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: null },
-  3010069: { crn: '3010000069', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: null },
-  3010070: { crn: '3010000070', firstName: 'Invalid', lastName: 'phone', landline: '12345', mobile: null },
-  3010071: { crn: '3010000071', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: '123456789' },
-  3010072: { crn: '3010000072', firstName: 'Invalid', lastName: 'phone', landline: '1'.repeat(51), mobile: null },
-  3010073: { crn: '3010000073', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: '2'.repeat(51) },
-  3010074: { crn: '3010000074', firstName: 'Invalid', lastName: 'phone', landline: '123456789', mobile: null },
-  3010075: { crn: '3010000075', firstName: 'Invalid', lastName: 'phone', landline: null, mobile: '12345' },
-  3010076: { crn: '3010000076', firstName: 'Invalid', lastName: 'phone', landline: '3'.repeat(51), mobile: '' },
-  3010077: { crn: '3010000077', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '4'.repeat(51) },
-  3010078: { crn: '3010000078', firstName: 'Invalid', lastName: 'phone', landline: '12', mobile: '' },
-  3010079: { crn: '3010000079', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '34' },
+  3010065: {
+    crn: '3010000065',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: null
+  },
+  3010066: {
+    crn: '3010000066',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: null
+  },
+  3010067: {
+    crn: '3010000067',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: null
+  },
+  3010068: {
+    crn: '3010000068',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: null
+  },
+  3010069: {
+    crn: '3010000069',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: null
+  },
+  3010070: {
+    crn: '3010000070',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '12345',
+    mobile: null
+  },
+  3010071: {
+    crn: '3010000071',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: '123456789'
+  },
+  3010072: {
+    crn: '3010000072',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '1'.repeat(51),
+    mobile: null
+  },
+  3010073: {
+    crn: '3010000073',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: '2'.repeat(51)
+  },
+  3010074: {
+    crn: '3010000074',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '123456789',
+    mobile: null
+  },
+  3010075: {
+    crn: '3010000075',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: null,
+    mobile: '12345'
+  },
+  3010076: {
+    crn: '3010000076',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '3'.repeat(51),
+    mobile: ''
+  },
+  3010077: {
+    crn: '3010000077',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '',
+    mobile: '4'.repeat(51)
+  },
+  3010078: {
+    crn: '3010000078',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '12',
+    mobile: ''
+  },
+  3010079: {
+    crn: '3010000079',
+    firstName: 'Invalid',
+    lastName: 'phone',
+    landline: '',
+    mobile: '34'
+  },
 
   // Invalid Phone (3004000-3004999) - Invalid phone formats
   // 100-person-ID buffer between different scenario types to allow expansion
@@ -237,7 +477,12 @@ export const sfdPersonLookup = {
   // 3004700-3004799: Mixed invalid (letters and numbers)
   3004700: { crn: '3004700000', firstName: 'Invalid', lastName: 'Phone', mobile: '12abc34' },
   // 3004800-3004899: Too long
-  3004800: { crn: '3004800000', firstName: 'Invalid', lastName: 'Phone', mobile: '12345678901234567890' },
+  3004800: {
+    crn: '3004800000',
+    firstName: 'Invalid',
+    lastName: 'Phone',
+    mobile: '12345678901234567890'
+  },
   // 3004900-3004999: Null as string
   3004900: { crn: '3004900000', firstName: 'Invalid', lastName: 'Phone', mobile: 'null' },
 
@@ -257,32 +502,72 @@ export const sfdPersonLookup = {
   3010092: { crn: '3010000092', firstName: 'Invalid', lastName: 'email', email: 'user@localhost' },
   3010093: { crn: '3010000093', firstName: 'Invalid', lastName: 'email', email: 'user@domain.c' },
   3010094: { crn: '3010000094', firstName: 'Invalid', lastName: 'email', email: 'user@domain' },
-  3010095: { crn: '3010000095', firstName: 'Invalid', lastName: 'email', email: 'user@domain..com' },
-  3010096: { crn: '3010000096', firstName: 'Invalid', lastName: 'email', email: 'user@@domain.com' },
+  3010095: {
+    crn: '3010000095',
+    firstName: 'Invalid',
+    lastName: 'email',
+    email: 'user@domain..com'
+  },
+  3010096: {
+    crn: '3010000096',
+    firstName: 'Invalid',
+    lastName: 'email',
+    email: 'user@@domain.com'
+  },
   3010097: { crn: '3010000097', firstName: 'Invalid', lastName: 'email', email: 'user domain.com' },
-  3010098: { crn: '3010000098', firstName: 'Invalid', lastName: 'email', email: 'user@domain.com ' },
-  3010099: { crn: '3010000099', firstName: 'Invalid', lastName: 'email', email: 'a'.repeat(251) + '@example.com' },
+  3010098: {
+    crn: '3010000098',
+    firstName: 'Invalid',
+    lastName: 'email',
+    email: 'user@domain.com '
+  },
+  3010099: {
+    crn: '3010000099',
+    firstName: 'Invalid',
+    lastName: 'email',
+    email: 'a'.repeat(251) + '@example.com'
+  },
 
   // Invalid Email (3003000-3003999) - Invalid email formats
   // 100-person-ID buffer between different scenario types to allow expansion
   // 3003000-3003099: Invalid email format 'not-an-email'
   3003000: { crn: '3003000000', firstName: 'Invalid', lastName: 'Email', email: 'not-an-email' },
   // 3003100-3003199: Missing @ symbol
-  3003100: { crn: '3003100000', firstName: 'Invalid', lastName: 'Email', email: 'invalidemail.com' },
+  3003100: {
+    crn: '3003100000',
+    firstName: 'Invalid',
+    lastName: 'Email',
+    email: 'invalidemail.com'
+  },
   // 3003200-3003299: Missing domain
   3003200: { crn: '3003200000', firstName: 'Invalid', lastName: 'Email', email: 'invalid@' },
   // 3003300-3003399: Missing local part
   3003300: { crn: '3003300000', firstName: 'Invalid', lastName: 'Email', email: '@example.com' },
   // 3003400-3003499: Contains spaces
-  3003400: { crn: '3003400000', firstName: 'Invalid', lastName: 'Email', email: 'invalid email@example.com' },
+  3003400: {
+    crn: '3003400000',
+    firstName: 'Invalid',
+    lastName: 'Email',
+    email: 'invalid email@example.com'
+  },
   // 3003500-3003599: Multiple @ symbols
-  3003500: { crn: '3003500000', firstName: 'Invalid', lastName: 'Email', email: 'invalid@@example.com' },
+  3003500: {
+    crn: '3003500000',
+    firstName: 'Invalid',
+    lastName: 'Email',
+    email: 'invalid@@example.com'
+  },
   // 3003600-3003699: No TLD
   3003600: { crn: '3003600000', firstName: 'Invalid', lastName: 'Email', email: 'invalid@example' },
   // 3003700-3003799: Just text (no @ or domain)
   3003700: { crn: '3003700000', firstName: 'Invalid', lastName: 'Email', email: 'justtext' },
   // 3003800-3003899: Special characters
-  3003800: { crn: '3003800000', firstName: 'Invalid', lastName: 'Email', email: 'invalid!@#$%example.com' },
+  3003800: {
+    crn: '3003800000',
+    firstName: 'Invalid',
+    lastName: 'Email',
+    email: 'invalid!@#$%example.com'
+  },
   // 3003900-3003999: Empty string
   3003900: { crn: '3003900000', firstName: 'Invalid', lastName: 'Email', email: '' },
 
@@ -849,4 +1134,3 @@ export const SHARED_TEST_ORG_PERSON_IDS = Object.keys(sfdPersonLookup)
   .map(Number)
   .filter((id) => id !== 3009100)
   .sort((a, b) => a - b)
-

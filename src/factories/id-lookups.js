@@ -1,5 +1,9 @@
 import fs from 'node:fs'
-import { sfdBusinessDetailsLookup, sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
+import {
+  sfdBusinessDetailsLookup,
+  sfdBusinessLookup,
+  sfdPersonLookup
+} from './sfd-test-data/index.js'
 
 export const staticPersonData = {
   ...sfdPersonLookup,
