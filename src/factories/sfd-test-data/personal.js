@@ -78,7 +78,19 @@ const invalidAddressTooLong = {
 
 const nameTooLong = 'A'.repeat(101)
 
-// All five invalid: name, DOB, email, phone, address (used for 3010100-3010109)
+const invalidMobileOnly = {
+  firstName: 'Invalid',
+  lastName: 'mobile',
+  mobile: 'not-a-phone'
+}
+
+const invalidPhoneOnly = {
+  firstName: 'Invalid',
+  lastName: 'phone',
+  landline: 'not-a-phone'
+}
+
+// All five invalid: name, DOB, email, phone, address
 const allInvalidPersonBase = {
   firstName: '',
   lastName: '',
@@ -539,18 +551,6 @@ export const sfdPersonLookup = {
     email: 'a'.repeat(251) + '@example.com'
   },
 
-  // All five invalid: name + DOB + email + phone + address (3010100-3010109)
-  3010100: { crn: '3010000100', ...allInvalidPersonBase },
-  3010101: { crn: '3010000101', ...allInvalidPersonBase },
-  3010102: { crn: '3010000102', ...allInvalidPersonBase },
-  3010103: { crn: '3010000103', ...allInvalidPersonBase },
-  3010104: { crn: '3010000104', ...allInvalidPersonBase },
-  3010105: { crn: '3010000105', ...allInvalidPersonBase },
-  3010106: { crn: '3010000106', ...allInvalidPersonBase },
-  3010107: { crn: '3010000107', ...allInvalidPersonBase },
-  3010108: { crn: '3010000108', ...allInvalidPersonBase },
-  3010109: { crn: '3010000109', ...allInvalidPersonBase },
-
   // Invalid Email (3003000-3003999) - Invalid email formats
   // 100-person-ID buffer between different scenario types to allow expansion
   // 3003000-3003099: Invalid email format 'not-an-email'
@@ -595,7 +595,6 @@ export const sfdPersonLookup = {
   3003900: { crn: '3003900000', firstName: 'Invalid', lastName: 'Email', email: '' },
 
   // Multiple Invalid Fields (3005000-3005999) - Multiple invalid fields
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3005000-3005099: Invalid email + phone + future DOB
   3005000: {
     // Invalid email + phone + future DOB - example 1
@@ -657,9 +656,9 @@ export const sfdPersonLookup = {
       uprn: null
     }
   },
-  // 3005400-3005499: All invalid (email, phone, DOB, address)
+  // 3005400-3005499: Multiple invalid (email, phone, DOB, address)
   3005400: {
-    // All invalid: email, phone, DOB, address - example 1
+    // Multiple invalid: email, phone, DOB, address - example 1
     crn: '3005400000',
     firstName: 'Multiple',
     lastName: 'Invalid',
@@ -746,7 +745,6 @@ export const sfdPersonLookup = {
   },
 
   // One Field Wrong (3006000-3006999) - Single invalid field combinations
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3006000-3006099: Invalid DOB only
   3006000: {
     // Invalid DOB only - example 1
@@ -763,14 +761,30 @@ export const sfdPersonLookup = {
     lastName: 'Wrong',
     email: 'not-an-email'
   },
-  // 3006200-3006299: Invalid phone only
-  3006200: {
-    // Invalid phone only - example 1
-    crn: '3006200000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    mobile: 'not-a-phone'
-  },
+  // Invalid mobile only
+  3006200: { crn: '3006200000', ...invalidMobileOnly },
+  3006201: { crn: '3006201000', ...invalidMobileOnly },
+  3006202: { crn: '3006202000', ...invalidMobileOnly },
+  3006203: { crn: '3006203000', ...invalidMobileOnly },
+  3006204: { crn: '3006204000', ...invalidMobileOnly },
+  3006205: { crn: '3006205000', ...invalidMobileOnly },
+  3006206: { crn: '3006206000', ...invalidMobileOnly },
+  3006207: { crn: '3006207000', ...invalidMobileOnly },
+  3006208: { crn: '3006208000', ...invalidMobileOnly },
+  3006209: { crn: '3006209000', ...invalidMobileOnly },
+
+  // Invalid phone only
+  3006250: { crn: '3006250000', ...invalidPhoneOnly },
+  3006251: { crn: '3006251000', ...invalidPhoneOnly },
+  3006252: { crn: '3006252000', ...invalidPhoneOnly },
+  3006253: { crn: '3006253000', ...invalidPhoneOnly },
+  3006254: { crn: '3006254000', ...invalidPhoneOnly },
+  3006255: { crn: '3006255000', ...invalidPhoneOnly },
+  3006256: { crn: '3006256000', ...invalidPhoneOnly },
+  3006257: { crn: '3006257000', ...invalidPhoneOnly },
+  3006258: { crn: '3006258000', ...invalidPhoneOnly },
+  3006259: { crn: '3006259000', ...invalidPhoneOnly },
+
   // 3006300-3006399: Missing address1 only
   3006300: {
     // Missing address1 only - example 1
@@ -1145,6 +1159,18 @@ export const sfdPersonLookup = {
       uprn: null
     }
   },
+  // 3010100-3010109: All five invalid: (name + DOB + email + phone + address)
+  3010100: { crn: '3010000100', ...allInvalidPersonBase },
+  3010101: { crn: '3010000101', ...allInvalidPersonBase },
+  3010102: { crn: '3010000102', ...allInvalidPersonBase },
+  3010103: { crn: '3010000103', ...allInvalidPersonBase },
+  3010104: { crn: '3010000104', ...allInvalidPersonBase },
+  3010105: { crn: '3010000105', ...allInvalidPersonBase },
+  3010106: { crn: '3010000106', ...allInvalidPersonBase },
+  3010107: { crn: '3010000107', ...allInvalidPersonBase },
+  3010108: { crn: '3010000108', ...allInvalidPersonBase },
+  3010109: { crn: '3010000109', ...allInvalidPersonBase },
+
 
   // Person stub for the Business details test user (CRN 3020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
   3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' }
