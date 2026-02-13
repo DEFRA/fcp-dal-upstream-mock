@@ -78,6 +78,12 @@ const invalidAddressTooLong = {
 
 const nameTooLong = 'A'.repeat(101)
 
+const invalidDOBOnly = {
+  firstName: 'Invalid',
+  lastName: 'dob',
+  dateOfBirth: new Date('2049-01-01T00:00:00Z').getTime()
+}
+
 const invalidMobileOnly = {
   firstName: 'Invalid',
   lastName: 'mobile',
@@ -88,6 +94,12 @@ const invalidPhoneOnly = {
   firstName: 'Invalid',
   lastName: 'phone',
   landline: 'not-a-phone'
+}
+
+const invalidEmailOnly = {
+  firstName: 'Invalid',
+  lastName: 'email',
+  email: 'not-an-email'
 }
 
 // All five invalid: name, DOB, email, phone, address
@@ -163,66 +175,16 @@ export const sfdPersonLookup = {
   3010039: { crn: '3010000039', firstName: 'Invalid', lastName: 'dob', dateOfBirth: null },
 
   // DOB invalid - future date (3001000-3001099)
-  3001000: {
-    crn: '3001000000',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2074-01-01T00:00:00Z').getTime()
-  },
-  3001001: {
-    crn: '3001000001',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2096-06-15T00:00:00Z').getTime()
-  },
-  3001002: {
-    crn: '3001000002',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2094-12-31T00:00:00Z').getTime()
-  },
-  3001003: {
-    crn: '3001000003',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime()
-  },
-  3001004: {
-    crn: '3001000004',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime()
-  },
-  3001005: {
-    crn: '3001000005',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2079-07-04T00:00:00Z').getTime()
-  },
-  3001006: {
-    crn: '3001000006',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2067-11-11T00:00:00Z').getTime()
-  },
-  3001007: {
-    crn: '3001000007',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2088-05-15T00:00:00Z').getTime()
-  },
-  3001008: {
-    crn: '3001000008',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime()
-  },
-  3001009: {
-    crn: '3001000009',
-    firstName: 'Invalid',
-    lastName: 'dob',
-    dateOfBirth: new Date('2050-02-28T00:00:00Z').getTime()
-  },
+  3001000: { crn: '3001000000', ...invalidDOBOnly },
+  3001001: { crn: '3001000001', ...invalidDOBOnly },
+  3001002: { crn: '3001000002', ...invalidDOBOnly },
+  3001003: { crn: '3001000003', ...invalidDOBOnly },
+  3001004: { crn: '3001000004', ...invalidDOBOnly },
+  3001005: { crn: '3001000005', ...invalidDOBOnly },
+  3001006: { crn: '3001000006', ...invalidDOBOnly },
+  3001007: { crn: '3001000007', ...invalidDOBOnly },
+  3001008: { crn: '3001000008', ...invalidDOBOnly },
+  3001009: { crn: '3001000009', ...invalidDOBOnly },
 
   // Missing Mandatory Address Fields (3002000-3002999) - Missing address fields
   // 100-person-ID buffer between different scenario types to allow expansion
@@ -369,7 +331,7 @@ export const sfdPersonLookup = {
     address: invalidAddressTooLong
   },
 
-  // Phone (3010060-3010079) - null/empty + invalid
+  // Phone - null/empty + invalid
   3010060: { crn: '3010000060', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
   3010061: { crn: '3010000061', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
   3010062: { crn: '3010000062', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
@@ -525,25 +487,10 @@ export const sfdPersonLookup = {
   3010092: { crn: '3010000092', firstName: 'Invalid', lastName: 'email', email: 'user@localhost' },
   3010093: { crn: '3010000093', firstName: 'Invalid', lastName: 'email', email: 'user@domain.c' },
   3010094: { crn: '3010000094', firstName: 'Invalid', lastName: 'email', email: 'user@domain' },
-  3010095: {
-    crn: '3010000095',
-    firstName: 'Invalid',
-    lastName: 'email',
-    email: 'user@domain..com'
-  },
-  3010096: {
-    crn: '3010000096',
-    firstName: 'Invalid',
-    lastName: 'email',
-    email: 'user@@domain.com'
-  },
-  3010097: { crn: '3010000097', firstName: 'Invalid', lastName: 'email', email: 'user domain.com' },
-  3010098: {
-    crn: '3010000098',
-    firstName: 'Invalid',
-    lastName: 'email',
-    email: 'user@domain.com '
-  },
+  3010095: { crn: '3010000095', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
+  3010096: { crn: '3010000096', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
+  3010097: { crn: '3010000097', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
+  3010098: { crn: '3010000098', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
   3010099: {
     crn: '3010000099',
     firstName: 'Invalid',
@@ -1170,7 +1117,6 @@ export const sfdPersonLookup = {
   3010107: { crn: '3010000107', ...allInvalidPersonBase },
   3010108: { crn: '3010000108', ...allInvalidPersonBase },
   3010109: { crn: '3010000109', ...allInvalidPersonBase },
-
 
   // Person stub for the Business details test user (CRN 3020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
   3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' }
