@@ -1081,7 +1081,13 @@ const sharedTestOrgLookup = {
   }
 }
 
-// One org per sfdBusinessDetailsLookup entry; each has customer BUSINESS_DETAILS_TEST_PERSON_ID.
+/*
+ * For each orgId in sfdBusinessDetailsLookup we create one entry: orgId -> { sbi, customers }.
+ * - SBI is derived as 300900001 + (orgId - 3009000).
+ * - Orgs 3009000 and 3009001 have all 30 permission-test users (full/view/amend) as customers.
+ * - All other business-details orgs have a single customer 3009100 so the main test user keeps
+ *   access to all orgs in defra-id.data.json.
+ */
 const businessDetailsOrgLookup = Object.fromEntries(
   Object.keys(sfdBusinessDetailsLookup).map((orgId) => {
     const id = Number(orgId)
