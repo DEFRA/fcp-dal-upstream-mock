@@ -78,6 +78,17 @@ const invalidAddressTooLong = {
 
 const nameTooLong = 'A'.repeat(101)
 
+// All five invalid: name, DOB, email, phone, address (used for 3010100-3010109)
+const allInvalidPersonBase = {
+  firstName: '',
+  lastName: '',
+  dateOfBirth: new Date('2049-01-01T00:00:00Z').getTime(),
+  email: '',
+  landline: '',
+  mobile: '',
+  address: { ...emptyAddress }
+}
+
 export const sfdPersonLookup = {
   // SFD edge case test users - static entries for testing
   // Starting from person ID 3000000, CRN 3000000000
@@ -527,6 +538,18 @@ export const sfdPersonLookup = {
     lastName: 'email',
     email: 'a'.repeat(251) + '@example.com'
   },
+
+  // All five invalid: name + DOB + email + phone + address (3010100-3010109)
+  3010100: { crn: '3010000100', ...allInvalidPersonBase },
+  3010101: { crn: '3010000101', ...allInvalidPersonBase },
+  3010102: { crn: '3010000102', ...allInvalidPersonBase },
+  3010103: { crn: '3010000103', ...allInvalidPersonBase },
+  3010104: { crn: '3010000104', ...allInvalidPersonBase },
+  3010105: { crn: '3010000105', ...allInvalidPersonBase },
+  3010106: { crn: '3010000106', ...allInvalidPersonBase },
+  3010107: { crn: '3010000107', ...allInvalidPersonBase },
+  3010108: { crn: '3010000108', ...allInvalidPersonBase },
+  3010109: { crn: '3010000109', ...allInvalidPersonBase },
 
   // Invalid Email (3003000-3003999) - Invalid email formats
   // 100-person-ID buffer between different scenario types to allow expansion
