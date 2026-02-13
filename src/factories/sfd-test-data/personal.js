@@ -34,6 +34,8 @@
  * different scenario types; 10 examples per scenario.
  */
 
+const nameTooLong = 'A'.repeat(101)
+
 // Shared address shapes
 const testAddressBase = {
   address1: '123 Test Street',
@@ -64,6 +66,8 @@ const emptyAddress = {
 
 // Address invalid (fields too long): ADDRESS_LINE 101, TOWN/CITY/COUNTY 63, etc.
 const invalidAddressTooLong = {
+  firstName: 'Invalid',
+  lastName: 'address',
   address1: 'A'.repeat(101),
   address2: '',
   address3: '',
@@ -76,12 +80,24 @@ const invalidAddressTooLong = {
   uprn: null
 }
 
-const nameTooLong = 'A'.repeat(101)
-
 const invalidDOBOnly = {
   firstName: 'Invalid',
   lastName: 'dob',
   dateOfBirth: new Date('2049-01-01T00:00:00Z').getTime()
+}
+
+const emptyPhoneAndMobile = {
+  firstName: 'Empty',
+  lastName: 'phone',
+  landline: '',
+  mobile: ''
+}
+
+const nullPhoneAndMobile = {
+  firstName: 'Null',
+  lastName: 'phone',
+  landline: null,
+  mobile: null
 }
 
 const invalidMobileOnly = {
@@ -187,7 +203,6 @@ export const sfdPersonLookup = {
   3001009: { crn: '3001000009', ...invalidDOBOnly },
 
   // Missing Mandatory Address Fields (3002000-3002999) - Missing address fields
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3002000-3002099: Missing address1, street, city
   3002000: {
     crn: '3002000000',
@@ -259,7 +274,7 @@ export const sfdPersonLookup = {
     address: { ...testAddressBase, address1: null, street: null, city: null, postalCode: null }
   },
 
-  // Address (3010040-3010059) - null/empty + invalid
+  // Address - empty
   3010040: { crn: '3010000040', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
   3010041: { crn: '3010000041', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
   3010042: { crn: '3010000042', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
@@ -270,108 +285,34 @@ export const sfdPersonLookup = {
   3010047: { crn: '3010000047', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
   3010048: { crn: '3010000048', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
   3010049: { crn: '3010000049', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010050: {
-    crn: '3010000050',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010051: {
-    crn: '3010000051',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010052: {
-    crn: '3010000052',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010053: {
-    crn: '3010000053',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010054: {
-    crn: '3010000054',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010055: {
-    crn: '3010000055',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010056: {
-    crn: '3010000056',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010057: {
-    crn: '3010000057',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010058: {
-    crn: '3010000058',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
-  3010059: {
-    crn: '3010000059',
-    firstName: 'Invalid',
-    lastName: 'address',
-    address: invalidAddressTooLong
-  },
 
-  // Phone - null/empty + invalid
-  3010060: { crn: '3010000060', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
-  3010061: { crn: '3010000061', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
-  3010062: { crn: '3010000062', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
-  3010063: { crn: '3010000063', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
-  3010064: { crn: '3010000064', firstName: 'Invalid', lastName: 'phone', landline: '', mobile: '' },
-  3010065: {
-    crn: '3010000065',
-    firstName: 'Invalid',
-    lastName: 'phone',
-    landline: null,
-    mobile: null
-  },
-  3010066: {
-    crn: '3010000066',
-    firstName: 'Invalid',
-    lastName: 'phone',
-    landline: null,
-    mobile: null
-  },
-  3010067: {
-    crn: '3010000067',
-    firstName: 'Invalid',
-    lastName: 'phone',
-    landline: null,
-    mobile: null
-  },
-  3010068: {
-    crn: '3010000068',
-    firstName: 'Invalid',
-    lastName: 'phone',
-    landline: null,
-    mobile: null
-  },
-  3010069: {
-    crn: '3010000069',
-    firstName: 'Invalid',
-    lastName: 'phone',
-    landline: null,
-    mobile: null
-  },
+  // Address - too long
+  3010050: { crn: '3010000050', ...invalidAddressTooLong },
+  3010051: { crn: '3010000051', ...invalidAddressTooLong },
+  3010052: { crn: '3010000052', ...invalidAddressTooLong },
+  3010053: { crn: '3010000053', ...invalidAddressTooLong },
+  3010054: { crn: '3010000054', ...invalidAddressTooLong },
+  3010055: { crn: '3010000055', ...invalidAddressTooLong },
+  3010056: { crn: '3010000056', ...invalidAddressTooLong },
+  3010057: { crn: '3010000057', ...invalidAddressTooLong },
+  3010058: { crn: '3010000058', ...invalidAddressTooLong },
+  3010059: { crn: '3010000059', ...invalidAddressTooLong },
+
+  // Phone - both phones empty
+  3010060: { crn: '3010000060', ...emptyPhoneAndMobile },
+  3010061: { crn: '3010000061', ...emptyPhoneAndMobile },
+  3010062: { crn: '3010000062', ...emptyPhoneAndMobile },
+  3010063: { crn: '3010000063', ...emptyPhoneAndMobile },
+  3010064: { crn: '3010000064', ...emptyPhoneAndMobile },
+
+  // Phone - both phones null
+  3010065: { crn: '3010000065', ...nullPhoneAndMobile },
+  3010066: { crn: '3010000066', ...nullPhoneAndMobile },
+  3010067: { crn: '3010000067', ...nullPhoneAndMobile },
+  3010068: { crn: '3010000068', ...nullPhoneAndMobile },
+  3010069: { crn: '3010000069', ...nullPhoneAndMobile },
+
+  // Phone - both phones invalid
   3010070: {
     crn: '3010000070',
     firstName: 'Invalid',
@@ -444,7 +385,6 @@ export const sfdPersonLookup = {
   },
 
   // Invalid Phone (3004000-3004999) - Invalid phone formats
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3004000-3004099: Invalid phone 'not-a-phone'
   3004000: { crn: '3004000000', firstName: 'Invalid', lastName: 'Phone', mobile: 'not-a-phone' },
   // 3004100-3004199: Too short
@@ -499,7 +439,6 @@ export const sfdPersonLookup = {
   },
 
   // Invalid Email (3003000-3003999) - Invalid email formats
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3003000-3003099: Invalid email format 'not-an-email'
   3003000: { crn: '3003000000', firstName: 'Invalid', lastName: 'Email', email: 'not-an-email' },
   // 3003100-3003199: Missing @ symbol
@@ -818,7 +757,6 @@ export const sfdPersonLookup = {
   },
 
   // Two Fields Wrong (3007000-3007999) - Two invalid fields together
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3007000-3007099: DOB + email
   3007000: {
     // DOB + email - example 1
@@ -946,7 +884,6 @@ export const sfdPersonLookup = {
   },
 
   // Three+ Fields Wrong (3008000-3008999) - Three or more invalid fields
-  // 100-person-ID buffer between different scenario types to allow expansion
   // 3008000-3008099: DOB + email + phone
   3008000: {
     // DOB + email + phone - example 1
