@@ -56,11 +56,13 @@ export const retrieveMessages = (orgId, personId, page = 1) => {
   if (messages) {
     return messages
   }
-  const messagesPayload = generateMessagesPayload(
-    orgId,
-    personId,
-    faker.number.int({ min: 0, max: 10 })
-  )
+
+  let messageCount = 0
+  if (orgId !== 3333333333 && personId !== 11111120) {
+    messageCount = faker.number.int({ min: 0, max: 10 })
+  }
+
+  const messagesPayload = generateMessagesPayload(orgId, personId, messageCount)
   businessPersonMessages[`${orgId}-${personId}`] = messagesPayload
   return messagesPayload
 }
