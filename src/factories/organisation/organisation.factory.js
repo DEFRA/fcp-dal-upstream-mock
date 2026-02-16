@@ -3,7 +3,8 @@ import {
   orgIdToPersonIds,
   orgIdToSbi,
   personIdToOrgIds,
-  sbiToOrgId
+  sbiToOrgId,
+  staticBusinessData
 } from '../../factories/id-lookups.js'
 import { fakeAddress, fakeIds, faker, generateId, nft, nullOrFake, safeSeed } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
@@ -116,7 +117,7 @@ export const createOrganisation = (personId, payload) => {
   return org
 }
 
-const generateOrganisation = (orgId, sbi) => {
+const generateOrganisation = (orgId, sbi, overrides = {}) => {
   orgId = safeSeed(orgId)
   const name = faker.company.name()
   const hasAdditionalBusinessActivities = nft(4, 2, 3)
@@ -170,7 +171,8 @@ const generateOrganisation = (orgId, sbi) => {
           id: parseInt(id, 10),
           type: `Additional Business Activity ${i}`
         }))
-      : null
+      : null,
+    ...overrides
   }
 
   organisations[orgId] = org
@@ -214,7 +216,7 @@ export const retrieveOrganisation = (orgId) => {
     throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   }
 
-  return organisations[orgId] ?? generateOrganisation(orgId, sbi)
+  return organisations[orgId] ?? generateOrganisation(orgId, sbi, staticBusinessData[orgId])
 }
 
 export const retrieveOrganisationCustomers = (orgId) => {
