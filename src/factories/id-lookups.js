@@ -48,6 +48,15 @@ export const staticPersonData = {
     lastName: 'Grey',
     privileges: []
   },
+  // Person in org 3333333334
+  11111141: {
+    crn: '1111111902',
+    title: 'Mr',
+    otherTitle: '',
+    firstName: 'Frederick',
+    middleName: '',
+    lastName: 'Forsyth'
+  },
   // people in org 1111111111 and 2222222222
   11111122: { crn: '1111112200' },
   11111222: { crn: '1111122200' },
@@ -273,7 +282,11 @@ export const orgIdLookup = {
       }
     ]
   },
+  // Contains user with no first name and no messages
   3333333333: { sbi: 3333333333, customers: [11111120] },
+
+  // Contains user with 10 messages, 5 deleted messages
+  3333333334: { sbi: 3333333334, customers: [11111141] },
 
   // business from dev CRM
   5565448: {
