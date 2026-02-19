@@ -212,7 +212,14 @@ export const updateAdditionalOrganisationDetails = (
 export const retrieveOrganisation = (orgId) => {
   const sbi = orgIdToSbi[orgId]
 
-  if (!sbi) {
+  // Special case - returns 500 error
+  if (sbi === 3000000500) {
+    throw Boom.error('Server error from this API.')
+  } else if (sbi === 3000000401) {
+    throw Boom.unauthorized('Unauthorized access to this API.')
+  } else if (sbi === 3000000403) {
+    throw Boom.forbidden('Forbidden access to this API.')
+  } else if (!sbi) {
     throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   }
 
