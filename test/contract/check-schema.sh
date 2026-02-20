@@ -9,7 +9,17 @@ mkdir -p ./tmp
 usage() {
   set +x
   echo
-  echo "Usage: $0 {p|person|o|org|organisation|a|auth|authenticate|help}"
+  echo "Run schemathesis contract tests against the upstream KITS."
+  echo "All tests are run against the 'upgrade' API env."
+  echo
+  echo "Usage: $0 {a|auth|authenticate|o|org|organisation|p|person|s|sa|siti-agri|help}"
+  echo
+  echo "Where the argument specifies which schema to test:"
+  echo "  p | person              - test the Person schema"
+  echo "  o | org | organisation  - test the Organisation schema"
+  echo "  a | auth | authenticate - test the Authenticate schema"
+  echo "  s | sa | siti-agri      - test the Siti-Agri schema"
+  echo "  h | help                - show this help message"
   echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  KITS_KEY  - KITS client key file (path relative to project root)"
