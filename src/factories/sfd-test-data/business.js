@@ -17,8 +17,11 @@
  *     address1: 'Line 1',
  *     address2: null,
  *     address3: null,
- *     address4: null,
+ *     address4: 'Test City',
  *     address5: null,
+ *     street: null,
+ *     city: null,
+ *     county: null,
  *     postalCode: 'AB1 2CD',
  *     country: 'United Kingdom',
  *     uprn: null  // Set to null for manual entry / test scenarios (no lookup)
@@ -38,102 +41,114 @@ const SHARED_TEST_ORG_ID = 3001458
 const BUSINESS_DETAILS_TEST_PERSON_ID = 3009100
 const ORG_ID_NO_CPH = 80000001
 
-const cleanAddress = {
-  address1: '1 Clean Street',
-  address2: null,
-  address3: null,
-  address4: null,
-  address5: null,
-  city: 'Clean Town',
-  county: null,
-  postalCode: 'AB1 2CD',
-  country: 'United Kingdom',
+/*
+ * Manual address only (no lookup): uprn is null; we do not use lookup data.
+ *
+ * Manual fields used:
+ * - address1: Address line 1 (required). address2, address3, address5: optional lines (null if unused).
+ * - address4: Town or city (frontend uses line4 for "Town or city" and validation).
+ * - postalCode, country: Required.
+ *
+ * Lookup/structured fields (city, county, street, uprn, ...) are included and set to null
+ * because the Address schema requires these keys to be present for the response to be valid;
+ * we set them to null since this is manual-only test data.
+ */
+
+// Shared address shapes
+const emptyAddress = {
+  address1: '',
+  address2: '',
+  address3: '',
+  address4: '',
+  address5: '',
+  city: '',
+  county: '',
+  postalCode: '',
+  country: '',
   uprn: null
 }
 
-const minimalValidAddress = {
-  address1: '1 Valid Street',
+const minimalMandatoryAddress = {
+  address1: '123 Test Street',
   address2: null,
   address3: null,
-  address4: null,
+  address4: 'Test City',
   address5: null,
-  city: 'Town',
+  city: null,
+  street: null,
+  city: null,
   county: null,
-  postalCode: 'AB1 2CD',
-  country: 'United Kingdom',
+  postalCode: 'TE1 2ST',
+  country: 'England',
   uprn: null
 }
 
-export const sfdBusinessDetailsLookup = {
+// Base applied to every org so address is predictable unless the entry overrides address.
+const defaultBusinessDetailsOverride = { address: minimalMandatoryAddress }
+
+// Town/city (address4) empty — for validation tests.
+const addressTownEmpty = { ...minimalMandatoryAddress, address4: '' }
+
+const businessDetailsLookupEntries = {
   // Clean control (3009000-3009099) - All valid data for comparison
   // 100-org-ID buffer between different scenario types to allow expansion
   // 3009000-3009009: Clean control (10), buffer 3009010-3009099
   3009000: {
     name: 'Clean control - example 1',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009001: {
     name: 'Clean control - example 2',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009002: {
     name: 'Clean control - example 3',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009003: {
     name: 'Clean control - example 4',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009004: {
     name: 'Clean control - example 5',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009005: {
     name: 'Clean control - example 6',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009006: {
     name: 'Clean control - example 7',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009007: {
     name: 'Clean control - example 8',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009008: {
     name: 'Clean control - example 9',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
   },
   3009009: {
     name: 'Clean control - example 10',
-    address: cleanAddress,
     landline: '01234567890',
     mobile: '07123456789',
     email: 'clean.business@example.com'
@@ -147,403 +162,403 @@ export const sfdBusinessDetailsLookup = {
   // 3009300-3009399: Address line 1 empty (10)
   3009300: {
     name: 'Address line 1 empty - example 1',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009301: {
     name: 'Address line 1 empty - example 2',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009302: {
     name: 'Address line 1 empty - example 3',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009303: {
     name: 'Address line 1 empty - example 4',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009304: {
     name: 'Address line 1 empty - example 5',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009305: {
     name: 'Address line 1 empty - example 6',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009306: {
     name: 'Address line 1 empty - example 7',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009307: {
     name: 'Address line 1 empty - example 8',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009308: {
     name: 'Address line 1 empty - example 9',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
   3009309: {
     name: 'Address line 1 empty - example 10',
-    address: { ...minimalValidAddress, address1: '' }
+    address: { ...minimalMandatoryAddress, address1: '' }
   },
 
   // 3009400-3009499: Address line 1 too long (10) - ADDRESS_LINE_MAX 100
   3009400: {
     name: 'Address line 1 too long - example 1',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009401: {
     name: 'Address line 1 too long - example 2',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009402: {
     name: 'Address line 1 too long - example 3',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009403: {
     name: 'Address line 1 too long - example 4',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009404: {
     name: 'Address line 1 too long - example 5',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009405: {
     name: 'Address line 1 too long - example 6',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009406: {
     name: 'Address line 1 too long - example 7',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009407: {
     name: 'Address line 1 too long - example 8',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009408: {
     name: 'Address line 1 too long - example 9',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
   3009409: {
     name: 'Address line 1 too long - example 10',
-    address: { ...minimalValidAddress, address1: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address1: 'A'.repeat(101) }
   },
 
   // 3009500-3009599: Address line 2 too long (10)
   3009500: {
     name: 'Address line 2 too long - example 1',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009501: {
     name: 'Address line 2 too long - example 2',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009502: {
     name: 'Address line 2 too long - example 3',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009503: {
     name: 'Address line 2 too long - example 4',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009504: {
     name: 'Address line 2 too long - example 5',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009505: {
     name: 'Address line 2 too long - example 6',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009506: {
     name: 'Address line 2 too long - example 7',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009507: {
     name: 'Address line 2 too long - example 8',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009508: {
     name: 'Address line 2 too long - example 9',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
   3009509: {
     name: 'Address line 2 too long - example 10',
-    address: { ...minimalValidAddress, address2: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address2: 'A'.repeat(101) }
   },
 
   // 3009600-3009699: Address line 3 too long (10)
   3009600: {
     name: 'Address line 3 too long - example 1',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009601: {
     name: 'Address line 3 too long - example 2',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009602: {
     name: 'Address line 3 too long - example 3',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009603: {
     name: 'Address line 3 too long - example 4',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009604: {
     name: 'Address line 3 too long - example 5',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009605: {
     name: 'Address line 3 too long - example 6',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009606: {
     name: 'Address line 3 too long - example 7',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009607: {
     name: 'Address line 3 too long - example 8',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009608: {
     name: 'Address line 3 too long - example 9',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
   3009609: {
     name: 'Address line 3 too long - example 10',
-    address: { ...minimalValidAddress, address3: 'A'.repeat(101) }
+    address: { ...minimalMandatoryAddress, address3: 'A'.repeat(101) }
   },
 
-  // 3009700-3009799: City empty (10)
-  3009700: { name: 'City empty - example 1', address: { ...minimalValidAddress, city: '' } },
-  3009701: { name: 'City empty - example 2', address: { ...minimalValidAddress, city: '' } },
-  3009702: { name: 'City empty - example 3', address: { ...minimalValidAddress, city: '' } },
-  3009703: { name: 'City empty - example 4', address: { ...minimalValidAddress, city: '' } },
-  3009704: { name: 'City empty - example 5', address: { ...minimalValidAddress, city: '' } },
-  3009705: { name: 'City empty - example 6', address: { ...minimalValidAddress, city: '' } },
-  3009706: { name: 'City empty - example 7', address: { ...minimalValidAddress, city: '' } },
-  3009707: { name: 'City empty - example 8', address: { ...minimalValidAddress, city: '' } },
-  3009708: { name: 'City empty - example 9', address: { ...minimalValidAddress, city: '' } },
-  3009709: { name: 'City empty - example 10', address: { ...minimalValidAddress, city: '' } },
+  // 3009700-3009799: Address empty (10)
+  3009700: { name: 'Address empty - example 1', address: emptyAddress },
+  3009701: { name: 'Address empty - example 2', address: emptyAddress },
+  3009702: { name: 'Address empty - example 3', address: emptyAddress },
+  3009703: { name: 'Address empty - example 4', address: emptyAddress },
+  3009704: { name: 'Address empty - example 5', address: emptyAddress },
+  3009705: { name: 'Address empty - example 6', address: emptyAddress },
+  3009706: { name: 'Address empty - example 7', address: emptyAddress },
+  3009707: { name: 'Address empty - example 8', address: emptyAddress },
+  3009708: { name: 'Address empty - example 9', address: emptyAddress },
+  3009709: { name: 'Address empty - example 10', address: emptyAddress },
 
-  // 3009800-3009899: City too long (10) - TOWN_CITY_MAX 60
+  // 3009800-3009899: Town/city (address4) too long (10) - TOWN_CITY_MAX 60
   3009800: {
     name: 'City too long - example 1',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009801: {
     name: 'City too long - example 2',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009802: {
     name: 'City too long - example 3',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009803: {
     name: 'City too long - example 4',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009804: {
     name: 'City too long - example 5',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009805: {
     name: 'City too long - example 6',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009806: {
     name: 'City too long - example 7',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009807: {
     name: 'City too long - example 8',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009808: {
     name: 'City too long - example 9',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
   3009809: {
     name: 'City too long - example 10',
-    address: { ...minimalValidAddress, city: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, address4: 'A'.repeat(61) }
   },
 
   // 3009900-3009999: County too long (10) - COUNTY_MAX 60
   3009900: {
     name: 'County too long - example 1',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009901: {
     name: 'County too long - example 2',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009902: {
     name: 'County too long - example 3',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009903: {
     name: 'County too long - example 4',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009904: {
     name: 'County too long - example 5',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009905: {
     name: 'County too long - example 6',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009906: {
     name: 'County too long - example 7',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009907: {
     name: 'County too long - example 8',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009908: {
     name: 'County too long - example 9',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
   3009909: {
     name: 'County too long - example 10',
-    address: { ...minimalValidAddress, county: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, county: 'A'.repeat(61) }
   },
 
   // 3010000-3010099: Postcode empty (10)
   3010000: {
     name: 'Postcode empty - example 1',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010001: {
     name: 'Postcode empty - example 2',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010002: {
     name: 'Postcode empty - example 3',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010003: {
     name: 'Postcode empty - example 4',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010004: {
     name: 'Postcode empty - example 5',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010005: {
     name: 'Postcode empty - example 6',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010006: {
     name: 'Postcode empty - example 7',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010007: {
     name: 'Postcode empty - example 8',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010008: {
     name: 'Postcode empty - example 9',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
   3010009: {
     name: 'Postcode empty - example 10',
-    address: { ...minimalValidAddress, postalCode: '' }
+    address: { ...minimalMandatoryAddress, postalCode: '' }
   },
 
   // 3010100-3010199: Postcode too long (10) - POSTCODE_MAX 8
   3010100: {
     name: 'Postcode too long - example 1',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010101: {
     name: 'Postcode too long - example 2',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010102: {
     name: 'Postcode too long - example 3',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010103: {
     name: 'Postcode too long - example 4',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010104: {
     name: 'Postcode too long - example 5',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010105: {
     name: 'Postcode too long - example 6',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010106: {
     name: 'Postcode too long - example 7',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010107: {
     name: 'Postcode too long - example 8',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010108: {
     name: 'Postcode too long - example 9',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
   3010109: {
     name: 'Postcode too long - example 10',
-    address: { ...minimalValidAddress, postalCode: 'A'.repeat(9) }
+    address: { ...minimalMandatoryAddress, postalCode: 'A'.repeat(9) }
   },
 
   // 3010200-3010299: Country empty (10)
-  3010200: { name: 'Country empty - example 1', address: { ...minimalValidAddress, country: '' } },
-  3010201: { name: 'Country empty - example 2', address: { ...minimalValidAddress, country: '' } },
-  3010202: { name: 'Country empty - example 3', address: { ...minimalValidAddress, country: '' } },
-  3010203: { name: 'Country empty - example 4', address: { ...minimalValidAddress, country: '' } },
-  3010204: { name: 'Country empty - example 5', address: { ...minimalValidAddress, country: '' } },
-  3010205: { name: 'Country empty - example 6', address: { ...minimalValidAddress, country: '' } },
-  3010206: { name: 'Country empty - example 7', address: { ...minimalValidAddress, country: '' } },
-  3010207: { name: 'Country empty - example 8', address: { ...minimalValidAddress, country: '' } },
-  3010208: { name: 'Country empty - example 9', address: { ...minimalValidAddress, country: '' } },
-  3010209: { name: 'Country empty - example 10', address: { ...minimalValidAddress, country: '' } },
+  3010200: { name: 'Country empty - example 1', address: { ...minimalMandatoryAddress, country: '' } },
+  3010201: { name: 'Country empty - example 2', address: { ...minimalMandatoryAddress, country: '' } },
+  3010202: { name: 'Country empty - example 3', address: { ...minimalMandatoryAddress, country: '' } },
+  3010203: { name: 'Country empty - example 4', address: { ...minimalMandatoryAddress, country: '' } },
+  3010204: { name: 'Country empty - example 5', address: { ...minimalMandatoryAddress, country: '' } },
+  3010205: { name: 'Country empty - example 6', address: { ...minimalMandatoryAddress, country: '' } },
+  3010206: { name: 'Country empty - example 7', address: { ...minimalMandatoryAddress, country: '' } },
+  3010207: { name: 'Country empty - example 8', address: { ...minimalMandatoryAddress, country: '' } },
+  3010208: { name: 'Country empty - example 9', address: { ...minimalMandatoryAddress, country: '' } },
+  3010209: { name: 'Country empty - example 10', address: { ...minimalMandatoryAddress, country: '' } },
 
   // 3010300-3010399: Country too long (10) - COUNTRY_MAX 60
   3010300: {
     name: 'Country too long - example 1',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010301: {
     name: 'Country too long - example 2',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010302: {
     name: 'Country too long - example 3',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010303: {
     name: 'Country too long - example 4',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010304: {
     name: 'Country too long - example 5',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010305: {
     name: 'Country too long - example 6',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010306: {
     name: 'Country too long - example 7',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010307: {
     name: 'Country too long - example 8',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010308: {
     name: 'Country too long - example 9',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
   3010309: {
     name: 'Country too long - example 10',
-    address: { ...minimalValidAddress, country: 'A'.repeat(61) }
+    address: { ...minimalMandatoryAddress, country: 'A'.repeat(61) }
   },
 
   // Phone (3010400-3010899) - both null + length invalid
@@ -821,113 +836,113 @@ export const sfdBusinessDetailsLookup = {
   // 3012300-3012309: Address + phone invalid (10)
   3012300: {
     name: 'Address + phone invalid - example 1',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012301: {
     name: 'Address + phone invalid - example 2',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012302: {
     name: 'Address + phone invalid - example 3',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012303: {
     name: 'Address + phone invalid - example 4',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012304: {
     name: 'Address + phone invalid - example 5',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012305: {
     name: 'Address + phone invalid - example 6',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012306: {
     name: 'Address + phone invalid - example 7',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012307: {
     name: 'Address + phone invalid - example 8',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012308: {
     name: 'Address + phone invalid - example 9',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   3012309: {
     name: 'Address + phone invalid - example 10',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null
   },
   // 3012400-3012409: Address + email invalid (10)
   3012400: {
     name: 'Address + email invalid - example 1',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012401: {
     name: 'Address + email invalid - example 2',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012402: {
     name: 'Address + email invalid - example 3',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012403: {
     name: 'Address + email invalid - example 4',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012404: {
     name: 'Address + email invalid - example 5',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012405: {
     name: 'Address + email invalid - example 6',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012406: {
     name: 'Address + email invalid - example 7',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012407: {
     name: 'Address + email invalid - example 8',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012408: {
     name: 'Address + email invalid - example 9',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   3012409: {
     name: 'Address + email invalid - example 10',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     email: 'not-an-email'
   },
   // 3012500-3012509: Phone + email invalid (10)
@@ -984,75 +999,93 @@ export const sfdBusinessDetailsLookup = {
   // 3012600-3012609: All three invalid - address + phone + email (10)
   3012600: {
     name: 'All three invalid - example 1',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012601: {
     name: 'All three invalid - example 2',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012602: {
     name: 'All three invalid - example 3',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012603: {
     name: 'All three invalid - example 4',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012604: {
     name: 'All three invalid - example 5',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012605: {
     name: 'All three invalid - example 6',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012606: {
     name: 'All three invalid - example 7',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012607: {
     name: 'All three invalid - example 8',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012608: {
     name: 'All three invalid - example 9',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   },
   3012609: {
     name: 'All three invalid - example 10',
-    address: { ...minimalValidAddress, address1: '' },
+    address: { ...minimalMandatoryAddress, address1: '' },
     landline: null,
     mobile: null,
     email: 'not-an-email'
   }
 }
+
+/*
+ * Without this merge, any entry that does not set address would get a faker-generated
+ * address from the organisation factory, which is unpredictable and can cause missing address
+ * lines or frontend validation failures. We want every such org to get the deterministic
+ * minimalMandatoryAddress instead.
+ *
+ * businessDetailsLookupEntries lists only what each org overrides (name, address when
+ * needed, phones, email). We merge defaultBusinessDetailsOverride (which sets
+ * address: minimalMandatoryAddress) into each entry here. Entries that omit address get the
+ * default; entries that set address (e.g. addressTownEmpty, address1 too long) override it.
+ */
+export const sfdBusinessDetailsLookup = Object.fromEntries(
+  Object.entries(businessDetailsLookupEntries).map(([id, entry]) => [
+    id,
+    { ...defaultBusinessDetailsOverride, ...entry }
+  ])
+)
 
 /*
  * Org/customer lookup: which orgs exist and who their "customers" are (person IDs).

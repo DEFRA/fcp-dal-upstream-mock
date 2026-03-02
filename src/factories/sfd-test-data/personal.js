@@ -1,9 +1,23 @@
 /**
- * sfdPersonLookup: personId -> override object for person details (crn, name, dob, address, phones,
+ * personLookupEntries: personId -> override object for person details (crn, name, dob, address, phones,
  * email). Entries are merged into staticPersonData in id-lookups.js and applied as overrides in
  * person.factory.js generatePerson(personId, crn, overrides). Only include the keys you need; other
  * person fields come from factory defaults. Edge-case / business test data only. Performance-test
  * person data is in performance.js and merged at sfd-test-data/index.js.
+ *
+ * - Manual addresses only: We do not use lookup addresses; uprn is always null.
+ *   The frontend treats address4 as "Town or city" (line4). Test data uses manual
+ *   address fields (address1-5, postalCode, country) and sets lookup fields (street, city, county,
+ *   etc.) to null; see minimalMandatoryAddress below.
+ * - Default address: At export time we merge a default (defaultPersonOverride with
+ *   address: minimalMandatoryAddress) into every entry. If an entry does not set address, it gets
+ *   that default, so address data is predictable. If an entry does set address, that value replaces
+ *   the default.
+ * - Overriding address: To test invalid or special addresses (e.g. empty, missing address1, too long),
+ *   set address on the entry and provide the full address object (e.g. emptyAddress or
+ *   { ...minimalMandatoryAddress, address1: null }). We override in full so the mock returns exactly
+ *   the address needed for that scenario. The merge block at the bottom of the file applies the
+ *   default; see the comment there for details.
  *
  * Example shape for sfdPersonLookup entries:
  *
@@ -19,10 +33,10 @@
  *     address1: 'Line 1',
  *     address2: null,
  *     address3: null,
- *     address4: null,
+ *     address4: 'Test City',
  *     address5: null,
  *     street: null,
- *     city: 'Town',
+ *     city: null,
  *     county: null,
  *     postalCode: 'AB1 2CD',
  *     country: 'United Kingdom',
@@ -30,27 +44,17 @@
  *   }
  * }
  *
+ * Omit address to get the default; set address to override (see minimalMandatoryAddress and shared
+ * shapes below).
+ *
  * Person IDs follow the same numbering/buffer approach as business.js: 1000-person-ID buffer between
  * different scenario types; 10 examples per scenario.
  */
 
+// Shared constants
 const nameTooLong = 'A'.repeat(101)
 
 // Shared address shapes
-const testAddressBase = {
-  address1: '123 Test Street',
-  address2: null,
-  address3: null,
-  address4: null,
-  address5: null,
-  street: 'Test Street',
-  city: 'Test City',
-  county: null,
-  postalCode: 'TE1 2ST',
-  country: 'England',
-  uprn: null
-}
-
 const emptyAddress = {
   address1: '',
   address2: '',
@@ -64,15 +68,43 @@ const emptyAddress = {
   uprn: null
 }
 
-// Address invalid (fields too long): ADDRESS_LINE 101, TOWN/CITY/COUNTY 63, etc.
-const invalidAddressTooLong = {
-  firstName: 'Invalid',
-  lastName: 'address',
+/*
+ * Manual address only (no lookup): uprn is null; we do not use lookup data.
+ *
+ * Manual fields used:
+ * - address1: Address line 1 (required). address2, address3, address5: optional lines (null if unused).
+ * - address4: Town or city (frontend uses line4 for "Town or city" and validation).
+ * - postalCode, country: Required.
+ *
+ * Lookup/structured fields (city, county, street, uprn, ...) are included and set to null
+ * because the Address schema requires these keys to be present for the response to be valid;
+ * we set them to null since this is manual-only test data.
+ */
+const minimalMandatoryAddress = {
+  address1: '123 Test Street',
+  address2: null,
+  address3: null,
+  address4: 'Test City',
+  address5: null,
+  street: null,
+  city: null,
+  county: null,
+  postalCode: 'TE1 2ST',
+  country: 'England',
+  uprn: null
+}
+
+// Base applied to every person so address is predictable unless the entry overrides address.
+const defaultPersonOverride = { address: minimalMandatoryAddress }
+
+// Address fields too long
+const addressTooLongAddress = {
   address1: 'A'.repeat(101),
   address2: '',
   address3: '',
   address4: 'C'.repeat(63),
   address5: 'D'.repeat(61),
+  street: null,
   city: 'C'.repeat(63),
   county: 'D'.repeat(61),
   postalCode: 'P'.repeat(9),
@@ -81,40 +113,40 @@ const invalidAddressTooLong = {
 }
 
 const invalidDOBOnly = {
-  firstName: 'Invalid',
-  lastName: 'dob',
+  firstName: 'Date of birth',
+  lastName: 'invalid',
   dateOfBirth: new Date('2049-01-01T00:00:00Z').getTime()
 }
 
 const emptyPhoneAndMobile = {
-  firstName: 'Empty',
-  lastName: 'phone',
+  firstName: 'Phone and mobile',
+  lastName: 'empty',
   landline: '',
   mobile: ''
 }
 
 const nullPhoneAndMobile = {
-  firstName: 'Null',
-  lastName: 'phone',
+  firstName: 'Phone and mobile',
+  lastName: 'null',
   landline: null,
   mobile: null
 }
 
 const invalidMobileOnly = {
-  firstName: 'Invalid',
-  lastName: 'mobile',
+  firstName: 'Mobile',
+  lastName: 'invalid',
   mobile: 'not-a-phone'
 }
 
 const invalidPhoneOnly = {
-  firstName: 'Invalid',
-  lastName: 'phone',
+  firstName: 'Phone',
+  lastName: 'invalid',
   landline: 'not-a-phone'
 }
 
 const invalidEmailOnly = {
-  firstName: 'Invalid',
-  lastName: 'email',
+  firstName: 'Email',
+  lastName: 'invalid',
   email: 'not-an-email'
 }
 
@@ -129,7 +161,7 @@ const allInvalidPersonBase = {
   address: { ...emptyAddress }
 }
 
-export const sfdPersonLookup = {
+const personLookupEntries = {
   // SFD edge case test users - static entries for testing
   // Starting from person ID 3000000, CRN 3000000000
   // 1000-person-ID buffer between categories, 10 examples per category
@@ -203,100 +235,86 @@ export const sfdPersonLookup = {
   3001009: { crn: '3001000009', ...invalidDOBOnly },
 
   // Missing Mandatory Address Fields (3002000-3002999) - Missing address fields
-  // 3002000-3002099: Missing address1, street, city
+  // 3002000-3002099: Missing address1, city
   3002000: {
     crn: '3002000000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, address1: null, street: null, city: null }
+    address: { ...minimalMandatoryAddress, address1: null, address4: null }
   },
-  // 3002100-3002199: Missing address1 and street
+  // 3002100-3002199: Missing address1
   3002100: {
     crn: '3002100000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, address1: null, street: null }
+    address: { ...minimalMandatoryAddress, address1: null }
   },
   // 3002200-3002299: Missing city and postalCode
   3002200: {
     crn: '3002200000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, city: null, postalCode: null }
+    address: { ...minimalMandatoryAddress, address4: null, postalCode: null }
   },
   // 3002300-3002399: Missing address1 only
   3002300: {
     crn: '3002300000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, address1: null }
-  },
-  // 3002400-3002499: Missing street only
-  3002400: {
-    crn: '3002400000',
-    firstName: 'Missing',
-    lastName: 'Address',
-    address: { ...testAddressBase, street: null }
+    address: { ...minimalMandatoryAddress, address1: null }
   },
   // 3002500-3002599: Missing city only
   3002500: {
     crn: '3002500000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, city: null }
+    address: { ...minimalMandatoryAddress, address4: null }
   },
   // 3002600-3002699: Missing address1 and city
   3002600: {
     crn: '3002600000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, address1: null, city: null }
-  },
-  // 3002700-3002799: Missing street and city
-  3002700: {
-    crn: '3002700000',
-    firstName: 'Missing',
-    lastName: 'Address',
-    address: { ...testAddressBase, street: null, city: null }
+    address: { ...minimalMandatoryAddress, address1: null, address4: null }
   },
   // 3002800-3002899: Missing postalCode
   3002800: {
     crn: '3002800000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, postalCode: null }
+    address: { ...minimalMandatoryAddress, postalCode: null }
   },
   // 3002900-3002999: Missing all address fields except country
   3002900: {
     crn: '3002900000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...testAddressBase, address1: null, street: null, city: null, postalCode: null }
+    address: { ...minimalMandatoryAddress, address1: null, address4: null, postalCode: null }
   },
 
   // Address - empty
-  3010040: { crn: '3010000040', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010041: { crn: '3010000041', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010042: { crn: '3010000042', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010043: { crn: '3010000043', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010044: { crn: '3010000044', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010045: { crn: '3010000045', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010046: { crn: '3010000046', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010047: { crn: '3010000047', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010048: { crn: '3010000048', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
-  3010049: { crn: '3010000049', firstName: 'Invalid', lastName: 'address', address: emptyAddress },
+  3010040: { crn: '3010000040', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010041: { crn: '3010000041', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010042: { crn: '3010000042', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010043: { crn: '3010000043', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010044: { crn: '3010000044', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010045: { crn: '3010000045', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010046: { crn: '3010000046', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010047: { crn: '3010000047', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010048: { crn: '3010000048', firstName: 'Address', lastName: 'empty', address: emptyAddress },
+  3010049: { crn: '3010000049', firstName: 'Address', lastName: 'empty', address: emptyAddress },
 
   // Address - too long
-  3010050: { crn: '3010000050', ...invalidAddressTooLong },
-  3010051: { crn: '3010000051', ...invalidAddressTooLong },
-  3010052: { crn: '3010000052', ...invalidAddressTooLong },
-  3010053: { crn: '3010000053', ...invalidAddressTooLong },
-  3010054: { crn: '3010000054', ...invalidAddressTooLong },
-  3010055: { crn: '3010000055', ...invalidAddressTooLong },
-  3010056: { crn: '3010000056', ...invalidAddressTooLong },
-  3010057: { crn: '3010000057', ...invalidAddressTooLong },
-  3010058: { crn: '3010000058', ...invalidAddressTooLong },
-  3010059: { crn: '3010000059', ...invalidAddressTooLong },
+  3010050: { crn: '3010000050', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010051: { crn: '3010000051', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010052: { crn: '3010000052', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010053: { crn: '3010000053', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010054: { crn: '3010000054', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010055: { crn: '3010000055', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010056: { crn: '3010000056', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010057: { crn: '3010000057', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010058: { crn: '3010000058', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010059: { crn: '3010000059', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
 
   // Phone - both phones empty
   3010060: { crn: '3010000060', ...emptyPhoneAndMobile },
@@ -412,29 +430,29 @@ export const sfdPersonLookup = {
   3004900: { crn: '3004900000', firstName: 'Invalid', lastName: 'Phone', mobile: 'null' },
 
   // Email (3010080-3010099) - null/empty + invalid
-  3010080: { crn: '3010000080', firstName: 'Invalid', lastName: 'email', email: '' },
-  3010081: { crn: '3010000081', firstName: 'Invalid', lastName: 'email', email: '' },
-  3010082: { crn: '3010000082', firstName: 'Invalid', lastName: 'email', email: '' },
-  3010083: { crn: '3010000083', firstName: 'Invalid', lastName: 'email', email: '' },
-  3010084: { crn: '3010000084', firstName: 'Invalid', lastName: 'email', email: '' },
-  3010085: { crn: '3010000085', firstName: 'Invalid', lastName: 'email', email: null },
-  3010086: { crn: '3010000086', firstName: 'Invalid', lastName: 'email', email: null },
-  3010087: { crn: '3010000087', firstName: 'Invalid', lastName: 'email', email: null },
-  3010088: { crn: '3010000088', firstName: 'Invalid', lastName: 'email', email: null },
-  3010089: { crn: '3010000089', firstName: 'Invalid', lastName: 'email', email: null },
-  3010090: { crn: '3010000090', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
-  3010091: { crn: '3010000091', firstName: 'Invalid', lastName: 'email', email: 'user@' },
-  3010092: { crn: '3010000092', firstName: 'Invalid', lastName: 'email', email: 'user@localhost' },
-  3010093: { crn: '3010000093', firstName: 'Invalid', lastName: 'email', email: 'user@domain.c' },
-  3010094: { crn: '3010000094', firstName: 'Invalid', lastName: 'email', email: 'user@domain' },
-  3010095: { crn: '3010000095', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
-  3010096: { crn: '3010000096', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
-  3010097: { crn: '3010000097', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
-  3010098: { crn: '3010000098', firstName: 'Invalid', lastName: 'email', email: 'not-an-email' },
+  3010080: { crn: '3010000080', firstName: 'Email', lastName: 'empty', email: '' },
+  3010081: { crn: '3010000081', firstName: 'Email', lastName: 'empty', email: '' },
+  3010082: { crn: '3010000082', firstName: 'Email', lastName: 'empty', email: '' },
+  3010083: { crn: '3010000083', firstName: 'Email', lastName: 'empty', email: '' },
+  3010084: { crn: '3010000084', firstName: 'Email', lastName: 'empty', email: '' },
+  3010085: { crn: '3010000085', firstName: 'Email', lastName: 'null', email: null },
+  3010086: { crn: '3010000086', firstName: 'Email', lastName: 'null', email: null },
+  3010087: { crn: '3010000087', firstName: 'Email', lastName: 'null', email: null },
+  3010088: { crn: '3010000088', firstName: 'Email', lastName: 'null', email: null },
+  3010089: { crn: '3010000089', firstName: 'Email', lastName: 'null', email: null },
+  3010090: { crn: '3010000090', ...invalidEmailOnly },
+  3010091: { crn: '3010000091', ...invalidEmailOnly },
+  3010092: { crn: '3010000092', ...invalidEmailOnly },
+  3010093: { crn: '3010000093', ...invalidEmailOnly },
+  3010094: { crn: '3010000094', ...invalidEmailOnly },
+  3010095: { crn: '3010000095', ...invalidEmailOnly },
+  3010096: { crn: '3010000096', ...invalidEmailOnly },
+  3010097: { crn: '3010000097', ...invalidEmailOnly },
+  3010098: { crn: '3010000098', ...invalidEmailOnly },
   3010099: {
     crn: '3010000099',
-    firstName: 'Invalid',
-    lastName: 'email',
+    firstName: 'Email',
+    lastName: 'too long',
     email: 'a'.repeat(251) + '@example.com'
   },
 
@@ -551,14 +569,7 @@ export const sfdPersonLookup = {
     email: 'invalid@@example.com',
     mobile: 'not-a-phone',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress }
   },
   // 3005500-3005599: Invalid email + phone
   3005500: {
@@ -585,14 +596,7 @@ export const sfdPersonLookup = {
     firstName: 'Multiple',
     lastName: 'Invalid',
     mobile: '!@#$%',
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress },
   },
   // 3005800-3005899: Future DOB + missing address + invalid phone
   3005800: {
@@ -602,14 +606,7 @@ export const sfdPersonLookup = {
     lastName: 'Invalid',
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
     mobile: 'abc123',
-    address: {
-      address1: null,
-      street: 'Test Street',
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress }
   },
   // 3005900-3005999: Invalid email + phone + future DOB + missing address
   3005900: {
@@ -620,14 +617,7 @@ export const sfdPersonLookup = {
     email: '',
     mobile: '',
     dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime(),
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress },
   },
 
   // One Field Wrong (3006000-3006999) - Single invalid field combinations
@@ -671,90 +661,7 @@ export const sfdPersonLookup = {
   3006258: { crn: '3006258000', ...invalidPhoneOnly },
   3006259: { crn: '3006259000', ...invalidPhoneOnly },
 
-  // 3006300-3006399: Missing address1 only
-  3006300: {
-    // Missing address1 only - example 1
-    crn: '3006300000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    address: {
-      address1: null,
-      street: 'Test Street',
-      city: 'Test City',
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
-  },
-  // 3006400-3006499: Missing street only
-  3006400: {
-    // Missing street only - example 1
-    crn: '3006400000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    address: {
-      address1: '123 Test Street',
-      street: null,
-      city: 'Test City',
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
-  },
-  // 3006500-3006599: Missing city only
-  3006500: {
-    // Missing city only - example 1
-    crn: '3006500000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    address: {
-      address1: '123 Test Street',
-      street: 'Test Street',
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
-  },
-  // 3006600-3006699: Missing postalCode only
-  3006600: {
-    // Missing postalCode only - example 1
-    crn: '3006600000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    address: {
-      address1: '123 Test Street',
-      street: 'Test Street',
-      city: 'Test City',
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
-  },
-  // 3006700-3006799: Future DOB (different date)
-  3006700: {
-    // Future DOB (different date) - example 1
-    crn: '3006700000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime()
-  },
-  // 3006800-3006899: Invalid email (different format)
-  3006800: {
-    // Invalid email (different format) - example 1
-    crn: '3006800000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    email: 'invalid@'
-  },
-  // 3006900-3006999: Invalid phone (different format)
-  3006900: {
-    // Invalid phone (different format) - example 1
-    crn: '3006900000',
-    firstName: 'One',
-    lastName: 'Wrong',
-    mobile: '123'
-  },
+  // Multiple fields invalid - Two or more invalid fields together
 
   // Two Fields Wrong (3007000-3007999) - Two invalid fields together
   // 3007000-3007099: DOB + email
@@ -781,14 +688,7 @@ export const sfdPersonLookup = {
     crn: '3007200000',
     firstName: 'Two',
     lastName: 'Wrong',
-    address: {
-      address1: null,
-      street: null,
-      city: 'Test City',
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    },
+    address: { ...addressTooLongAddress },
     email: 'invalid@'
   },
   // 3007300-3007399: Address + phone
@@ -797,14 +697,7 @@ export const sfdPersonLookup = {
     crn: '3007300000',
     firstName: 'Two',
     lastName: 'Wrong',
-    address: {
-      address1: null,
-      street: 'Test Street',
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    },
+    address: { ...addressTooLongAddress },
     mobile: '123'
   },
   // 3007400-3007499: Email + phone
@@ -823,14 +716,7 @@ export const sfdPersonLookup = {
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3007600-3007699: DOB + email (different values)
   3007600: {
@@ -847,14 +733,7 @@ export const sfdPersonLookup = {
     crn: '3007700000',
     firstName: 'Two',
     lastName: 'Wrong',
-    address: {
-      address1: '123 Test Street',
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    },
+    address: { ...addressTooLongAddress },
     mobile: '!@#$%'
   },
   // 3007800-3007899: Email + phone (different formats)
@@ -873,14 +752,7 @@ export const sfdPersonLookup = {
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
-    address: {
-      address1: null,
-      street: null,
-      city: 'Test City',
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
 
   // Three+ Fields Wrong (3008000-3008999) - Three or more invalid fields
@@ -902,14 +774,7 @@ export const sfdPersonLookup = {
     lastName: 'Plus',
     dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime(),
     email: 'invalid@',
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008200-3008299: DOB + phone + address
   3008200: {
@@ -919,14 +784,7 @@ export const sfdPersonLookup = {
     lastName: 'Plus',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
     mobile: '123',
-    address: {
-      address1: null,
-      street: null,
-      city: 'Test City',
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008300-3008399: Email + phone + address
   3008300: {
@@ -936,14 +794,7 @@ export const sfdPersonLookup = {
     lastName: 'Plus',
     email: 'bad-email',
     mobile: 'abc',
-    address: {
-      address1: null,
-      street: 'Test Street',
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008400-3008499: DOB + email + phone + address
   3008400: {
@@ -954,14 +805,7 @@ export const sfdPersonLookup = {
     dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
     email: 'invalid email@example.com',
     mobile: '!@#$%',
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008500-3008599: DOB + email + phone (different values)
   3008500: {
@@ -981,14 +825,7 @@ export const sfdPersonLookup = {
     lastName: 'Plus',
     dateOfBirth: new Date('2028-07-04T00:00:00Z').getTime(),
     email: 'bad@email',
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008700-3008799: Email + phone + address (different fields)
   3008700: {
@@ -998,14 +835,7 @@ export const sfdPersonLookup = {
     lastName: 'Plus',
     email: '',
     mobile: '',
-    address: {
-      address1: null,
-      street: null,
-      city: 'Test City',
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008800-3008899: DOB + email + phone + address (different combinations)
   3008800: {
@@ -1016,14 +846,7 @@ export const sfdPersonLookup = {
     dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime(),
     email: 'invalid@',
     mobile: 'abc123',
-    address: {
-      address1: null,
-      street: 'Test Street',
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3008900-3008999: All four fields (DOB + email + phone + address)
   3008900: {
@@ -1034,14 +857,7 @@ export const sfdPersonLookup = {
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
     email: 'invalid@',
     mobile: 'not-a-phone',
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...addressTooLongAddress },
   },
   // 3010100-3010109: All five invalid: (name + DOB + email + phone + address)
   3010100: { crn: '3010000100', ...allInvalidPersonBase },
@@ -1058,6 +874,25 @@ export const sfdPersonLookup = {
   // Person stub for the Business details test user (CRN 3020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
   3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' }
 }
+
+/*
+ * Without this merge, any entry that does not set `address` would get a
+ * faker-generated address from the person factory, which is unpredictable and
+ * can cause missing address lines or frontend validation failures. We want
+ * every person to get the minimalMandatoryAddress instead.
+ *
+ * personLookupEntries lists only what each person overrides (crn, name,
+ * phone, address when needed). We merge defaultPersonOverride (which sets
+ * address: minimalMandatoryAddress) into each entry here. Entries that omit
+ * address get the default; entries that set address (e.g. emptyAddress,
+ * addressTooLongAddress) override it.
+ */
+export const sfdPersonLookup = Object.fromEntries(
+  Object.entries(personLookupEntries).map(([id, entry]) => [
+    id,
+    { ...defaultPersonOverride, ...entry }
+  ])
+)
 
 // Person IDs that use the shared Test Org (3001458) in defra-id. Derived from sfdPersonLookup keys
 // excluding 3009100 (Business Details Test). When adding a test user with org 3001458 in defra-id,
