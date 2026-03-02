@@ -416,6 +416,60 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
+    describe('with static organisation data overrides', () => {
+      const staticOrgFixture = {
+        name: 'Clean control - example 1',
+        address: {
+          address1: '1 Clean Street',
+          address2: null,
+          address3: null,
+          address4: null,
+          address5: null,
+          city: 'Clean Town',
+          county: null,
+          postalCode: 'AB1 2CD',
+          country: 'United Kingdom',
+          uprn: null
+        },
+        landline: '01234567890',
+        mobile: '07123456789',
+        email: 'clean.business@example.com'
+      }
+
+      test('Should return data for /organisation/{organisationId} with static overrides', async () => {
+        const response = await mockServer.inject({
+          method: 'GET',
+          url: '/extapi/organisation/3009000'
+        })
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toEqual(expect.objectContaining(staticOrgFixture))
+      })
+
+      test('Should return data for /organisation/search with static overrides', async () => {
+        const response = await mockServer.inject({
+          method: 'POST',
+          url: '/extapi/organisation/search',
+          payload: {
+            primarySearchPhrase: '300900001',
+            searchFieldType: 'SBI'
+          }
+        })
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toHaveLength(1)
+        // Search returns a subset of org fields (no email, landline, mobile)
+        expect(json._data[0]).toEqual(
+          expect.objectContaining({
+            id: 3009000,
+            sbi: 300900001,
+            name: staticOrgFixture.name,
+            address: staticOrgFixture.address
+          })
+        )
+      })
+    })
+
     test('Should return data for /organisation/create/{personId}', async () => {
       const response = await mockServer.inject({
         method: 'POST',
