@@ -305,16 +305,66 @@ const personLookupEntries = {
   3010049: { crn: '3010000049', firstName: 'Address', lastName: 'empty', address: emptyAddress },
 
   // Address - too long
-  3010050: { crn: '3010000050', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010051: { crn: '3010000051', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010052: { crn: '3010000052', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010053: { crn: '3010000053', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010054: { crn: '3010000054', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010055: { crn: '3010000055', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010056: { crn: '3010000056', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010057: { crn: '3010000057', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010058: { crn: '3010000058', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
-  3010059: { crn: '3010000059', firstName: 'Address', lastName: 'too long', address: addressTooLongAddress },
+  3010050: {
+    crn: '3010000050',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010051: {
+    crn: '3010000051',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010052: {
+    crn: '3010000052',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010053: {
+    crn: '3010000053',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010054: {
+    crn: '3010000054',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010055: {
+    crn: '3010000055',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010056: {
+    crn: '3010000056',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010057: {
+    crn: '3010000057',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010058: {
+    crn: '3010000058',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
+  3010059: {
+    crn: '3010000059',
+    firstName: 'Address',
+    lastName: 'too long',
+    address: addressTooLongAddress
+  },
 
   // Phone - both phones empty
   3010060: { crn: '3010000060', ...emptyPhoneAndMobile },
@@ -596,7 +646,7 @@ const personLookupEntries = {
     firstName: 'Multiple',
     lastName: 'Invalid',
     mobile: '!@#$%',
-    address: { ...emptyAddress },
+    address: { ...emptyAddress }
   },
   // 3005800-3005899: Future DOB + missing address + invalid phone
   3005800: {
@@ -617,7 +667,7 @@ const personLookupEntries = {
     email: '',
     mobile: '',
     dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime(),
-    address: { ...emptyAddress },
+    address: { ...emptyAddress }
   },
 
   // One Field Wrong (3006000-3006999) - Single invalid field combinations
@@ -716,7 +766,7 @@ const personLookupEntries = {
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3007600-3007699: DOB + email (different values)
   3007600: {
@@ -752,7 +802,7 @@ const personLookupEntries = {
     firstName: 'Two',
     lastName: 'Wrong',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
 
   // Three+ Fields Wrong (3008000-3008999) - Three or more invalid fields
@@ -774,7 +824,7 @@ const personLookupEntries = {
     lastName: 'Plus',
     dateOfBirth: new Date('2031-06-15T00:00:00Z').getTime(),
     email: 'invalid@',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008200-3008299: DOB + phone + address
   3008200: {
@@ -784,7 +834,7 @@ const personLookupEntries = {
     lastName: 'Plus',
     dateOfBirth: new Date('2035-03-20T00:00:00Z').getTime(),
     mobile: '123',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008300-3008399: Email + phone + address
   3008300: {
@@ -794,7 +844,7 @@ const personLookupEntries = {
     lastName: 'Plus',
     email: 'bad-email',
     mobile: 'abc',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008400-3008499: DOB + email + phone + address
   3008400: {
@@ -805,7 +855,7 @@ const personLookupEntries = {
     dateOfBirth: new Date('2029-12-31T00:00:00Z').getTime(),
     email: 'invalid email@example.com',
     mobile: '!@#$%',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008500-3008599: DOB + email + phone (different values)
   3008500: {
@@ -825,7 +875,7 @@ const personLookupEntries = {
     lastName: 'Plus',
     dateOfBirth: new Date('2028-07-04T00:00:00Z').getTime(),
     email: 'bad@email',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008700-3008799: Email + phone + address (different fields)
   3008700: {
@@ -835,7 +885,7 @@ const personLookupEntries = {
     lastName: 'Plus',
     email: '',
     mobile: '',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008800-3008899: DOB + email + phone + address (different combinations)
   3008800: {
@@ -846,7 +896,7 @@ const personLookupEntries = {
     dateOfBirth: new Date('2032-11-11T00:00:00Z').getTime(),
     email: 'invalid@',
     mobile: 'abc123',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3008900-3008999: All four fields (DOB + email + phone + address)
   3008900: {
@@ -857,7 +907,7 @@ const personLookupEntries = {
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
     email: 'invalid@',
     mobile: 'not-a-phone',
-    address: { ...addressTooLongAddress },
+    address: { ...addressTooLongAddress }
   },
   // 3010100-3010109: All five invalid: (name + DOB + email + phone + address)
   3010100: { crn: '3010000100', ...allInvalidPersonBase },
