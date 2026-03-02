@@ -569,14 +569,7 @@ const personLookupEntries = {
     email: 'invalid@@example.com',
     mobile: 'not-a-phone',
     dateOfBirth: new Date('2040-01-01T00:00:00Z').getTime(),
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress }
   },
   // 3005500-3005599: Invalid email + phone
   3005500: {
@@ -603,14 +596,7 @@ const personLookupEntries = {
     firstName: 'Multiple',
     lastName: 'Invalid',
     mobile: '!@#$%',
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: 'TE1 2ST',
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress },
   },
   // 3005800-3005899: Future DOB + missing address + invalid phone
   3005800: {
@@ -620,14 +606,7 @@ const personLookupEntries = {
     lastName: 'Invalid',
     dateOfBirth: new Date('2027-05-15T00:00:00Z').getTime(),
     mobile: 'abc123',
-    address: {
-      address1: null,
-      street: 'Test Street',
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress }
   },
   // 3005900-3005999: Invalid email + phone + future DOB + missing address
   3005900: {
@@ -638,14 +617,7 @@ const personLookupEntries = {
     email: '',
     mobile: '',
     dateOfBirth: new Date('2033-09-30T00:00:00Z').getTime(),
-    address: {
-      address1: null,
-      street: null,
-      city: null,
-      postalCode: null,
-      country: 'England',
-      uprn: null
-    }
+    address: { ...emptyAddress },
   },
 
   // One Field Wrong (3006000-3006999) - Single invalid field combinations
