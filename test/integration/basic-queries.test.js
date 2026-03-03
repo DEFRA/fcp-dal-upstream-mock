@@ -417,18 +417,20 @@ describe('Basic queries for faked routes', () => {
     })
 
     describe('with static organisation data overrides', () => {
+      // Matches cleanControlBase + minimalMandatoryAddress in src/factories/sfd-test-data/business.js
       const staticOrgFixture = {
-        name: 'Clean control - example 1',
+        name: 'Clean control',
         address: {
-          address1: '1 Clean Street',
+          address1: '123 Test Street',
           address2: null,
           address3: null,
-          address4: null,
+          address4: 'Test City',
           address5: null,
-          city: 'Clean Town',
+          city: null,
           county: null,
-          postalCode: 'AB1 2CD',
-          country: 'United Kingdom',
+          postalCode: 'TE1 2ST',
+          country: 'England',
+          street: null,
           uprn: null
         },
         landline: '01234567890',
