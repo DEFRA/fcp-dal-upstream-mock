@@ -41,9 +41,6 @@ const SHARED_TEST_ORG_ID = 3001458
 const BUSINESS_DETAILS_TEST_PERSON_ID = 3009100
 const ORG_ID_NO_CPH = 80000001
 
-// Base applied to every org so address is predictable unless the entry overrides address.
-const defaultBusinessDetailsOverride = { address: minimalMandatoryAddress }
-
 /*
  * Manual address only (no lookup): uprn is null; we do not use lookup data.
  *
@@ -57,19 +54,6 @@ const defaultBusinessDetailsOverride = { address: minimalMandatoryAddress }
  * we set them to null since this is manual-only test data.
  */
 
-// Shared constants
-const addressLineTooLong = 'A'.repeat(101)
-const phoneTooLong = '0'.repeat(51)
-const emailTooLong = 'a'.repeat(250) + '@ab.com'
-
-const cleanControlBase = {
-  name: 'Clean control',
-  landline: '01234567890',
-  mobile: '07123456789',
-  email: 'clean.business@example.com'
-}
-
-// Address base shapes
 const minimalMandatoryAddress = {
   address1: '123 Test Street',
   address2: null,
@@ -82,6 +66,22 @@ const minimalMandatoryAddress = {
   postalCode: 'TE1 2ST',
   country: 'England',
   uprn: null
+}
+
+// Base applied to every org so address is predictable unless the entry overrides address.
+const defaultBusinessDetailsOverride = { address: minimalMandatoryAddress }
+
+// Shared constants
+const addressLineTooLong = 'A'.repeat(101)
+const phoneTooLong = '0'.repeat(51)
+const emailTooLong = 'a'.repeat(250) + '@ab.com'
+
+// Base templates
+const cleanControlBase = {
+  name: 'Clean control',
+  landline: '01234567890',
+  mobile: '07123456789',
+  email: 'clean.business@example.com'
 }
 
 const addressLine1EmptyBase = {
@@ -102,7 +102,7 @@ const addressLine3TooLongBase = {
 }
 const cityEmptyBase = {
   name: 'City empty',
-  address: { ...minimalMandatoryAddress, city: '' }
+  address: { ...minimalMandatoryAddress, address4: '' }
 }
 const cityTooLongBase = {
   name: 'City too long',
@@ -192,7 +192,7 @@ const businessDetailsLookupEntries = {
   3009608: { ...addressLine3TooLongBase },
   3009609: { ...addressLine3TooLongBase },
 
-  // City empty
+  // Town/city (address4) empty
   3009700: { ...cityEmptyBase },
   3009701: { ...cityEmptyBase },
   3009702: { ...cityEmptyBase },
