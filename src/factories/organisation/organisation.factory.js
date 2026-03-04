@@ -220,11 +220,11 @@ export const retrieveOrganisation = (orgId) => {
 }
 
 export const retrieveOrganisationCustomers = (orgId) => {
-  const personIds = orgIdToPersonIds[orgId] || []
-  const orgPeople = personIds.map((personId) => {
-    const person = retrievePerson(personId)
+  const customers = orgIdToPersonIds[orgId] || []
+  const orgPeople = customers.map((customer) => {
+    const person = retrievePerson(customer.personId)
     return {
-      id: personId,
+      id: customer.personId,
       firstName: person.firstName,
       lastName: person.lastName,
       customerReference: person.customerReferenceNumber,
