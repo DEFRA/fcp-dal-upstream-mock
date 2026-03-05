@@ -453,7 +453,8 @@ export const personIdToOrgIds = {}
 Object.entries(orgIdLookup).forEach(([orgId, { sbi, customers }]) => {
   orgIdToSbi[orgId] = sbi
   sbiToOrgId[sbi] = orgId
-  orgIdToPersonIds[orgId] = customers
+  //orgIdToPersonIds[orgId] = customers
+  orgIdToPersonIds[orgId] = customers.map((person) => person.personId)
   customers.forEach((personElement) => {
     if (!personIdToOrgIds[personElement.personId]) {
       personIdToOrgIds[personElement.personId] = []
