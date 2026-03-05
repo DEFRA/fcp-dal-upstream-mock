@@ -1,30 +1,49 @@
-import { personIdToOrgIds } from '../factories/id-lookups.js'
 import { fakeId, faker, nullOrFake, safeSeed } from './common.js'
+import { orgIdToSbi, personIdToOrgIds, staticPersonData, orgIdLookup } from './id-lookups.js'
 
 const businessPersonMessages = {}
+const maxYearsInPast = 4
 
-const createMessageMock = (orgId, personId) => {
-  const readAt = nullOrFake(() => Number.parseInt(faker.date.past().getTime() / 1000) * 1000)
-  return {
+const createMessageMock = (orgId, personId, overrides = {}) => {
+  const archivedAt = nullOrFake(
+    () => Number.parseInt(faker.date.past(maxYearsInPast).getTime() / 1000) * 1000
+  )
+
+  const readAt = nullOrFake(
+    () => Number.parseInt(faker.date.past(maxYearsInPast).getTime() / 1000) * 1000
+  )
+
+  const message = {
     id: fakeId(),
     personId,
     organisationId: orgId,
     messageId: fakeId(),
     readAt,
-    archivedAt: null,
-    archive: null,
+    archivedAt,
+    archive: archivedAt === null ? null : !!archivedAt,
     createdAt: faker.date.past(readAt ? { refDate: readAt } : undefined).getTime(),
     title: faker.lorem.sentence({ min: 3, max: 10 }),
     body: `<p>${faker.lorem.sentence()}</p>`,
     category: 'OrganisationLevel',
-    bespokeNotificationId: null
+    bespokeNotificationId: null,
+    ...overrides
   }
+  return message
 }
 
-const generateMessagesPayload = (orgId, personId, numMessages) => {
-  const notifications = Array.from({ length: numMessages }, () =>
-    createMessageMock(orgId, personId)
-  )
+const generateMessagesPayload = (orgId, personId, overrides = null) => {
+  var notifications
+  if (!overrides) {
+    const messageCount = faker.number.int({ min: 0, max: 10 })
+    notifications = Array.from({ length: messageCount }, (_, i) =>
+      createMessageMock(orgId, personId)
+    )
+  } else {
+    notifications = Array.from(overrides, (messageOverrides) =>
+      createMessageMock(orgId, personId, messageOverrides)
+    )
+  }
+
   const readCount = notifications.filter((n) => n.readAt).length
 
   return {
@@ -56,11 +75,19 @@ export const retrieveMessages = (orgId, personId, page = 1) => {
   if (messages) {
     return messages
   }
-  const messagesPayload = generateMessagesPayload(
-    orgId,
-    personId,
-    faker.number.int({ min: 0, max: 10 })
-  )
+
+  const { sbi, ...overrides } = orgIdLookup[orgId] ?? {}
+
+  var messagesPayload
+  if (overrides) {
+    const messageOverrides = overrides.customers[0].messages
+    if (messageOverrides) {
+      messagesPayload = generateMessagesPayload(orgId, personId, messageOverrides)
+    } else {
+      messagesPayload = generateMessagesPayload(orgId, personId)
+    }
+  }
+
   businessPersonMessages[`${orgId}-${personId}`] = messagesPayload
   return messagesPayload
 }

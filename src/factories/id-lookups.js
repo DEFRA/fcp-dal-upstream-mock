@@ -48,6 +48,15 @@ export const staticPersonData = {
     lastName: 'Grey',
     privileges: []
   },
+  // Person in org 3333333334
+  11111141: {
+    crn: '1111111902',
+    title: 'Mr',
+    otherTitle: '',
+    firstName: 'Frederick',
+    middleName: '',
+    lastName: 'Forsyth'
+  },
   // people in org 1111111111 and 2222222222
   11111122: { crn: '1111112200' },
   11111222: { crn: '1111122200' },
@@ -172,8 +181,21 @@ export const orgIdLookup = {
   1111111111: {
     sbi: 1111111111,
     customers: [
-      11111111, 11111112, 11111113, 11111114, 11111115, 11111116, 11111117, 11111118, 11111119,
-      11111122, 11111222, 11112222, 11122222, 11222222, 12222222
+      { personId: 11111111 },
+      { personId: 11111112 },
+      { personId: 11111113 },
+      { personId: 11111114 },
+      { personId: 11111115 },
+      { personId: 11111116 },
+      { personId: 11111117 },
+      { personId: 11111118 },
+      { personId: 11111119 },
+      { personId: 11111122 },
+      { personId: 11111222 },
+      { personId: 11112222 },
+      { personId: 11122222 },
+      { personId: 11222222 },
+      { personId: 12222222 }
     ],
     agreements: [
       {
@@ -249,14 +271,72 @@ export const orgIdLookup = {
   2222222222: {
     sbi: 2222222222,
     customers: [
-      11111122, 11111222, 11112222, 11122222, 11222222, 12222222, 22222220, 22222221, 22222222,
-      22222223, 22222224, 22222225, 22222226, 22222227, 22222228, 22222229, 22222230, 22222231,
-      22222232, 22222233, 22222234, 22222235, 22222236, 22222237, 22222238, 22222239, 22222240,
-      22222241, 22222242, 22222243, 22222244, 22222245, 22222246, 22222247, 22222248, 22222249,
-      22222250, 22222251, 22222252, 22222253, 22222254, 22222255, 22222256, 22222257, 22222258,
-      22222259, 22222260, 22222261, 22222262, 22222263, 22222264, 22222265, 22222266, 22222267,
-      22222268, 22222269, 22222270, 22222271, 22222272, 22222273, 22222274, 22222275, 22222276,
-      22222277, 22222278, 22222279
+      { personId: 11111122 },
+      { personId: 11111222 },
+      { personId: 11112222 },
+      { personId: 11122222 },
+      { personId: 11222222 },
+      { personId: 12222222 },
+      { personId: 22222220 },
+      { personId: 22222221 },
+      { personId: 22222222 },
+      { personId: 22222223 },
+      { personId: 22222224 },
+      { personId: 22222225 },
+      { personId: 22222226 },
+      { personId: 22222227 },
+      { personId: 22222228 },
+      { personId: 22222229 },
+      { personId: 22222230 },
+      { personId: 22222231 },
+      { personId: 22222232 },
+      { personId: 22222233 },
+      { personId: 22222234 },
+      { personId: 22222235 },
+      { personId: 22222236 },
+      { personId: 22222237 },
+      { personId: 22222238 },
+      { personId: 22222239 },
+      { personId: 22222240 },
+      { personId: 22222241 },
+      { personId: 22222242 },
+      { personId: 22222243 },
+      { personId: 22222244 },
+      { personId: 22222245 },
+      { personId: 22222246 },
+      { personId: 22222247 },
+      { personId: 22222248 },
+      { personId: 22222249 },
+      { personId: 22222250 },
+      { personId: 22222251 },
+      { personId: 22222252 },
+      { personId: 22222253 },
+      { personId: 22222254 },
+      { personId: 22222255 },
+      { personId: 22222256 },
+      { personId: 22222257 },
+      { personId: 22222258 },
+      { personId: 22222259 },
+      { personId: 22222260 },
+      { personId: 22222261 },
+      { personId: 22222262 },
+      { personId: 22222263 },
+      { personId: 22222264 },
+      { personId: 22222265 },
+      { personId: 22222266 },
+      { personId: 22222267 },
+      { personId: 22222268 },
+      { personId: 22222269 },
+      { personId: 22222270 },
+      { personId: 22222271 },
+      { personId: 22222272 },
+      { personId: 22222273 },
+      { personId: 22222274 },
+      { personId: 22222275 },
+      { personId: 22222276 },
+      { personId: 22222277 },
+      { personId: 22222278 },
+      { personId: 22222279 }
     ],
     agreements: [
       {
@@ -273,7 +353,49 @@ export const orgIdLookup = {
       }
     ]
   },
-  3333333333: { sbi: 3333333333, customers: [11111120] },
+  // Contains user with no first name and no messages
+  3333333333: {
+    sbi: 3333333333,
+    customers: [
+      {
+        personId: 11111120,
+        messages: []
+      }
+    ]
+  },
+
+  // Contains user with 10 messages, 5 deleted messages
+  3333333334: {
+    sbi: 3333333334,
+    customers: [
+      {
+        personId: 11111141,
+        messages: [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}, // 10 faked messages
+          { archive: true },
+          { archive: true },
+          { archive: true },
+          { archive: true }, // 4 faked message that've been deleted
+          {
+            readAt: '2020-01-31T18:01:30.000Z', // read
+            archivedAt: '2020-03-31T18:01:30.000Z', // deleted
+            archive: true,
+            title: 'Static title',
+            body: '<i>static body<i>'
+          } // deleted message with comprehensive static data
+        ]
+      }
+    ]
+  },
 
   // business from dev CRM
   5565448: {
@@ -282,10 +404,19 @@ export const orgIdLookup = {
     applications: [{ application_history: [{}] }], // 1 application with 1 transition entry
     cphs: Array.from({ length: 8 }, () => ({})) // 8 CPHs
   },
-  5559799: { sbi: 106238988, customers: [5302028] },
-  5560725: { sbi: 106284736, customers: [5302028, 9900000, 9900001, 9900002, 9900003] },
-  5625145: { sbi: 107591843, customers: [5302028, 5692562] },
-  5447505: { sbi: 121428499, customers: [5302028] },
+  5559799: { sbi: 106238988, customers: [{ personId: 5302028 }] },
+  5560725: {
+    sbi: 106284736,
+    customers: [
+      { personId: 5302028 },
+      { personId: 9900000 },
+      { personId: 9900001 },
+      { personId: 9900002 },
+      { personId: 9900003 }
+    ]
+  },
+  5625145: { sbi: 107591843, customers: [{ personId: 5302028 }, { personId: 5692562 }] },
+  5447505: { sbi: 121428499, customers: [{ personId: 5302028 }] },
 
   // for DAL mutation tests
   9000001: { sbi: 900000001, customers: [] },
@@ -294,8 +425,18 @@ export const orgIdLookup = {
   9000003: {
     sbi: 900000003,
     customers: [
-      9000010, 9000011, 9000012, 9000013, 9000014, 9000015, 9000016, 9000017, 9000018, 9000019,
-      9000020, 9000021
+      { personId: 9000010 },
+      { personId: 9000011 },
+      { personId: 9000012 },
+      { personId: 9000013 },
+      { personId: 9000014 },
+      { personId: 9000015 },
+      { personId: 9000016 },
+      { personId: 9000017 },
+      { personId: 9000018 },
+      { personId: 9000019 },
+      { personId: 9000020 },
+      { personId: 9000021 }
     ]
   }
 }
@@ -312,11 +453,12 @@ export const personIdToOrgIds = {}
 Object.entries(orgIdLookup).forEach(([orgId, { sbi, customers }]) => {
   orgIdToSbi[orgId] = sbi
   sbiToOrgId[sbi] = orgId
-  orgIdToPersonIds[orgId] = customers
-  customers.forEach((personId) => {
-    if (!personIdToOrgIds[personId]) {
-      personIdToOrgIds[personId] = []
+  //orgIdToPersonIds[orgId] = customers
+  orgIdToPersonIds[orgId] = customers.map((person) => person.personId)
+  customers.forEach((personElement) => {
+    if (!personIdToOrgIds[personElement.personId]) {
+      personIdToOrgIds[personElement.personId] = []
     }
-    personIdToOrgIds[personId].push(Number(orgId))
+    personIdToOrgIds[personElement.personId].push(Number(orgId))
   })
 })
