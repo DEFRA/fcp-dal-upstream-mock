@@ -814,7 +814,10 @@ const businessDetailsOrgLookup = Object.fromEntries(
     const permissionUsers = permissionUsersByOrgId[id] ?? []
     return [
       id,
-      { sbi: 300900001 + (id - 3009000), customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers] }
+      {
+        sbi: 300900001 + (id - 3009000),
+        customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers]
+      }
     ]
   })
 )
