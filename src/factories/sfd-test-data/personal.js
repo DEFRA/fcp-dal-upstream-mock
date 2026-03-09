@@ -922,7 +922,40 @@ const personLookupEntries = {
   3010109: { crn: '3010000109', ...allInvalidPersonBase },
 
   // Person stub for the Business details test user (CRN 3020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
-  3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' }
+  3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' },
+
+  // Permission-level test users (View / Amend) for Business Details. Privilege strings must match fcp-dal-api mapping.
+  // VIEW (2)
+  3010001: { crn: '3010001000', firstName: 'View Level Permission', lastName: 'Example 1', privileges: ['View - business'] },
+  3010002: { crn: '3010002000', firstName: 'View Level Permission', lastName: 'Example 2', privileges: ['View - business'] },
+  // AMEND all valid (5)
+  3010003: { crn: '3010003000', firstName: 'Amend Level Permission', lastName: 'All Valid - example 1', privileges: ['Amend - business'] },
+  3010004: { crn: '3010004000', firstName: 'Amend Level Permission', lastName: 'All Valid - example 2', privileges: ['Amend - business'] },
+  3010005: { crn: '3010005000', firstName: 'Amend Level Permission', lastName: 'All Valid - example 3', privileges: ['Amend - business'] },
+  3010006: { crn: '3010006000', firstName: 'Amend Level Permission', lastName: 'All Valid - example 4', privileges: ['Amend - business'] },
+  3010007: { crn: '3010007000', firstName: 'Amend Level Permission', lastName: 'All Valid - example 5', privileges: ['Amend - business'] },
+  // AMEND one invalid (10)
+  3010008: { crn: '3010008000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 1', privileges: ['Amend - business'] },
+  3010009: { crn: '3010009000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 2', privileges: ['Amend - business'] },
+  3010010: { crn: '3010010000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 3', privileges: ['Amend - business'] },
+  3010011: { crn: '3010011000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 4', privileges: ['Amend - business'] },
+  3010012: { crn: '3010012000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 5', privileges: ['Amend - business'] },
+  3010013: { crn: '3010013000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 6', privileges: ['Amend - business'] },
+  3010014: { crn: '3010014000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 7', privileges: ['Amend - business'] },
+  3010015: { crn: '3010015000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 8', privileges: ['Amend - business'] },
+  3010016: { crn: '3010016000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 9', privileges: ['Amend - business'] },
+  3010017: { crn: '3010017000', firstName: 'Amend Level Permission', lastName: 'One Invalid - example 10', privileges: ['Amend - business'] },
+  // AMEND two invalid (10)
+  3010018: { crn: '3010018000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 1', privileges: ['Amend - business'] },
+  3010019: { crn: '3010019000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 2', privileges: ['Amend - business'] },
+  3010020: { crn: '3010020000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 3', privileges: ['Amend - business'] },
+  3010021: { crn: '3010021000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 4', privileges: ['Amend - business'] },
+  3010022: { crn: '3010022000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 5', privileges: ['Amend - business'] },
+  3010023: { crn: '3010023000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 6', privileges: ['Amend - business'] },
+  3010024: { crn: '3010024000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 7', privileges: ['Amend - business'] },
+  3010025: { crn: '3010025000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 8', privileges: ['Amend - business'] },
+  3010026: { crn: '3010026000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 9', privileges: ['Amend - business'] },
+  3010027: { crn: '3010027000', firstName: 'Amend Level Permission', lastName: 'Two Invalid - example 10', privileges: ['Amend - business'] }
 }
 
 /*
@@ -945,9 +978,15 @@ export const sfdPersonLookup = Object.fromEntries(
 )
 
 // Person IDs that use the shared Test Org (3001458) in defra-id. Derived from sfdPersonLookup keys
-// excluding 3009100 (Business Details Test). When adding a test user with org 3001458 in defra-id,
-// add their person ID to sfdPersonLookup; they appear here automatically.
+// excluding 3009100 (Business Details Test) and permission-test users (3010001–3010027) who use
+// business-details orgs only. When adding a test user with org 3001458 in defra-id, add their
+// person ID to sfdPersonLookup; they appear here automatically.
+const PERMISSION_TEST_PERSON_IDS = new Set([
+  3010001, 3010002, 3010003, 3010004, 3010005, 3010006, 3010007,
+  3010008, 3010009, 3010010, 3010011, 3010012, 3010013, 3010014, 3010015, 3010016, 3010017,
+  3010018, 3010019, 3010020, 3010021, 3010022, 3010023, 3010024, 3010025, 3010026, 3010027
+])
 export const SHARED_TEST_ORG_PERSON_IDS = Object.keys(sfdPersonLookup)
   .map(Number)
-  .filter((id) => id !== 3009100)
+  .filter((id) => id !== 3009100 && !PERMISSION_TEST_PERSON_IDS.has(id))
   .sort((a, b) => a - b)

@@ -767,17 +767,55 @@ const sharedTestOrgLookup = {
   }
 }
 
+// Permission-level test users: view (3010001–3010002), amend valid (3010003–3010007), amend one invalid (3010008–3010017), amend two invalid (3010018–3010027).
+const PERMISSION_TEST_VIEW_PERSON_IDS = [3010001, 3010002]
+const PERMISSION_TEST_AMEND_VALID_PERSON_IDS = [3010003, 3010004, 3010005, 3010006, 3010007]
+
+// Orgs that have additional permission-test users as customers
+const permissionUsersByOrgId = {
+  3009000: [...PERMISSION_TEST_VIEW_PERSON_IDS, ...PERMISSION_TEST_AMEND_VALID_PERSON_IDS],
+  3009001: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009002: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009003: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009004: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009300: [3010008],
+  3009400: [3010009],
+  3009500: [3010010],
+  3009600: [3010011],
+  3009700: [3010012],
+  3009800: [3010013],
+  3009900: [3010014],
+  3010000: [3010015],
+  3010100: [3010016],
+  3010200: [3010017],
+  3012300: [3010018],
+  3012301: [3010019],
+  3012302: [3010020],
+  3012400: [3010021],
+  3012401: [3010022],
+  3012500: [3010023],
+  3012501: [3010024],
+  3012600: [3010025],
+  3012601: [3010026],
+  3012303: [3010027]
+}
+
 /*
  * For each orgId in sfdBusinessDetailsLookup we create one entry: orgId -> { sbi, customers }.
  * - SBI is derived as 300900001 + (orgId - 3009000).
- * - Orgs 3009000 and 3009001 have all 30 permission-test users (full/view/amend) as customers.
- * - All other business-details orgs have a single customer 3009100 so the main test user keeps
- *   access to all orgs in defra-id.data.json.
+ * - Org 3009000 has view + amend-valid permission-test users; 3009001–3009004 have amend-valid.
+ * - One-invalid orgs (3009300, 3009400, …) and two-invalid orgs (3012300, 3012400, …) have the
+ *   corresponding amend permission-test users as customers.
+ * - All business-details orgs include 3009100 so the main test user keeps access to all orgs.
  */
 const businessDetailsOrgLookup = Object.fromEntries(
   Object.keys(sfdBusinessDetailsLookup).map((orgId) => {
     const id = Number(orgId)
-    return [id, { sbi: 300900001 + (id - 3009000), customers: [BUSINESS_DETAILS_TEST_PERSON_ID] }]
+    const permissionUsers = permissionUsersByOrgId[id] ?? []
+    return [
+      id,
+      { sbi: 300900001 + (id - 3009000), customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers] }
+    ]
   })
 )
 
