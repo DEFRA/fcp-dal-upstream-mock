@@ -1030,62 +1030,62 @@ const personLookupEntries = {
     lastName: 'One Invalid - example 10',
     privileges: ['Amend - business']
   },
-  // AMEND two invalid (10)
-  3010018: {
+  // AMEND two invalid (10) — use 3011000–3011009 to avoid overwriting DOB test users 3010020–3010027
+  3011000: {
     crn: '3010018000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 1',
     privileges: ['Amend - business']
   },
-  3010019: {
+  3011001: {
     crn: '3010019000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 2',
     privileges: ['Amend - business']
   },
-  3010020: {
+  3011002: {
     crn: '3010020000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 3',
     privileges: ['Amend - business']
   },
-  3010021: {
+  3011003: {
     crn: '3010021000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 4',
     privileges: ['Amend - business']
   },
-  3010022: {
+  3011004: {
     crn: '3010022000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 5',
     privileges: ['Amend - business']
   },
-  3010023: {
+  3011005: {
     crn: '3010023000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 6',
     privileges: ['Amend - business']
   },
-  3010024: {
+  3011006: {
     crn: '3010024000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 7',
     privileges: ['Amend - business']
   },
-  3010025: {
+  3011007: {
     crn: '3010025000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 8',
     privileges: ['Amend - business']
   },
-  3010026: {
+  3011008: {
     crn: '3010026000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 9',
     privileges: ['Amend - business']
   },
-  3010027: {
+  3011009: {
     crn: '3010027000',
     firstName: 'Amend Level Permission',
     lastName: 'Two Invalid - example 10',
@@ -1113,13 +1113,13 @@ export const sfdPersonLookup = Object.fromEntries(
 )
 
 // Person IDs that use the shared Test Org (3001458) in defra-id. Derived from sfdPersonLookup keys
-// excluding 3009100 (Business Details Test) and permission-test users (3010001–3010027) who use
+// excluding 3009100 (Business Details Test) and permission-test users (3010001–3010017, 3011000–3011009) who use
 // business-details orgs only. When adding a test user with org 3001458 in defra-id, add their
 // person ID to sfdPersonLookup; they appear here automatically.
 const PERMISSION_TEST_PERSON_IDS = new Set([
   3010001, 3010002, 3010003, 3010004, 3010005, 3010006, 3010007, 3010008, 3010009, 3010010, 3010011,
-  3010012, 3010013, 3010014, 3010015, 3010016, 3010017, 3010018, 3010019, 3010020, 3010021, 3010022,
-  3010023, 3010024, 3010025, 3010026, 3010027
+  3010012, 3010013, 3010014, 3010015, 3010016, 3010017, 3011000, 3011001, 3011002, 3011003, 3011004,
+  3011005, 3011006, 3011007, 3011008, 3011009
 ])
 export const SHARED_TEST_ORG_PERSON_IDS = Object.keys(sfdPersonLookup)
   .map(Number)
