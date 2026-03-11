@@ -15,7 +15,7 @@ tags:
   - name: 'payments'
     description: API for Payments information and history
 paths:
-  /api/services/RSFVendPaymentDetailsServiceGroup/RSFVendPaymentDetailsService/getSupplierPaymentsPackage:
+  /services/RSFVendPaymentDetailsServiceGroup/RSFVendPaymentDetailsService/getSupplierPaymentsPackage:
     post:
       tags:
         - 'payments'
@@ -38,100 +38,150 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentsData'
+                oneOf:
+                  - $ref: '#/components/schemas/PaymentsData'
+                  - $ref: '#/components/schemas/NotFound'
+        '400':
+          description: >
+            Bad request data, usually missing required fields `request`, `request.payment`, `request.audit`
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
         '401':
           description: Unauthorized - missing or invalid authentication token - empty response body
+        '500':
+          description: >
+            General error case, but can happen for missing required `audit` object in request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
 
 components:
   schemas:
     PaymentsRequest:
       type: object
       properties:
-        payment:
+        request:
           type: object
           properties:
-            SupplierAccount:
-              description: The FRN of the business (10 digits).
-              type: string
-              pattern: '^\d{10}$'
+            payment:
+              type: object
+              properties:
+                SupplierAccount:
+                  description: The FRN of the business (10 digits).
+                  oneOf:
+                    - type: string
+                      minimum: 0
+                    - type: number
+                    - type: boolean
+                    - type: 'null'
+                  examples:
+                    - '5411707635'
+                    - '5305137528'
+                    - '4002722019'
+                    - '5411707635'
+                FromDate:
+                  description: Date(/time) preferably in ISO format - or MM/DD/YYYY format (en-US locale).
+                  type: string
+                  format: date-time
+                  examples:
+                    - '2020-01-01T00:00:00Z'
+                    - '2022-04-06T00:00:00.000Z'
+                ToDate:
+                  description: Date(/time) preferably in ISO format - or MM/DD/YYYY format (en-US locale).
+                  type: string
+                  format: date-time
+                  examples:
+                    - '2021-01-01T00:00:00Z'
+                    - '2023-04-05T23:59:59.999Z'
+            audit:
+              type: object
+              properties:
+                requestedSystem:
+                  description: GUID of the app-reg of the system making the request (SFD, SFI, etc.).
+                  oneOf:
+                    - type: string
+                      minimum: 0
+                      maximum: 128
+                    - type: number
+                    - type: boolean
+                    - type: 'null'
+                requesterId:
+                  description: Email address of the user making the request.
+                  oneOf:
+                    - type: string
+                      minimum: 0
+                      maximum: 254
+                    - type: number
+                    - type: boolean
+                    - type: 'null'
+                userIP:
+                  description: IP address of the user making the request, either IPv4 or IPv6.
+                  oneOf:
+                    - type: string
+                      minimum: 0
+                      maximum: 45
+                    - type: number
+                    - type: boolean
+                    - type: 'null'
+                resourceId:
+                  description: Identifier for the resource being accessed (the SBI of the business).
+                  oneOf:
+                    - type: string
+                      minimum: 0
+                      maximum: 32
+                    - type: number
+                    - type: boolean
+                    - type: 'null'
+                correlationId:
+                  description: >
+                    Correlation identifier for tracing the request.
+                    Generated from the original user's request and passed through each layer/system.
+                  oneOf:
+                    - type: string
+                      minimum: 0
+                      maximum: 32
+                    - type: number
+                    - type: boolean
+                    - type: 'null'
               examples:
-                - '1102397229'
-                - '1100640037'
-                - '1106593375'
-                - '1106269284'
-                - '1106434560'
-                - '1106161297'
-            FromDate:
-              description: Date in MM/DD/YYYY format (en-US locale).
-              type: string
-              pattern: '^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$'
-              example: '01/25/2024'
-            ToDate:
-              description: Date in MM/DD/YYYY format (en-US locale).
-              type: string
-              pattern: '^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$'
-              example: '03/25/2024'
-          oneOf:
-            - required:
-                - SupplierAccount
-            - required:
-                - SupplierAccount
-                - FromDate
-                - ToDate
-        audit:
-          type: object
-          properties:
-            requestedSystem:
-              description: GUID of the app-reg of the system making the request.
-              type: string
-              minimum: 1
-              maximum: 128
-              example: 'a22c6ad7-ae80-4f5a-a705-7fa63f6e8d0e'
-            requesterId:
-              description: Email address of the user making the request.
-              type: string
-              minimum: 1
-              maximum: 254
-              example: 'case.worker@defra.gov.uk'
-            userIP:
-              description: IP address of the user making the request, either IPv4 or IPv6.
-              type: string
-            resourceId:
-              description: Identifier for the resource being accessed (the SBI of the business).
-              type: string
-              minimum: 1
-              maximum: 32
-              example: '1234567890'
-            correlationId:
-              description: >
-                Correlation identifier for tracing the request.
-                Generated from the original user's request and passed through each layer/system.
-              type: string
-              minimum: 1
-              maximum: 32
-              examples:
-                - '3a6538ac904b3a2bdf3c4985f85c29c7'
-                - 'a22c6ad7-ae80-4f5a-a705-7fa63f6e8d0e'
+                - requestedSystem: 'a22c6ad7-ae80-4f5a-a705-7fa63f6e8d0e'
+                  requesterId: 'case.worker@defra.gov.uk'
+                  userIP: '192.168.1.1'
+                  resourceId: '1234567890'
+                  correlationId: '3a6538ac904b3a2bdf3c4985f85c29c7'
+                - requestedSystem: ''
+                  requesterId: ''
+                  userIP: ''
+                  resourceId: ''
+                  correlationId: ''
+                - {}
           required:
-            - requestedSystem
-            - requesterId
-            - userIP
-            - resourceId
-            - correlationId
+            - payment
+            - audit
+      required:
+        - request
 
     # response objects
     PaymentsData:
       type: object
       properties:
         $id:
+          description: This object's sequence in the JSON response blob.
           type: string
+          format: integer
         Result:
           type: boolean
+          example: true
         parmSupplierInfo:
           type: object
           properties:
             $id:
+              description: This object's sequence in the JSON response blob.
               type: string
+              format: integer
             parmSupplier:
               description: The name of the business.
               type: string
@@ -150,7 +200,6 @@ components:
               pattern: '^\d{6}$'
           additionalProperties: false
           required:
-            - $id
             - parmSupplier
             - parmHoldCodes
             - parmAccountLast4
@@ -166,7 +215,6 @@ components:
             type: string
       additionalProperties: false
       required:
-        - $id
         - Result
         - parmSupplierInfo
         - parmPayments
@@ -175,7 +223,9 @@ components:
       type: object
       properties:
         $id:
+          description: This object's sequence in the JSON response blob.
           type: string
+          format: integer
         parmPaymentReference:
           description: The payment reference for this payment transaction.
           type: string
@@ -183,7 +233,7 @@ components:
         parmDate:
           description: The date and time the payment was made.
           type: string
-          format: date-time
+          pattern: '^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d'
           example: '2024-03-15T00:00:00'
         parmAmount:
           description: The amount paid in this transaction.
@@ -200,7 +250,6 @@ components:
             $ref: '#/components/schemas/PaymentLineItem'
       additionalProperties: false
       required:
-        - $id
         - parmPaymentReference
         - parmDate
         - parmAmount
@@ -210,7 +259,9 @@ components:
       type: object
       properties:
         $id:
+          description: This object's sequence in the JSON response blob.
           type: string
+          format: integer
         parmAgreementNumber:
           description: The agreement number associated with this line item.
           type: string
@@ -220,23 +271,81 @@ components:
         parmScheme:
           description: The ID of the scheme associated with this line item.
           type: string
+          example: '10501'
         parmDescription:
           description: Description of the line item.
           type: string
+          example: 'Late claim submission penalty'
         parmMarketingYear:
           description: The marketing year associated this line item.
           type: string
+          format: integer
+          example: '2017'
         parmAmount:
           description: The amount for this line item.
           type: number
+          example: 1161.75
       required:
-        - $id
         - parmAgreementNumber
         - parmClaimRefNumber
         - parmScheme
         - parmDescription
         - parmMarketingYear
         - parmAmount
+
+    # error responses
+    GenericError:
+      type: object
+      properties:
+        Message:
+          description: Information about the error and its cause.
+          type: string
+          examples:
+            - >
+              An exception occured when deserializing the request
+              - Exception occurred when parsing and deserializing parameter 'request'
+              - 'Parameter 'request' is not found within the request content body.'
+            - >
+              An exception occured when invoking the operation
+              - Object reference not set to an instance of an object.
+        ExceptionType:
+          description: The class name of the error.
+          type: string
+          examples:
+            - XppServicesDeserializationException
+            - NullReferenceException
+        ActivityId:
+          description: A UUID for this error.
+          type: string
+          example: some-long-uuid-string
+    NotFound:
+      type: object
+      properties:
+        $id:
+          description: This object's sequence in the JSON response blob.
+          type: string
+          format: integer
+        Result:
+          type: boolean
+          example: false
+        parmSupplierInfo:
+          type: 'null'
+        parmPayments:
+          description: A list of payments made to the business.
+          type: 'null'
+        InfoMessages:
+          type: array
+          items:
+            type: string
+          examples:
+            - ['*** FRN does not exist', 'No data retrieved for this request']
+            - ['*** No FRN provided', 'No data retrieved for this request']
+      additionalProperties: false
+      required:
+        - Result
+        - parmSupplierInfo
+        - parmPayments
+        - InfoMessages
 
   securitySchemes:
     BearerAuth:
