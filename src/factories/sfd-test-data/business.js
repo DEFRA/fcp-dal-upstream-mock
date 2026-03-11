@@ -37,8 +37,15 @@
 import { SHARED_TEST_ORG_PERSON_IDS } from './personal.js'
 
 // SFD test data IDs — used in lookups below
+// Single shared org used by many personal-details test users; see sharedTestOrgLookup.
 const SHARED_TEST_ORG_ID = 3001458
+// Main test person; added as customer to every business-details org so one user can access all.
 const BUSINESS_DETAILS_TEST_PERSON_ID = 3009100
+// First org in business-details range; used in SBI formula with BUSINESS_DETAILS_BASE_SBI.
+const BUSINESS_DETAILS_BASE_ORG_ID = 3009000
+// SBI for that base org; base value in the SBI formula for all business-details orgs.
+const BUSINESS_DETAILS_BASE_SBI = 300900001
+// Org with no CPH (holding number), for tests that need an org without a holding; see otherFixedOrgsLookup.
 const ORG_ID_NO_CPH = 80000001
 
 /*
@@ -767,9 +774,10 @@ const sharedTestOrgLookup = {
   }
 }
 
-// Permission-level test users: view (3010001–3010002), amend valid (3010003–3010007), amend one invalid (3010008–3010017), amend two invalid (3011000–3011009).
-const PERMISSION_TEST_VIEW_PERSON_IDS = [3010001, 3010002]
-const PERMISSION_TEST_AMEND_VALID_PERSON_IDS = [3010003, 3010004, 3010005, 3010006, 3010007]
+// Permission-level test users (dedicated block 3011000–3011026 in personal.js):
+// view 3011010–3011011, amend valid 3011012–3011016, amend one invalid 3011017–3011026, amend two invalid 3011000–3011009.
+const PERMISSION_TEST_VIEW_PERSON_IDS = [3011010, 3011011]
+const PERMISSION_TEST_AMEND_VALID_PERSON_IDS = [3011012, 3011013, 3011014, 3011015, 3011016]
 
 // Orgs that have additional permission-test users as customers
 const permissionUsersByOrgId = {
@@ -778,16 +786,16 @@ const permissionUsersByOrgId = {
   3009002: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
   3009003: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
   3009004: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
-  3009300: [3010008],
-  3009400: [3010009],
-  3009500: [3010010],
-  3009600: [3010011],
-  3009700: [3010012],
-  3009800: [3010013],
-  3009900: [3010014],
-  3010000: [3010015],
-  3010100: [3010016],
-  3010200: [3010017],
+  3009300: [3011017],
+  3009400: [3011018],
+  3009500: [3011019],
+  3009600: [3011020],
+  3009700: [3011021],
+  3009800: [3011022],
+  3009900: [3011023],
+  3010000: [3011024],
+  3010100: [3011025],
+  3010200: [3011026],
   3012300: [3011000],
   3012301: [3011001],
   3012302: [3011002],
@@ -801,9 +809,9 @@ const permissionUsersByOrgId = {
 }
 
 /*
- * For each orgId in sfdBusinessDetailsLookup we create one entry: orgId -> { sbi, customers }.
- * - SBI is derived as 300900001 + (orgId - 3009000).
- * - Org 3009000 has view + amend-valid permission-test users; 3009001–3009004 have amend-valid.
+ * Build a lookup: for each test org we store its SBI and which test users can access it.
+ * - SBI is derived as BUSINESS_DETAILS_BASE_SBI + (orgId - BUSINESS_DETAILS_BASE_ORG_ID).
+ * - Org BUSINESS_DETAILS_BASE_ORG_ID has view + amend-valid permission-test users; 3009001–3009004 have amend-valid.
  * - One-invalid orgs (3009300, 3009400, …) and two-invalid orgs (3012300, 3012400, …) have the
  *   corresponding amend permission-test users as customers.
  * - All business-details orgs include 3009100 so the main test user keeps access to all orgs.
@@ -811,11 +819,14 @@ const permissionUsersByOrgId = {
 const businessDetailsOrgLookup = Object.fromEntries(
   Object.keys(sfdBusinessDetailsLookup).map((orgId) => {
     const id = Number(orgId)
+    // Org-specific test users used for permission tests (e.g. amend-valid, view-only).
     const permissionUsers = permissionUsersByOrgId[id] ?? []
     return [
       id,
       {
-        sbi: 300900001 + (id - 3009000),
+        // Give this org a unique SBI using the base SBI and base org ID
+        sbi: BUSINESS_DETAILS_BASE_SBI + (id - BUSINESS_DETAILS_BASE_ORG_ID),
+        // Who can access this org: always the main test user first, then any permission-test users for this org.
         customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers]
       }
     ]

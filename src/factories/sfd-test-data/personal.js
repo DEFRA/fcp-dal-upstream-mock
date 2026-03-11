@@ -924,113 +924,114 @@ const personLookupEntries = {
   // Person stub for the Business details test user (CRN 3020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
   3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' },
 
-  // Permission-level test users (View / Amend) for Business Details. Privilege strings must match fcp-dal-api mapping.
-  // VIEW (2)
-  3010001: {
+  // Permission-level test users (View / Amend) for Business Details.
+  // Privilege strings must match fcp-dal-api mapping.
+  // VIEW (2): 3011010–3011011
+  3011010: {
     crn: '3010001000',
     firstName: 'View Level Permission',
     lastName: 'Example 1',
     privileges: ['View - business']
   },
-  3010002: {
+  3011011: {
     crn: '3010002000',
     firstName: 'View Level Permission',
     lastName: 'Example 2',
     privileges: ['View - business']
   },
-  // AMEND all valid (5)
-  3010003: {
+  // AMEND all valid (5): 3011012–3011016
+  3011012: {
     crn: '3010003000',
     firstName: 'Amend Level Permission',
     lastName: 'All Valid - example 1',
     privileges: ['Amend - business']
   },
-  3010004: {
+  3011013: {
     crn: '3010004000',
     firstName: 'Amend Level Permission',
     lastName: 'All Valid - example 2',
     privileges: ['Amend - business']
   },
-  3010005: {
+  3011014: {
     crn: '3010005000',
     firstName: 'Amend Level Permission',
     lastName: 'All Valid - example 3',
     privileges: ['Amend - business']
   },
-  3010006: {
+  3011015: {
     crn: '3010006000',
     firstName: 'Amend Level Permission',
     lastName: 'All Valid - example 4',
     privileges: ['Amend - business']
   },
-  3010007: {
+  3011016: {
     crn: '3010007000',
     firstName: 'Amend Level Permission',
     lastName: 'All Valid - example 5',
     privileges: ['Amend - business']
   },
-  // AMEND one invalid (10)
-  3010008: {
+  // AMEND one invalid (10): 3011017–3011026
+  3011017: {
     crn: '3010008000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 1',
     privileges: ['Amend - business']
   },
-  3010009: {
+  3011018: {
     crn: '3010009000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 2',
     privileges: ['Amend - business']
   },
-  3010010: {
+  3011019: {
     crn: '3010010000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 3',
     privileges: ['Amend - business']
   },
-  3010011: {
+  3011020: {
     crn: '3010011000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 4',
     privileges: ['Amend - business']
   },
-  3010012: {
+  3011021: {
     crn: '3010012000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 5',
     privileges: ['Amend - business']
   },
-  3010013: {
+  3011022: {
     crn: '3010013000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 6',
     privileges: ['Amend - business']
   },
-  3010014: {
+  3011023: {
     crn: '3010014000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 7',
     privileges: ['Amend - business']
   },
-  3010015: {
+  3011024: {
     crn: '3010015000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 8',
     privileges: ['Amend - business']
   },
-  3010016: {
+  3011025: {
     crn: '3010016000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 9',
     privileges: ['Amend - business']
   },
-  3010017: {
+  3011026: {
     crn: '3010017000',
     firstName: 'Amend Level Permission',
     lastName: 'One Invalid - example 10',
     privileges: ['Amend - business']
   },
-  // AMEND two invalid (10) — use 3011000–3011009 to avoid overwriting DOB test users 3010020–3010027
+  // AMEND two invalid (10): 3011000–3011009
   3011000: {
     crn: '3010018000',
     firstName: 'Amend Level Permission',
@@ -1113,13 +1114,13 @@ export const sfdPersonLookup = Object.fromEntries(
 )
 
 // Person IDs that use the shared Test Org (3001458) in defra-id. Derived from sfdPersonLookup keys
-// excluding 3009100 (Business Details Test) and permission-test users (3010001–3010017, 3011000–3011009) who use
+// excluding 3009100 (Business Details Test) and permission-test users (3011000–3011026) who use
 // business-details orgs only. When adding a test user with org 3001458 in defra-id, add their
 // person ID to sfdPersonLookup; they appear here automatically.
 const PERMISSION_TEST_PERSON_IDS = new Set([
-  3010001, 3010002, 3010003, 3010004, 3010005, 3010006, 3010007, 3010008, 3010009, 3010010, 3010011,
-  3010012, 3010013, 3010014, 3010015, 3010016, 3010017, 3011000, 3011001, 3011002, 3011003, 3011004,
-  3011005, 3011006, 3011007, 3011008, 3011009
+  3011000, 3011001, 3011002, 3011003, 3011004, 3011005, 3011006, 3011007, 3011008, 3011009,
+  3011010, 3011011, 3011012, 3011013, 3011014, 3011015, 3011016, 3011017, 3011018, 3011019,
+  3011020, 3011021, 3011022, 3011023, 3011024, 3011025, 3011026
 ])
 export const SHARED_TEST_ORG_PERSON_IDS = Object.keys(sfdPersonLookup)
   .map(Number)
