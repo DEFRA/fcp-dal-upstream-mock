@@ -15,6 +15,22 @@ expect.extend({
       }
     }
 
+    // try to retrieve the value at the instance path for each error to make debugging easier
+    validate.errors.forEach((error) => {
+      try {
+        let value = received
+        error.instancePath
+          .split('/')
+          .slice(1)
+          .forEach((segment) => {
+            value = value[segment]
+          })
+        error.value = value
+      } catch (e) {
+        error.value = 'could not retrieve value at instance path: ' + e.message
+      }
+    })
+
     return {
       pass: false,
       message: () =>
