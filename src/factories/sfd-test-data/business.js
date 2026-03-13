@@ -45,6 +45,8 @@ const BUSINESS_DETAILS_TEST_PERSON_ID = 3009100
 const BUSINESS_DETAILS_BASE_ORG_ID = 3009000
 // SBI for that base org; base value in the SBI formula for all business-details orgs.
 const BUSINESS_DETAILS_BASE_SBI = 300900001
+// Offset to add to org id to get SBI
+const BASE_SBI_ORG_ID_OFFSET = BUSINESS_DETAILS_BASE_SBI - BUSINESS_DETAILS_BASE_ORG_ID
 // Org with no CPH (holding number), for tests that need an org without a holding; see otherFixedOrgsLookup.
 const ORG_ID_NO_CPH = 80000001
 
@@ -810,7 +812,7 @@ const permissionUsersByOrgId = {
 
 /*
  * Build a lookup: for each test org we store its SBI and which test users can access it.
- * - SBI is derived as BUSINESS_DETAILS_BASE_SBI + (orgId - BUSINESS_DETAILS_BASE_ORG_ID).
+ * - SBI is derived as BASE_SBI_ORG_ID_OFFSET + orgId.
  * - Org BUSINESS_DETAILS_BASE_ORG_ID has view + amend-valid permission-test users; 3009001–3009004 have amend-valid.
  * - One-invalid orgs (3009300, 3009400, …) and two-invalid orgs (3012300, 3012400, …) have the
  *   corresponding amend permission-test users as customers.
@@ -824,8 +826,8 @@ const businessDetailsOrgLookup = Object.fromEntries(
     return [
       id,
       {
-        // Give this org a unique SBI using the base SBI and base org ID
-        sbi: BUSINESS_DETAILS_BASE_SBI + (id - BUSINESS_DETAILS_BASE_ORG_ID),
+        // Give this org a unique SBI: offset + org id.
+        sbi: BASE_SBI_ORG_ID_OFFSET + id,
         // Who can access this org: always the main test user first, then any permission-test users for this org.
         customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers]
       }
