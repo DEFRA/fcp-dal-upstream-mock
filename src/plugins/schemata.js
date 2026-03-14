@@ -8,6 +8,7 @@ export const schemata = {
     name: 'schemata',
     register: (server, _options) => {
       server.route([
+        // KITS schemata
         {
           method: 'GET',
           path: '/schemata/person.yml',
@@ -34,6 +35,14 @@ export const schemata = {
           path: '/schemata/siti-agri.yml',
           handler: {
             file: path.join(__dirname, '../routes/kits-v1/siti-agri-schema.oas.yml')
+          }
+        },
+        // Hitachi schemata
+        {
+          method: 'GET',
+          path: '/schemata/payments.yml',
+          handler: {
+            file: path.join(__dirname, '../routes/hitachi/payments-schema.oas.yml')
           }
         }
       ])
