@@ -1,10 +1,17 @@
+import Hapi from '@hapi/hapi'
 import { retrievePayments } from '../../../../src/factories/payments.factory.js'
+import { payments } from '../../../../src/routes/hitachi/payments.js'
 import { loadSchema } from '../../../../src/utils/validatePayload.js'
 
 describe('Fake Payments', () => {
-  let schema
+  let server, schema
   beforeAll(async () => {
-    await loadSchema('/routes/hitachi/payments-schema.oas.yml').then((s) => (schema = s))
+    server = Hapi.server()
+    server.route(payments)
+    await Promise.all([
+      server.initialize(),
+      loadSchema('/routes/hitachi/payments-schema.oas.yml').then((s) => (schema = s))
+    ])
   })
 
   describe('factory', () => {
@@ -17,6 +24,120 @@ describe('Fake Payments', () => {
         parmSupplierInfo: { ...paymentsResponse.parmSupplierInfo, parmSupplier: 'business name' },
         InfoMessages: ['added later']
       }).toConformToSchema(PaymentsData)
+    })
+  })
+
+  describe('route', () => {
+    it('should POST payments response conforming to the schema', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url:
+          '/services/RSFVendPaymentDetailsServiceGroup/' +
+          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        payload: {
+          request: {
+            payment: { SupplierAccount: '6561479446' },
+            audit: {}
+          }
+        }
+      })
+      expect(statusCode).toBe(200)
+      expect(result).toConformToSchema(schema.components.schemas.PaymentsData)
+      expect(result.parmPayments.length).toEqual(29)
+      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 29'])
+    })
+
+    it('should filter payments by FromDate', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url:
+          '/services/RSFVendPaymentDetailsServiceGroup/' +
+          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        payload: {
+          request: {
+            payment: {
+              SupplierAccount: '6561479446',
+              FromDate: new Date().toISOString() // filter out all dates
+            },
+            audit: {}
+          }
+        }
+      })
+      expect(statusCode).toBe(200)
+      expect(result.parmPayments).toEqual([])
+      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 0'])
+    })
+
+    it('should filter payments by FromDate', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url:
+          '/services/RSFVendPaymentDetailsServiceGroup/' +
+          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        payload: {
+          request: {
+            payment: {
+              SupplierAccount: '6561479446',
+              // filter out all dates (as payments are more recent)
+              ToDate: new Date('2000-01-01').toISOString()
+            },
+            audit: {}
+          }
+        }
+      })
+      expect(statusCode).toBe(200)
+      expect(result.parmPayments).toEqual([])
+      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 0'])
+    })
+
+    it('should filter payments by FromDate', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url:
+          '/services/RSFVendPaymentDetailsServiceGroup/' +
+          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        payload: {
+          request: {
+            payment: {
+              SupplierAccount: '6561479446',
+              // include all dates (as payments are recent but not made in the future)
+              FromDate: new Date('2000-01-01').toISOString(),
+              ToDate: new Date().toISOString()
+            },
+            audit: {}
+          }
+        }
+      })
+      expect(statusCode).toBe(200)
+      expect(result.parmPayments.length).toEqual(29)
+      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 29'])
+    })
+
+    it('honours static data if set', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url:
+          '/services/RSFVendPaymentDetailsServiceGroup/' +
+          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        payload: {
+          request: {
+            payment: { SupplierAccount: '8581665877' },
+            audit: {}
+          }
+        }
+      })
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({
+        Result: true,
+        parmSupplierInfo: {
+          parmHoldCodes: ['AUTOVERIFY', 'NTHLD'],
+          parmAccountLast4: '****6784',
+          parmSortCode: '032113',
+          parmSupplier: 'Little, Stoltenberg and Brakus'
+        },
+        parmPayments: [], // empty payments array set in `id-lookups.js`
+        InfoMessages: ['No. of payments retrieved = 0']
+      })
     })
   })
 })
