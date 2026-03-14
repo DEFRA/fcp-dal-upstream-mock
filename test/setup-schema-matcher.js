@@ -4,6 +4,16 @@ import addFormats from 'ajv-formats'
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
+// register a custom JSON Schema format validator
+ajv.addFormat('integer', {
+  type: 'string',
+  validate: (value) => {
+    const int = Number.parseInt(value, 10) // int must a positive integer
+    return Number.isInteger(int) && int > 0
+  }
+})
+
+// register a custom schema assertion that checks object conformity
 expect.extend({
   toConformToSchema(received, schema) {
     const validate = ajv.compile(schema)
