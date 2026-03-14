@@ -1,9 +1,6 @@
 import fs from 'node:fs'
-import {
-  sfdBusinessDetailsLookup,
-  sfdBusinessLookup,
-  sfdPersonLookup
-} from './sfd-test-data/index.js'
+import { faker, safeSeed } from './common.js'
+import { sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
 
 export const staticPersonData = {
   ...sfdPersonLookup,
@@ -149,11 +146,6 @@ export const staticPersonData = {
   9000021: { crn: '9000002100', dateOfBirth: new Date('31 Dec 1969 GMT-1').getTime() }
 }
 
-export const staticBusinessData = {
-  // Keep a stable "static overrides" entry point.
-  ...sfdBusinessDetailsLookup
-}
-
 const validGeometries = JSON.parse(
   // Generated using scripts/generate_geometries.sh
   fs.readFileSync(new URL('./valid-geometries.json', import.meta.url))
@@ -167,7 +159,9 @@ export const orgIdLookup = {
     agreements: [], // ... no agreements
     applications: [], // ... no applications
     cphs: [], // ... no CPHs
-    land: [] // ... no land
+    land: [], // ... no land
+    payments: { parmPayments: [] }, // ... no payments
+    overrides: {} // any static overrides for this org can go here
   },
   1111111111: {
     sbi: 1111111111,
@@ -306,12 +300,30 @@ export const crnToPersonId = Object.fromEntries(
 )
 export const sbiToOrgId = {}
 export const orgIdToSbi = {}
+export const frnToOrgId = {}
+export const frnToPaymentOverrides = {}
 export const orgIdToPersonIds = {}
 export const personIdToOrgIds = {}
 
-Object.entries(orgIdLookup).forEach(([orgId, { sbi, customers }]) => {
+Object.entries(orgIdLookup).forEach(([orgId, orgDetails]) => {
+  const { sbi, customers, overrides } = orgDetails
   orgIdToSbi[orgId] = sbi
   sbiToOrgId[sbi] = orgId
+
+  // NOTE: we expect FRNs for Hitachi payments API, the "businessReference" from overrides
+  if (overrides?.businessReference === undefined) {
+    safeSeed(orgId) // set consistent seed point for repeatable FRNs for businesses
+    const frn = faker.string.numeric(10)
+    frnToPaymentOverrides[frn] = orgDetails.payments ?? {}
+    // store FRN with static data overrides for later use
+    orgDetails.overrides = { ...overrides, businessReference: frn }
+    frnToOrgId[frn] = orgId
+  } else {
+    // businessReference is the FRN!
+    frnToPaymentOverrides[overrides.businessReference] = orgDetails.payments ?? {}
+    frnToOrgId[overrides.businessReference] = orgId
+  }
+
   orgIdToPersonIds[orgId] = customers
   customers.forEach((personId) => {
     if (!personIdToOrgIds[personId]) {

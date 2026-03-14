@@ -5,7 +5,7 @@ describe('Changes to organisation data', () => {
   beforeAll(async () => {
     process.env = { ...PROCESS_ENV }
     process.env.PORT = '3097' // Set to obscure port to avoid conflicts
-    const { startServer } = await import('../../../src/server.js')
+    const { startServer } = await import('../../../../src/server.js')
     mockServer = await startServer()
   })
   afterAll(() => {
