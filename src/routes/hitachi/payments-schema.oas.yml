@@ -9,8 +9,10 @@ info:
 security:
   - BearerAuth: []
 servers:
-  - url: 'https://orgcf202fa2.operations.eu.dynamics.com'
+  - url: 'https://orgcf202fa2.operations.eu.dynamics.com/api'
     description: The test server for Hitachi payments APIs, a.k.a. FAT 202.
+  - url: 'http://dal-mock:3100/api'
+    description: Local mock server
 tags:
   - name: 'payments'
     description: API for Payments information and history
@@ -78,10 +80,10 @@ components:
                     - type: boolean
                     - type: 'null'
                   examples:
-                    - '5411707635'
-                    - '5305137528'
-                    - '4002722019'
-                    - '5411707635'
+                    - '6561479446'
+                    - '7791344361'
+                    - '8581665877'
+                    - '9672045241'
                 FromDate:
                   description: Date(/time) preferably in ISO format - or MM/DD/YYYY format (en-US locale).
                   type: string

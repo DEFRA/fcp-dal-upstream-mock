@@ -27,6 +27,8 @@ usage() {
   echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
   echo "  CDP_PROXY - the URL of the CDP HTTPS proxy to use"
   echo "  KITS_URL  - the URL of the KITS API to use"
+  echo "or..."
+  echo "  HITACHI_CLIENT_SECRET - the client secret for token generation"
 }
 
 # check OPTION argument
@@ -78,7 +80,7 @@ case "$1" in
   pd | payments )
     schema="hitachi/payments"
     mutations='. |
-.components.schemas.PaymentsRequest.properties.payment.properties.SupplierAccount.examples = ["5411707635","5305137528","4002722019","5411707635"]'
+.components.schemas.PaymentsRequest.properties.payment.properties.SupplierAccount.examples = ["5411707635","5305137528","4002722019"]'
     ;;
   *)
     echo "ERROR: Invalid argument: $1" 1>&2
@@ -91,7 +93,7 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 # run schemathesis tests
-if [ ${kits}] ; then # KITS gateway
+if ${kits} ; then # KITS gateway
   echo "ERROR: Temporarily failing KITS test runs as not possible until the following"
   echo "work has been completed:"
   echo "  - mock backdoor to KITS https://eaflood.atlassian.net/browse/FCPDAL-253"
@@ -138,7 +140,7 @@ else # hitachi
     exit 1
   fi
 
-  HITACHI_TOKEN=$( curl --request POST \
+  HITACHI_TOKEN=$( curl --silent --request POST \
     --url https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/oauth2/token \
     --header 'content-type: application/x-www-form-urlencoded' \
     --data grant_type=client_credentials \
@@ -146,6 +148,13 @@ else # hitachi
     --data "client_secret=${HITACHI_CLIENT_SECRET}" \
     --data resource=https://orgcf202fa2.operations.eu.dynamics.com \
     | jq -r '.access_token' )
+  
+  # check the token looks good
+  if [ "${HITACHI_TOKEN}" = "null" ]; then
+    echo "ERROR: HITACHI_TOKEN was not generated correctly, check the secret is correct" 1>&2
+    usage
+    exit 1
+  fi
 
   docker run --rm --network=host --pull always \
     -v ${baseDir}/tmp:/tmp \

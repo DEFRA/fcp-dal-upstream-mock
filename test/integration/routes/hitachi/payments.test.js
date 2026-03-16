@@ -28,12 +28,16 @@ describe('Fake Payments', () => {
   })
 
   describe('route', () => {
+    const url =
+      '/services/RSFVendPaymentDetailsServiceGroup/' +
+      'RSFVendPaymentDetailsService/getSupplierPaymentsPackage'
+    const headers = { authorization: 'bearer token' } // dummy token for mock auth
+
     it('should POST payments response conforming to the schema', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
-        url:
-          '/services/RSFVendPaymentDetailsServiceGroup/' +
-          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        url,
+        headers,
         payload: {
           request: {
             payment: { SupplierAccount: '6561479446' },
@@ -50,9 +54,8 @@ describe('Fake Payments', () => {
     it('should filter payments by FromDate', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
-        url:
-          '/services/RSFVendPaymentDetailsServiceGroup/' +
-          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        url,
+        headers,
         payload: {
           request: {
             payment: {
@@ -71,9 +74,8 @@ describe('Fake Payments', () => {
     it('should filter payments by FromDate', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
-        url:
-          '/services/RSFVendPaymentDetailsServiceGroup/' +
-          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        url,
+        headers,
         payload: {
           request: {
             payment: {
@@ -93,9 +95,8 @@ describe('Fake Payments', () => {
     it('should filter payments by FromDate', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
-        url:
-          '/services/RSFVendPaymentDetailsServiceGroup/' +
-          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        url,
+        headers,
         payload: {
           request: {
             payment: {
@@ -116,9 +117,8 @@ describe('Fake Payments', () => {
     it('honours static data if set', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
-        url:
-          '/services/RSFVendPaymentDetailsServiceGroup/' +
-          'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+        url,
+        headers,
         payload: {
           request: {
             payment: { SupplierAccount: '8581665877' },

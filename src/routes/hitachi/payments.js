@@ -1,6 +1,7 @@
 import { frnToOrgId } from '../../factories/id-lookups.js'
 import { retrieveOrganisation } from '../../factories/organisation/organisation.factory.js'
 import { retrievePayments } from '../../factories/payments.factory.js'
+import { createPayloadValidator } from '../../utils/validatePayload.js'
 
 const dataErrorResponse = {
   Message:
@@ -29,22 +30,33 @@ const badDateFormatResponse = {
   InfoMessages: ['*** Invalid date range provided', 'No data retrieved for this request']
 }
 
+const path =
+  '/services/RSFVendPaymentDetailsServiceGroup' +
+  '/RSFVendPaymentDetailsService/getSupplierPaymentsPackage'
+const validateRequestPayload = await createPayloadValidator(
+  'routes/hitachi/payments-schema.oas.yml',
+  (schema) => schema.paths[path].post.requestBody.content['application/json'].schema
+)
+
 export const payments = [
   {
     method: 'POST',
-    path:
-      '/services/RSFVendPaymentDetailsServiceGroup/' +
-      'RSFVendPaymentDetailsService/getSupplierPaymentsPackage',
+    path,
     handler: async (request, h) => {
-      // check request body
+      // dummy authorisation check
+      if (request?.headers?.authorization !== 'bearer token') {
+        return h.response().code(401)
+      }
+
+      // check request body for required fields
       const body = request?.payload?.request || {}
-      if (
-        !body?.payment ||
-        !body?.audit ||
-        typeof body.payment !== 'object' ||
-        typeof body.audit !== 'object'
-      ) {
-        return h.response(dataErrorResponse)
+      if (!body?.payment || !body?.audit) {
+        return h.response(dataErrorResponse).code(500)
+      }
+
+      // check required fields are objects
+      if (!validateRequestPayload(request.payload)) {
+        return h.response(dataErrorResponse).code(400)
       }
 
       // check FRN specified (SupplierAccount)
