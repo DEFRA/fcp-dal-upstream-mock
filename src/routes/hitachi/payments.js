@@ -44,7 +44,7 @@ export const payments = [
     path,
     handler: async (request, h) => {
       // dummy authorisation check
-      if (request?.headers?.authorization !== 'bearer token') {
+      if (request?.headers?.authorization?.toLowerCase() !== 'bearer token') {
         return h.response().code(401)
       }
 
