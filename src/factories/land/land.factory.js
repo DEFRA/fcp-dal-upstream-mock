@@ -1,6 +1,7 @@
 import { Boom } from '@hapi/boom'
 import { orgIdToSbi } from '../../factories/id-lookups.js'
-import { faker, getLandParcels, safeSeed } from '../common.js'
+import { getLandParcels } from '../common-land.js'
+import { faker, safeSeed } from '../common.js'
 
 const land = {}
 

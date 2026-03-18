@@ -1,4 +1,5 @@
-import { faker, getLandParcels, nullOrFake, safeSeed, transformTimestamp } from '../common.js'
+import { getLandParcels } from '../common-land.js'
+import { faker, nullOrFake, safeSeed, transformTimestamp } from '../common.js'
 import { orgIdLookup } from '../id-lookups.js'
 import { parishes } from './parishes.js'
 
