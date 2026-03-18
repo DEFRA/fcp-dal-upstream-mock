@@ -1,5 +1,5 @@
-import { retrieveAuthenticateData } from '../factories/person/authenticate-data.factory.js'
-import { checkId } from '../utils/shared-datatypes.js'
+import { retrieveAuthenticateData } from '../../factories/person/authenticate-data.factory.js'
+import { checkId } from '../../utils/shared-datatypes.js'
 
 export const authenticate = [
   {

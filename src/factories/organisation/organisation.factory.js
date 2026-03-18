@@ -1,10 +1,12 @@
 import Boom from '@hapi/boom'
 import {
+  frnToOrgId,
+  frnToPaymentOverrides,
+  orgIdLookup,
   orgIdToPersonIds,
   orgIdToSbi,
   personIdToOrgIds,
-  sbiToOrgId,
-  staticBusinessData
+  sbiToOrgId
 } from '../../factories/id-lookups.js'
 import { fakeAddress, fakeIds, faker, generateId, nft, nullOrFake, safeSeed } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
@@ -108,9 +110,13 @@ export const createOrganisation = (personId, payload) => {
     additionalBusinessActivities: null
   }
 
+  // ensure all the entity relationships are also created
   organisations[id] = org
   orgIdToSbi[id] = sbi
   sbiToOrgId[sbi] = id
+  orgIdLookup[id] = { sbi }
+  frnToOrgId[payload.businessReference] = id
+  frnToPaymentOverrides[payload.businessReference] = {}
   personIdToOrgIds[personId].push(id)
   orgIdToPersonIds[id] = [personId]
 
@@ -150,6 +156,8 @@ const generateOrganisation = (orgId, sbi, overrides = {}) => {
       id: faker.number.int({ min: 164946, max: 964946 }),
       type: 'Not Specified'
     },
+    // businessReference is actually FRN! and will always be overridden!
+    // but keeping this step to ensure the rest of the data remains consistent
     businessReference: faker.string.numeric(10),
     legalStatus: {
       id: faker.number.int({ min: 164946, max: 964946 }),
@@ -168,7 +176,7 @@ const generateOrganisation = (orgId, sbi, overrides = {}) => {
     isAccountablePeopleDeclarationCompleted: nft(7, 1, 2),
     additionalBusinessActivities: hasAdditionalBusinessActivities
       ? fakeIds(faker.number.int({ min: 1, max: 3 }), 164946, 964946).map((id, i) => ({
-          id: parseInt(id, 10),
+          id: Number.parseInt(id, 10),
           type: `Additional Business Activity ${i}`
         }))
       : null,
@@ -210,13 +218,13 @@ export const updateAdditionalOrganisationDetails = (
 }
 
 export const retrieveOrganisation = (orgId) => {
-  const sbi = orgIdToSbi[orgId]
+  const { sbi, overrides } = orgIdLookup[orgId] ?? {}
 
   if (!sbi) {
     throw Boom.notFound(`organisation with orgId ${orgId} not found`)
   }
 
-  return organisations[orgId] ?? generateOrganisation(orgId, sbi, staticBusinessData[orgId])
+  return organisations[orgId] ?? generateOrganisation(orgId, sbi, overrides)
 }
 
 export const retrieveOrganisationCustomers = (orgId) => {
