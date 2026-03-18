@@ -775,9 +775,16 @@ const sharedTestOrgLookup = {
  *   access to all orgs in defra-id.data.json.
  */
 const businessDetailsOrgLookup = Object.fromEntries(
-  Object.keys(sfdBusinessDetailsLookup).map((orgId) => {
+  Object.entries(sfdBusinessDetailsLookup).map(([orgId, overrides]) => {
     const id = Number(orgId)
-    return [id, { sbi: 300900001 + (id - 3009000), customers: [BUSINESS_DETAILS_TEST_PERSON_ID] }]
+    return [
+      id,
+      {
+        sbi: 300900001 + (id - 3009000),
+        customers: [BUSINESS_DETAILS_TEST_PERSON_ID],
+        overrides
+      }
+    ]
   })
 )
 

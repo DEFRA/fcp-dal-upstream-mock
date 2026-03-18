@@ -1,5 +1,5 @@
 import Hapi from '@hapi/hapi'
-import { organisation } from '../../../../src/routes/organisation.js'
+import { organisation } from '../../../../src/routes/kits-v1/organisation.js'
 
 describe('Organisation Lock/Unlock', () => {
   let server

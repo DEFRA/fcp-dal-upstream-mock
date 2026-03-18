@@ -8,12 +8,14 @@ services:
       - -c
       - |
         result=0
-        for schema in person organisation authenticate siti-agri ; do
+        for schema in person organisation authenticate siti-agri payments ; do
           echo "Running contract tests for schema: $${schema}"
-          schemathesis run --exclude-checks=unsupported_method,not_a_server_error \
+          auth_header="email: $${TEST_USER_EMAIL:-testuser01@defra.gov.uk}"
+          if [ "$${schema}" = "payments" ]; then auth_header='Authorization: bearer token'; fi
+          schemathesis run -H "$${auth_header}" \
+            --exclude-checks=unsupported_method,not_a_server_error \
             --report-vcr-path /tmp/$${schema}.logs.yaml \
-            "http://dal-mock:3100/schemata/$${schema}.yml" \
-            && rm /tmp/$${schema}.logs.yaml
+            "http://dal-mock:3100/schemata/$${schema}.yml"
           result=$((result | $?))
         done
         if [ $${result} -eq 0 ] ; then

@@ -27,9 +27,9 @@ Core delivery platform Node.js Backend Template.
 ### Node.js
 
 Please install [Node.js](http://nodejs.org/) `>= v22` and [npm](https://nodejs.org/) `>= v11`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
+easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm), or [`n`](https://github.com/tj/n)
 
-To use the correct version of Node.js for this application, via nvm:
+To use the correct version of Node.js for this application, via `nvm`:
 
 ```bash
 cd fcp-dal-upstream-mock
@@ -106,10 +106,14 @@ git config --global core.autocrlf false
 
 More information about each logical area of the API can be found by accessing its associated schema.
 
-| Endpoint                    | Description                                       |
-| :-------------------------- | :------------------------------------------------ |
-| `GET: /health`              | Basic platform health check                       |
-| `GET: /schemata/person.yml` | Defines the API for `person` data at `/v1/person` |
+| Endpoint                          | Description                                                                                                                                      |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET: /health`                    | Basic platform health check                                                                                                                      |
+| `GET: /schemata/authenticate.yml` | Defines the API for `Authenticate` question answers at `/extapi/external-auth/security-answers/{crn}`                                            |
+| `GET: /schemata/organisation.yml` | Defines the API for `organisation` data at `/extapi/organisation`                                                                                |
+| `GET: /schemata/payments.yml`     | Defines the API for `payments` data at `/api/services/RSFVendPaymentDetailsServiceGroup/RSFVendPaymentDetailsService/getSupplierPaymentsPackage` |
+| `GET: /schemata/person.yml`       | Defines the API for `person` data at `/extapi/person`                                                                                            |
+| `GET: /schemata/siti-agri.yml`    | Defines the API for `Siti-Agri` data at `/SitiAgriApi/cv`                                                                                        |
 
 ## Docker
 
@@ -140,15 +144,6 @@ Run:
 ```bash
 docker run -e PORT=3001 -p 3001:3001 fcp-dal-upstream-mock
 ```
-
-## Dependabot
-
-We have added an example dependabot configuration file to the repository. You can enable it by renaming
-the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github/dependabot.yml`
-
-## SonarCloud
-
-Instructions for setting up SonarCloud can be found in [sonar-project.properties](./sonar-project.properties)
 
 ## Licence
 
