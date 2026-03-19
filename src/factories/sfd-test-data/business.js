@@ -811,8 +811,9 @@ const permissionUsersByOrgId = {
 }
 
 /*
- * Build a lookup: for each test org we store its SBI and which test users can access it.
- * - SBI is derived as BASE_SBI_ORG_ID_OFFSET + orgId.
+ * Build a lookup: for each test org we store its SBI, which test users can access it, and business-details overrides.
+ * - SBI is derived as BASE_SBI_ORG_ID_OFFSET + org id.
+ * - overrides (name, address, phones, email) are passed through to orgIdLookup and applied in organisation.factory.js.
  * - Org BUSINESS_DETAILS_BASE_ORG_ID has view + amend-valid permission-test users; 3009001–3009004 have amend-valid.
  * - One-invalid orgs (3009300, 3009400, …) and two-invalid orgs (3012300, 3012400, …) have the
  *   corresponding amend permission-test users as customers.
@@ -825,7 +826,7 @@ const businessDetailsOrgLookup = Object.fromEntries(
     return [
       id,
       {
-        sbi: BUSINESS_DETAILS_BASE_SBI + (id - BUSINESS_DETAILS_BASE_ORG_ID),
+        sbi: BASE_SBI_ORG_ID_OFFSET + id,
         customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers],
         overrides
       }
