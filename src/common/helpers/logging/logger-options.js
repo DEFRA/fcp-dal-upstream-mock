@@ -11,13 +11,7 @@ const customTransform = {
     log(object) {
       if (!object?.payload) return object
 
-      const withQuery = { ...object, url: { query: JSON.stringify(object.payload) } }
-      try {
-        withQuery.url.query = new URLSearchParams(object.payload).toString()
-      } catch (_) {
-        // NOTE: ignore any errors in URLSearchParams
-      }
-      return withQuery
+      return { ...object, url: { query: JSON.stringify(object.payload) } }
     }
   }
 }

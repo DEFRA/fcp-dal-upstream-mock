@@ -7,7 +7,8 @@ import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
-import { router } from './plugins/fake-router.js'
+import { router as hitachiRouter } from './routes/hitachi/payments.js'
+import { router as kitsRouter } from './plugins/kits-v1-router.js'
 import { health } from './plugins/health.js'
 import { schemata } from './plugins/schemata.js'
 
@@ -47,7 +48,8 @@ export const startServer = async (listener) => {
     // schemata       - serves swagger 2.0 schema files
     // router         - routes used in the app
     await server.register([requestLogger, requestTracing, pulse, inert, health, schemata])
-    await server.register(router, { routes: { prefix: '/extapi' } })
+    await server.register(hitachiRouter, { routes: { prefix: '/api' } })
+    await server.register(kitsRouter, { routes: { prefix: '/extapi' } })
 
     // emulate upstream error responses
     server.ext('onPreResponse', emulateUpstreamErrors)
@@ -60,7 +62,7 @@ export const startServer = async (listener) => {
 
     server.ext('onRequest', (request, h) => {
       // log the domain of the email that was passed in the `email` header
-      if (request.headers.email) {
+      if (request?.headers?.email) {
         request.logger = request.logger.child({
           tenant: { id: request?.headers?.email?.split('@')[1] }
         })

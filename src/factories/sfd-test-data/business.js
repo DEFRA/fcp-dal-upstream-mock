@@ -819,17 +819,15 @@ const permissionUsersByOrgId = {
  * - All business-details orgs include 3009100 so the main test user keeps access to all orgs.
  */
 const businessDetailsOrgLookup = Object.fromEntries(
-  Object.keys(sfdBusinessDetailsLookup).map((orgId) => {
+  Object.entries(sfdBusinessDetailsLookup).map(([orgId, overrides]) => {
     const id = Number(orgId)
-    // Org-specific test users used for permission tests (e.g. amend-valid, view-only).
     const permissionUsers = permissionUsersByOrgId[id] ?? []
     return [
       id,
       {
-        // Give this org a unique SBI: offset + org id.
-        sbi: BASE_SBI_ORG_ID_OFFSET + id,
-        // Who can access this org: always the main test user first, then any permission-test users for this org.
-        customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers]
+        sbi: BUSINESS_DETAILS_BASE_SBI + (id - BUSINESS_DETAILS_BASE_ORG_ID),
+        customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers],
+        overrides
       }
     ]
   })

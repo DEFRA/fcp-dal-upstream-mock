@@ -10,7 +10,7 @@ describe('Basic queries for faked routes', () => {
   })
   afterAll(() => {
     process.env = PROCESS_ENV
-    mockServer.stop({ timeout: 0 })
+    mockServer?.stop({ timeout: 0 })
   })
 
   describe('Land routes', () => {
