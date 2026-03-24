@@ -6,9 +6,9 @@
  * person data is in performance.js and merged at sfd-test-data/index.js.
  *
  * - Manual addresses only: We do not use lookup addresses; uprn is always null.
- *   The frontend treats address4 as "Town or city" (line4). Test data uses manual
- *   address fields (address1-5, postalCode, country) and sets lookup fields (street, city, county,
- *   etc.) to null; see minimalMandatoryAddress below.
+ *   In this mapping, city/town is stored in shared `city` and county is stored in `address4`.
+ *   Test data uses manual address fields (address1-5, postalCode, country) and keeps lookup-only
+ *   fields (for example `street`) null; see minimalMandatoryAddress below.
  * - Default address: At export time we merge a default (defaultPersonOverride with
  *   address: minimalMandatoryAddress) into every entry. If an entry does not set address, it gets
  *   that default, so address data is predictable. If an entry does set address, that value replaces
@@ -33,10 +33,10 @@
  *     address1: 'Line 1',
  *     address2: null,
  *     address3: null,
- *     address4: 'Test City',
+ *     address4: 'Test County',
  *     address5: null,
  *     street: null,
- *     city: null,
+ *     city: 'Test City',
  *     county: null,
  *     postalCode: 'AB1 2CD',
  *     country: 'United Kingdom',
@@ -73,21 +73,20 @@ const emptyAddress = {
  *
  * Manual fields used:
  * - address1: Address line 1 (required). address2, address3, address5: optional lines (null if unused).
- * - address4: Town or city (frontend uses line4 for "Town or city" and validation).
+ * - address4: County (manual line 4 now stores county in this fixture mapping).
  * - postalCode, country: Required.
  *
- * Lookup/structured fields (city, county, street, uprn, ...) are included and set to null
- * because the Address schema requires these keys to be present for the response to be valid;
- * we set them to null since this is manual-only test data.
+ * Shared/lookup fields include city + county. For this mapping, city carries town/city and
+ * address4 carries county while lookup-only fields (for example street) remain null.
  */
 const minimalMandatoryAddress = {
   address1: '123 Test Street',
   address2: null,
   address3: null,
-  address4: 'Test City',
+  address4: 'Test County',
   address5: null,
   street: null,
-  city: null,
+  city: 'Test City',
   county: null,
   postalCode: 'TE1 2ST',
   country: 'England',
@@ -102,11 +101,11 @@ const addressTooLongAddress = {
   address1: 'A'.repeat(101),
   address2: '',
   address3: '',
-  address4: 'C'.repeat(63),
+  address4: 'D'.repeat(61),
   address5: 'D'.repeat(61),
   street: null,
   city: 'C'.repeat(63),
-  county: 'D'.repeat(61),
+  county: null,
   postalCode: 'P'.repeat(9),
   country: 'E'.repeat(63),
   uprn: null
@@ -240,7 +239,7 @@ const personLookupEntries = {
     crn: '3002000000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address1: null, address4: null }
+    address: { ...minimalMandatoryAddress, address1: null, city: null }
   },
   // 3002100-3002199: Missing address1
   3002100: {
@@ -254,7 +253,7 @@ const personLookupEntries = {
     crn: '3002200000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address4: null, postalCode: null }
+    address: { ...minimalMandatoryAddress, city: null, postalCode: null }
   },
   // 3002300-3002399: Missing address1 only
   3002300: {
@@ -268,14 +267,14 @@ const personLookupEntries = {
     crn: '3002500000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address4: null }
+    address: { ...minimalMandatoryAddress, city: null }
   },
   // 3002600-3002699: Missing address1 and city
   3002600: {
     crn: '3002600000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address1: null, address4: null }
+    address: { ...minimalMandatoryAddress, address1: null, city: null }
   },
   // 3002800-3002899: Missing postalCode
   3002800: {
@@ -289,7 +288,7 @@ const personLookupEntries = {
     crn: '3002900000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address1: null, address4: null, postalCode: null }
+    address: { ...minimalMandatoryAddress, address1: null, city: null, postalCode: null }
   },
 
   // Address - empty
@@ -922,7 +921,176 @@ const personLookupEntries = {
   3010109: { crn: '3010000109', ...allInvalidPersonBase },
 
   // Person stub for the Business details test user (CRN 3020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
-  3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' }
+  3009100: { crn: '3020000000', firstName: 'Business', lastName: 'Details Test' },
+
+  // Permission-level test users (View / Amend) for Business Details.
+  // Privilege strings must match fcp-dal-api mapping.
+  // VIEW (2): 3011010–3011011
+  3011010: {
+    crn: '3010001000',
+    firstName: 'View Level Permission',
+    lastName: 'Example 1',
+    privileges: ['View - business']
+  },
+  3011011: {
+    crn: '3010002000',
+    firstName: 'View Level Permission',
+    lastName: 'Example 2',
+    privileges: ['View - business']
+  },
+  // AMEND all valid (5): 3011012–3011016
+  3011012: {
+    crn: '3010003000',
+    firstName: 'Amend Level Permission',
+    lastName: 'All Valid - example 1',
+    privileges: ['Amend - business']
+  },
+  3011013: {
+    crn: '3010004000',
+    firstName: 'Amend Level Permission',
+    lastName: 'All Valid - example 2',
+    privileges: ['Amend - business']
+  },
+  3011014: {
+    crn: '3010005000',
+    firstName: 'Amend Level Permission',
+    lastName: 'All Valid - example 3',
+    privileges: ['Amend - business']
+  },
+  3011015: {
+    crn: '3010006000',
+    firstName: 'Amend Level Permission',
+    lastName: 'All Valid - example 4',
+    privileges: ['Amend - business']
+  },
+  3011016: {
+    crn: '3010007000',
+    firstName: 'Amend Level Permission',
+    lastName: 'All Valid - example 5',
+    privileges: ['Amend - business']
+  },
+  // AMEND one invalid (10): 3011017–3011026
+  3011017: {
+    crn: '3010008000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 1',
+    privileges: ['Amend - business']
+  },
+  3011018: {
+    crn: '3010009000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 2',
+    privileges: ['Amend - business']
+  },
+  3011019: {
+    crn: '3010010000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 3',
+    privileges: ['Amend - business']
+  },
+  3011020: {
+    crn: '3010011000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 4',
+    privileges: ['Amend - business']
+  },
+  3011021: {
+    crn: '3010012000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 5',
+    privileges: ['Amend - business']
+  },
+  3011022: {
+    crn: '3010013000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 6',
+    privileges: ['Amend - business']
+  },
+  3011023: {
+    crn: '3010014000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 7',
+    privileges: ['Amend - business']
+  },
+  3011024: {
+    crn: '3010015000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 8',
+    privileges: ['Amend - business']
+  },
+  3011025: {
+    crn: '3010016000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 9',
+    privileges: ['Amend - business']
+  },
+  3011026: {
+    crn: '3010017000',
+    firstName: 'Amend Level Permission',
+    lastName: 'One Invalid - example 10',
+    privileges: ['Amend - business']
+  },
+  // AMEND two invalid (10): 3011000–3011009
+  3011000: {
+    crn: '3010018000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 1',
+    privileges: ['Amend - business']
+  },
+  3011001: {
+    crn: '3010019000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 2',
+    privileges: ['Amend - business']
+  },
+  3011002: {
+    crn: '3010020000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 3',
+    privileges: ['Amend - business']
+  },
+  3011003: {
+    crn: '3010021000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 4',
+    privileges: ['Amend - business']
+  },
+  3011004: {
+    crn: '3010022000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 5',
+    privileges: ['Amend - business']
+  },
+  3011005: {
+    crn: '3010023000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 6',
+    privileges: ['Amend - business']
+  },
+  3011006: {
+    crn: '3010024000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 7',
+    privileges: ['Amend - business']
+  },
+  3011007: {
+    crn: '3010025000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 8',
+    privileges: ['Amend - business']
+  },
+  3011008: {
+    crn: '3010026000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 9',
+    privileges: ['Amend - business']
+  },
+  3011009: {
+    crn: '3010027000',
+    firstName: 'Amend Level Permission',
+    lastName: 'Two Invalid - example 10',
+    privileges: ['Amend - business']
+  }
 }
 
 /*
@@ -945,9 +1113,15 @@ export const sfdPersonLookup = Object.fromEntries(
 )
 
 // Person IDs that use the shared Test Org (3001458) in defra-id. Derived from sfdPersonLookup keys
-// excluding 3009100 (Business Details Test). When adding a test user with org 3001458 in defra-id,
-// add their person ID to sfdPersonLookup; they appear here automatically.
+// excluding 3009100 (Business Details Test) and permission-test users (3011000–3011026) who use
+// business-details orgs only. When adding a test user with org 3001458 in defra-id, add their
+// person ID to sfdPersonLookup; they appear here automatically.
+const PERMISSION_TEST_PERSON_IDS = new Set([
+  3011000, 3011001, 3011002, 3011003, 3011004, 3011005, 3011006, 3011007, 3011008, 3011009, 3011010,
+  3011011, 3011012, 3011013, 3011014, 3011015, 3011016, 3011017, 3011018, 3011019, 3011020, 3011021,
+  3011022, 3011023, 3011024, 3011025, 3011026
+])
 export const SHARED_TEST_ORG_PERSON_IDS = Object.keys(sfdPersonLookup)
   .map(Number)
-  .filter((id) => id !== 3009100)
+  .filter((id) => id !== 3009100 && !PERMISSION_TEST_PERSON_IDS.has(id))
   .sort((a, b) => a - b)
