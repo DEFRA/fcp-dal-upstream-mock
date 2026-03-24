@@ -6,9 +6,9 @@
  * person data is in performance.js and merged at sfd-test-data/index.js.
  *
  * - Manual addresses only: We do not use lookup addresses; uprn is always null.
- *   The frontend treats address4 as "Town or city" (line4). Test data uses manual
- *   address fields (address1-5, postalCode, country) and sets lookup fields (street, city, county,
- *   etc.) to null; see minimalMandatoryAddress below.
+ *   In this mapping, city/town is stored in shared `city` and county is stored in `address4`.
+ *   Test data uses manual address fields (address1-5, postalCode, country) and keeps lookup-only
+ *   fields (for example `street`) null; see minimalMandatoryAddress below.
  * - Default address: At export time we merge a default (defaultPersonOverride with
  *   address: minimalMandatoryAddress) into every entry. If an entry does not set address, it gets
  *   that default, so address data is predictable. If an entry does set address, that value replaces
@@ -33,10 +33,10 @@
  *     address1: 'Line 1',
  *     address2: null,
  *     address3: null,
- *     address4: 'Test City',
+ *     address4: 'Test County',
  *     address5: null,
  *     street: null,
- *     city: null,
+ *     city: 'Test City',
  *     county: null,
  *     postalCode: 'AB1 2CD',
  *     country: 'United Kingdom',
@@ -73,21 +73,20 @@ const emptyAddress = {
  *
  * Manual fields used:
  * - address1: Address line 1 (required). address2, address3, address5: optional lines (null if unused).
- * - address4: Town or city (frontend uses line4 for "Town or city" and validation).
+ * - address4: County (manual line 4 now stores county in this fixture mapping).
  * - postalCode, country: Required.
  *
- * Lookup/structured fields (city, county, street, uprn, ...) are included and set to null
- * because the Address schema requires these keys to be present for the response to be valid;
- * we set them to null since this is manual-only test data.
+ * Shared/lookup fields include city + county. For this mapping, city carries town/city and
+ * address4 carries county while lookup-only fields (for example street) remain null.
  */
 const minimalMandatoryAddress = {
   address1: '123 Test Street',
   address2: null,
   address3: null,
-  address4: 'Test City',
+  address4: 'Test County',
   address5: null,
   street: null,
-  city: null,
+  city: 'Test City',
   county: null,
   postalCode: 'TE1 2ST',
   country: 'England',
@@ -102,11 +101,11 @@ const addressTooLongAddress = {
   address1: 'A'.repeat(101),
   address2: '',
   address3: '',
-  address4: 'C'.repeat(63),
+  address4: 'D'.repeat(61),
   address5: 'D'.repeat(61),
   street: null,
   city: 'C'.repeat(63),
-  county: 'D'.repeat(61),
+  county: null,
   postalCode: 'P'.repeat(9),
   country: 'E'.repeat(63),
   uprn: null
@@ -240,7 +239,7 @@ const personLookupEntries = {
     crn: '3002000000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address1: null, address4: null }
+    address: { ...minimalMandatoryAddress, address1: null, city: null }
   },
   // 3002100-3002199: Missing address1
   3002100: {
@@ -254,7 +253,7 @@ const personLookupEntries = {
     crn: '3002200000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address4: null, postalCode: null }
+    address: { ...minimalMandatoryAddress, city: null, postalCode: null }
   },
   // 3002300-3002399: Missing address1 only
   3002300: {
@@ -268,14 +267,14 @@ const personLookupEntries = {
     crn: '3002500000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address4: null }
+    address: { ...minimalMandatoryAddress, city: null }
   },
   // 3002600-3002699: Missing address1 and city
   3002600: {
     crn: '3002600000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address1: null, address4: null }
+    address: { ...minimalMandatoryAddress, address1: null, city: null }
   },
   // 3002800-3002899: Missing postalCode
   3002800: {
@@ -289,7 +288,7 @@ const personLookupEntries = {
     crn: '3002900000',
     firstName: 'Missing',
     lastName: 'Address',
-    address: { ...minimalMandatoryAddress, address1: null, address4: null, postalCode: null }
+    address: { ...minimalMandatoryAddress, address1: null, city: null, postalCode: null }
   },
 
   // Address - empty

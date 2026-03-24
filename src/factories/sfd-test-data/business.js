@@ -17,10 +17,10 @@
  *     address1: 'Line 1',
  *     address2: null,
  *     address3: null,
- *     address4: 'Test City',
+ *     address4: 'Test County',
  *     address5: null,
  *     street: null,
- *     city: null,
+ *     city: 'Test City',
  *     county: null,
  *     postalCode: 'AB1 2CD',
  *     country: 'United Kingdom',
@@ -55,22 +55,21 @@ const ORG_ID_NO_CPH = 80000001
  *
  * Manual fields used:
  * - address1: Address line 1 (required). address2, address3, address5: optional lines (null if unused).
- * - address4: Town or city (frontend uses line4 for "Town or city" and validation).
+ * - address4: County (manual line 4 now stores county in this fixture mapping).
  * - postalCode, country: Required.
  *
- * Lookup/structured fields (city, county, street, uprn, ...) are included and set to null
- * because the Address schema requires these keys to be present for the response to be valid;
- * we set them to null since this is manual-only test data.
+ * Shared/lookup fields include city + county. For this mapping, city carries town/city and
+ * address4 carries county while lookup-only fields (for example street) remain null.
  */
 
 const minimalMandatoryAddress = {
   address1: '123 Test Street',
   address2: null,
   address3: null,
-  address4: 'Test City',
+  address4: 'Test County',
   address5: null,
   street: null,
-  city: null,
+  city: 'Test City',
   county: null,
   postalCode: 'TE1 2ST',
   country: 'England',
@@ -111,15 +110,15 @@ const addressLine3TooLongBase = {
 }
 const cityEmptyBase = {
   name: 'City empty',
-  address: { ...minimalMandatoryAddress, address4: '' }
+  address: { ...minimalMandatoryAddress, city: '' }
 }
 const cityTooLongBase = {
   name: 'City too long',
-  address: { ...minimalMandatoryAddress, address4: addressLineTooLong }
+  address: { ...minimalMandatoryAddress, city: addressLineTooLong }
 }
 const countyTooLongBase = {
   name: 'County too long',
-  address: { ...minimalMandatoryAddress, county: addressLineTooLong }
+  address: { ...minimalMandatoryAddress, address4: addressLineTooLong }
 }
 const postcodeEmptyBase = {
   name: 'Postcode empty',
@@ -201,7 +200,7 @@ const businessDetailsLookupEntries = {
   3009608: { ...addressLine3TooLongBase },
   3009609: { ...addressLine3TooLongBase },
 
-  // Town/city (address4) empty
+  // City (shared) empty
   3009700: { ...cityEmptyBase },
   3009701: { ...cityEmptyBase },
   3009702: { ...cityEmptyBase },
@@ -213,7 +212,7 @@ const businessDetailsLookupEntries = {
   3009708: { ...cityEmptyBase },
   3009709: { ...cityEmptyBase },
 
-  // Town/city (address4) too long - TOWN_CITY_MAX 60
+  // City (shared) too long - TOWN_CITY_MAX 60
   3009800: { ...cityTooLongBase },
   3009801: { ...cityTooLongBase },
   3009802: { ...cityTooLongBase },
