@@ -17,10 +17,10 @@
  *     address1: 'Line 1',
  *     address2: null,
  *     address3: null,
- *     address4: 'Test City',
+ *     address4: 'Test County',
  *     address5: null,
  *     street: null,
- *     city: null,
+ *     city: 'Test City',
  *     county: null,
  *     postalCode: 'AB1 2CD',
  *     country: 'United Kingdom',
@@ -37,8 +37,17 @@
 import { SHARED_TEST_ORG_PERSON_IDS } from './personal.js'
 
 // SFD test data IDs — used in lookups below
+// Single shared org used by many personal-details test users; see sharedTestOrgLookup.
 const SHARED_TEST_ORG_ID = 3001458
+// Main test person; added as customer to every business-details org so one user can access all.
 const BUSINESS_DETAILS_TEST_PERSON_ID = 3009100
+// First org in business-details range; used in SBI formula with BUSINESS_DETAILS_BASE_SBI.
+const BUSINESS_DETAILS_BASE_ORG_ID = 3009000
+// SBI for that base org; base value in the SBI formula for all business-details orgs.
+const BUSINESS_DETAILS_BASE_SBI = 300900001
+// Offset to add to org id to get SBI
+const BASE_SBI_ORG_ID_OFFSET = BUSINESS_DETAILS_BASE_SBI - BUSINESS_DETAILS_BASE_ORG_ID
+// Org with no CPH (holding number), for tests that need an org without a holding; see otherFixedOrgsLookup.
 const ORG_ID_NO_CPH = 80000001
 
 /*
@@ -46,22 +55,21 @@ const ORG_ID_NO_CPH = 80000001
  *
  * Manual fields used:
  * - address1: Address line 1 (required). address2, address3, address5: optional lines (null if unused).
- * - address4: Town or city (frontend uses line4 for "Town or city" and validation).
+ * - address4: County (manual line 4 now stores county in this fixture mapping).
  * - postalCode, country: Required.
  *
- * Lookup/structured fields (city, county, street, uprn, ...) are included and set to null
- * because the Address schema requires these keys to be present for the response to be valid;
- * we set them to null since this is manual-only test data.
+ * Shared/lookup fields include city + county. For this mapping, city carries town/city and
+ * address4 carries county while lookup-only fields (for example street) remain null.
  */
 
 const minimalMandatoryAddress = {
   address1: '123 Test Street',
   address2: null,
   address3: null,
-  address4: 'Test City',
+  address4: 'Test County',
   address5: null,
   street: null,
-  city: null,
+  city: 'Test City',
   county: null,
   postalCode: 'TE1 2ST',
   country: 'England',
@@ -102,15 +110,15 @@ const addressLine3TooLongBase = {
 }
 const cityEmptyBase = {
   name: 'City empty',
-  address: { ...minimalMandatoryAddress, address4: '' }
+  address: { ...minimalMandatoryAddress, city: '' }
 }
 const cityTooLongBase = {
   name: 'City too long',
-  address: { ...minimalMandatoryAddress, address4: addressLineTooLong }
+  address: { ...minimalMandatoryAddress, city: addressLineTooLong }
 }
 const countyTooLongBase = {
   name: 'County too long',
-  address: { ...minimalMandatoryAddress, county: addressLineTooLong }
+  address: { ...minimalMandatoryAddress, address4: addressLineTooLong }
 }
 const postcodeEmptyBase = {
   name: 'Postcode empty',
@@ -192,7 +200,7 @@ const businessDetailsLookupEntries = {
   3009608: { ...addressLine3TooLongBase },
   3009609: { ...addressLine3TooLongBase },
 
-  // Town/city (address4) empty
+  // City (shared) empty
   3009700: { ...cityEmptyBase },
   3009701: { ...cityEmptyBase },
   3009702: { ...cityEmptyBase },
@@ -204,7 +212,7 @@ const businessDetailsLookupEntries = {
   3009708: { ...cityEmptyBase },
   3009709: { ...cityEmptyBase },
 
-  // Town/city (address4) too long - TOWN_CITY_MAX 60
+  // City (shared) too long - TOWN_CITY_MAX 60
   3009800: { ...cityTooLongBase },
   3009801: { ...cityTooLongBase },
   3009802: { ...cityTooLongBase },
@@ -767,21 +775,58 @@ const sharedTestOrgLookup = {
   }
 }
 
+// Permission-level test users (dedicated block 3011000–3011026 in personal.js):
+// view 3011010–3011011, amend valid 3011012–3011016, amend one invalid 3011017–3011026, amend two invalid 3011000–3011009.
+const PERMISSION_TEST_VIEW_PERSON_IDS = [3011010, 3011011]
+const PERMISSION_TEST_AMEND_VALID_PERSON_IDS = [3011012, 3011013, 3011014, 3011015, 3011016]
+
+// Orgs that have additional permission-test users as customers
+const permissionUsersByOrgId = {
+  3009000: [...PERMISSION_TEST_VIEW_PERSON_IDS, ...PERMISSION_TEST_AMEND_VALID_PERSON_IDS],
+  3009001: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009002: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009003: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009004: PERMISSION_TEST_AMEND_VALID_PERSON_IDS,
+  3009300: [3011017],
+  3009400: [3011018],
+  3009500: [3011019],
+  3009600: [3011020],
+  3009700: [3011021],
+  3009800: [3011022],
+  3009900: [3011023],
+  3010000: [3011024],
+  3010100: [3011025],
+  3010200: [3011026],
+  3012300: [3011000],
+  3012301: [3011001],
+  3012302: [3011002],
+  3012400: [3011003],
+  3012401: [3011004],
+  3012500: [3011005],
+  3012501: [3011006],
+  3012600: [3011007],
+  3012601: [3011008],
+  3012303: [3011009]
+}
+
 /*
- * For each orgId in sfdBusinessDetailsLookup we create one entry: orgId -> { sbi, customers }.
- * - SBI is derived as 300900001 + (orgId - 3009000).
- * - Orgs 3009000 and 3009001 have all 30 permission-test users (full/view/amend) as customers.
- * - All other business-details orgs have a single customer 3009100 so the main test user keeps
- *   access to all orgs in defra-id.data.json.
+ * Build a lookup: for each test org we store its SBI, which test users can access it, and business-details overrides.
+ * - SBI is derived as BASE_SBI_ORG_ID_OFFSET + org id.
+ * - overrides (name, address, phones, email) are passed through to orgIdLookup and applied in organisation.factory.js.
+ * - Org BUSINESS_DETAILS_BASE_ORG_ID has view + amend-valid permission-test users; 3009001–3009004 have amend-valid.
+ * - One-invalid orgs (3009300, 3009400, …) and two-invalid orgs (3012300, 3012400, …) have the
+ *   corresponding amend permission-test users as customers.
+ * - All business-details orgs include 3009100 so the main test user keeps access to all orgs.
  */
 const businessDetailsOrgLookup = Object.fromEntries(
   Object.entries(sfdBusinessDetailsLookup).map(([orgId, overrides]) => {
     const id = Number(orgId)
+    const permissionUsers = permissionUsersByOrgId[id] ?? []
     return [
       id,
       {
-        sbi: 300900001 + (id - 3009000),
-        customers: [BUSINESS_DETAILS_TEST_PERSON_ID],
+        sbi: BASE_SBI_ORG_ID_OFFSET + id,
+        customers: [BUSINESS_DETAILS_TEST_PERSON_ID, ...permissionUsers],
         overrides
       }
     ]
