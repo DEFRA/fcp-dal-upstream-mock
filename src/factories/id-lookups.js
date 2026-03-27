@@ -270,9 +270,9 @@ export const orgIdLookup = {
   3333333333: { sbi: 3333333333, customers: [11111120] },
 
   // SBI that always returns specific errors when requested
-  3000000500: { sbi: 3000000500, customers: [] },
-  3000000401: { sbi: 3000000401, customers: [] },
-  3000000403: { sbi: 3000000403, customers: [] },
+  3000000500: { sbi: 300000500, customers: [] },
+  3000000401: { sbi: 300000401, customers: [] },
+  3000000403: { sbi: 300000403, customers: [] },
 
   // business from dev CRM
   5565448: {
