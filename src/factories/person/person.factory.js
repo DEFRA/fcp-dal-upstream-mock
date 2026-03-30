@@ -30,7 +30,14 @@ const generatePerson = (personId, crn, overrides = {}) => {
     customerReferenceNumber: crn,
     personalIdentifiers: fakeIds(faker.number.int({ min: 0, max: 3 })).map((id) => `${id}`),
     deactivated: faker.datatype.boolean(),
-    role: 'Business Partner',
+    role: faker.helpers.arrayElement([
+      'Owner',
+      'Sole Trader',
+      'Key Contact',
+      'Agent',
+      'Director',
+      'Trustee'
+    ]),
     privileges: [
       'Full permission - business',
       'SUBMIT - CS APP - SA',
