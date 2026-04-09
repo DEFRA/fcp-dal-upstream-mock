@@ -50,7 +50,7 @@ export const retrievePayments = (frn) => {
   const paymentResponseContent = {
     Result: true,
     parmSupplierInfo: {
-      parmHoldCodes: ['AUTOVERIFY', 'NTHLD'], // TODO: what other hold codes are possible?
+      parmHoldCodes: generateHoldCodes(),
       parmAccountLast4: `****${faker.string.numeric({ length: 4, allowLeadingZeros: true })}`,
       parmSortCode: `${faker.string.numeric({ length: 6, allowLeadingZeros: true })}`
     },
@@ -63,4 +63,78 @@ export const retrievePayments = (frn) => {
   responseContentsCache[frn] = paymentResponseContent
 
   return paymentResponseContent
+}
+
+const generateHoldCodes = () => {
+  const onHoldCodes = [
+    'AUTOVERIFY',
+    'BACSREJECT',
+    'BANKVERIFY',
+    'BPS_SRE',
+    'BPSMAN18',
+    'BRIDGING',
+    'BRIDGING16',
+    'BRIDGING17',
+    'BRIDGING18',
+    'COMMONS',
+    'CR_SRE',
+    'CSBRIDG17',
+    'CSBRIDG18',
+    'CSBRIDGING',
+    'CSCAPMAN',
+    'CSFSP',
+    'CSFSP17',
+    'CSTREAS17',
+    'CSTREAS18',
+    'CUSTBANK',
+    'CUSTELIG',
+    'DAXADDRESS',
+    'DAXINSOLV',
+    'DAXPROBTE',
+    'DEACTIVATE',
+    'DR_LEGAL',
+    'ENT_SURR',
+    'ESBRIDGING',
+    'ESFSP',
+    'ESTREASURY',
+    'FDMR_SRE',
+    'FINANCE',
+    'FRAUD',
+    'FRNEX_BANK',
+    'FRNEX_CURR',
+    'FRNEX_D2P',
+    'FRNEX_DEBT',
+    'FRNEX_E2P',
+    'FRNEX_POT1',
+    'GREY_LINES',
+    'INACTIVE',
+    'INCP',
+    'INSOLV',
+    'INTERIM',
+    'LOW VALUE',
+    'MULTI',
+    'NE_AUDIT',
+    'NOBANK',
+    'NONRPAPROC',
+    'OREGONDEBT',
+    'OVER',
+    'PENALTY',
+    'PREVWO',
+    'PROBATE',
+    'RETRO',
+    'RLE01',
+    'SCOT_LOAN',
+    'SCOTTISHXB',
+    'SEPBUSCHK',
+    'SHAREDPARC',
+    'TYPN',
+    'WRONG_CURR',
+    'XBORDER',
+    'ZCREATE'
+  ]
+  const notOnHoldCode = ['NTHLD']
+
+  return faker.datatype.boolean({ probability: 0.25 })
+    ? faker.helpers.arrayElements(onHoldCodes, faker.number.int({ min: 1, max: 5 }))
+    : notOnHoldCode
 }

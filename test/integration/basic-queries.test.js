@@ -601,7 +601,7 @@ describe('Basic queries for faked routes', () => {
           id: 11111112,
           customerReference: '1111111200',
           lastName: 'Stiedemann',
-          lastUpdatedOn: 1735660238275,
+          lastUpdatedOn: 1735619955643,
           privileges: [
             'Full permission - business',
             'SUBMIT - CS APP - SA',
@@ -616,7 +616,7 @@ describe('Basic queries for faked routes', () => {
             'Submit - cs agree',
             'ELM_APPLICATION_SUBMIT'
           ],
-          role: 'Business Partner'
+          role: 'Director'
         })
       )
     })
