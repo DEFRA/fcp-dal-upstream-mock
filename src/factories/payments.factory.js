@@ -68,7 +68,6 @@ export const retrievePayments = (frn) => {
 const generateHoldCodes = () => {
   const onHoldCodes = [
     'AUTOVERIFY',
-    'NTHLD',
     'BACSREJECT',
     'BANKVERIFY',
     'BPS_SRE',

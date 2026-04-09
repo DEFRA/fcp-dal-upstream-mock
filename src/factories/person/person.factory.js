@@ -31,8 +31,7 @@ const generatePerson = (personId, crn, overrides = {}) => {
     personalIdentifiers: fakeIds(faker.number.int({ min: 0, max: 3 })).map((id) => `${id}`),
     deactivated: faker.datatype.boolean(),
     role: faker.helpers.arrayElement([
-      'Owner',
-      'Sole Trader',
+      'Owner or Sole Trader',
       'Key Contact',
       'Agent',
       'Director',
