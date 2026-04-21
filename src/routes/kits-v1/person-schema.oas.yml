@@ -51,6 +51,39 @@ paths:
         '404':
           description: 'Person not found'
           $ref: '#/components/responses/NotFound'
+  /person/{emailAddress}/validateEmail:
+    get:
+      tags:
+        - 'person'
+      summary: 'Validates emails'
+      description: 'Returns a boolean to indicate if the email is duplicated'
+      operationId: 'isEmailDuplicated'
+      parameters:
+        - name: 'emailAddress'
+          in: 'path'
+          description: 'email'
+          required: true
+          schema:
+            type: 'string'
+      responses:
+        '200':
+          description: 'Returns a flag to indicate if the email is a duplicate'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    $ref: '#/components/schemas/ValidEmail'
+                required:
+                  - '_data'
+                additionalProperties: false
+        '403':
+          description: Getting an internal user's details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 'Person not found'
+          $ref: '#/components/responses/NotFound'
   /person/search:
     post:
       tags:
@@ -485,6 +518,14 @@ components:
         - 'customerReferenceNumber'
         - 'personalIdentifiers'
         - 'deactivated'
+    ValidEmail:
+      type: object
+      additionalProperties: false
+      properties:
+        emailDuplicated:
+          type: boolean
+      required:
+        - 'emailDuplicated'
 
   securitySchemes:
     mTLS:

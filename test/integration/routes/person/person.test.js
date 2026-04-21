@@ -40,6 +40,37 @@ describe('Fake Person', () => {
     )
   })
 
+  describe('validateEmail', () => {
+    it('returns emailDuplicated: true when the address contains "exists"', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/test.exists@example.com/validateEmail'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data.emailDuplicated).toBe(true)
+    })
+
+    it('returns emailDuplicated: false when the address does not contain "exists"', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/test@example.com/validateEmail'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data.emailDuplicated).toBe(false)
+    })
+
+    it.each([400, 401, 403, 404, 500])(
+      'returns http status code %i when local part of email is %i',
+      async (code) => {
+        const { statusCode } = await server.inject({
+          method: 'GET',
+          url: `/person/${code}@example.com/validateEmail`
+        })
+        expect(statusCode).toBe(code)
+      }
+    )
+  })
+
   it('should fetch the same person with ID or CRN', async () => {
     const id = 11111111
     const { result, statusCode } = await server.inject({

@@ -27,6 +27,24 @@ const checkPersonId = (request) => {
   return personId
 }
 
+const validateEmailAddress = (emailAddress) => {
+  const localPart = emailAddress.split('@')[0]
+
+  // If the local part of the email is a number in (a selection of) the 4XX/5XX range, then return that as a status code
+  if (Number.isInteger(Number(localPart))) {
+    const statusCode = Number(localPart)
+
+    // Keeping the implementation simple here, only supporting a small subset of status codes.
+    // All other numbers treated as a valid email address
+    const validStatusCode = new Set([400, 401, 403, 404, 500]).has(statusCode)
+    if (validStatusCode) {
+      throw new Boom.Boom(`Simulated service failure with status code ${validStatusCode}`, {
+        statusCode: statusCode
+      })
+    }
+  }
+}
+
 export const person = [
   {
     method: 'GET',
@@ -42,6 +60,18 @@ export const person = [
       const { role, privileges, lastUpdatedOn, ...personData } = retrievePerson(personId)
 
       return h.response({ _data: personData })
+    }
+  },
+  {
+    method: 'GET',
+    path: '/person/{emailAddress}/validateEmail',
+    handler: async (request, h) => {
+      const emailAddress = request.params.emailAddress
+
+      validateEmailAddress(emailAddress)
+
+      const emailDuplicated = emailAddress.includes('exists')
+      return h.response({ _data: { emailDuplicated } })
     }
   },
   {
