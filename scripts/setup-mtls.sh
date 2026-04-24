@@ -57,8 +57,10 @@ elif [ -z "${CA_CERT}" ]; then
 fi
 
 # use localhost if no common name was provided
+GENERATE_MTLS_DOTENV_FILE=false
 if [ -z "${COMMON_NAME}" ]; then
     COMMON_NAME="localhost"
+    GENERATE_MTLS_DOTENV_FILE=true
     echo "Using common name: ${COMMON_NAME}"
     echo "This can be changed by passing a command line argument to the script:"
     echo "  $0 my-common-name"
@@ -74,8 +76,8 @@ mkdir -p mtls
 # wrapper function to run openssl command and handle result
 run_command() {
     set +e
-    
-    local cmd="$*"    
+
+    local cmd="$*"
     local operation=$2
     case "${operation}" in
         "genpkey") operation="generate private key" ;;
@@ -89,7 +91,7 @@ run_command() {
             echo -e "  \e[32m✔\e[0m remove certificate signing requests"
         else
             local asset=$(echo "$*" | awk '{
-                for (i=1; i<NF; i++) 
+                for (i=1; i<NF; i++)
                     if ($i == "-out") print $(i+1)
             }')
             echo -e "  \e[32m✔\e[0m ${operation}: \e[34m${asset}\e[0m"
@@ -155,3 +157,17 @@ run_command openssl x509 -req \
 run_command rm ./mtls/*.csr
 
 echo "MTLS setup complete"
+
+# write .env.mtls for running dal-mock locally against the Docker kits emulation
+if ${GENERATE_MTLS_DOTENV_FILE}; then
+    {
+        echo "KITS_CA_CERT=$(cat ./mtls/ca.crt | base64 | tr -d '\n')"
+        echo "KITS_INTERNAL_GATEWAY_URL=https://localhost:3101/extapi"
+        echo "KITS_INTERNAL_CONNECTION_CERT=$(cat ./mtls/client.crt | base64 | tr -d '\n')"
+        echo "KITS_INTERNAL_CONNECTION_KEY=$(cat ./mtls/client.key | base64 | tr -d '\n')"
+        echo "KITS_EXTERNAL_GATEWAY_URL=https://localhost:3101/extapi"
+        echo "KITS_EXTERNAL_CONNECTION_CERT=$(cat ./mtls/client.crt | base64 | tr -d '\n')"
+        echo "KITS_EXTERNAL_CONNECTION_KEY=$(cat ./mtls/client.key | base64 | tr -d '\n')"
+    } > ../.env.mtls
+    echo ".env.mtls written to project root"
+fi
