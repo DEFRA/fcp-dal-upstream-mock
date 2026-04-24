@@ -32,6 +32,8 @@ This will perform a bunch of tests to check the specified schema (in this case t
 
 > NOTE: Only the KITS `upgrade` service is currently considered for testing, but other environments could also be checked by changing the target and providing the according mTLS details.
 
+> NOTE: The script uses [yq](https://github.com/mikefarah/yq) - ensure you have it installed, as it is not a project-level installation
+
 ## Checking local mock
 
 There is now a `/schemata` route that serves the OAS definitions of the mock, so checking mock endpoints match, is as simple as calling an NPM script with the target URL:
