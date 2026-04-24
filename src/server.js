@@ -9,6 +9,7 @@ import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
 import { router as hitachiRouter } from './routes/hitachi/payments.js'
 import { router as kitsRouter } from './plugins/kits-v1-router.js'
+import { router as kitsProxyRouter } from './routes/proxy/kits-proxy.router.js'
 import { health } from './plugins/health.js'
 import { schemata } from './plugins/schemata.js'
 
@@ -50,6 +51,7 @@ export const startServer = async (listener) => {
     await server.register([requestLogger, requestTracing, pulse, inert, health, schemata])
     await server.register(hitachiRouter, { routes: { prefix: '/api' } })
     await server.register(kitsRouter, { routes: { prefix: '/extapi' } })
+    await server.register(kitsProxyRouter, { routes: { prefix: '/proxy' } })
 
     // emulate upstream error responses
     server.ext('onPreResponse', emulateUpstreamErrors)
