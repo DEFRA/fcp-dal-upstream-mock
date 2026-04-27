@@ -90,6 +90,10 @@ generated, when the certificates were created when starting the upstream).
 npm run dev-with-locally-proxied-kits
 ```
 
+You can then access the service on port 3001 as follows
+
+> curl http://localhost:3001/proxy/external/extapi/person/3010037/summary
+
 ### Accessing the mock proxy in CDP Dev environment
 
 It is not possible to directly access the deployed API, from your local machine. Instead, you need to access the
