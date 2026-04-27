@@ -40,8 +40,14 @@ const extractHeaders = (headers) => {
   return h
 }
 
+const peek = (str) => (str ? `${str.slice(0, 25)}...${str.slice(-10)}` : 'undefined')
+
 const mtlsDispatcher = (mtlsConfig, baseUrl) => {
   const { hostname } = new URL(baseUrl)
+  logger.info(
+    { cert: peek(mtlsConfig.cert), key: peek(mtlsConfig.key), ca: peek(mtlsConfig.ca), hostname },
+    'mTLS dispatcher config'
+  )
   return new Agent({
     connect: {
       ...(mtlsConfig.ca && { ca: mtlsConfig.ca }),
