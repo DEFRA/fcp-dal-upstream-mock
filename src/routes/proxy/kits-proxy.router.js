@@ -17,6 +17,8 @@ const HOP_BY_HOP_HEADERS_FOR_EXCLUSION = new Set([
   'host'
 ])
 
+const ALLOWED_HEADERS = new Set(['email'])
+
 // Certain headers should not be forwarded, when proxying (these headers are specific to this `hop`
 // in the request chain.  Ensure we don't forward them on.
 // TODO Might be safer coming the other way... What headers, if any, SHOULD be forwarded on?
@@ -24,6 +26,15 @@ const filerOutHopByHopHeaders = (headers) => {
   logger.info(`Pre filter headers: ${JSON.stringify(headers)}`)
   const h = Object.fromEntries(
     Object.entries(headers).filter(([key]) => !HOP_BY_HOP_HEADERS_FOR_EXCLUSION.has(key))
+  )
+  logger.info(`Post filter headers: ${JSON.stringify(h)}`)
+  return h
+}
+
+const extractHeaders = (headers) => {
+  logger.info(`Pre filter headers: ${JSON.stringify(headers)}`)
+  const h = Object.fromEntries(
+    Object.entries(headers).filter(([key]) => ALLOWED_HEADERS.has(key.toLowerCase()))
   )
   logger.info(`Post filter headers: ${JSON.stringify(h)}`)
   return h
@@ -63,7 +74,7 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
       try {
         upstreamResponse = await fetch11(targetUrl, {
           method: request.method,
-          headers: filerOutHopByHopHeaders(request.headers),
+          headers: extractHeaders(request.headers),
           body: request.payload ?? undefined,
           dispatcher,
           signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
