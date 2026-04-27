@@ -45,8 +45,7 @@ const peek = (str) => (str ? `${str.slice(0, 25)}...${str.slice(-10)}` : 'undefi
 const mtlsDispatcher = (mtlsConfig, baseUrl) => {
   const { hostname } = new URL(baseUrl)
   logger.info(
-    { cert: peek(mtlsConfig.cert), key: peek(mtlsConfig.key), ca: peek(mtlsConfig.ca), hostname },
-    'mTLS dispatcher config'
+    `mTLS dispatcher config : ${JSON.stringify({ cert: peek(mtlsConfig.cert), key: peek(mtlsConfig.key), ca: peek(mtlsConfig.ca), hostname })}`
   )
   return new Agent({
     connect: {
