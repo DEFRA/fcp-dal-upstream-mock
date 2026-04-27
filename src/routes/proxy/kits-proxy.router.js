@@ -1,6 +1,7 @@
 import { fetch as fetch11, Agent } from 'undici'
 import { config } from '../../config.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
+import { he } from '@faker-js/faker'
 
 const logger = createLogger()
 
@@ -19,10 +20,14 @@ const HOP_BY_HOP_HEADERS_FOR_EXCLUSION = new Set([
 // Certain headers should not be forwarded, when proxying (these headers are specific to this `hop`
 // in the request chain.  Ensure we don't forward them on.
 // TODO Might be safer coming the other way... What headers, if any, SHOULD be forwarded on?
-const filerOutHopByHopHeaders = (headers) =>
-  Object.fromEntries(
+const filerOutHopByHopHeaders = (headers) => {
+  logger.info(`Pre filter headers: ${JSON.stringify(headers)}`)
+  const h = Object.fromEntries(
     Object.entries(headers).filter(([key]) => !HOP_BY_HOP_HEADERS_FOR_EXCLUSION.has(key))
   )
+  logger.info(`Post filter headers: ${JSON.stringify(h)}`)
+  return h
+}
 
 const mtlsDispatcher = (mtlsConfig, baseUrl) => {
   const { hostname } = new URL(baseUrl)
