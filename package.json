@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development nodemon --ext js,json -w ./src",
+    "dev-with-locally-proxied-kits": "NODE_ENV=development dotenv -e .env.mtls -- nodemon --ext js,json -w ./src",
     "git:pre-commit-hook": "npm run lint",
     "postinstall": "npm run setup:husky",
     "lint": "eslint . && prettier --check . && npm run verify:schemata",
