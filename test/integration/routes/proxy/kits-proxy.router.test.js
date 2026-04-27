@@ -110,7 +110,7 @@ describe('KITS Proxy router', () => {
       )
     })
 
-    test.skip('strips hop-by-hop headers before forwarding', async () => {
+    test('forwards on email header', async () => {
       mockUpstreamResponse()
 
       await server.inject({
@@ -120,12 +120,14 @@ describe('KITS Proxy router', () => {
           'x-custom-header': 'keep-me',
           connection: 'close',
           'transfer-encoding': 'chunked',
+          email: 'email@example.com',
           host: 'original-host'
         }
       })
 
       const [, { headers }] = mockFetch.mock.calls[0]
-      expect(headers['x-custom-header']).toBe('keep-me')
+      expect(headers['email']).toBe('email@example.com')
+      expect(headers['x-custom-header']).toBeUndefined()
       expect(headers['connection']).toBeUndefined()
       expect(headers['transfer-encoding']).toBeUndefined()
       expect(headers['host']).toBeUndefined()
