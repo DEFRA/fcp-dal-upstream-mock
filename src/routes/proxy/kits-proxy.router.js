@@ -54,13 +54,22 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
       const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
 
       logger.info(`Proxying ${request.method.toUpperCase()} ${targetUrl}`)
-      const upstreamResponse = await fetch11(targetUrl, {
-        method: request.method,
-        headers: filerOutHopByHopHeaders(request.headers),
-        body: request.payload ?? undefined,
-        dispatcher,
-        signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
-      })
+      let upstreamResponse
+      try {
+        upstreamResponse = await fetch11(targetUrl, {
+          method: request.method,
+          headers: filerOutHopByHopHeaders(request.headers),
+          body: request.payload ?? undefined,
+          dispatcher,
+          signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
+        })
+      } catch (err) {
+        logger.error(
+          { err, targetUrl, method: request.method.toUpperCase() },
+          'upstream fetch failed'
+        )
+        throw err
+      }
 
       const responseBody = await upstreamResponse.arrayBuffer()
       const responseHeaders = filerOutHopByHopHeaders(
