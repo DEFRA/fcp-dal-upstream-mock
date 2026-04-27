@@ -13,6 +13,10 @@ jest.unstable_mockModule('undici', () => ({
 const INTERNAL_URL = 'http://internal-gateway.test'
 const EXTERNAL_URL = 'http://external-gateway.test'
 
+jest.unstable_mockModule('../../../../src/common/helpers/logging/logger.js', () => ({
+  createLogger: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() })
+}))
+
 jest.unstable_mockModule('../../../../src/config.js', () => ({
   config: {
     get: (key) =>
@@ -22,8 +26,8 @@ jest.unstable_mockModule('../../../../src/config.js', () => ({
         'kitsProxy.gatewayTimeoutMs': 5000
       })[key],
     decodedKitsMTLS: {
-      internal: {},
-      external: {}
+      internal: { cert: 'internal-cert', key: 'internal-key' },
+      external: { cert: 'external-cert', key: 'external-key' }
     }
   }
 }))
