@@ -5,9 +5,13 @@ const mockFetch = jest.fn()
 
 jest.unstable_mockModule('undici', () => ({
   fetch: mockFetch,
-  Agent: class {
+  EnvHttpProxyAgent: class {
     constructor() {}
   }
+}))
+
+jest.unstable_mockModule('node:tls', () => ({
+  default: { createSecureContext: jest.fn().mockReturnValue({}) }
 }))
 
 const INTERNAL_URL = 'http://internal-gateway.test'
