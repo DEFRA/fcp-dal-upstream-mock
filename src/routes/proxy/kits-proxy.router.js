@@ -60,22 +60,27 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
       const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
 
       logger.debug(`Proxying ${request.method.toUpperCase()} ${targetUrl}`)
-      const upstreamResponse = await fetch11(targetUrl, {
-        method: request.method,
-        headers: extractRequestHeaders(request.headers),
-        body: request.payload ?? undefined,
-        dispatcher,
-        signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
-      })
-      const responseBody = await upstreamResponse.arrayBuffer()
-      const responseHeaders = extractResponseHeaders(
-        Object.fromEntries(upstreamResponse.headers.entries())
-      )
-      const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
-      for (const [name, value] of Object.entries(responseHeaders)) {
-        response.header(name, value)
+      try {
+        const upstreamResponse = await fetch11(targetUrl, {
+          method: request.method,
+          headers: extractRequestHeaders(request.headers),
+          body: request.payload ?? undefined,
+          dispatcher,
+          signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
+        })
+        const responseBody = await upstreamResponse.arrayBuffer()
+        // const responseHeaders = extractResponseHeaders(
+        //   Object.fromEntries(upstreamResponse.headers.entries())
+        // )
+        const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
+        // for (const [name, value] of Object.entries(responseHeaders)) {
+        //   response.header(name, value)
+        // }
+        return response
+      } catch (error) {
+        logger.error(JSON.stringify(error))
+        throw error
       }
-      return response
     }
   }
 }
