@@ -1,5 +1,6 @@
 import { fetch as fetch11, Agent } from 'undici'
 import { config } from '../../config.js'
+import tls from 'node:tls'
 
 const HOP_BY_HOP_HEADERS_FOR_EXCLUSION = new Set([
   'connection',
@@ -21,7 +22,18 @@ const filerOutHopByHopHeaders = (headers) =>
     Object.entries(headers).filter(([key]) => !HOP_BY_HOP_HEADERS_FOR_EXCLUSION.has(key))
   )
 
-const mtlsDispatcherAgent = (mtlsConfig) => {
+const mtlsDispatcher = (mtlsConfig, baseUrl) => {
+  const kitsUrl = new URL(baseUrl)
+  const requestTls = {
+    host: kitsUrl.hostname,
+    port: kitsUrl.port,
+    servername: kitsUrl.hostname
+  }
+  if (mtlsConfig.ca) {
+    requestTls.secureContext = tls.createSecureContext(mtlsConfig)
+  } else {
+  }
+
   return new Agent({
     connect: {
       ca: mtlsConfig.ca || undefined,
@@ -46,7 +58,7 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => ({
       method: request.method,
       headers: filerOutHopByHopHeaders(request.headers),
       body: request.payload ?? undefined,
-      dispatcher: mtlsDispatcherAgent(mtlsConfig),
+      dispatcher: mtlsDispatcher(mtlsConfig, baseUrl),
       signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
     })
 
