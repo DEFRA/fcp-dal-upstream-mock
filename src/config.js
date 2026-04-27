@@ -126,6 +126,13 @@ const config = convict({
         env: 'KITS_EXTERNAL_GATEWAY_URL'
       }
     },
+    enabled: {
+      doc: 'Should the KITS proxy be enabled',
+      format: Boolean,
+      nullable: true,
+      default: !!process.env.KITS_INTERNAL_CONNECTION_CERT,
+      env: 'KITS_PROXY_ENABLED'
+    },
     caCert: {
       doc: 'Base64 encoded CA certificate for KITS mTLS connection',
       format: String,

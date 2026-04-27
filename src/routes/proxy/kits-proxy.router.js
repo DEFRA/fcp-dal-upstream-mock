@@ -1,6 +1,8 @@
 import { fetch as fetch11, Agent } from 'undici'
 import { config } from '../../config.js'
-import tls from 'node:tls'
+import { createLogger } from '../../common/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 const HOP_BY_HOP_HEADERS_FOR_EXCLUSION = new Set([
   'connection',
@@ -23,57 +25,56 @@ const filerOutHopByHopHeaders = (headers) =>
   )
 
 const mtlsDispatcher = (mtlsConfig, baseUrl) => {
-  const kitsUrl = new URL(baseUrl)
-  const requestTls = {
-    host: kitsUrl.hostname,
-    port: kitsUrl.port,
-    servername: kitsUrl.hostname
-  }
-  if (mtlsConfig.ca) {
-    requestTls.secureContext = tls.createSecureContext(mtlsConfig)
-  } else {
-  }
-
+  const { hostname } = new URL(baseUrl)
   return new Agent({
     connect: {
-      ca: mtlsConfig.ca || undefined,
-      cert: mtlsConfig.cert || undefined,
-      key: mtlsConfig.key || undefined
+      ...(mtlsConfig.ca && { ca: mtlsConfig.ca }),
+      cert: mtlsConfig.cert,
+      key: mtlsConfig.key,
+      servername: hostname
     }
   })
 }
 
-const proxyRoute = (routePath, baseUrl, mtlsConfig) => ({
-  method: '*',
-  path: routePath,
-  options: {
-    auth: false,
-    payload: { output: 'data', parse: false }
-  },
-  handler: async (request, h) => {
-    const forwardedPath = request.params.path ?? ''
-    const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
-
-    const upstreamResponse = await fetch11(targetUrl, {
-      method: request.method,
-      headers: filerOutHopByHopHeaders(request.headers),
-      body: request.payload ?? undefined,
-      dispatcher: mtlsDispatcher(mtlsConfig, baseUrl),
-      signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
-    })
-
-    const responseBody = await upstreamResponse.arrayBuffer()
-    const responseHeaders = filerOutHopByHopHeaders(
-      Object.fromEntries(upstreamResponse.headers.entries())
-    )
-
-    const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
-    for (const [name, value] of Object.entries(responseHeaders)) {
-      response.header(name, value)
-    }
-    return response
+const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
+  if (!mtlsConfig.cert || !mtlsConfig.key) {
+    throw new Error(`mTLS cert/key not configured for route ${routePath}`)
   }
-})
+  const dispatcher = mtlsDispatcher(mtlsConfig, baseUrl)
+
+  return {
+    method: '*',
+    path: routePath,
+    options: {
+      auth: false,
+      payload: { output: 'data', parse: false }
+    },
+    handler: async (request, h) => {
+      const forwardedPath = request.params.path ?? ''
+      const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
+
+      logger.info(`Proxying ${request.method.toUpperCase()} ${targetUrl}`)
+      const upstreamResponse = await fetch11(targetUrl, {
+        method: request.method,
+        headers: filerOutHopByHopHeaders(request.headers),
+        body: request.payload ?? undefined,
+        dispatcher,
+        signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
+      })
+
+      const responseBody = await upstreamResponse.arrayBuffer()
+      const responseHeaders = filerOutHopByHopHeaders(
+        Object.fromEntries(upstreamResponse.headers.entries())
+      )
+
+      const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
+      for (const [name, value] of Object.entries(responseHeaders)) {
+        response.header(name, value)
+      }
+      return response
+    }
+  }
+}
 
 export const router = {
   plugin: {
