@@ -137,27 +137,55 @@ describe('KITS Proxy router', () => {
       )
     })
 
-    test('forwards on email header', async () => {
+    test('forwards only allowed request headers upstream', async () => {
       mockUpstreamResponse()
 
       await server.inject({
         method: 'GET',
         url: '/internal/extapi/person/123/summary',
         headers: {
-          'x-custom-header': 'keep-me',
+          email: 'email@example.com',
+          'content-type': 'application/json',
+          accept: 'application/json',
+          'x-custom-header': 'should-be-filtered',
           connection: 'close',
           'transfer-encoding': 'chunked',
-          email: 'email@example.com',
           host: 'original-host'
         }
       })
 
       const [, { headers }] = mockFetch.mock.calls[0]
       expect(headers['email']).toBe('email@example.com')
+      expect(headers['content-type']).toBe('application/json')
+      expect(headers['accept']).toBe('application/json')
       expect(headers['x-custom-header']).toBeUndefined()
       expect(headers['connection']).toBeUndefined()
       expect(headers['transfer-encoding']).toBeUndefined()
       expect(headers['host']).toBeUndefined()
+    })
+
+    test('forwards only allowed response headers to caller', async () => {
+      mockUpstreamResponse({
+        headers: {
+          'content-length': '42',
+          'content-encoding': 'gzip',
+          'cache-control': 'no-cache',
+          'x-custom-header': 'should-be-filtered',
+          'set-cookie': 'session=abc'
+        }
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/internal/extapi/person/123/summary'
+      })
+
+      expect(response.headers['content-type']).toBeDefined()
+      expect(response.headers['content-length']).toBeDefined()
+      expect(response.headers['content-encoding']).toBeDefined()
+      expect(response.headers['cache-control']).toBeDefined()
+      expect(response.headers['x-custom-header']).toBeUndefined()
+      expect(response.headers['set-cookie']).toBeUndefined()
     })
 
     test('returns upstream status code to caller', async () => {
