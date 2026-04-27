@@ -6,12 +6,7 @@ import tls from 'node:tls'
 const logger = createLogger()
 
 const ALLOWED_REQUEST_HEADERS = new Set(['email', 'content-type', 'accept'])
-const ALLOWED_RESPONSE_HEADERS = new Set([
-  'content-type',
-  'content-length',
-  'content-encoding',
-  'cache-control'
-])
+const ALLOWED_RESPONSE_HEADERS = new Set(['content-type'])
 
 const extractRequestHeaders = (headers) =>
   Object.fromEntries(
@@ -22,6 +17,7 @@ const extractResponseHeaders = (headers) =>
   Object.fromEntries(
     Object.entries(headers).filter(([key]) => ALLOWED_RESPONSE_HEADERS.has(key.toLowerCase()))
   )
+
 const mtlsDispatcher = (mtlsConfig, baseUrl) => {
   const { hostname } = new URL(baseUrl)
   const connectOptions = {
@@ -69,13 +65,13 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
           signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
         })
         const responseBody = await upstreamResponse.arrayBuffer()
-        // const responseHeaders = extractResponseHeaders(
-        //   Object.fromEntries(upstreamResponse.headers.entries())
-        // )
+        const responseHeaders = extractResponseHeaders(
+          Object.fromEntries(upstreamResponse.headers.entries())
+        )
         const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
-        // for (const [name, value] of Object.entries(responseHeaders)) {
-        //   response.header(name, value)
-        // }
+        for (const [name, value] of Object.entries(responseHeaders)) {
+          response.header(name, value)
+        }
         return response
       } catch (error) {
         logger.error(JSON.stringify(error))
