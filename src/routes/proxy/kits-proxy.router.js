@@ -65,7 +65,7 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
         })
       } catch (err) {
         logger.error(
-          { err, targetUrl, method: request.method.toUpperCase() },
+          { err, cause: err.cause, targetUrl, method: request.method.toUpperCase() },
           'upstream fetch failed'
         )
         throw err
