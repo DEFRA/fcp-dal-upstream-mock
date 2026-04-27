@@ -126,6 +126,13 @@ const config = convict({
         env: 'KITS_EXTERNAL_GATEWAY_URL'
       }
     },
+    enabled: {
+      doc: 'Should the KITS proxy be enabled',
+      format: Boolean,
+      nullable: true,
+      default: !!process.env.KITS_INTERNAL_CONNECTION_CERT,
+      env: 'KITS_PROXY_ENABLED'
+    },
     caCert: {
       doc: 'Base64 encoded CA certificate for KITS mTLS connection',
       format: String,
@@ -185,7 +192,6 @@ if (config.get('tls.key') || config.get('tls.cert')) {
   if (config.get('tls.ca')) config.decodedTLS.ca = decodeBase64Config(config.get('tls.ca'))
 }
 
-const ca = config.get('kitsProxy.caCert') && decodeBase64Config(config.get('kitsProxy.caCert'))
 config.decodedKitsMTLS = {
   internal: {
     cert:
@@ -193,8 +199,7 @@ config.decodedKitsMTLS = {
       decodeBase64Config(config.get('kitsProxy.internal.connectionCert')),
     key:
       config.get('kitsProxy.internal.connectionKey') &&
-      decodeBase64Config(config.get('kitsProxy.internal.connectionKey')),
-    ca
+      decodeBase64Config(config.get('kitsProxy.internal.connectionKey'))
   },
   external: {
     cert:
@@ -202,9 +207,14 @@ config.decodedKitsMTLS = {
       decodeBase64Config(config.get('kitsProxy.external.connectionCert')),
     key:
       config.get('kitsProxy.external.connectionKey') &&
-      decodeBase64Config(config.get('kitsProxy.external.connectionKey')),
-    ca
+      decodeBase64Config(config.get('kitsProxy.external.connectionKey'))
   }
+}
+
+const ca = config.get('kitsProxy.caCert') && decodeBase64Config(config.get('kitsProxy.caCert'))
+if (ca) {
+  config.decodedKitsMTLS.internal.ca = ca
+  config.decodedKitsMTLS.external.ca = ca
 }
 
 export { config }

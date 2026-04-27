@@ -12,14 +12,14 @@ echo "Generating TLS assets..."
 rm -fr "${SCRIPT_DIR}/mtls"
 ${SCRIPT_DIR}/setup-mtls.sh
 
-## Load env variables from generated TLS assets
+# Load env variables from generated TLS assets
 export KITS_CA_CERT="$(cat "${SCRIPT_DIR}/mtls/ca.crt" | base64 -w0)"
 export KITS_MOCK_TLS_SERVER_KEY="$(cat "${SCRIPT_DIR}/mtls/server.key" | base64 -w0)"
 export KITS_MOCK_TLS_SERVER_CERT="$(cat "${SCRIPT_DIR}/mtls/server.crt" | base64 -w0)"
 export KITS_INTERNAL_CONNECTION_KEY="$(cat "${SCRIPT_DIR}/mtls/client.key" | base64 -w0)"
 export KITS_INTERNAL_CONNECTION_CERT="$(cat "${SCRIPT_DIR}/mtls/client.crt" | base64 -w0)"
-#
-## Run docker compose
+
+# Run docker compose
 echo
 echo "Starting CDP emulation..."
 docker compose \

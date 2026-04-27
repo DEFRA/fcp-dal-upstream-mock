@@ -5,13 +5,26 @@ const mockFetch = jest.fn()
 
 jest.unstable_mockModule('undici', () => ({
   fetch: mockFetch,
-  Agent: class {
+  EnvHttpProxyAgent: class {
     constructor() {}
   }
 }))
 
+jest.unstable_mockModule('node:tls', () => ({
+  default: { createSecureContext: jest.fn().mockReturnValue({}) }
+}))
+
 const INTERNAL_URL = 'http://internal-gateway.test'
 const EXTERNAL_URL = 'http://external-gateway.test'
+
+jest.unstable_mockModule('../../../../src/common/helpers/logging/logger.js', () => ({
+  createLogger: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() })
+}))
+
+let mockMTLSConfig = {
+  internal: { cert: 'internal-cert', key: 'internal-key' },
+  external: { cert: 'external-cert', key: 'external-key' }
+}
 
 jest.unstable_mockModule('../../../../src/config.js', () => ({
   config: {
@@ -21,9 +34,8 @@ jest.unstable_mockModule('../../../../src/config.js', () => ({
         'kitsProxy.external.gatewayUrl': EXTERNAL_URL,
         'kitsProxy.gatewayTimeoutMs': 5000
       })[key],
-    decodedKitsMTLS: {
-      internal: {},
-      external: {}
+    get decodedKitsMTLS() {
+      return mockMTLSConfig
     }
   }
 }))
@@ -38,8 +50,8 @@ const mockUpstreamResponse = ({ body = {}, status = 200, headers = {} } = {}) =>
 }
 
 /**
- * This is a bit of  a hybrid test.  The proxy route is tested by starting a real Hapi server with
- * the upstream fetch mocked.  This validates routing, header filtering, and status code
+ * This is a bit of a hybrid integration/unit test.  The proxy route is tested by starting a real
+ * Hapi server with, but the upstream is mocked.  This validates routing, header filtering, and status code
  * pass-through without a live upstream.
  */
 describe('KITS Proxy router', () => {
@@ -75,7 +87,26 @@ describe('KITS Proxy router', () => {
         expect.objectContaining({ method: 'get' })
       )
     })
+  })
 
+  describe('/external/extapi', () => {
+    test('forwards GET to the external gateway URL', async () => {
+      mockUpstreamResponse({ body: { _data: { id: 123 } } })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/external/extapi/person/123/summary'
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${EXTERNAL_URL}/person/123/summary`,
+        expect.objectContaining({ method: 'get' })
+      )
+    })
+  })
+
+  describe('Non route specific behaviour', () => {
     test('forwards query string to upstream', async () => {
       mockUpstreamResponse({ body: { notifications: [] } })
 
@@ -106,7 +137,7 @@ describe('KITS Proxy router', () => {
       )
     })
 
-    test('strips hop-by-hop headers before forwarding', async () => {
+    test('forwards on email header', async () => {
       mockUpstreamResponse()
 
       await server.inject({
@@ -116,12 +147,14 @@ describe('KITS Proxy router', () => {
           'x-custom-header': 'keep-me',
           connection: 'close',
           'transfer-encoding': 'chunked',
+          email: 'email@example.com',
           host: 'original-host'
         }
       })
 
       const [, { headers }] = mockFetch.mock.calls[0]
-      expect(headers['x-custom-header']).toBe('keep-me')
+      expect(headers['email']).toBe('email@example.com')
+      expect(headers['x-custom-header']).toBeUndefined()
       expect(headers['connection']).toBeUndefined()
       expect(headers['transfer-encoding']).toBeUndefined()
       expect(headers['host']).toBeUndefined()
@@ -148,23 +181,6 @@ describe('KITS Proxy router', () => {
 
       expect(response.statusCode).toBe(503)
     })
-  })
-
-  describe('/external/extapi', () => {
-    test('forwards GET to the external gateway URL', async () => {
-      mockUpstreamResponse({ body: { _data: { id: 123 } } })
-
-      const response = await server.inject({
-        method: 'GET',
-        url: '/external/extapi/person/123/summary'
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(mockFetch).toHaveBeenCalledWith(
-        `${EXTERNAL_URL}/person/123/summary`,
-        expect.objectContaining({ method: 'get' })
-      )
-    })
 
     test('forwards query string to upstream', async () => {
       mockUpstreamResponse()
@@ -189,6 +205,55 @@ describe('KITS Proxy router', () => {
       })
 
       expect(response.statusCode).toBe(403)
+    })
+
+    test('uses empty string for path when no path segment is provided', async () => {
+      mockUpstreamResponse()
+
+      await server.inject({ method: 'GET', url: '/internal/extapi' })
+
+      expect(mockFetch).toHaveBeenCalledWith(`${INTERNAL_URL}/`, expect.anything())
+    })
+  })
+
+  describe('mTLS configuration validation', () => {
+    let router
+
+    beforeAll(async () => {
+      ;({ router } = await import('../../../../src/routes/proxy/kits-proxy.router.js'))
+    })
+
+    beforeEach(() => {
+      mockMTLSConfig = {
+        internal: { cert: 'internal-cert', key: 'internal-key' },
+        external: { cert: 'external-cert', key: 'external-key' }
+      }
+    })
+
+    test('throws on registration when cert is missing', async () => {
+      mockMTLSConfig.internal = { key: 'internal-key' }
+      await expect(Hapi.server().register(router)).rejects.toThrow(
+        'mTLS cert/key not configured for route /internal/extapi/{path*}'
+      )
+    })
+
+    test('throws on registration when key is missing', async () => {
+      mockMTLSConfig.internal = { cert: 'internal-cert' }
+      await expect(Hapi.server().register(router)).rejects.toThrow(
+        'mTLS cert/key not configured for route /internal/extapi/{path*}'
+      )
+    })
+
+    test('includes ca in secure context when provided', async () => {
+      const { default: tls } = await import('node:tls')
+      tls.createSecureContext.mockClear()
+
+      mockMTLSConfig.internal.ca = 'ca-cert'
+      await Hapi.server().register(router)
+
+      expect(tls.createSecureContext).toHaveBeenCalledWith(
+        expect.objectContaining({ ca: 'ca-cert' })
+      )
     })
   })
 })
