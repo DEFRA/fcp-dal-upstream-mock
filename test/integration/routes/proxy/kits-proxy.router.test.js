@@ -45,7 +45,7 @@ const mockUpstreamResponse = ({ body = {}, status = 200, headers = {} } = {}) =>
   mockFetch.mockResolvedValueOnce({
     status,
     arrayBuffer: async () => encoded.buffer,
-    headers: new Headers({ 'content-type': 'application/json', ...headers })
+    headers: new Headers({ 'Content-Type': 'application/json', ...headers })
   })
 }
 
@@ -164,29 +164,25 @@ describe('KITS Proxy router', () => {
       expect(headers['host']).toBeUndefined()
     })
 
-    // test('forwards only allowed response headers to caller', async () => {
-    //   mockUpstreamResponse({
-    //     headers: {
-    //       'content-length': '42',
-    //       'content-encoding': 'gzip',
-    //       'cache-control': 'no-cache',
-    //       'x-custom-header': 'should-be-filtered',
-    //       'set-cookie': 'session=abc'
-    //     }
-    //   })
-    //
-    //   const response = await server.inject({
-    //     method: 'GET',
-    //     url: '/internal/extapi/person/123/summary'
-    //   })
-    //
-    //   expect(response.headers['content-type']).toBeDefined()
-    //   expect(response.headers['content-length']).toBeDefined()
-    //   expect(response.headers['content-encoding']).toBeDefined()
-    //   expect(response.headers['cache-control']).toBeDefined()
-    //   expect(response.headers['x-custom-header']).toBeUndefined()
-    //   expect(response.headers['set-cookie']).toBeUndefined()
-    // })
+    test('forwards only allowed response headers to caller', async () => {
+      mockUpstreamResponse({
+        headers: {
+          'cache-control': 'no-cache',
+          'x-custom-header': 'should-be-filtered',
+          'set-cookie': 'session=abc'
+        }
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/internal/extapi/person/123/summary'
+      })
+
+      expect(response.headers['content-type']).toContain('application/json')
+      expect(response.headers['cache-control']).toBe('no-cache')
+      expect(response.headers['x-custom-header']).toBeUndefined()
+      expect(response.headers['set-cookie']).toBeUndefined()
+    })
 
     test('returns upstream status code to caller', async () => {
       mockUpstreamResponse({ status: 404 })
