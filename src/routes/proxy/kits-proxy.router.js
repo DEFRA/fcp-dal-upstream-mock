@@ -1,67 +1,68 @@
-import { fetch as fetch11, Agent } from 'undici'
+import { fetch as fetch11, EnvHttpProxyAgent } from 'undici'
 import { config } from '../../config.js'
+import { createLogger } from '../../common/helpers/logging/logger.js'
+import tls from 'node:tls'
 
-const HOP_BY_HOP_HEADERS_FOR_EXCLUSION = new Set([
-  'connection',
-  'keep-alive',
-  'proxy-authenticate',
-  'proxy-authorization',
-  'te',
-  'trailers',
-  'transfer-encoding',
-  'upgrade',
-  'host'
-])
+const logger = createLogger()
 
-// Certain headers should not be forwarded, when proxying (these headers are specific to this `hop`
-// in the request chain.  Ensure we don't forward them on.
-// TODO Might be safer coming the other way... What headers, if any, SHOULD be forwarded on?
-const filerOutHopByHopHeaders = (headers) =>
+const ALLOWED_HEADERS = new Set(['email'])
+
+const extractHeaders = (headers) =>
   Object.fromEntries(
-    Object.entries(headers).filter(([key]) => !HOP_BY_HOP_HEADERS_FOR_EXCLUSION.has(key))
+    Object.entries(headers).filter(([key]) => ALLOWED_HEADERS.has(key.toLowerCase()))
   )
 
-const mtlsDispatcherAgent = (mtlsConfig) => {
-  return new Agent({
-    connect: {
-      ca: mtlsConfig.ca || undefined,
-      cert: mtlsConfig.cert || undefined,
-      key: mtlsConfig.key || undefined
-    }
+const mtlsDispatcher = (mtlsConfig, baseUrl) => {
+  const { hostname } = new URL(baseUrl)
+  const connectOptions = {
+    cert: mtlsConfig.cert,
+    key: mtlsConfig.key,
+    ...(mtlsConfig.ca && { ca: mtlsConfig.ca }),
+    servername: hostname
+  }
+
+  // EnvHttpProxyAgent handles two distinct connection paths:
+  // - Deployed (CDP) environments route traffic through a SQUID proxy, so traffic is routed
+  //   via a CONNECT tunnel. undici applies `requestTls` to the inner TLS connection inside that tunnel.
+  // - Local Docker has no proxy, so undici makes a direct TLS connection and applies `connect` instead.
+  //   Without `connect`, the self-signed CA is not trusted and the handshake fails with SELF_SIGNED_CERT_IN_CHAIN.
+  return new EnvHttpProxyAgent({
+    connect: connectOptions,
+    requestTls: { servername: hostname, secureContext: tls.createSecureContext(connectOptions) }
   })
 }
 
-const proxyRoute = (routePath, baseUrl, mtlsConfig) => ({
-  method: '*',
-  path: routePath,
-  options: {
-    auth: false,
-    payload: { output: 'data', parse: false }
-  },
-  handler: async (request, h) => {
-    const forwardedPath = request.params.path ?? ''
-    const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
-
-    const upstreamResponse = await fetch11(targetUrl, {
-      method: request.method,
-      headers: filerOutHopByHopHeaders(request.headers),
-      body: request.payload ?? undefined,
-      dispatcher: mtlsDispatcherAgent(mtlsConfig),
-      signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
-    })
-
-    const responseBody = await upstreamResponse.arrayBuffer()
-    const responseHeaders = filerOutHopByHopHeaders(
-      Object.fromEntries(upstreamResponse.headers.entries())
-    )
-
-    const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
-    for (const [name, value] of Object.entries(responseHeaders)) {
-      response.header(name, value)
-    }
-    return response
+const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
+  if (!mtlsConfig.cert || !mtlsConfig.key) {
+    throw new Error(`mTLS cert/key not configured for route ${routePath}`)
   }
-})
+  const dispatcher = mtlsDispatcher(mtlsConfig, baseUrl)
+
+  return {
+    method: '*',
+    path: routePath,
+    options: {
+      auth: false,
+      payload: { output: 'data', parse: false }
+    },
+    handler: async (request, h) => {
+      const forwardedPath = request.params.path ?? ''
+      const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
+
+      logger.debug(`Proxying ${request.method.toUpperCase()} ${targetUrl}`)
+      const upstreamResponse = await fetch11(targetUrl, {
+        method: request.method,
+        headers: extractHeaders(request.headers),
+        body: request.payload ?? undefined,
+        dispatcher,
+        signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
+      })
+      const responseBody = await upstreamResponse.arrayBuffer()
+
+      return h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
+    }
+  }
+}
 
 export const router = {
   plugin: {

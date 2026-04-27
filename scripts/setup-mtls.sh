@@ -56,8 +56,9 @@ elif [ -z "${CA_CERT}" ]; then
     exit 1
 fi
 
-# use localhost if no common name was provided
 GENERATE_MTLS_DOTENV_FILE=false
+
+# use localhost if no common name was provided
 if [ -z "${COMMON_NAME}" ]; then
     COMMON_NAME="localhost"
     GENERATE_MTLS_DOTENV_FILE=true
@@ -132,11 +133,17 @@ run_command openssl genpkey \
 run_command openssl req -new \
     -key ./mtls/server.key -passin pass:server-password \
     -out ./mtls/server.csr -subj '/CN='"${COMMON_NAME}"
+
+# Write the SAN extension to a file rather than using -addext, which requires OpenSSL 1.1.1+
+# and is not supported on macOS's bundled LibreSSL.
+echo "subjectAltName=DNS:${COMMON_NAME}" > ./mtls/server.ext
+
 run_command openssl x509 -req \
     -in ./mtls/server.csr -out ./mtls/server.crt \
     -CA ${CA_CERT} -CAkey ${CA_KEY} -passin pass:ca-password \
     -CAcreateserial -CAserial ./mtls/ca.srl \
-    -days ${TEST_ASSET_TTL}
+    -days ${TEST_ASSET_TTL} \
+    -extfile ./mtls/server.ext
 
 # setup client assets
 run_command openssl genpkey \
@@ -154,7 +161,7 @@ run_command openssl x509 -req \
     -days ${TEST_ASSET_TTL}
 
 # tidy up - remove CSR files
-run_command rm ./mtls/*.csr
+run_command rm ./mtls/*.csr ./mtls/*.ext
 
 echo "MTLS setup complete"
 

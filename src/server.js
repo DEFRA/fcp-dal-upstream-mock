@@ -51,7 +51,9 @@ export const startServer = async (listener) => {
     await server.register([requestLogger, requestTracing, pulse, inert, health, schemata])
     await server.register(hitachiRouter, { routes: { prefix: '/api' } })
     await server.register(kitsRouter, { routes: { prefix: '/extapi' } })
-    await server.register(kitsProxyRouter, { routes: { prefix: '/proxy' } })
+    if (config.get('kitsProxy.enabled')) {
+      await server.register(kitsProxyRouter, { routes: { prefix: '/proxy' } })
+    }
 
     // emulate upstream error responses
     server.ext('onPreResponse', emulateUpstreamErrors)
