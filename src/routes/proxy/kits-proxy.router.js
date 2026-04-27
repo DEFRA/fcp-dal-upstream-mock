@@ -1,7 +1,7 @@
-import { fetch as fetch11, Agent } from 'undici'
+import { fetch as fetch11, EnvHttpProxyAgent } from 'undici'
 import { config } from '../../config.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
-import { he } from '@faker-js/faker'
+import tls from 'node:tls'
 
 const logger = createLogger()
 
@@ -47,14 +47,13 @@ const mtlsDispatcher = (mtlsConfig, baseUrl) => {
   logger.info(
     `mTLS dispatcher config : ${JSON.stringify({ cert: peek(mtlsConfig.cert), key: peek(mtlsConfig.key), ca: peek(mtlsConfig.ca), hostname })}`
   )
-  return new Agent({
-    connect: {
-      ...(mtlsConfig.ca && { ca: mtlsConfig.ca }),
-      cert: mtlsConfig.cert,
-      key: mtlsConfig.key,
-      servername: hostname
-    }
+  const requestTls = { servername: hostname }
+  requestTls.secureContext = tls.createSecureContext({
+    cert: mtlsConfig.cert,
+    key: mtlsConfig.key,
+    ...(mtlsConfig.ca && { ca: mtlsConfig.ca })
   })
+  return new EnvHttpProxyAgent({ requestTls })
 }
 
 const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
