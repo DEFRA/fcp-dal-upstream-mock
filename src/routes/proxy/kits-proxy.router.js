@@ -5,7 +5,7 @@ import tls from 'node:tls'
 
 const logger = createLogger()
 
-const ALLOWED_HEADERS = new Set(['email'])
+const ALLOWED_HEADERS = new Set(['email', 'content-type', 'accept'])
 
 const extractHeaders = (headers) =>
   Object.fromEntries(
