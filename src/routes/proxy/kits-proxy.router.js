@@ -92,14 +92,16 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
       }
 
       const responseBody = await upstreamResponse.arrayBuffer()
-      const responseHeaders = filerOutHopByHopHeaders(
-        Object.fromEntries(upstreamResponse.headers.entries())
-      )
+      console.log(`Body ${new TextDecoder().decode(responseBody)}`)
+      console.log(`status ${upstreamResponse.status}`)
+      // const responseHeaders = filerOutHopByHopHeaders(
+      //   Object.fromEntries(upstreamResponse.headers.entries())
+      // )
 
       const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
-      for (const [name, value] of Object.entries(responseHeaders)) {
-        response.header(name, value)
-      }
+      // for (const [name, value] of Object.entries(responseHeaders)) {
+      //   response.header(name, value)
+      // }
       return response
     }
   }
