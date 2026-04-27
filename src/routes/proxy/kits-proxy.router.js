@@ -5,13 +5,23 @@ import tls from 'node:tls'
 
 const logger = createLogger()
 
-const ALLOWED_HEADERS = new Set(['email', 'content-type', 'accept'])
+const ALLOWED_REQUEST_HEADERS = new Set(['email', 'content-type', 'accept'])
+const ALLOWED_RESPONSE_HEADERS = new Set([
+  'content-type',
+  'content-length',
+  'content-encoding',
+  'cache-control'
+])
 
-const extractHeaders = (headers) =>
+const extractRequestHeaders = (headers) =>
   Object.fromEntries(
-    Object.entries(headers).filter(([key]) => ALLOWED_HEADERS.has(key.toLowerCase()))
+    Object.entries(headers).filter(([key]) => ALLOWED_REQUEST_HEADERS.has(key.toLowerCase()))
   )
 
+const extractResponseHeaders = (headers) =>
+  Object.fromEntries(
+    Object.entries(headers).filter(([key]) => ALLOWED_RESPONSE_HEADERS.has(key.toLowerCase()))
+  )
 const mtlsDispatcher = (mtlsConfig, baseUrl) => {
   const { hostname } = new URL(baseUrl)
   const connectOptions = {
@@ -52,14 +62,20 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
       logger.debug(`Proxying ${request.method.toUpperCase()} ${targetUrl}`)
       const upstreamResponse = await fetch11(targetUrl, {
         method: request.method,
-        headers: extractHeaders(request.headers),
+        headers: extractRequestHeaders(request.headers),
         body: request.payload ?? undefined,
         dispatcher,
         signal: AbortSignal.timeout(config.get('kitsProxy.gatewayTimeoutMs'))
       })
       const responseBody = await upstreamResponse.arrayBuffer()
-
-      return h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
+      const responseHeaders = extractResponseHeaders(
+        Object.fromEntries(upstreamResponse.headers.entries())
+      )
+      const response = h.response(Buffer.from(responseBody)).code(upstreamResponse.status)
+      for (const [name, value] of Object.entries(responseHeaders)) {
+        response.header(name, value)
+      }
+      return response
     }
   }
 }
