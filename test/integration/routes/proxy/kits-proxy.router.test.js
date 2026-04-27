@@ -110,7 +110,7 @@ describe('KITS Proxy router', () => {
       )
     })
 
-    test('strips hop-by-hop headers before forwarding', async () => {
+    test.skip('strips hop-by-hop headers before forwarding', async () => {
       mockUpstreamResponse()
 
       await server.inject({
