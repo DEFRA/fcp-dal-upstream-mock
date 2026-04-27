@@ -68,7 +68,7 @@ This generates certificates/keys needed to support MTLS and then starts two dock
   - Proxy Endpoint
     - /proxy
       - This uses MTLS to communicates with the KITS emulation docker image below
-- The MTLS secured KITS simulator (kits-emulation-mock), used as the upstream for the standard mock above
+- The MTLS secured KITS simulator (kits-proxied-upstream), used as the upstream for the standard mock above
 
 You can the access the KITS-emulator via the DAL mock proxy as follows:
 
@@ -89,3 +89,11 @@ generated, when the certificates were created when starting the upstream).
 ```
 npm run dev-with-locally-proxied-kits
 ```
+
+### Accessing the mock proxy in CDP Dev environment
+
+It is not possible to directly access the deployed API, from your local machine. Instead, you need to access the
+API via the ephemeral gateway using a [developer API key](https://github.com/DEFRA/cdp-documentation/blob/main/how-to/developer-api-key.md)
+(valid for 24 hours). You can then access the proxy as follows
+
+> curl --header 'x-api-key: {API-KEY}' https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi/person/3010037/summary
