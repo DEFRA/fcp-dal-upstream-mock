@@ -1,11 +1,23 @@
 import { createServer as createHttpServer } from 'http'
 import { createServer as createHttpsServer } from 'https'
 import process from 'node:process'
+import diagnosticsChannel from 'node:diagnostics_channel'
 import { createLogger } from './common/helpers/logging/logger.js'
 import { config } from './config.js'
 import { startServer } from './server.js'
 
 const logger = createLogger()
+
+diagnosticsChannel.subscribe('undici:request:error', ({ request, error }) => {
+  logger.error({ url: `${request.origin}${request.path}`, error }, 'upstream request failed')
+})
+
+diagnosticsChannel.subscribe('undici:request:headers', ({ request, response }) => {
+  logger.info(
+    { url: `${request.origin}${request.path}`, status: response.statusCode },
+    'upstream response headers'
+  )
+})
 
 export const createListener = () => {
   // If TLS key/cert provided, create HTTPS server and enable mTLS (request client cert)
