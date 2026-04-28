@@ -115,6 +115,15 @@ More information about each logical area of the API can be found by accessing it
 | `GET: /schemata/person.yml`       | Defines the API for `person` data at `/extapi/person`                                                                                            |
 | `GET: /schemata/siti-agri.yml`    | Defines the API for `Siti-Agri` data at `/SitiAgriApi/cv`                                                                                        |
 
+## Schema testing against the KITS upgrade endpoint
+
+It's not possible to directly access the KITS service from a developer machine. The mock service can be used as a proxy
+to the KITS service, allowing schema verification. Access to this AI is via the CDP ephemeral gateway using a
+[developer API key](https://github.com/DEFRA/cdp-documentation/blob/main/how-to/developer-api-key.md) (valid for 24 hours).
+You can then access the proxy as shown in the following example
+
+> curl --header 'x-api-key: {API-KEY}' --header 'email: {EMAIL-ADDRESS}' https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi/person/3010037/summary
+
 ## Docker
 
 ### Development image

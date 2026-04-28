@@ -93,11 +93,3 @@ npm run dev-with-locally-proxied-kits
 You can then access the service on port 3001 as follows
 
 > curl http://localhost:3001/proxy/external/extapi/person/3010037/summary
-
-### Accessing the mock proxy in CDP Dev environment
-
-It is not possible to directly access the deployed API, from your local machine. Instead, you need to access the
-API via the ephemeral gateway using a [developer API key](https://github.com/DEFRA/cdp-documentation/blob/main/how-to/developer-api-key.md)
-(valid for 24 hours). You can then access the proxy as follows
-
-> curl --header 'x-api-key: {API-KEY}' https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi/person/3010037/summary

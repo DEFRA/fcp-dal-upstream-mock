@@ -12,6 +12,9 @@ These same schemata can then be used to check the mock to ensure proper conforma
 
 ## Checking a KITS target
 
+Before running the script, you need to [create a developer API key](https://github.com/DEFRA/cdp-documentation/blob/main/how-to/developer-api-key.md).
+This key will be valid for 24 hours.
+
 Run the automated checks using the convenience script, get more by running:
 
 ```shell
@@ -21,10 +24,8 @@ test/contract/check-schema.sh help
 ...but basically something like the following:
 
 ```shell
-export KITS_KEY=path/to/upgrade.key
-export KITS_CERT=path/to/upgrade.cert
-export CDP_PROXY=https://<user>:<pass>@proxy.dev.cdp-int.defra.cloud
-export KITS_URL=https://chs-upgrade-api.ruraldev.org.uk:8446/extapi
+export CDP_API_KEY=[KEY GENERATED ABOVE]
+export KITS_URL=https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi
 test/contract/check-schema.sh person
 ```
 
