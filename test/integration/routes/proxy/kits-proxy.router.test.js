@@ -184,6 +184,28 @@ describe('KITS Proxy router', () => {
       expect(response.headers['set-cookie']).toBeUndefined()
     })
 
+    test('sets content-encoding: identity on all responses', async () => {
+      mockUpstreamResponse()
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/internal/extapi/person/123/summary'
+      })
+
+      expect(response.headers['content-encoding']).toBe('identity')
+    })
+
+    test('sets content-encoding: identity on error responses', async () => {
+      mockUpstreamResponse({ status: 500 })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/internal/extapi/person/123/summary'
+      })
+
+      expect(response.headers['content-encoding']).toBe('identity')
+    })
+
     test('returns upstream status code to caller', async () => {
       mockUpstreamResponse({ status: 404 })
 
