@@ -72,9 +72,10 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
         for (const [name, value] of Object.entries(responseHeaders)) {
           response.header(name, value)
         }
-        // The body has already been decoded by undici (arrayBuffer auto-decompresses).
-        // Setting identity here prevents the CDP ingress from re-gzipping the response,
-        // which produces invalid gzip for certain upstream error payloads.
+
+        // Any content encoding applied by the upstream is lost when we create an ArrayBuffer from the
+        // upstream response body, so using the upstream's content-encoding would be incorrect here.
+        // Make it clear to any downstream caller that the body is not encoded
         response.header('content-encoding', 'identity')
         return response
       } catch (error) {
