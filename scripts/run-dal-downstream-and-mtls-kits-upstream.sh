@@ -10,7 +10,7 @@ cd "${PROJECT_ROOT}"
 # Generate TLS assets
 echo "Generating TLS assets..."
 rm -fr "${SCRIPT_DIR}/mtls"
-"${SCRIPT_DIR}/setup-mtls.sh" kits-proxied-upstream
+"${SCRIPT_DIR}/setup-mtls.sh" mtls-protected-upstream-simulator
 
 # Load env variables from generated TLS assets
 export KITS_CA_CERT="$(cat "${SCRIPT_DIR}/mtls/ca.crt" | base64 -w0)"

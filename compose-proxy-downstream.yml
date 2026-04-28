@@ -3,10 +3,10 @@ services:
   dal-mock:
     environment:
       KITS_CA_CERT: ${KITS_CA_CERT:?KITS_CA_CERT must be set for kits emulation}
-      KITS_INTERNAL_GATEWAY_URL: https://kits-proxied-upstream:3101/extapi
+      KITS_INTERNAL_GATEWAY_URL: https://mtls-protected-upstream-simulator:3101/extapi
       KITS_INTERNAL_CONNECTION_KEY: ${KITS_INTERNAL_CONNECTION_KEY:?KITS_INTERNAL_CONNECTION_KEY must be set}
       KITS_INTERNAL_CONNECTION_CERT: ${KITS_INTERNAL_CONNECTION_CERT:?KITS_INTERNAL_CONNECTION_CERT must be set}
-      KITS_EXTERNAL_GATEWAY_URL: https://kits-proxied-upstream:3101/extapi
+      KITS_EXTERNAL_GATEWAY_URL: https://mtls-protected-upstream-simulator:3101/extapi
       KITS_EXTERNAL_CONNECTION_KEY: $KITS_INTERNAL_CONNECTION_KEY
       KITS_EXTERNAL_CONNECTION_CERT: $KITS_INTERNAL_CONNECTION_CERT
 

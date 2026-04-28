@@ -1,7 +1,7 @@
 services:
   # Starts the DAL, with upstream/server MTLS configuration.  This is primarily intended to act as the upstream
   # endpoint for the /proxy endpoint in the mock.
-  kits-proxied-upstream:
+  mtls-protected-upstream-simulator:
     build:
       context: .
     environment:

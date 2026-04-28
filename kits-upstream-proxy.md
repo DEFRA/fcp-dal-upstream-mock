@@ -68,7 +68,7 @@ This generates certificates/keys needed to support MTLS and then starts two dock
   - Proxy Endpoint
     - /proxy
       - This uses MTLS to communicates with the KITS emulation docker image below
-- The MTLS secured KITS simulator (kits-proxied-upstream), used as the upstream for the standard mock above
+- The MTLS secured KITS simulator (mtls-protected-upstream-simulator), used as the upstream for the standard mock above
 
 You can the access the KITS-emulator via the DAL mock proxy as follows:
 
