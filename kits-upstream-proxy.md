@@ -67,10 +67,10 @@ This generates certificates/keys needed to support MTLS and then starts two dock
     - /extapi
   - Proxy Endpoint
     - /proxy
-      - This uses MTLS to communicates with the KITS emulation docker image below
+      - This uses MTLS to communicate with the KITS emulation docker image below
 - The MTLS secured KITS simulator (mtls-protected-upstream-simulator), used as the upstream for the standard mock above
 
-You can the access the KITS-emulator via the DAL mock proxy as follows:
+You can then access the KITS-emulator via the DAL mock proxy as follows:
 
 > curl http://localhost:3100/proxy/internal/extapi/person/3010037/summary
 

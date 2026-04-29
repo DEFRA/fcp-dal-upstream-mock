@@ -51,7 +51,7 @@ const mockUpstreamResponse = ({ body = {}, status = 200, headers = {} } = {}) =>
 
 /**
  * This is a bit of a hybrid integration/unit test.  The proxy route is tested by starting a real
- * Hapi server with, but the upstream is mocked.  This validates routing, header filtering, and status code
+ * Hapi server, but the upstream is mocked.  This validates routing, header filtering, and status code
  * pass-through without a live upstream.
  */
 describe('KITS Proxy router', () => {
