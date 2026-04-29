@@ -24,7 +24,6 @@ echo
 echo "Starting MTLS protected upstream..."
 docker compose \
   -f "${PROJECT_ROOT}/compose-proxy-upstream.yml" \
-  ${TEST_CONTAINER[@]} \
   up \
   --build --quiet-pull
 
