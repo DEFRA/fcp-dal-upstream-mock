@@ -21,13 +21,12 @@ export KITS_INTERNAL_CONNECTION_CERT="$(cat "${SCRIPT_DIR}/mtls/client.crt" | ba
 
 # Run docker compose
 echo
-echo "Starting CDP emulation..."
+echo "Starting MTLS protected upstream..."
 docker compose \
   -f "${PROJECT_ROOT}/compose-proxy-upstream.yml" \
   ${TEST_CONTAINER[@]} \
   up \
-  --build --quiet-pull \
-  ${COMPOSE_SERVICE}
+  --build --quiet-pull
 
 # clean-up generated TLS assets
 echo
