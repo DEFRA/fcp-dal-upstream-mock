@@ -7,11 +7,13 @@ import { fileURLToPath } from 'node:url'
 describe('mTLS setup', () => {
   const PROCESS_ENV = process.env
   const testDir = dirname(fileURLToPath(import.meta.url))
+  const projectRoot = join(testDir, '../..')
+  const mtlsDir = join(projectRoot, 'scripts', 'mtls')
   let ca, hapi
   const options = { hostname: 'localhost', port: 3443, path: '/health', rejectUnauthorized: true }
 
   const readAsset = async (asset) => {
-    const value = await readFile(join(testDir, 'mtls', asset), 'utf8')
+    const value = await readFile(join(mtlsDir, asset), 'utf8')
     return Buffer.from(value).toString('base64')
   }
 
@@ -37,10 +39,10 @@ describe('mTLS setup', () => {
 
   beforeAll(async () => {
     // const result = // Uncomment for debugging
-    execSync('bash setup-mtls.sh', { cwd: testDir })
+    execSync('bash scripts/setup-mtls.sh', { cwd: projectRoot })
     // console.log(result.toString()) // Uncomment for debugging
 
-    ca = await readFile(join(testDir, 'mtls', 'ca.crt'), 'utf8')
+    ca = await readFile(join(mtlsDir, 'ca.crt'), 'utf8')
     options.ca = ca
 
     process.env = { ...PROCESS_ENV }
@@ -57,7 +59,7 @@ describe('mTLS setup', () => {
   afterAll(async () => {
     await hapi.stop()
     process.env = PROCESS_ENV
-    await rm(join(testDir, 'mtls'), { recursive: true, force: true })
+    await rm(mtlsDir, { recursive: true, force: true })
   })
 
   it('should start HTTPS server with mTLS enabled', async () => {
@@ -72,8 +74,8 @@ describe('mTLS setup', () => {
   })
 
   it('should accept connections with valid client certificate', async () => {
-    const key = await readFile(join(testDir, 'mtls', 'client.key'), 'utf8')
-    const cert = await readFile(join(testDir, 'mtls', 'client.crt'), 'utf8')
+    const key = await readFile(join(mtlsDir, 'client.key'), 'utf8')
+    const cert = await readFile(join(mtlsDir, 'client.crt'), 'utf8')
 
     expect(await makeRequest({ ...options, key, cert })).toEqual({
       statusCode: 200,

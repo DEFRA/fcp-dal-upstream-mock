@@ -23,10 +23,8 @@ usage() {
   echo "  h  | help                - show this help message"
   echo
   echo "NOTE: additionally the following environment variables must be set:"
-  echo "  KITS_KEY  - KITS client key file (path relative to project root)"
-  echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
-  echo "  CDP_PROXY - the URL of the CDP HTTPS proxy to use"
-  echo "  KITS_URL  - the URL of the KITS API to use"
+  echo "  CDP_API_KEY - CDP Platform developer API key "
+  echo "  KITS_URL  - the URL of the KITS API to use (this should be the DAL Mock proxy endpoint, via the ephemeral endpoint)"
   echo "or..."
   echo "  HITACHI_CLIENT_SECRET - the client secret for token generation"
 }
@@ -94,44 +92,20 @@ yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
 
 # run schemathesis tests
 if ${kits} ; then # KITS gateway
-  echo "ERROR: Temporarily failing KITS test runs as not possible until the following"
-  echo "work has been completed:"
-  echo "  - mock backdoor to KITS https://eaflood.atlassian.net/browse/FCPDAL-253"
-  exit 1
-
-  # resolve KITS_KEY
-  if [ -f "${KITS_KEY}" ]; then
-    KITS_KEY="$(cd "$(dirname "${KITS_KEY}")" && pwd)/$(basename "${KITS_KEY}")"
-  elif [ -f "${rootDir}/${KITS_KEY}" ]; then
-    KITS_KEY="${rootDir}/${KITS_KEY}"
-  else
-    echo "KITS_KEY file not found: ${KITS_KEY} or ${rootDir}/${KITS_KEY}"
+  if [ -z "${CDP_API_KEY}" ]; then
+    echo "ERROR: CDP_API_KEY environment variable is not set" 1>&2
     usage
     exit 1
   fi
-  # resolve KITS_CERT
-  if [ -f "${KITS_CERT}" ]; then
-    KITS_CERT="$(cd "$(dirname "${KITS_CERT}")" && pwd)/$(basename "${KITS_CERT}")"
-  elif [ -f "${rootDir}/${KITS_CERT}" ]; then
-    KITS_CERT="${rootDir}/${KITS_CERT}"
-  else
-    echo "KITS_CERT file not found: ${KITS_CERT} or ${rootDir}/${KITS_CERT}"
-    usage
-    exit 1
-  fi
-
   docker run --rm --network=host --pull always \
     -v ${baseDir}/tmp:/tmp \
-    -v ${KITS_KEY}:/kits.key \
-    -v ${KITS_CERT}:/kits.crt \
     schemathesis/schemathesis:stable \
       run /tmp/schema.json \
         --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
+        --header "x-api-key: ${CDP_API_KEY}" \
         --exclude-checks=unsupported_method,not_a_server_error \
-        --request-cert /kits.crt \
-        --request-cert-key /kits.key \
         --report-vcr-path /tmp/vcr.yaml \
-        --url "${KITS_URL:-https://chs-upgrade-api.ruraldev.org.uk:8446/extapi}"
+        --url "${KITS_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
 
 else # hitachi
   if [ -z "${HITACHI_CLIENT_SECRET}" ]; then
@@ -148,7 +122,7 @@ else # hitachi
     --data "client_secret=${HITACHI_CLIENT_SECRET}" \
     --data resource=https://orgcf202fa2.operations.eu.dynamics.com \
     | jq -r '.access_token' )
-  
+
   # check the token looks good
   if [ "${HITACHI_TOKEN}" = "null" ]; then
     echo "ERROR: HITACHI_TOKEN was not generated correctly, check the secret is correct" 1>&2

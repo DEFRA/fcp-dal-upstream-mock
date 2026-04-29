@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development nodemon --ext js,json -w ./src",
+    "dev-with-locally-proxied-kits": "NODE_ENV=development dotenv -e .env.mtls -- nodemon --ext js,json -w ./src",
     "git:pre-commit-hook": "npm run lint",
     "postinstall": "npm run setup:husky",
     "lint": "eslint . && prettier --check . && npm run verify:schemata",
@@ -38,7 +39,8 @@
     "hapi-pino": "^13.0.0",
     "hapi-pulse": "^3.0.1",
     "pino": "^10.0.0",
-    "pino-pretty": "^13.0.0"
+    "pino-pretty": "^13.0.0",
+    "undici": "^7.18.2"
   },
   "devDependencies": {
     "@redocly/cli": "^2.11.1",
