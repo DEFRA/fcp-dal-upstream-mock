@@ -34,8 +34,20 @@ export const organisation = [
     path: '/organisation/{organisationId}',
     handler: async (request, h) => {
       const organisationId = checkId(request, 'organisationId')
+      console.log('OrgId is: ' + organisationId)
 
-      return h.response({ _data: retrieveOrganisation(organisationId) })
+      // Special cases to return specific status codes
+      if (organisationId == 3000000500) {
+        throw Boom.error('Server error from this API.')
+      } else if (organisationId == 3000000401) {
+        throw Boom.unauthorized('Unauthorized access to this API.')
+      } else if (organisationId == 3000000403) {
+        throw Boom.forbidden('Forbidden access to this API.')
+      } else if (organisationId == 3000000206) {
+        return h.response('{}').code(206)
+      } else {
+        return h.response({ _data: retrieveOrganisation(organisationId) })
+      }
     }
   },
   {
