@@ -7,6 +7,7 @@ import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { config } from './config.js'
+import { router as bankRouter } from './routes/bank-change-service/bank.js'
 import { router as hitachiRouter } from './routes/hitachi/payments.js'
 import { router as kitsRouter } from './plugins/kits-v1-router.js'
 import { router as kitsProxyRouter } from './routes/proxy/kits-proxy.router.js'
@@ -51,6 +52,7 @@ export const startServer = async (listener) => {
     await server.register([requestLogger, requestTracing, pulse, inert, health, schemata])
     await server.register(hitachiRouter, { routes: { prefix: '/api' } })
     await server.register(kitsRouter, { routes: { prefix: '/extapi' } })
+    await server.register(bankRouter, { routes: { prefix: '/extapi' } })
     if (config.get('kitsProxy.enabled')) {
       await server.register(kitsProxyRouter, { routes: { prefix: '/proxy' } })
     }
