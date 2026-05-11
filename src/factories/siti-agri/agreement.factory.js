@@ -14,7 +14,7 @@ const createPaymentSchedule = (attributes = {}) => {
     parcel_name: faker.string.numeric({ length: 4 }),
     action_area: faker.number.int({ min: 1000, max: 50000 }),
     action_mtl: nullOrFake(() => faker.number.int({ min: 1, max: 100 })),
-    action_units: nullOrFake(() => faker.number.int({ min: 1, max: 100 })),
+    action_units: nullOrFake(() => faker.number.float({ min: 1, max: 100, fractionDigits: 2 })),
     parcel_total_area: faker.number.int({ min: 1000, max: 50000 }),
     payment_schedule_start_date: transformDate(faker.date.past({ years: 10 })), // replicate kits date format
     payment_schedule_end_date: transformDate(faker.date.future({ years: 5 })), // replicate kits date format
