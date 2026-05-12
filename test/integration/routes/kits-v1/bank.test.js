@@ -55,11 +55,12 @@ describe('POST /bank-change-service/v1/submit', () => {
       expect(statusCode).toBe(200)
     })
 
-    it('returns 200 for an EU account with IBAN instead of account number', async () => {
+    it('returns 200 for an EU account with both number and IBAN', async () => {
       const payload = validPayload()
       payload.account = {
         accountType: 'EU',
         name: 'Jane Doe',
+        number: '12345678',
         iban: 'PT392831273127334616',
         bank: {
           name: 'Acme Bank',
@@ -92,7 +93,7 @@ describe('POST /bank-change-service/v1/submit', () => {
           {
             code: 20,
             description:
-              'Organisation id,Person id,SBI,FRN,CRN,Submission date/time,Account information is missing'
+              'Organisation id,Person id,SBI,FRN,CRN,Submission date/time,Account information,Country information is missing'
           }
         ]
       })
@@ -107,66 +108,91 @@ describe('POST /bank-change-service/v1/submit', () => {
         errors: [
           {
             code: 20,
-            description:
-              'Account type,Account name,Account number or IBAN,Account bank details is missing'
+            description: 'Account type,Account name,Account number,Account bank details is missing'
           }
         ]
       })
     })
 
-    it('returns 400 with code 20 when bank.name is missing (only required bank field)', async () => {
+    it.each([
+      {
+        name: 'bank.name is missing',
+        mutate: (p) => {
+          delete p.account.bank.name
+        },
+        expected: /Bank name is missing/
+      },
+      {
+        name: 'account.number is missing (even when iban is provided)',
+        mutate: (p) => {
+          delete p.account.number
+          p.account.iban = 'PT392831273127334616'
+        },
+        expected: /Account number is missing/
+      },
+      {
+        name: 'account.number is shorter than 4 chars',
+        mutate: (p) => {
+          p.account.number = '123'
+        },
+        expected: /at least 4 characters/
+      },
+      {
+        name: 'account type is not in the allowed enum',
+        mutate: (p) => {
+          p.account.accountType = 'UNKNOWN'
+        },
+        expected: /Unknown account type/
+      },
+      {
+        name: 'SBI is not found',
+        mutate: (p) => {
+          p.sbi = '999999999'
+        },
+        expected: /Organisation not found/
+      },
+      {
+        name: 'country is missing',
+        mutate: (p) => {
+          delete p.country
+        },
+        expected: /Country information is missing/
+      },
+      {
+        name: 'country.currency is missing',
+        mutate: (p) => {
+          p.country = { code: 'GB' }
+        },
+        expected: /Currency is missing/
+      },
+      {
+        name: 'currency is not in the EUR/GBP enum',
+        mutate: (p) => {
+          p.country = { code: 'US', currency: 'USD' }
+        },
+        expected: /Unknown currency/
+      },
+      {
+        name: 'country code is unknown',
+        mutate: (p) => {
+          p.country = { code: 'ZZ', currency: 'GBP' }
+        },
+        expected: /country code/
+      },
+      {
+        name: 'currency does not match country code',
+        mutate: (p) => {
+          p.country = { code: 'GB', currency: 'EUR' }
+        },
+        expected: /Currency/
+      }
+    ])('returns 400 with code 20 when $name', async ({ mutate, expected }) => {
       const payload = validPayload()
-      delete payload.account.bank.name
-      const { result, statusCode } = await server.inject({ method: 'POST', url, payload })
-      expect(statusCode).toBe(400)
-      expect(result.errors[0]).toEqual({ code: 20, description: 'Bank name is missing' })
-    })
-
-    it('returns 400 with code 20 when neither account.number nor account.iban is provided', async () => {
-      const payload = validPayload()
-      delete payload.account.number
-      const { result, statusCode } = await server.inject({ method: 'POST', url, payload })
-      expect(statusCode).toBe(400)
-      expect(result.errors[0]).toEqual({
-        code: 20,
-        description: 'Account number or IBAN is missing'
-      })
-    })
-
-    it('returns 400 with code 20 when account type is not in the allowed enum', async () => {
-      const payload = validPayload()
-      payload.account.accountType = 'UNKNOWN'
+      mutate(payload)
       const { result, statusCode } = await server.inject({ method: 'POST', url, payload })
       expect(statusCode).toBe(400)
       expect(result.errors[0].code).toBe(20)
-      expect(result.errors[0].description).toMatch(/Unknown account type/)
-    })
-
-    it('returns 400 with code 20 when SBI is not found', async () => {
-      const payload = validPayload()
-      payload.sbi = '999999999'
-      const { result, statusCode } = await server.inject({ method: 'POST', url, payload })
-      expect(statusCode).toBe(400)
-      expect(result.errors[0].code).toBe(20)
-      expect(result.errors[0].description).toMatch(/Organisation not found/)
-    })
-
-    it('returns 400 with code 20 for an unknown country code', async () => {
-      const payload = validPayload()
-      payload.country = { code: 'ZZ', currency: 'GBP' }
-      const { result, statusCode } = await server.inject({ method: 'POST', url, payload })
-      expect(statusCode).toBe(400)
-      expect(result.errors[0].code).toBe(20)
-      expect(result.errors[0].description).toMatch(/country code/)
-    })
-
-    it('returns 400 with code 20 when currency does not match country code', async () => {
-      const payload = validPayload()
-      payload.country = { code: 'GB', currency: 'EUR' }
-      const { result, statusCode } = await server.inject({ method: 'POST', url, payload })
-      expect(statusCode).toBe(400)
-      expect(result.errors[0].code).toBe(20)
-      expect(result.errors[0].description).toMatch(/Currency/)
+      expect(result.errors[0].description).toMatch(expected)
     })
   })
 })

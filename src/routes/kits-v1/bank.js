@@ -1,14 +1,17 @@
 import { sbiToOrgId } from '../../factories/id-lookups.js'
 
+const VALID_CURRENCIES = new Set(['EUR', 'GBP'])
+
 const countriesCurrency = {
   GB: 'GBP',
   IE: 'EUR',
   IRL: 'EUR',
-  PT: 'EUR',
-  US: 'USD'
+  PT: 'EUR'
 }
 
 const ACCOUNT_TYPES = new Set(['EU', 'UK_PERSONAL', 'UK_BUSINESS'])
+
+const ACCOUNT_NUMBER_MIN_LENGTH = 4
 
 // all 400s return code 20
 const UPSTREAM_ERROR_CODE = 20
@@ -31,6 +34,7 @@ const collectMissing = (body) => {
   if (!isPresent(body.crn)) missing.push('CRN')
   if (!isPresent(body.submissionDateTime)) missing.push('Submission date/time')
   if (!body.account || typeof body.account !== 'object') missing.push('Account information')
+  if (!body.country || typeof body.country !== 'object') missing.push('Country information')
   return missing
 }
 
@@ -38,14 +42,20 @@ const collectAccountMissing = (account) => {
   const missing = []
   if (!isPresent(account.accountType)) missing.push('Account type')
   if (!isPresent(account.name)) missing.push('Account name')
-  if (!isPresent(account.number) && !isPresent(account.iban)) {
-    missing.push('Account number or IBAN')
-  }
+  // Schema requires `number` always — upstream NPEs on accountNumber.length() if missing,
+  // even when `iban` is provided.
+  if (!isPresent(account.number)) missing.push('Account number')
   if (!account.bank || typeof account.bank !== 'object') {
     missing.push('Account bank details')
   } else if (!isPresent(account.bank.name)) {
     missing.push('Bank name')
   }
+  return missing
+}
+
+const collectCountryMissing = (country) => {
+  const missing = []
+  if (!isPresent(country.currency)) missing.push('Currency')
   return missing
 }
 
@@ -69,6 +79,15 @@ export const bank = [
         return errorResponse(h, 400, UPSTREAM_ERROR_CODE, `${accountMissing.join(',')} is missing`)
       }
 
+      if (body.account.number.length < ACCOUNT_NUMBER_MIN_LENGTH) {
+        return errorResponse(
+          h,
+          400,
+          UPSTREAM_ERROR_CODE,
+          `Account number must be at least ${ACCOUNT_NUMBER_MIN_LENGTH} characters`
+        )
+      }
+
       if (!ACCOUNT_TYPES.has(body.account.accountType)) {
         return errorResponse(
           h,
@@ -78,15 +97,19 @@ export const bank = [
         )
       }
 
+      const countryMissing = collectCountryMissing(body.country)
+      if (countryMissing.length > 0) {
+        return errorResponse(h, 400, UPSTREAM_ERROR_CODE, `${countryMissing.join(',')} is missing`)
+      }
+
       const { country } = body
-      if (country?.code && !countriesCurrency[country.code]) {
+      if (!VALID_CURRENCIES.has(country.currency)) {
+        return errorResponse(h, 400, UPSTREAM_ERROR_CODE, `Unknown currency: ${country.currency}`)
+      }
+      if (country.code && !countriesCurrency[country.code]) {
         return errorResponse(h, 400, UPSTREAM_ERROR_CODE, `Unknown country code: ${country.code}`)
       }
-      if (
-        country?.code &&
-        country?.currency &&
-        countriesCurrency[country.code] !== country.currency
-      ) {
+      if (country.code && countriesCurrency[country.code] !== country.currency) {
         return errorResponse(
           h,
           400,
