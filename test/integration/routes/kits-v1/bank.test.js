@@ -1,5 +1,5 @@
 import Hapi from '@hapi/hapi'
-import { bank } from '../../../../src/routes/bank-change-service/bank.js'
+import { bank } from '../../../../src/routes/kits-v1/bank.js'
 
 const url = '/bank-change-service/v1/submit'
 

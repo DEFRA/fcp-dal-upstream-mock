@@ -91,19 +91,23 @@ components:
         name:
           type: string
           minLength: 1
+          description: Bank name. Must not be blank — upstream returns code:20 400 if missing/empty.
         sortCode:
-          type: [string, 'null']
+          type: string
+          description: >
+            UK 6-digit sort code. Optional at submission, but required downstream for
+            UK_PERSONAL/UK_BUSINESS accounts.
         swiftCode:
-          type: [string, 'null']
+          type: string
+          description: >
+            SWIFT/BIC code. Optional at submission, but required downstream for EU accounts.
     SubmissionAccountDetails:
       type: object
       required:
         - accountType
         - name
         - bank
-      anyOf:
-        - required: [number]
-        - required: [iban]
+        - number
       properties:
         accountType:
           type: string
@@ -111,27 +115,39 @@ components:
             - EU
             - UK_PERSONAL
             - UK_BUSINESS
+          description: Account classification. Must not be null.
         name:
           type: string
           minLength: 1
+          description: Account holder name. Must not be blank.
         number:
           type: string
-          minLength: 1
+          minLength: 4
+          description: UK account number (typically 8 digits). Must be at least 4 chars.
         iban:
           type: string
-          minLength: 1
+          description: International Bank Account Number for EU/international accounts.
         buildingSocietyRollNumber:
-          type: [string, 'null']
+          type: string
+          description: >
+            Optional building society roll number. Note: upstream applies no server-side
+            validation restricting this field to building-society account types — it's
+            accepted and passed through regardless of accountType.
         bank:
           $ref: '#/components/schemas/SubmissionBankDetails'
     CountryDetails:
       type: object
+      required:
+        - currency
       properties:
-        # Upstream does not type-check country fields
         code:
-          description: Country code (e.g. GB, IRL).
+          type: string
         currency:
-          description: Currency code (e.g. EUR, GBP).
+          type: string
+          enum:
+            - EUR
+            - GBP
+          description: Currency code.
     SubmissionRequest:
       type: object
       examples:
@@ -159,22 +175,30 @@ components:
         - crn
         - submissionDateTime
         - account
+        - country
       properties:
         organisationId:
           type: string
           minLength: 1
+          description: >
+            Internal organisation ID. Numeric string parseable as Long. Must not be blank —
+            upstream returns code:20 400 if missing/empty; non-numeric values cause HTTP 500.
         personId:
           type: string
           minLength: 1
+          description: Internal person ID. Numeric string parseable as Long. Must not be blank.
         sbi:
           type: string
           minLength: 1
+          description: Single Business Identifier. Must not be blank.
         frn:
           type: string
           minLength: 1
+          description: Firm Reference Number. Must not be blank.
         crn:
           type: string
           minLength: 1
+          description: Customer Reference Number. Must not be blank.
         submissionDateTime:
           type: string
           minLength: 1

@@ -49,7 +49,7 @@ export const schemata = {
           method: 'GET',
           path: '/schemata/bank.yml',
           handler: {
-            file: path.join(__dirname, '../routes/bank-change-service/bank-schema.oas.yml')
+            file: path.join(__dirname, '../routes/kits-v1/bank-schema.oas.yml')
           }
         }
       ])

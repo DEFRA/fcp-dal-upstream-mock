@@ -108,12 +108,3 @@ export const bank = [
     }
   }
 ]
-
-export const router = {
-  plugin: {
-    name: 'bank-change-service-router',
-    register: (server, _options) => {
-      server.route(bank)
-    }
-  }
-}
