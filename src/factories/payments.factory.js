@@ -2,6 +2,8 @@ import { addMoney } from '../utils/common.js'
 import { fakeId, faker, safeSeed } from './common.js'
 import { frnToPaymentOverrides } from './id-lookups.js'
 
+let paymentIdCounter = 1
+
 const createLineItem = (overrides = {}) => ({
   parmAgreementNumber:
     faker.string.alpha({ length: 1, casing: 'upper' }) +
@@ -21,6 +23,7 @@ export const createPayment = ({ parmLineItems, ...overrides } = {}) => {
   )
 
   return {
+    $id: `${paymentIdCounter++}`,
     parmPaymentReference: faker.string.alphanumeric({ length: { max: 18 }, casing: 'upper' }),
     parmDate: faker.date.past({ years: 5 }).toISOString().substring(0, 19),
     parmAmount: parmLineItems.reduce((sum, item) => addMoney(sum, item.parmAmount), 0),
