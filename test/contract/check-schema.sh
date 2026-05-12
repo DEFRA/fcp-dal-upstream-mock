@@ -33,8 +33,6 @@ usage() {
 
 # check OPTION argument
 kits=false
-# Comma-prefixed list of additional schemathesis checks to exclude (per-target).
-extra_excludes=""
 case "$1" in
   h | help | --help | -h )
     usage
@@ -51,7 +49,6 @@ case "$1" in
 .components.schemas.SubmissionRequest.examples[0].crn = "1100209492" |
 .components.schemas.SubmissionRequest.properties.organisationId.enum = ["5583781"] |
 .components.schemas.SubmissionRequest.properties.personId.enum = ["5020949"]'
-    extra_excludes=",negative_data_rejection"
     kits=true
     ;;
   a | auth | authenticate )
@@ -120,7 +117,7 @@ if ${kits} ; then # KITS gateway
       run /tmp/schema.json \
         --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
         --header "x-api-key: ${CDP_API_KEY}" \
-        --exclude-checks=unsupported_method,not_a_server_error${extra_excludes} \
+        --exclude-checks=unsupported_method,not_a_server_error \
         --report-vcr-path /tmp/vcr.yaml \
         --url "${KITS_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
 
@@ -151,7 +148,7 @@ else # hitachi
     -v ${baseDir}/tmp:/tmp \
     schemathesis/schemathesis:stable \
       run /tmp/schema.json \
-        --exclude-checks=unsupported_method,not_a_server_error${extra_excludes} \
+        --exclude-checks=unsupported_method,not_a_server_error \
         --header "Authorization: Bearer ${HITACHI_TOKEN}" \
         --report-vcr-path /tmp/vcr.yaml \
         --url "${HITACHI_URL:-https://orgcf202fa2.operations.eu.dynamics.com/api}"
