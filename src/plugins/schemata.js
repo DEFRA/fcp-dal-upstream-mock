@@ -44,6 +44,13 @@ export const schemata = {
           handler: {
             file: path.join(__dirname, '../routes/hitachi/payments-schema.oas.yml')
           }
+        },
+        {
+          method: 'GET',
+          path: '/schemata/bank.yml',
+          handler: {
+            file: path.join(__dirname, '../routes/kits-v1/bank-schema.oas.yml')
+          }
         }
       ])
     }

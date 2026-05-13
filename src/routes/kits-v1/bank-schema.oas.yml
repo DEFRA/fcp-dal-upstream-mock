@@ -1,0 +1,242 @@
+openapi: 3.1.0
+info:
+  title: Bank Change Service API
+  description: API for submitting bank details for a business
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+tags:
+  - name: 'bank'
+    description: API for submitting bank details
+security:
+  - mTLS: []
+servers:
+  - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
+    description: The test server for KITS/V1 APIs
+paths:
+  /bank-change-service/v1/submit:
+    post:
+      tags:
+        - 'bank'
+      summary: Submits bank change, to be sent to Azure Service Bus
+      operationId: submitBankChange
+      requestBody:
+        required: true
+        description: Bank change request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionRequest'
+            examples:
+              BankChangeRequest:
+                summary: A bank change request
+                description: Bank change request
+                value:
+                  sbi: '110405990'
+                  frn: '10014489653'
+                  crn: '1100209492'
+                  submissionDateTime: 02/05/2026 14:12:11
+                  account:
+                    accountType: UK_BUSINESS
+                    name: John Doe
+                    number: '14345678'
+                    iban: PT392831273127334616
+                    buildingSocietyRollNumber: '2123414'
+                    bank:
+                      name: t1est
+                      sortCode: '123456'
+                      swiftCode: '8741136'
+                  country:
+                    code: IRL
+                    currency: EUR
+                  organisationId: '5583781'
+                  personId: '5020949'
+      responses:
+        '200':
+          description: Change processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+              examples:
+                ChangeProcessed:
+                  summary: The bank change has been processed
+                  description: Change processed
+                  value: {}
+        '400':
+          description: field validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '500':
+          description: There was an unexpected service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+components:
+  securitySchemes:
+    mTLS:
+      type: mutualTLS
+      description: >
+        Mutual TLS authentication. Client must present a certificate issued by the server.
+  schemas:
+    SubmissionBankDetails:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: Bank name. Must not be blank — upstream returns code:20 400 if missing/empty.
+        sortCode:
+          type: [string, number, boolean, 'null']
+          description: >
+            UK 6-digit sort code. Optional at submission, but required downstream for
+            UK_PERSONAL/UK_BUSINESS accounts.
+        swiftCode:
+          type: [string, number, boolean, 'null']
+          description: >
+            SWIFT/BIC code. Optional at submission, but required downstream for EU accounts.
+    SubmissionAccountDetails:
+      type: object
+      required:
+        - accountType
+        - name
+        - bank
+        - number
+      properties:
+        accountType:
+          type: [string, integer]
+          enum:
+            - EU
+            - UK_PERSONAL
+            - UK_BUSINESS
+            - 0
+            - 1
+            - 2
+          description: Account classification. Must not be null.
+        name:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: Account holder name. Must not be blank.
+        number:
+          oneOf:
+            - type: string
+              minLength: 4
+            - type: number
+              minimum: 1000
+            - type: boolean
+          description: UK account number (typically 8 digits). Must be at least 4 chars.
+        iban:
+          type: [string, number, boolean, 'null']
+          description: International Bank Account Number for EU/international accounts.
+        buildingSocietyRollNumber:
+          type: [string, number, boolean, 'null']
+          description: >
+            Optional building society roll number. Note: upstream applies no server-side
+            validation restricting this field to building-society account types — it's
+            accepted and passed through regardless of accountType.
+        bank:
+          $ref: '#/components/schemas/SubmissionBankDetails'
+    CountryDetails:
+      type: object
+      required:
+        - currency
+      properties:
+        code:
+          type: [string, number, boolean, 'null']
+        currency:
+          type: [string, integer]
+          enum:
+            - EUR
+            - GBP
+            - 0
+            - 1
+          description: Currency code.
+    SubmissionRequest:
+      type: object
+      examples:
+        - organisationId: '1000000000'
+          personId: '1000000000'
+          sbi: '100000000'
+          frn: '1000000000'
+          crn: '1000000000'
+          submissionDateTime: '01/02/2023 14:12:11'
+          account:
+            accountType: UK_BUSINESS
+            name: John Doe
+            number: '12345678'
+            bank:
+              name: Acme Bank
+              sortCode: '123456'
+          country:
+            code: GB
+            currency: GBP
+      required:
+        - organisationId
+        - personId
+        - sbi
+        - frn
+        - crn
+        - submissionDateTime
+        - account
+        - country
+      properties:
+        organisationId:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: >
+            Internal organisation ID. Numeric string parseable as Long. Must not be blank —
+            upstream returns code:20 400 if missing/empty; non-numeric values cause HTTP 500.
+        personId:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: Internal person ID. Numeric string parseable as Long. Must not be blank.
+        sbi:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: Single Business Identifier. Must not be blank.
+        frn:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: Firm Reference Number. Must not be blank.
+        crn:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          description: Customer Reference Number. Must not be blank.
+        submissionDateTime:
+          type: [string, number, boolean]
+          minLength: 1
+          pattern: '[^\s\u001C-\u001F]'
+          example: '01/02/2023 14:12:11'
+        account:
+          $ref: '#/components/schemas/SubmissionAccountDetails'
+        country:
+          $ref: '#/components/schemas/CountryDetails'
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+        description:
+          type: string
+    DefaultResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 
 # setup
@@ -12,10 +13,11 @@ usage() {
   echo "Run schemathesis contract tests against the upstream KITS."
   echo "All tests are run against the 'upgrade' API env."
   echo
-  echo "Usage: $0 {a|auth|authenticate|o|org|organisation|p|person|s|sa|siti-agri|help}"
+  echo "Usage: $0 {a|auth|authenticate|b|bank|o|org|organisation|p|person|s|sa|siti-agri|help}"
   echo
   echo "Where the argument specifies which schema to test:"
   echo "  a  | auth | authenticate - test the Authenticate schema"
+  echo "  b  | bank                - test the Bank Change Service schema"
   echo "  o  | org | organisation  - test the Organisation schema"
   echo "  p  | person              - test the Person schema"
   echo "  pd | payments            - test the Payment Details schema"
@@ -37,6 +39,18 @@ case "$1" in
     exit 0
     ;;
   # KITS APIs
+  b | bank )
+    schema="kits-v1/bank"
+    mutations='. |
+.components.schemas.SubmissionRequest.examples[0].organisationId = "5583781" |
+.components.schemas.SubmissionRequest.examples[0].personId = "5020949" |
+.components.schemas.SubmissionRequest.examples[0].sbi = "110405990" |
+.components.schemas.SubmissionRequest.examples[0].frn = "10014489653" |
+.components.schemas.SubmissionRequest.examples[0].crn = "1100209492" |
+.components.schemas.SubmissionRequest.properties.organisationId.enum = ["5583781"] |
+.components.schemas.SubmissionRequest.properties.personId.enum = ["5020949"]'
+    kits=true
+    ;;
   a | auth | authenticate )
     schema="kits-v1/authenticate"
     mutations='. |
