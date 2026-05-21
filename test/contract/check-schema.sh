@@ -48,7 +48,13 @@ case "$1" in
 .components.schemas.SubmissionRequest.examples[0].frn = "10014489653" |
 .components.schemas.SubmissionRequest.examples[0].crn = "1100209492" |
 .components.schemas.SubmissionRequest.properties.organisationId.enum = ["5583781"] |
-.components.schemas.SubmissionRequest.properties.personId.enum = ["5020949"]'
+.components.schemas.SubmissionRequest.properties.personId.enum = ["5020949"] |
+.components.schemas.ValidateRequest.examples[0].sbi = "110405990" |
+.components.schemas.ValidateRequest.examples[0].frn = "10014489653" |
+.components.schemas.ValidateRequest.examples[0].crn = "1100209492" |
+.paths["/bank-change-service/v1/locked-status/{organisationId}/{personId}"].get.parameters[0].schema.examples = ["5583781"] |
+.paths["/bank-change-service/v1/locked-status/{organisationId}/{personId}"].get.parameters[1].schema.examples = ["5020949"] |
+.paths["/bank-change-service/v1/account-status/{organisationId}"].get.parameters[0].schema.examples = ["5583781"]'
     kits=true
     ;;
   a | auth | authenticate )

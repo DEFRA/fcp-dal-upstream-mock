@@ -165,6 +165,8 @@ export const orgIdLookup = {
   },
   1111111111: {
     sbi: 1111111111,
+    // Bank-change attempts for this person are locked
+    bankLockedPersonIds: [11111119],
     customers: [
       11111111, 11111112, 11111113, 11111114, 11111115, 11111116, 11111117, 11111118, 11111119,
       11111122, 11111222, 11112222, 11122222, 11222222, 12222222
@@ -242,6 +244,10 @@ export const orgIdLookup = {
   },
   2222222222: {
     sbi: 2222222222,
+    // FRN: pinned to match the orgId so bank example payloads stay readable.
+    overrides: { businessReference: '2222222222' },
+    // Bank details not editable.
+    bankAccountStatus: { submitted: true, updatedRecently: true, new: false },
     customers: [
       11111122, 11111222, 11112222, 11122222, 11222222, 12222222, 22222220, 22222221, 22222222,
       22222223, 22222224, 22222225, 22222226, 22222227, 22222228, 22222229, 22222230, 22222231,
@@ -267,7 +273,11 @@ export const orgIdLookup = {
       }
     ]
   },
-  3333333333: { sbi: 3333333333, customers: [11111120] },
+  3333333333: {
+    sbi: 3333333333,
+    bankAccountStatus: { submitted: false, updatedRecently: false, new: true },
+    customers: [11111120]
+  },
 
   // Orgs that always returns specific status when requested
   3000000206: { sbi: 300000206, customers: [] },
@@ -288,7 +298,11 @@ export const orgIdLookup = {
   5447505: { sbi: 121428499, customers: [5302028] },
 
   // for DAL mutation tests
-  9000001: { sbi: 900000001, customers: [] },
+  9000001: {
+    sbi: 900000001,
+    customers: [],
+    bankAccountStatus: { submitted: false, updatedRecently: true, new: false }
+  },
   9000002: { sbi: 900000002, customers: [] },
   // for CV/DAL DoB edge case tests
   9000003: {
@@ -310,9 +324,22 @@ export const frnToOrgId = {}
 export const frnToPaymentOverrides = {}
 export const orgIdToPersonIds = {}
 export const personIdToOrgIds = {}
+export const bankAccountStatusByOrgId = {}
+export const bankLockedPairs = new Set()
+
+// Bank account test accounts. Key is account number
+export const bankValidateTestAccounts = {
+  11111100: { sortCode: '111111', bankName: 'Match Bank', status: 'MATCH' },
+  22222200: {
+    sortCode: '222222',
+    bankName: 'Partial Match Bank',
+    status: 'PARTIAL_MATCH'
+  },
+  33333300: { sortCode: '333333', bankName: 'No Match Bank', status: 'FAILED' }
+}
 
 Object.entries(orgIdLookup).forEach(([orgId, orgDetails]) => {
-  const { sbi, customers, overrides } = orgDetails
+  const { sbi, customers, overrides, bankAccountStatus, bankLockedPersonIds } = orgDetails
   orgIdToSbi[orgId] = sbi
   sbiToOrgId[sbi] = orgId
 
@@ -336,5 +363,12 @@ Object.entries(orgIdLookup).forEach(([orgId, orgDetails]) => {
       personIdToOrgIds[personId] = []
     }
     personIdToOrgIds[personId].push(Number(orgId))
+  })
+
+  if (bankAccountStatus) {
+    bankAccountStatusByOrgId[orgId] = bankAccountStatus
+  }
+  bankLockedPersonIds?.forEach((personId) => {
+    bankLockedPairs.add(`${orgId}:${personId}`)
   })
 })
