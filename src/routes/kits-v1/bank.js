@@ -128,7 +128,7 @@ const validateAccountAndCountry = (h, body) => {
 
 const DEFAULT_ACCOUNT_STATUS = { submitted: false, updatedRecently: false, new: false }
 
-const normaliseSortCode = (value) => String(value ?? '').replace(/\D/g, '')
+const normaliseSortCode = (value) => String(value ?? '').replaceAll(/\D/g, '')
 
 const resolveValidateStatus = (account) => {
   const testAccount = bankValidateTestAccounts[String(account.number ?? '')]

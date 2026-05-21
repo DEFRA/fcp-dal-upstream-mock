@@ -133,12 +133,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
-        '500':
-          description: There was an unexpected service error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultResponse'
   /bank-change-service/v1/account-status/{organisationId}:
     get:
       tags:
@@ -197,7 +191,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
         '500':
-          description: There was an unexpected service error
+          description: >
+            Upstream incorrectly returns 500 (instead of 400) for invalid organisationId values — e.g. `00`
           content:
             application/json:
               schema:
@@ -278,11 +273,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
         '500':
-          description: There was an unexpected service error
+          description: >
+            Upstream incorrectly returns 500 (instead of 400) for invalid payloads
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DefaultResponse'
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                  status:
+                    type: integer
+                  error:
+                    type: string
+                  path:
+                    type: string
 components:
   securitySchemes:
     mTLS:
