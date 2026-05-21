@@ -2,41 +2,49 @@ import Hapi from '@hapi/hapi'
 import { bank } from '../../../../src/routes/kits-v1/bank.js'
 
 const url = '/bank-change-service/v1/submit'
+const validateUrl = '/bank-change-service/v1/validate'
 
-const knownSbi = 1111111111
+const knownSbi = 2222222222
 
 const validPayload = () => ({
-  organisationId: '5583781',
-  personId: '5020949',
+  organisationId: '2222222222',
+  personId: '22222220',
   sbi: String(knownSbi),
-  frn: '10014489653',
-  crn: '1100209492',
+  frn: '2222222222',
+  crn: '2222222000',
   submissionDateTime: '02/05/2026 14:12:11',
   account: {
     accountType: 'UK_BUSINESS',
     name: 'John Doe',
-    number: '14345678',
+    number: '11111100',
     bank: {
-      name: 't1est',
-      sortCode: '123456'
+      name: 'Match Bank',
+      sortCode: '111111'
     }
   },
   country: { code: 'GB', currency: 'GBP' }
 })
 
+const validValidatePayload = () => {
+  const payload = validPayload()
+  delete payload.organisationId
+  delete payload.personId
+  return payload
+}
+
+let server
+
+beforeAll(async () => {
+  server = Hapi.server()
+  server.route(bank)
+  await server.initialize()
+})
+
+afterAll(async () => {
+  await server.stop()
+})
+
 describe('POST /bank-change-service/v1/submit', () => {
-  let server
-
-  beforeAll(async () => {
-    server = Hapi.server()
-    server.route(bank)
-    await server.initialize()
-  })
-
-  afterAll(async () => {
-    await server.stop()
-  })
-
   describe('success scenarios', () => {
     it('returns 200 with an empty body for a fully populated valid request', async () => {
       const { result, statusCode } = await server.inject({
@@ -193,6 +201,212 @@ describe('POST /bank-change-service/v1/submit', () => {
       expect(statusCode).toBe(400)
       expect(result.errors[0].code).toBe(20)
       expect(result.errors[0].description).toMatch(expected)
+    })
+  })
+})
+
+describe('GET /bank-change-service/v1/locked-status/{organisationId}/{personId}', () => {
+  it('returns locked:false for an org/person pair that has no recent failures', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/locked-status/1111111111/11111111'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({ locked: false })
+  })
+
+  it('returns locked:true', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/locked-status/1111111111/11111119'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({ locked: true })
+  })
+})
+
+describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
+  it('returns editable:true for an organisation with no overrides', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/account-status/1111111111'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      editable: true,
+      submitted: false,
+      updatedRecently: false,
+      new: false
+    })
+  })
+
+  it('returns editable:false when the org was recently submitted', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/account-status/2222222222'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      editable: false,
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+  })
+
+  it('returns editable:false when the org is new', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/account-status/3333333333'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      editable: false,
+      submitted: false,
+      updatedRecently: false,
+      new: true
+    })
+  })
+
+  it('returns editable:true when only updatedRecently is set', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/account-status/9000001'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      editable: true,
+      submitted: false,
+      updatedRecently: true,
+      new: false
+    })
+  })
+})
+
+describe('POST /bank-change-service/v1/validate', () => {
+  describe('success scenarios', () => {
+    it('returns MATCH for the default happy-path payload', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload: validValidatePayload()
+      })
+      expect(statusCode).toBe(200)
+      expect(result.status).toBe('MATCH')
+      expect(result.attemptsRemaining).toBe(0)
+      expect(result.account.bank.name).toBe('Match Bank')
+      expect(result.account.bank.sortCode).toBe('111111')
+    })
+
+    it.each([
+      ['11111100', 'MATCH'],
+      ['22222200', 'PARTIAL_MATCH']
+    ])('returns %s -> %s based on the submitted account number', async (accountNumber, status) => {
+      const payload = validValidatePayload()
+      payload.account.number = accountNumber
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(200)
+      expect(result.status).toBe(status)
+      expect(result.attemptsRemaining).toBe(0)
+    })
+
+    it('normalises a dashed sort code in the echoed response', async () => {
+      const payload = validValidatePayload()
+      payload.account.bank.sortCode = '60-83-71'
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(200)
+      expect(result.account.bank.sortCode).toBe('608371')
+    })
+
+    it('echoes iban and swiftCode in the success response when supplied', async () => {
+      const payload = validValidatePayload()
+      payload.account = {
+        accountType: 'EU',
+        name: 'Jane Doe',
+        number: '11111100',
+        iban: 'PT392831273127334616',
+        bank: { name: 'Acme Bank', swiftCode: 'ABCDPTPL' }
+      }
+      payload.country = { code: 'PT', currency: 'EUR' }
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(200)
+      expect(result.status).toBe('MATCH')
+      expect(result.account.iban).toBe('PT392831273127334616')
+      expect(result.account.bank.swiftCode).toBe('ABCDPTPL')
+    })
+  })
+
+  describe('failure scenarios', () => {
+    it('returns FAILED for the FAILED test account number', async () => {
+      const payload = validValidatePayload()
+      payload.account.number = '33333300'
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(200)
+      expect(result.status).toBe('FAILED')
+      expect(result.message).toBe("Details don't match")
+      expect(result.attemptsRemaining).toBe(2)
+      expect(result.account.bank.sortCode).toBe('111111')
+    })
+  })
+
+  describe('validation error scenarios', () => {
+    it('returns 400 with code 20 when required top-level fields are missing', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload: {}
+      })
+      expect(statusCode).toBe(400)
+      expect(result).toEqual({
+        errors: [
+          {
+            code: 20,
+            description:
+              'SBI,FRN,CRN,Submission date/time,Account information,Country information is missing'
+          }
+        ]
+      })
+    })
+
+    it('returns 400 when the SBI is not found', async () => {
+      const payload = validValidatePayload()
+      payload.sbi = '999999999'
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(400)
+      expect(result.errors[0].code).toBe(20)
+      expect(result.errors[0].description).toMatch(/Organisation not found/)
+    })
+
+    it('returns 400 when the account type is unknown', async () => {
+      const payload = validValidatePayload()
+      payload.account.accountType = 'UNKNOWN'
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(400)
+      expect(result.errors[0].description).toMatch(/Unknown account type/)
     })
   })
 })
