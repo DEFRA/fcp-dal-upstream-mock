@@ -11,7 +11,7 @@
     "dev": "NODE_ENV=development nodemon --ext js,json -w ./src",
     "dev-with-locally-proxied-kits": "NODE_ENV=development dotenv -e .env.mtls -- nodemon --ext js,json -w ./src",
     "git:pre-commit-hook": "npm run lint",
-    "postinstall": "npm run setup:husky",
+    "postinstall": "./scripts/post-install.sh",
     "lint": "eslint . && prettier --check . && npm run verify:schemata",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
