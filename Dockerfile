@@ -16,7 +16,7 @@ COPY --chown=node:node .npmrc ./
 RUN npm install
 COPY --chown=node:node src ./src
 
-CMD [ "nodemon", "--ext", "js,json", "--legacy-watch", "./src" ]
+CMD [ "./node_modules/.bin/nodemon", "--ext", "js,json", "--legacy-watch", "./src" ]
 
 FROM defradigital/node:${PARENT_VERSION} AS production
 ARG PARENT_VERSION
