@@ -29,7 +29,10 @@ jobs:
           cache: npm
 
       - name: Install, lint, & test
-        run: npm cit
+        run: |
+          npm ci
+          npm run postinstall
+          npm test
 
       - name: Publish Hot Fix
         uses: DEFRA/cdp-build-action/build-hotfix@main
