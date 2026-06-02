@@ -29,6 +29,7 @@ jobs:
         run: |
           npm audit --omit=dev
           npm ci
+          npm run postinstall
           npm run lint
           npm t
 
