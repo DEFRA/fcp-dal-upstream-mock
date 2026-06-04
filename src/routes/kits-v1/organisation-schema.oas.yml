@@ -88,8 +88,9 @@ paths:
     post:
       tags:
         - 'organisation'
-      summary: 'Search for organisation by SBI.'
-      description: 'Search for organisation by SBI (Single Business Identifier).'
+      summary: 'Search for an organisation.'
+      description: >
+        Search for an organisation by SBI, business name, or business postcode.
       operationId: 'searchOrganisation'
       requestBody:
         required: true
@@ -115,7 +116,8 @@ paths:
                   - '_data'
                   - '_page'
         '400':
-          description: 'If searchFieldType is not "SBI"'
+          description: >
+            The `primarySearchPhrase` is shorter than the minimum length for the selected `searchFieldType`, or the `searchFieldType` is not recognised.
           content:
             application/json:
               schema:
@@ -172,6 +174,12 @@ paths:
                     <html><body><h1>403 Forbidden</h1>
                     Request forbidden by administrative rules.
                     </body></html>
+        '404':
+          description: 'organisation not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
         '500':
           description: 'organisationId must not be empty'
           content:
@@ -224,6 +232,12 @@ paths:
                     <html><body><h1>403 Forbidden</h1>
                     Request forbidden by administrative rules.
                     </body></html>
+        '404':
+          description: 'organisation not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
         '500':
           description: 'organisationId must not be empty'
           content:
@@ -235,34 +249,74 @@ components:
     # request objects
     SearchRequestBody:
       type: object
-      properties:
-        searchFieldType:
-          type: string
-          enum:
-            - 'SBI'
-        primarySearchPhrase:
-          oneOf:
-            - type: string
-              minLength: 9
-              # pattern: '^[0-9]{9,}$' # not just SBI upstream, other searches are also allowed
-            - type: integer
-              minimum: 100000000
-              description: 'If the SBI is a number it must have at least 9 digits.'
-              # This is because the upstream checks the character length of the number.
-              # Unfortunately the upstream accepts any `number`, but this is the closest we can
-              # replicate the type-space in this schema!
-              # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
-              # numbers, rationals, and exponents will be flagged as false negatives!!!
+      description: >
+        Search for an organisation by one of the options. The required length of `primarySearchPhrase` depends on the chosen `searchFieldType`:
+          - `SBI` - the full 9-digit SBI; returns 0 or 1 results.
+          - `BUSINESS_NAME` - partial business name, at least 2 characters; returns 0 or more results.
+          - `BUSINESS_POSTCODE` - full business postcode, at least 5 characters; returns 0 or more results.
+      oneOf:
+        - title: 'Search by SBI'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'SBI'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 9
+                - type: integer
+                  minimum: 100000000
+                  description: 'If the SBI is a number it must have at least 9 digits.'
+                  # This is because the upstream checks the character length of the number.
+                  # Unfortunately the upstream accepts any `number`, but this is the closest we can
+                  # replicate the type-space in this schema!
+                  # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
+                  # numbers, rationals, and exponents will be flagged as false negatives!!!
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by business name'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'BUSINESS_NAME'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 2
+                - type: integer
+                  minimum: 10
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by business postcode'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'BUSINESS_POSTCODE'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 5
+                - type: integer
+                  minimum: 10000
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
       examples:
-        - primarySearchPhrase: '1000000000'
-          searchFieldType: 'SBI'
-        - primarySearchPhrase: '1111111111'
-          searchFieldType: 'SBI'
-        - primarySearchPhrase: '2222222222'
-          searchFieldType: 'SBI'
-      required:
-        - 'searchFieldType'
-        - 'primarySearchPhrase'
+        - searchFieldType: 'SBI'
+          primarySearchPhrase: '1000000000'
+        - searchFieldType: 'SBI'
+          primarySearchPhrase: '1111111111'
+        - searchFieldType: 'SBI'
+          primarySearchPhrase: '2222222222'
+        - searchFieldType: 'BUSINESS_NAME'
+          primarySearchPhrase: 'Farm'
+        - searchFieldType: 'BUSINESS_POSTCODE'
+          primarySearchPhrase: 'AB12 3CD'
     LockRequestBody:
       type: object
       examples:
@@ -290,9 +344,7 @@ components:
                 - type: number
                 - type: boolean
                 - type: string
-                - type: object
                 - type: 'null'
-                - type: array
           required: ['partyNoteType', 'reason']
         - properties:
             partyNoteType:
@@ -310,9 +362,7 @@ components:
                 - type: number
                 - type: boolean
                 - type: string
-                - type: object
                 - type: 'null'
-                - type: array
           required: ['partyNoteType', 'note']
     UnlockRequestBody:
       type: object
@@ -341,9 +391,7 @@ components:
                 - type: number
                 - type: boolean
                 - type: string
-                - type: object
                 - type: 'null'
-                - type: array
           required: ['partyNoteType', 'reason']
         - properties:
             partyNoteType:
@@ -361,9 +409,7 @@ components:
                 - type: number
                 - type: boolean
                 - type: string
-                - type: object
                 - type: 'null'
-                - type: array
           required: ['partyNoteType', 'note']
 
     # response objects
@@ -519,11 +565,15 @@ components:
         taxRegistrationNumber:
           type: [string, 'null']
         businessType:
-          $ref: '#/components/schemas/TypeWithId'
+          oneOf:
+            - $ref: '#/components/schemas/TypeWithId'
+            - type: 'null'
         businessReference:
           type: string
         legalStatus:
-          $ref: '#/components/schemas/TypeWithId'
+          oneOf:
+            - $ref: '#/components/schemas/TypeWithId'
+            - type: 'null'
         dateStartedFarming:
           type: [string, 'null']
           format: 'date-time'

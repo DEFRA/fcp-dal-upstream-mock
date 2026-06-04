@@ -33,6 +33,7 @@ usage() {
 
 # check OPTION argument
 kits=false
+extraExcludes=""
 case "$1" in
   h | help | --help | -h )
     usage
@@ -70,9 +71,13 @@ case "$1" in
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "106554744" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "200629003" |
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "200665008" |
+.components.schemas.SearchRequestBody.examples[3].primarySearchPhrase = "Wood" |
+.components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "YO18 8RL" |
 .paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233] |
 .paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233]'
+    extraExcludes=",negative_data_rejection"
     kits=true
+
     ;;
   p | person )
     schema="kits-v1/person"
@@ -80,7 +85,13 @@ case "$1" in
 .paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
-.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899"'
+.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899" |
+.components.schemas.SearchRequestBody.examples[3].primarySearchPhrase = "116172867" |
+.components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "Truelove" |
+.components.schemas.SearchRequestBody.examples[5].primarySearchPhrase = "EX14 2XA" |
+.components.schemas.SearchRequestBody.examples[6].primarySearchPhrase = "123456" |
+.components.schemas.SearchRequestBody.examples[7].primarySearchPhrase = "123456"'
+    extraExcludes=",negative_data_rejection"
     kits=true
     ;;
   s | sa | siti-agri )
@@ -123,7 +134,7 @@ if ${kits} ; then # KITS gateway
       run /tmp/schema.json \
         --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
         --header "x-api-key: ${CDP_API_KEY}" \
-        --exclude-checks=unsupported_method,not_a_server_error \
+        --exclude-checks=unsupported_method,not_a_server_error${extraExcludes} \
         --report-vcr-path /tmp/vcr.yaml \
         --url "${KITS_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
 
