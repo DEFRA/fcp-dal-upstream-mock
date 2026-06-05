@@ -33,7 +33,6 @@ usage() {
 
 # check OPTION argument
 kits=false
-extraExcludes=""
 case "$1" in
   h | help | --help | -h )
     usage
@@ -75,9 +74,7 @@ case "$1" in
 .components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "YO18 8RL" |
 .paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233] |
 .paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233]'
-    extraExcludes=",negative_data_rejection"
     kits=true
-
     ;;
   p | person )
     schema="kits-v1/person"
@@ -91,7 +88,6 @@ case "$1" in
 .components.schemas.SearchRequestBody.examples[5].primarySearchPhrase = "EX14 2XA" |
 .components.schemas.SearchRequestBody.examples[6].primarySearchPhrase = "123456" |
 .components.schemas.SearchRequestBody.examples[7].primarySearchPhrase = "123456"'
-    extraExcludes=",negative_data_rejection"
     kits=true
     ;;
   s | sa | siti-agri )
@@ -128,13 +124,16 @@ if ${kits} ; then # KITS gateway
     usage
     exit 1
   fi
+  # NOTE: endpoint-specific check exclusions are configured in schemathesis.toml
   docker run --rm --network=host --pull always \
     -v ${baseDir}/tmp:/tmp \
+    -v ${baseDir}/schemathesis.toml:/tmp/schemathesis.toml:ro \
     schemathesis/schemathesis:stable \
+      --config-file /tmp/schemathesis.toml \
       run /tmp/schema.json \
         --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
         --header "x-api-key: ${CDP_API_KEY}" \
-        --exclude-checks=unsupported_method,not_a_server_error${extraExcludes} \
+        --exclude-checks=unsupported_method,not_a_server_error \
         --report-vcr-path /tmp/vcr.yaml \
         --url "${KITS_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
 
