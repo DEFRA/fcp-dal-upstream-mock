@@ -32,17 +32,10 @@ const createMessageMock = (orgId, personId, overrides = {}) => {
 }
 
 const generateMessagesPayload = (orgId, personId, overrides = null) => {
-  var notifications
-  if (!overrides) {
-    const messageCount = faker.number.int({ min: 0, max: 10 })
-    notifications = Array.from({ length: messageCount }, (_, i) =>
-      createMessageMock(orgId, personId)
-    )
-  } else {
-    notifications = Array.from(overrides, (messageOverrides) =>
-      createMessageMock(orgId, personId, messageOverrides)
-    )
-  }
+  const notifications = Array.from(
+    overrides ?? Array(faker.number.int({ min: 0, max: 10 })),
+    (messageOverrides) => createMessageMock(orgId, personId, messageOverrides)
+  )
 
   const readCount = notifications.filter((n) => n.readAt).length
 
@@ -78,16 +71,12 @@ export const retrieveMessages = (orgId, personId, page = 1) => {
 
   const { sbi, ...overrides } = orgIdLookup[orgId] ?? {}
 
-  var messagesPayload
-  if (overrides) {
-    const messageOverrides = overrides.customers[0].messages
-    if (messageOverrides) {
-      messagesPayload = generateMessagesPayload(orgId, personId, messageOverrides)
-    } else {
-      messagesPayload = generateMessagesPayload(orgId, personId)
-    }
-  }
-
+  let messagesPayload
+  messagesPayload = generateMessagesPayload(
+    orgId,
+    personId,
+    overrides.customers?.find((c) => personId === c?.personId).messages
+  )
   businessPersonMessages[`${orgId}-${personId}`] = messagesPayload
   return messagesPayload
 }

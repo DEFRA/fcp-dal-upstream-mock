@@ -481,7 +481,7 @@ Object.entries(orgIdLookup).forEach(([orgId, orgDetails]) => {
   orgIdToSbi[orgId] = sbi
   sbiToOrgId[sbi] = orgId
 
-// NOTE: we expect FRNs for Hitachi payments API, the "businessReference" from overrides
+  // NOTE: we expect FRNs for Hitachi payments API, the "businessReference" from overrides
   if (overrides?.businessReference === undefined) {
     safeSeed(orgId) // set consistent seed point for repeatable FRNs for businesses
     const frn = faker.string.numeric(10)
@@ -495,12 +495,19 @@ Object.entries(orgIdLookup).forEach(([orgId, orgDetails]) => {
     frnToOrgId[overrides.businessReference] = orgId
   }
 
-  orgIdToPersonIds[orgId] = customers.map((person) => person.personId)
-  customers.forEach((personElement) => {
-    if (!personIdToOrgIds[personElement.personId]) {
-      personIdToOrgIds[personElement.personId] = []
+  orgIdToPersonIds[orgId] = customers.map(({ personId }) => {
+    if (!personIdToOrgIds[personId]) {
+      personIdToOrgIds[personId] = []
     }
-    personIdToOrgIds[personElement.personId].push(Number(orgId))
+    personIdToOrgIds[personId].push(Number(orgId))
+    return personId
+  })
+
+  if (bankAccountStatus) {
+    bankAccountStatusByOrgId[orgId] = bankAccountStatus
+  }
+  bankLockedPersonIds?.forEach((personId) => {
+    bankLockedPairs.add(`${orgId}:${personId}`)
   })
 
   if (bankAccountStatus) {
