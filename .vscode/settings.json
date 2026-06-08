@@ -31,6 +31,7 @@
     "extapi",
     "healthcheck",
     "IDRAFT",
+    "legalstatus",
     "nationalarchives",
     "NINO",
     "nodemon",
