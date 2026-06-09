@@ -1,6 +1,6 @@
 import Hapi from '@hapi/hapi'
-import { authenticate } from '../../../../src/routes/kits-v1/authenticate-data.js'
-import { loadSchema } from '../../../../src/utils/validatePayload.js'
+import { authenticate } from '../../../../../src/routes/kits-v1/authenticate-data.js'
+import { loadSchema } from '../../../../../src/utils/validatePayload.js'
 
 describe('Fake Authenticate data', () => {
   let server, schema
