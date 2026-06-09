@@ -119,7 +119,8 @@ if ${GENERATE_CA} ; then
     run_command openssl x509 -req \
         -signkey ${CA_KEY} -passin pass:ca-password \
         -in ./mtls/ca.csr -out ${CA_CERT} \
-        -days ${TEST_ASSET_TTL}
+        -days ${TEST_ASSET_TTL} \
+        -extfile <(printf "basicConstraints=CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\nsubjectKeyIdentifier=hash")
 else
     echo "Skipping CA generation, using existing key/cert pair"
 fi
@@ -138,7 +139,8 @@ run_command openssl x509 -req \
     -in ./mtls/server.csr -out ./mtls/server.crt \
     -CA ${CA_CERT} -CAkey ${CA_KEY} -passin pass:ca-password \
     -CAcreateserial -CAserial ./mtls/ca.srl \
-    -days ${TEST_ASSET_TTL}
+    -days ${TEST_ASSET_TTL} \
+    -extfile <(printf "subjectAltName=DNS:${COMMON_NAME},DNS:localhost\nextendedKeyUsage=serverAuth")
 
 # setup client assets
 run_command openssl genpkey \
@@ -153,7 +155,8 @@ run_command openssl x509 -req \
     -in ./mtls/client.csr -out ./mtls/client.crt \
     -CA ${CA_CERT} -CAkey ${CA_KEY} -passin pass:ca-password \
     -CAserial ./mtls/ca.srl \
-    -days ${TEST_ASSET_TTL}
+    -days ${TEST_ASSET_TTL} \
+    -extfile <(printf "extendedKeyUsage=clientAuth")
 
 # tidy up - remove CSR files
 run_command rm ./mtls/*.csr
