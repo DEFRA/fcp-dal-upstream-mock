@@ -5,6 +5,7 @@ import { notifications } from '../routes/kits-v1/messages.js'
 import { organisation } from '../routes/kits-v1/organisation.js'
 import { person } from '../routes/kits-v1/person.js'
 import { sitiagri } from '../routes/kits-v1/siti-agri.js'
+import { referenceData } from '../routes/kits-v1/reference-data.js'
 
 const router = {
   plugin: {
@@ -17,7 +18,8 @@ const router = {
         ...sitiagri,
         ...notifications,
         ...land,
-        ...bank
+        ...bank,
+        ...referenceData
       ])
     }
   }
