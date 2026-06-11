@@ -335,7 +335,7 @@ components:
         - searchFieldType: 'VENDOR_NUMBER'
           primarySearchPhrase: '123456'
         - searchFieldType: 'TRADER_NUMBER'
-          primarySearchPhrase: '123456'
+          primarySearchPhrase: '654321'
     PersonalUpdateRequest:
       type: 'object'
       properties:

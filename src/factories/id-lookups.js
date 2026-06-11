@@ -118,6 +118,34 @@ export const staticPersonData = {
   9000000: { crn: '9000000000' },
   9000001: { crn: '9000000001' },
 
+  // dedicated person for every /person/search searchFieldType
+  9100000: {
+    crn: '9100000000',
+    firstName: 'Searchable',
+    lastName: 'Smith',
+    personalIdentifiers: ['116172867'],
+    address: {
+      address1: '1 Search Lane',
+      address2: null,
+      address3: null,
+      address4: null,
+      address5: null,
+      pafOrganisationName: null,
+      flatName: null,
+      buildingNumberRange: null,
+      buildingName: null,
+      street: null,
+      city: 'Searchton',
+      county: null,
+      postalCode: 'AB12 3CD',
+      country: 'England',
+      uprn: '910000000000',
+      dependentLocality: null,
+      doubleDependentLocality: null,
+      addressTypeId: null
+    }
+  },
+
   // from dev CRM
   5302028: { crn: '1103020285' },
   // from dev CRM, but do not exist on `upgrade`
@@ -296,6 +324,37 @@ export const orgIdLookup = {
   5560725: { sbi: 106284736, customers: [5302028, 9900000, 9900001, 9900002, 9900003] },
   5625145: { sbi: 107591843, customers: [5302028, 5692562] },
   5447505: { sbi: 121428499, customers: [5302028] },
+
+  // dedicated org for every /organisation/search searchFieldType
+  9100000: {
+    sbi: 910000000,
+    customers: [9100000],
+    overrides: {
+      name: 'Blue Barn Farm',
+      vendorNumber: '123456',
+      traderNumber: '654321',
+      address: {
+        address1: 'Blue Barn',
+        address2: null,
+        address3: null,
+        address4: null,
+        address5: null,
+        pafOrganisationName: 'Blue Barn Farm',
+        flatName: null,
+        buildingNumberRange: null,
+        buildingName: null,
+        street: null,
+        city: 'Searchton',
+        county: null,
+        postalCode: 'AB12 3CD',
+        country: 'England',
+        uprn: '910000000001',
+        dependentLocality: null,
+        doubleDependentLocality: null,
+        addressTypeId: null
+      }
+    }
+  },
 
   // for DAL mutation tests
   9000001: {

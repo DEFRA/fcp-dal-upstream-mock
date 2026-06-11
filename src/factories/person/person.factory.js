@@ -1,8 +1,15 @@
 import Boom from '@hapi/boom'
 import { personUpdateSchema } from '../../common/update-schemas.js'
-import { orgIdToSbi, personIdToOrgIds, staticPersonData } from '../../factories/id-lookups.js'
+import {
+  crnToPersonId,
+  orgIdLookup,
+  orgIdToPersonIds,
+  orgIdToSbi,
+  personIdToOrgIds,
+  staticPersonData
+} from '../../factories/id-lookups.js'
 import { applyUpdates } from '../../utils/applyUpdates.js'
-import { fakeAddress, fakeIds, faker, safeSeed } from '../common.js'
+import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const people = {}
@@ -86,6 +93,45 @@ export const retrievePersonOrgs = (personId) => {
   })
   return orgs
 }
+
+const allPeople = () => Object.keys(staticPersonData).map((personId) => retrievePerson(personId))
+
+// find all the people belonging to orgs matching the search function
+const peopleInOrgsWhere = (search) => {
+  const orgIds = Object.keys(orgIdLookup).filter((orgId) => search(retrieveOrganisation(orgId)))
+  // only persons that exsist
+  const personIds = new Set(orgIds.flatMap((orgId) => orgIdToPersonIds[orgId] ?? []))
+  return [...personIds]
+    .filter((personId) => personId in staticPersonData)
+    .map((personId) => retrievePerson(personId))
+}
+
+const personMatchers = {
+  CUSTOMER_REFERENCE: (crn) => (crnToPersonId[crn] ? [retrievePerson(crnToPersonId[crn])] : []),
+  PERSONAL_IDENTIFIER: (identifier) =>
+    allPeople()
+      .filter((person) => person.personalIdentifiers?.includes(identifier))
+      .slice(0, 1),
+  CUSTOMER_NAME: (name) =>
+    allPeople().filter((person) =>
+      [person.firstName, person.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(name.toLowerCase())
+    ),
+  CUSTOMER_POSTCODE: (postcode) =>
+    allPeople().filter(
+      (person) =>
+        person.address?.postalCode &&
+        normalisePostcode(person.address.postalCode) === normalisePostcode(postcode)
+    ),
+  VENDOR_NUMBER: (phrase) => peopleInOrgsWhere((org) => org.vendorNumber?.startsWith(phrase)),
+  TRADER_NUMBER: (phrase) => peopleInOrgsWhere((org) => org.traderNumber?.startsWith(phrase))
+}
+
+export const searchPeople = (searchFieldType, searchPhrase) =>
+  personMatchers[searchFieldType](searchPhrase)
 
 export const updatePerson = (personId, updatesToPerson) => {
   const person = retrievePerson(personId)
