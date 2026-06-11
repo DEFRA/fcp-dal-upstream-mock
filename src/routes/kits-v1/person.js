@@ -1,6 +1,6 @@
 import Boom from '@hapi/boom'
 import { config } from '../../config.js'
-import { paginationFor } from '../../factories/common.js'
+import { paginate } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
   retrievePerson,
@@ -84,12 +84,14 @@ export const person = [
     path: '/person/search',
     handler: async (request, h) => {
       const { searchFieldType, searchPhrase } = checkSearchPhrase(request, searchFieldTypes)
+      const { offset, limit } = request.payload
 
       const matches = searchPeople(searchFieldType, searchPhrase)
+      const { data, page } = paginate(matches, offset, limit)
 
       return h.response({
-        _data: matches.map(mapPersonToSearchResult),
-        _page: paginationFor(matches.length)
+        _data: data.map(mapPersonToSearchResult),
+        _page: page
       })
     }
   },

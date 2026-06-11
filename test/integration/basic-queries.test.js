@@ -735,6 +735,40 @@ describe('Basic queries for faked routes', () => {
         expect(response.statusCode).toBe(400)
       })
     })
+
+    describe('pagination', () => {
+      const pagedSearch = (url, searchFieldType, primarySearchPhrase, offset, limit) =>
+        mockServer.inject({
+          method: 'POST',
+          url,
+          payload: { searchFieldType, primarySearchPhrase, offset, limit }
+        })
+
+      test.each([
+        ['/extapi/organisation/search', 'BUSINESS_NAME', 'and'],
+        ['/extapi/person/search', 'CUSTOMER_NAME', 'a']
+      ])('slices %s by offset and limit', async (url, searchFieldType, primarySearchPhrase) => {
+        const all = JSON.parse(
+          (await pagedSearch(url, searchFieldType, primarySearchPhrase, 0, 1000)).payload
+        )._data
+        expect(all.length).toBeGreaterThan(2)
+
+        const offset = 2
+        const limit = 2
+        const response = await pagedSearch(url, searchFieldType, primarySearchPhrase, offset, limit)
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+
+        expect(json._data).toEqual(all.slice(offset, offset + limit))
+        expect(json._page).toEqual({
+          number: 1,
+          size: limit,
+          totalPages: Math.ceil(all.length / limit),
+          numberOfElements: json._data.length,
+          totalElements: all.length
+        })
+      })
+    })
   })
 
   describe('Notifications routes', () => {

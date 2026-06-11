@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { paginationFor } from '../../factories/common.js'
+import { paginate } from '../../factories/common.js'
 import {
   createOrganisation,
   lockOrganisation,
@@ -92,12 +92,14 @@ export const organisation = [
     path: '/organisation/search',
     handler: async (request, h) => {
       const { searchFieldType, searchPhrase } = checkSearchPhrase(request, searchFieldTypes)
+      const { offset, limit } = request.payload
 
       const matches = searchOrganisations(searchFieldType, searchPhrase)
+      const { data, page } = paginate(matches, offset, limit)
 
       return h.response({
-        _data: matches.map(mapOrgToSearchResult),
-        _page: paginationFor(matches.length)
+        _data: data.map(mapOrgToSearchResult),
+        _page: page
       })
     }
   },
