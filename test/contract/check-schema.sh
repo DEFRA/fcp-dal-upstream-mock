@@ -13,13 +13,14 @@ usage() {
   echo "Run schemathesis contract tests against the upstream KITS."
   echo "All tests are run against the 'upgrade' API env."
   echo
-  echo "Usage: $0 {a|auth|authenticate|b|bank|o|org|organisation|p|person|s|sa|siti-agri|help}"
+  echo "Usage: $0 {a|auth|authenticate|b|bank|o|org|organisation|p|person|r|rd|reference-data|s|sa|siti-agri|help}"
   echo
   echo "Where the argument specifies which schema to test:"
   echo "  a  | auth | authenticate - test the Authenticate schema"
   echo "  b  | bank                - test the Bank Change Service schema"
   echo "  o  | org | organisation  - test the Organisation schema"
   echo "  p  | person              - test the Person schema"
+  echo "  r  | rd | reference-data - test the Reference Data schema"
   echo "  pd | payments            - test the Payment Details schema"
   echo "  s  | sa | siti-agri      - test the Siti-Agri schema"
   echo "  h  | help                - show this help message"
@@ -83,6 +84,11 @@ case "$1" in
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899"'
     kits=true
     ;;
+  r | rd | reference-data )
+    schema="kits-v1/reference-data"
+    mutations='.'
+    kits=true
+    ;;
   s | sa | siti-agri )
     schema="kits-v1/siti-agri"
     mutations='. |
@@ -107,7 +113,7 @@ case "$1" in
 esac
 
 # mutate target schema - NOTE: the use of `tee` is intentional!!
-yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
+yq eval -o=json -- "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 # run schemathesis tests

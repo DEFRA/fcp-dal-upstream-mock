@@ -34,7 +34,6 @@ export const organisation = [
     path: '/organisation/{organisationId}',
     handler: async (request, h) => {
       const organisationId = checkId(request, 'organisationId')
-      console.log('OrgId is: ' + organisationId)
 
       // Special cases to return specific status codes
       if (organisationId == 3000000500) {

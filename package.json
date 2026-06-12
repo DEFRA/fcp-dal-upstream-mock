@@ -54,6 +54,10 @@
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3"
   },
+  "overrides": {
+    "baseline-browser-mapping": "^2.10.33",
+    "joi": "^18.2.1"
+  },
   "eslintConfig": {
     "extends": [
       "eslint-plugin-import",
