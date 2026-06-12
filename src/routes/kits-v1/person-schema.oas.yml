@@ -55,8 +55,9 @@ paths:
     post:
       tags:
         - 'person'
-      summary: 'Search for a person by CRN'
-      description: 'Search for a person using their CRN (Customer Reference Number).'
+      summary: 'Search for a person'
+      description: >
+        Search for a person by CRN, personal identifier, customer name, customer postcode, vendor number, or trader number.
       operationId: 'searchPerson'
       requestBody:
         required: true
@@ -83,7 +84,8 @@ paths:
                   - '_page'
                 additionalProperties: false
         '400':
-          description: 'breached search string length'
+          description: >
+            The `primarySearchPhrase` is shorter than the minimum length for the selected `searchFieldType`, or the `searchFieldType` is not recognised.
           $ref: '#/components/responses/BadRequest'
         '500':
           description: 'Internal server error, or only `searchFieldType` was provided.'
@@ -154,6 +156,19 @@ paths:
         '400':
           description: 'Invalid JSON, or valid JSON that does not match the body schema'
           $ref: '#/components/responses/BadRequest'
+        '500':
+          description: 'Internal server error (e.g. the upstream fails to process the request).'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: 'There was an error processing your request.'
 
 components:
   responses:
@@ -210,103 +225,226 @@ components:
     # request objects
     SearchRequestBody:
       type: object
-      properties:
-        searchFieldType:
-          type: string
-          enum:
-            - 'CUSTOMER_REFERENCE'
-        primarySearchPhrase:
-          oneOf:
-            - type: string
-              minLength: 10
-              # pattern: '^[0-9]{10,}$' # not just CRN upstream, other searches are also allowed
-            - type: integer
-              format: int64
-              minimum: 1000000000
-              description: 'If the CRN is a number it must have at least 10 digits.'
-              # This is because the upstream checks the character length of the number.
-              # Unfortunately the upstream accepts any `number`, but this is the closest we can
-              # replicate the type-space in this schema!
-              # PAY ATTENTION when acceptance testing this schema against the upstream, as negative
-              # numbers, rationals, and exponents will be flagged as false negatives!!!
+      description: >
+        Search for a person by one of the options. The required length of `primarySearchPhrase` depends on the chosen `searchFieldType`:
+          - `CUSTOMER_REFERENCE` - the full 10-digit CRN; returns 0 or 1 results.
+          - `PERSONAL_IDENTIFIER` - the full personal identifier, at least 9 characters; returns 0 or 1 results.
+          - `CUSTOMER_NAME` - partial first and/or last name (non-empty); returns 0 or more results.
+          - `CUSTOMER_POSTCODE` - full customer postcode, at least 5 characters; returns 0 or more results.
+          - `VENDOR_NUMBER` - at least the first 6 characters of the vendor number; returns 0 or more results.
+          - `TRADER_NUMBER` - at least the first 6 characters of the trader number; returns 0 or more results.
+      oneOf:
+        - title: 'Search by CRN'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'CUSTOMER_REFERENCE'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 10
+                - type: integer
+                  format: int64
+                  minimum: 1000000000
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by personal identifier'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'PERSONAL_IDENTIFIER'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 9
+                - type: integer
+                  format: int64
+                  minimum: 100000000
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by customer name'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'CUSTOMER_NAME'
+            primarySearchPhrase:
+              type: [string, number, boolean]
+              minLength: 1
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by customer postcode'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'CUSTOMER_POSTCODE'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 5
+                - type: integer
+                  minimum: 10000
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by vendor number'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'VENDOR_NUMBER'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 6
+                - type: integer
+                  minimum: 100000
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
+        - title: 'Search by trader number'
+          properties:
+            searchFieldType:
+              type: string
+              enum:
+                - 'TRADER_NUMBER'
+            primarySearchPhrase:
+              oneOf:
+                - type: string
+                  minLength: 6
+                - type: integer
+                  minimum: 100000
+          required:
+            - 'searchFieldType'
+            - 'primarySearchPhrase'
       examples:
-        - primarySearchPhrase: '1111111100'
-          searchFieldType: 'CUSTOMER_REFERENCE'
-        - primarySearchPhrase: '1111112200'
-          searchFieldType: 'CUSTOMER_REFERENCE'
-        - primarySearchPhrase: '2222222200'
-          searchFieldType: 'CUSTOMER_REFERENCE'
-      required:
-        - 'searchFieldType'
-        - 'primarySearchPhrase'
+        - searchFieldType: 'CUSTOMER_REFERENCE'
+          primarySearchPhrase: '1111111100'
+        - searchFieldType: 'PERSONAL_IDENTIFIER'
+          primarySearchPhrase: '116172867'
+        - searchFieldType: 'CUSTOMER_NAME'
+          primarySearchPhrase: 'Smith'
+        - searchFieldType: 'CUSTOMER_POSTCODE'
+          primarySearchPhrase: 'AB12 3CD'
+        - searchFieldType: 'VENDOR_NUMBER'
+          primarySearchPhrase: '123456'
+        - searchFieldType: 'TRADER_NUMBER'
+          primarySearchPhrase: '654321'
     PersonalUpdateRequest:
       type: 'object'
       properties:
         title:
-          type: [string, number, boolean, 'null']
+          oneOf:
+            - type: string
+              maxLength: 20
+            - type: integer
+              format: int64
+              minimum: -9007199254740991
+              maximum: 9007199254740991
+            - type: boolean
+            - type: 'null'
           description: 'Title of the person (e.g., Mr, Mrs)'
         otherTitle:
-          type: [string, number, boolean, 'null']
+          oneOf:
+            - type: string
+              maxLength: 100
+            - type: number
+            - type: boolean
+            - type: 'null'
           description: 'Alternative or additional title'
         firstName:
-          type: [string, number, boolean]
+          oneOf:
+            - type: string
+              minLength: 1
+              maxLength: 100
+            - type: number
+            - type: boolean
           description: 'First name of the person'
         middleName:
-          type: [string, number, boolean, 'null']
+          oneOf:
+            - type: string
+              maxLength: 100
+            - type: number
+            - type: boolean
+            - type: 'null'
           description: 'Middle name of the person'
         lastName:
-          type: [string, number, boolean]
+          oneOf:
+            - type: string
+              minLength: 1
+              maxLength: 100
+            - type: number
+            - type: boolean
           description: 'Last name of the person'
         dateOfBirth:
           description: 'Date of birth as a Unix timestamp'
           oneOf:
             - type: integer
               format: int64
+              minimum: -999999999999999
+              maximum: 999999999999
             - type: string
               pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
             - type: 'null'
         landline:
-          type: [object, array, string, 'null']
+          oneOf:
+            - type: string
+              pattern: '^((\+| *)([0-9] *){5,})?$'
+            - type: 'null'
           description: 'Landline phone number'
         mobile:
-          type: [object, array, string, 'null']
+          oneOf:
+            - type: string
+              pattern: '^((\+| *)([0-9] *){5,})?$'
+            - type: 'null'
           description: 'Mobile phone number'
         email:
-          type: [object, array, string, 'null']
+          oneOf:
+            - type: string
+              pattern: '^([A-Za-z0-9+_-]+(\.[A-Za-z0-9+_-]+)*@([A-Za-z]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,})?$'
+            - type: 'null'
           description: 'Email address'
         address:
-          type: [object, 'null']
-          properties:
-            address1:
-              type: [object, array, string, number, boolean, 'null']
-            address2:
-              type: [object, array, string, number, boolean, 'null']
-            address3:
-              type: [object, array, string, number, boolean, 'null']
-            address4:
-              type: [object, array, string, number, boolean, 'null']
-            address5:
-              type: [object, array, string, number, boolean, 'null']
-            pafOrganisationName:
-              type: [object, array, string, number, boolean, 'null']
-            flatName:
-              type: [object, array, string, number, boolean, 'null']
-            buildingNumberRange:
-              type: [object, array, string, number, boolean, 'null']
-            buildingName:
-              type: [object, array, string, number, boolean, 'null']
-            street:
-              type: [object, array, string, number, boolean, 'null']
-            city:
-              type: [object, array, string, number, boolean, 'null']
-            county:
-              type: [object, array, string, number, boolean, 'null']
-            postalCode:
-              type: [object, array, string, number, boolean, 'null']
-            country:
-              type: [object, array, string, number, boolean, 'null']
-            uprn:
-              type: [object, array, string, number, boolean, 'null']
+          oneOf:
+            - type: object
+              properties:
+                address1:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                address2:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                address3:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                address4:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                address5:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                pafOrganisationName:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                flatName:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                buildingNumberRange:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                buildingName:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                street:
+                  oneOf: [{ type: string, maxLength: 240 }, { type: 'null' }]
+                city:
+                  oneOf: [{ type: string, maxLength: 60 }, { type: 'null' }]
+                county:
+                  oneOf: [{ type: string, maxLength: 60 }, { type: 'null' }]
+                postalCode:
+                  oneOf: [{ type: string, maxLength: 8 }, { type: 'null' }]
+                country:
+                  oneOf: [{ type: string, maxLength: 100 }, { type: 'null' }]
+                uprn:
+                  oneOf: [{ type: string, maxLength: 12 }, { type: 'null' }]
+            - type: 'null'
       required:
         - firstName
         - lastName
@@ -321,7 +459,9 @@ components:
         fullName:
           type: string
         primaryAddress:
-          $ref: '#/components/schemas/Address'
+          oneOf:
+            - $ref: '#/components/schemas/Address'
+            - type: 'null'
         personalIdentifiers:
           type: array
           items:
@@ -451,7 +591,9 @@ components:
         emailValidated:
           type: boolean
         address:
-          $ref: '#/components/schemas/Address'
+          oneOf:
+            - $ref: '#/components/schemas/Address'
+            - type: 'null'
         locked:
           type: boolean
         id:
