@@ -345,8 +345,8 @@ components:
               maxLength: 20
             - type: integer
               format: int64
-              minimum: -9223372036854775808
-              maximum: 9223372036854775807
+              minimum: -9007199254740991
+              maximum: 9007199254740991
             - type: boolean
             - type: 'null'
           description: 'Title of the person (e.g., Mr, Mrs)'
@@ -355,8 +355,6 @@ components:
             - type: string
               maxLength: 100
             - type: number
-              minimum: -1e+50
-              maximum: 1e+50
             - type: boolean
             - type: 'null'
           description: 'Alternative or additional title'
@@ -366,8 +364,6 @@ components:
               minLength: 1
               maxLength: 100
             - type: number
-              minimum: -1e+50
-              maximum: 1e+50
             - type: boolean
           description: 'First name of the person'
         middleName:
@@ -375,8 +371,6 @@ components:
             - type: string
               maxLength: 100
             - type: number
-              minimum: -1e+50
-              maximum: 1e+50
             - type: boolean
             - type: 'null'
           description: 'Middle name of the person'
@@ -386,8 +380,6 @@ components:
               minLength: 1
               maxLength: 100
             - type: number
-              minimum: -1e+50
-              maximum: 1e+50
             - type: boolean
           description: 'Last name of the person'
         dateOfBirth:
@@ -404,14 +396,12 @@ components:
           oneOf:
             - type: string
               pattern: '^((\+| *)([0-9] *){5,})?$'
-              maxLength: 50
             - type: 'null'
           description: 'Landline phone number'
         mobile:
           oneOf:
             - type: string
               pattern: '^((\+| *)([0-9] *){5,})?$'
-              maxLength: 50
             - type: 'null'
           description: 'Mobile phone number'
         email:
