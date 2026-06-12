@@ -15,9 +15,9 @@ const validateUpdatePersonPayload = await createPayloadValidator(
 )
 
 const checkPersonId = (request) => {
-  const personId = parseInt(request.params.personId, 10)
+  const personId = Number.parseInt(request.params.personId, 10)
 
-  if (isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+  if (Number.isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
     throw Boom.forbidden(
       `bad personId: ${personId}, is not an integer in the acceptable range`,
       request

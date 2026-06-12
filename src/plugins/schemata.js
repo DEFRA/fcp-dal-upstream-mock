@@ -37,19 +37,27 @@ export const schemata = {
             file: path.join(__dirname, '../routes/kits-v1/siti-agri-schema.oas.yml')
           }
         },
+        {
+          method: 'GET',
+          path: '/schemata/bank.yml',
+          handler: {
+            file: path.join(__dirname, '../routes/kits-v1/bank-schema.oas.yml')
+          }
+        },
+        {
+          method: 'GET',
+          path: '/schemata/reference-data.yml',
+          handler: {
+            file: path.join(__dirname, '../routes/kits-v1/reference-data-schema.oas.yml')
+          }
+        },
+
         // Hitachi schemata
         {
           method: 'GET',
           path: '/schemata/payments.yml',
           handler: {
             file: path.join(__dirname, '../routes/hitachi/payments-schema.oas.yml')
-          }
-        },
-        {
-          method: 'GET',
-          path: '/schemata/bank.yml',
-          handler: {
-            file: path.join(__dirname, '../routes/kits-v1/bank-schema.oas.yml')
           }
         }
       ])

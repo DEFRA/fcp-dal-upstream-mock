@@ -1,5 +1,5 @@
-import { jest, expect, describe, beforeAll, afterAll, beforeEach, test } from '@jest/globals'
 import Hapi from '@hapi/hapi'
+import { afterAll, beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 
 const mockFetch = jest.fn()
 
@@ -17,7 +17,7 @@ jest.unstable_mockModule('node:tls', () => ({
 const INTERNAL_URL = 'http://internal-gateway.test'
 const EXTERNAL_URL = 'http://external-gateway.test'
 
-jest.unstable_mockModule('../../../../src/common/helpers/logging/logger.js', () => ({
+jest.unstable_mockModule('../../../../../src/common/helpers/logging/logger.js', () => ({
   createLogger: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() })
 }))
 
@@ -26,7 +26,7 @@ let mockMTLSConfig = {
   external: { cert: 'external-cert', key: 'external-key' }
 }
 
-jest.unstable_mockModule('../../../../src/config.js', () => ({
+jest.unstable_mockModule('../../../../../src/config.js', () => ({
   config: {
     get: (key) =>
       ({
@@ -58,7 +58,7 @@ describe('KITS Proxy router', () => {
   let server
 
   beforeAll(async () => {
-    const { router } = await import('../../../../src/routes/proxy/kits-proxy.router.js')
+    const { router } = await import('../../../../../src/routes/proxy/kits-proxy.router.js')
     server = Hapi.server()
     await server.register(router)
     await server.initialize()
@@ -266,7 +266,7 @@ describe('KITS Proxy router', () => {
     let router
 
     beforeAll(async () => {
-      ;({ router } = await import('../../../../src/routes/proxy/kits-proxy.router.js'))
+      ;({ router } = await import('../../../../../src/routes/proxy/kits-proxy.router.js'))
     })
 
     beforeEach(() => {

@@ -1,6 +1,6 @@
 import Hapi from '@hapi/hapi'
-import { sitiagri } from '../../../src/routes/kits-v1/siti-agri.js'
-import { loadSchema } from '../../../src/utils/validatePayload.js'
+import { sitiagri } from '../../../../../src/routes/kits-v1/siti-agri.js'
+import { loadSchema } from '../../../../../src/utils/validatePayload.js'
 
 describe('Fake Authenticate data', () => {
   let server, schema

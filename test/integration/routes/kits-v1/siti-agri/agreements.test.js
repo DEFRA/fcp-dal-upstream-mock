@@ -1,7 +1,7 @@
 import Hapi from '@hapi/hapi'
-import { retrieveOrganisationAgreements } from '../../../src/factories/siti-agri/agreement.factory.js'
-import { sitiagri } from '../../../src/routes/kits-v1/siti-agri.js'
-import { loadSchema } from '../../../src/utils/validatePayload.js'
+import { retrieveOrganisationAgreements } from '../../../../../src/factories/siti-agri/agreement.factory.js'
+import { sitiagri } from '../../../../../src/routes/kits-v1/siti-agri.js'
+import { loadSchema } from '../../../../../src/utils/validatePayload.js'
 
 describe('Basic queries for faked routes', () => {
   let server, schema

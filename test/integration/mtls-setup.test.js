@@ -70,7 +70,7 @@ describe('mTLS setup', () => {
   })
 
   it('should reject connections without client certificate', async () => {
-    await expect(makeRequest(options)).rejects.toThrow('alert certificate required')
+    await expect(makeRequest(options)).rejects.toThrow(/certificate required/)
   })
 
   it('should accept connections with valid client certificate', async () => {
