@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 
 # setup
@@ -12,21 +13,21 @@ usage() {
   echo "Run schemathesis contract tests against the upstream KITS."
   echo "All tests are run against the 'upgrade' API env."
   echo
-  echo "Usage: $0 {a|auth|authenticate|o|org|organisation|p|person|s|sa|siti-agri|help}"
+  echo "Usage: $0 {a|auth|authenticate|b|bank|o|org|organisation|p|person|r|rd|reference-data|s|sa|siti-agri|help}"
   echo
   echo "Where the argument specifies which schema to test:"
   echo "  a  | auth | authenticate - test the Authenticate schema"
+  echo "  b  | bank                - test the Bank Change Service schema"
   echo "  o  | org | organisation  - test the Organisation schema"
   echo "  p  | person              - test the Person schema"
+  echo "  r  | rd | reference-data - test the Reference Data schema"
   echo "  pd | payments            - test the Payment Details schema"
   echo "  s  | sa | siti-agri      - test the Siti-Agri schema"
   echo "  h  | help                - show this help message"
   echo
   echo "NOTE: additionally the following environment variables must be set:"
-  echo "  KITS_KEY  - KITS client key file (path relative to project root)"
-  echo "  KITS_CERT - KITS client certificate file (path relative to project root)"
-  echo "  CDP_PROXY - the URL of the CDP HTTPS proxy to use"
-  echo "  KITS_URL  - the URL of the KITS API to use"
+  echo "  CDP_API_KEY - CDP Platform developer API key "
+  echo "  KITS_URL  - the URL of the KITS API to use (this should be the DAL Mock proxy endpoint, via the ephemeral endpoint)"
   echo "or..."
   echo "  HITACHI_CLIENT_SECRET - the client secret for token generation"
 }
@@ -39,6 +40,24 @@ case "$1" in
     exit 0
     ;;
   # KITS APIs
+  b | bank )
+    schema="kits-v1/bank"
+    mutations='. |
+.components.schemas.SubmissionRequest.examples[0].organisationId = "5583781" |
+.components.schemas.SubmissionRequest.examples[0].personId = "5020949" |
+.components.schemas.SubmissionRequest.examples[0].sbi = "110405990" |
+.components.schemas.SubmissionRequest.examples[0].frn = "10014489653" |
+.components.schemas.SubmissionRequest.examples[0].crn = "1100209492" |
+.components.schemas.SubmissionRequest.properties.organisationId.enum = ["5583781"] |
+.components.schemas.SubmissionRequest.properties.personId.enum = ["5020949"] |
+.components.schemas.ValidateRequest.examples[0].sbi = "110405990" |
+.components.schemas.ValidateRequest.examples[0].frn = "10014489653" |
+.components.schemas.ValidateRequest.examples[0].crn = "1100209492" |
+.paths["/bank-change-service/v1/locked-status/{organisationId}/{personId}"].get.parameters[0].schema.examples = ["5583781"] |
+.paths["/bank-change-service/v1/locked-status/{organisationId}/{personId}"].get.parameters[1].schema.examples = ["5020949"] |
+.paths["/bank-change-service/v1/account-status/{organisationId}"].get.parameters[0].schema.examples = ["5583781"]'
+    kits=true
+    ;;
   a | auth | authenticate )
     schema="kits-v1/authenticate"
     mutations='. |
@@ -65,6 +84,11 @@ case "$1" in
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899"'
     kits=true
     ;;
+  r | rd | reference-data )
+    schema="kits-v1/reference-data"
+    mutations='.'
+    kits=true
+    ;;
   s | sa | siti-agri )
     schema="kits-v1/siti-agri"
     mutations='. |
@@ -89,49 +113,25 @@ case "$1" in
 esac
 
 # mutate target schema - NOTE: the use of `tee` is intentional!!
-yq eval -o=json "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
+yq eval -o=json -- "${mutations}" ${rootDir}/src/routes/${schema}-schema.oas.yml \
   | tee ./tmp/schema.json > /dev/null
 
 # run schemathesis tests
 if ${kits} ; then # KITS gateway
-  echo "ERROR: Temporarily failing KITS test runs as not possible until the following"
-  echo "work has been completed:"
-  echo "  - mock backdoor to KITS https://eaflood.atlassian.net/browse/FCPDAL-253"
-  exit 1
-
-  # resolve KITS_KEY
-  if [ -f "${KITS_KEY}" ]; then
-    KITS_KEY="$(cd "$(dirname "${KITS_KEY}")" && pwd)/$(basename "${KITS_KEY}")"
-  elif [ -f "${rootDir}/${KITS_KEY}" ]; then
-    KITS_KEY="${rootDir}/${KITS_KEY}"
-  else
-    echo "KITS_KEY file not found: ${KITS_KEY} or ${rootDir}/${KITS_KEY}"
+  if [ -z "${CDP_API_KEY}" ]; then
+    echo "ERROR: CDP_API_KEY environment variable is not set" 1>&2
     usage
     exit 1
   fi
-  # resolve KITS_CERT
-  if [ -f "${KITS_CERT}" ]; then
-    KITS_CERT="$(cd "$(dirname "${KITS_CERT}")" && pwd)/$(basename "${KITS_CERT}")"
-  elif [ -f "${rootDir}/${KITS_CERT}" ]; then
-    KITS_CERT="${rootDir}/${KITS_CERT}"
-  else
-    echo "KITS_CERT file not found: ${KITS_CERT} or ${rootDir}/${KITS_CERT}"
-    usage
-    exit 1
-  fi
-
   docker run --rm --network=host --pull always \
     -v ${baseDir}/tmp:/tmp \
-    -v ${KITS_KEY}:/kits.key \
-    -v ${KITS_CERT}:/kits.crt \
     schemathesis/schemathesis:stable \
       run /tmp/schema.json \
         --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
+        --header "x-api-key: ${CDP_API_KEY}" \
         --exclude-checks=unsupported_method,not_a_server_error \
-        --request-cert /kits.crt \
-        --request-cert-key /kits.key \
         --report-vcr-path /tmp/vcr.yaml \
-        --url "${KITS_URL:-https://chs-upgrade-api.ruraldev.org.uk:8446/extapi}"
+        --url "${KITS_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
 
 else # hitachi
   if [ -z "${HITACHI_CLIENT_SECRET}" ]; then
@@ -148,7 +148,7 @@ else # hitachi
     --data "client_secret=${HITACHI_CLIENT_SECRET}" \
     --data resource=https://orgcf202fa2.operations.eu.dynamics.com \
     | jq -r '.access_token' )
-  
+
   # check the token looks good
   if [ "${HITACHI_TOKEN}" = "null" ]; then
     echo "ERROR: HITACHI_TOKEN was not generated correctly, check the secret is correct" 1>&2

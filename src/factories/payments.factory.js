@@ -21,7 +21,7 @@ export const createPayment = ({ parmLineItems, ...overrides } = {}) => {
   )
 
   return {
-    parmPaymentReference: faker.string.alphanumeric({ length: { max: 18 }, casing: 'upper' }),
+    parmPaymentReference: `PY${faker.string.numeric({ length: 7, allowLeadingZeros: true })}`,
     parmDate: faker.date.past({ years: 5 }).toISOString().substring(0, 19),
     parmAmount: parmLineItems.reduce((sum, item) => addMoney(sum, item.parmAmount), 0),
     parmCurrency: 'GBP',

@@ -12,10 +12,11 @@ ENV PORT=${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node .npmrc ./
 RUN npm install
 COPY --chown=node:node src ./src
 
-CMD [ "nodemon", "--ext", "js,json", "--legacy-watch", "./src" ]
+CMD [ "./node_modules/.bin/nodemon", "--ext", "js,json", "--legacy-watch", "./src" ]
 
 FROM defradigital/node:${PARENT_VERSION} AS production
 ARG PARENT_VERSION
@@ -28,6 +29,8 @@ RUN apk add --no-cache curl
 USER node
 
 COPY package*.json ./
+COPY .npmrc ./
+
 RUN npm ci --omit=dev
 
 COPY src ./src

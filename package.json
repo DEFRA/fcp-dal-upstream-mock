@@ -9,8 +9,9 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development nodemon --ext js,json -w ./src",
+    "dev-with-locally-proxied-kits": "NODE_ENV=development dotenv -e .env.mtls -- nodemon --ext js,json -w ./src",
     "git:pre-commit-hook": "npm run lint",
-    "postinstall": "npm run setup:husky",
+    "postinstall": "./scripts/post-install.sh",
     "lint": "eslint . && prettier --check . && npm run verify:schemata",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
@@ -38,7 +39,8 @@
     "hapi-pino": "^13.0.0",
     "hapi-pulse": "^3.0.1",
     "pino": "^10.0.0",
-    "pino-pretty": "^13.0.0"
+    "pino-pretty": "^13.0.0",
+    "undici": "^7.18.2"
   },
   "devDependencies": {
     "@redocly/cli": "^2.11.1",
@@ -51,6 +53,10 @@
     "jest": "^29.7.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3"
+  },
+  "overrides": {
+    "baseline-browser-mapping": "^2.10.33",
+    "joi": "^18.2.1"
   },
   "eslintConfig": {
     "extends": [

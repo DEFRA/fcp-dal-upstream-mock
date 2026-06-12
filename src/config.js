@@ -74,6 +74,80 @@ const config = convict({
     default: 3337243,
     env: 'KIT_EXT_PERSON_ID_OVERRIDE'
   },
+  // All KITS properties are optional, as KITS proxy is only accessible from a deployed environment
+  kitsProxy: {
+    internal: {
+      connectionCert: {
+        doc: 'Base64 encoded mTLS certificate for the KITS internal gateway connection',
+        format: String,
+        default: null,
+        sensitive: true,
+        nullable: true,
+        env: 'KITS_INTERNAL_CONNECTION_CERT'
+      },
+      connectionKey: {
+        doc: 'Base64 encoded mTLS key for the KITS internal gateway connection',
+        format: String,
+        default: null,
+        sensitive: true,
+        nullable: true,
+        env: 'KITS_INTERNAL_CONNECTION_KEY'
+      },
+      gatewayUrl: {
+        doc: 'KITS gateway internal URL',
+        format: String,
+        default: null,
+        nullable: true,
+        env: 'KITS_INTERNAL_GATEWAY_URL'
+      }
+    },
+    external: {
+      connectionCert: {
+        doc: 'Base64 encoded mTLS certificate for the KITS external gateway connection',
+        format: String,
+        default: null,
+        sensitive: true,
+        nullable: true,
+        env: 'KITS_EXTERNAL_CONNECTION_CERT'
+      },
+      connectionKey: {
+        doc: 'Base64 encoded mTLS key for the KITS external gateway connection',
+        format: String,
+        default: null,
+        sensitive: true,
+        nullable: true,
+        env: 'KITS_EXTERNAL_CONNECTION_KEY'
+      },
+      gatewayUrl: {
+        doc: 'KITS gateway external URL',
+        format: String,
+        default: null,
+        nullable: true,
+        env: 'KITS_EXTERNAL_GATEWAY_URL'
+      }
+    },
+    enabled: {
+      doc: 'Should the KITS proxy be enabled',
+      format: Boolean,
+      nullable: true,
+      default: !!process.env.KITS_INTERNAL_CONNECTION_CERT,
+      env: 'KITS_PROXY_ENABLED'
+    },
+    caCert: {
+      doc: 'Base64 encoded CA certificate for KITS mTLS connection',
+      format: String,
+      default: null,
+      sensitive: true,
+      nullable: true,
+      env: 'KITS_CA_CERT'
+    },
+    gatewayTimeoutMs: {
+      doc: 'KITS gateway timeout in milliseconds',
+      format: 'int',
+      default: 30000,
+      env: 'KITS_GATEWAY_TIMEOUT_MS'
+    }
+  },
   tls: {
     key: {
       doc: 'TLS private key',
@@ -116,6 +190,31 @@ if (config.get('tls.key') || config.get('tls.cert')) {
     cert: config.get('tls.cert') && decodeBase64Config(config.get('tls.cert'))
   }
   if (config.get('tls.ca')) config.decodedTLS.ca = decodeBase64Config(config.get('tls.ca'))
+}
+
+config.decodedKitsMTLS = {
+  internal: {
+    cert:
+      config.get('kitsProxy.internal.connectionCert') &&
+      decodeBase64Config(config.get('kitsProxy.internal.connectionCert')),
+    key:
+      config.get('kitsProxy.internal.connectionKey') &&
+      decodeBase64Config(config.get('kitsProxy.internal.connectionKey'))
+  },
+  external: {
+    cert:
+      config.get('kitsProxy.external.connectionCert') &&
+      decodeBase64Config(config.get('kitsProxy.external.connectionCert')),
+    key:
+      config.get('kitsProxy.external.connectionKey') &&
+      decodeBase64Config(config.get('kitsProxy.external.connectionKey'))
+  }
+}
+
+const ca = config.get('kitsProxy.caCert') && decodeBase64Config(config.get('kitsProxy.caCert'))
+if (ca) {
+  config.decodedKitsMTLS.internal.ca = ca
+  config.decodedKitsMTLS.external.ca = ca
 }
 
 export { config }
