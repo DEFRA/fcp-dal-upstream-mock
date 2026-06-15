@@ -21,10 +21,7 @@ paths:
       summary: Get all parcels for an organisation at a historic date
       operationId: getParcelsHistoric
       description: |
-        Returns all parcels as they existed at `historicDate`. Calls
-        `organisationService.getParcels(historicDate, organisationId)`.
-
-        **Authorization**: VIEWLAND required.
+        Returns all parcels as they existed at `historicDate`.
       parameters:
         - $ref: '#/components/parameters/organisationId'
         - $ref: '#/components/parameters/historicDate'
@@ -50,10 +47,7 @@ paths:
       summary: Get all parcel details at a historic date
       operationId: getParcelDetailsHistoric
       description: |
-        Returns detailed parcel records for all parcels at `historicDate`. Calls
-        `organisationService.getParcelDetails(organisationId, historicDate)`.
-
-        **Authorization**: VIEWLAND required.
+        Returns detailed parcel records for all parcels at `historicDate`.
       parameters:
         - $ref: '#/components/parameters/organisationId'
         - $ref: '#/components/parameters/historicDate'
@@ -116,10 +110,7 @@ paths:
       summary: Get aggregated land cover summary at a historic date
       operationId: getLandCoverSummaryHistoric
       description: |
-        Returns aggregated land cover area totals at `historicDate`. Calls
-        `organisationService.getLandCoverSummary(businessReference, historicDate)`.
-
-        **Authorization**: VIEWLAND required.
+        Returns aggregated land cover area totals at `historicDate`.
       parameters:
         - $ref: '#/components/parameters/organisationId'
         - $ref: '#/components/parameters/historicDate'
@@ -153,7 +144,7 @@ paths:
           required: true
           description: |
             Bounding box as comma-separated string: `left,bottom,right,top` (minLon,minLat,maxLon,maxLat).
-            Pass `0,0,0,0` to retrieve all geometries (bypasses spatial filter, uses cache).
+            Pass `0,0,0,0` to retrieve all geometries
           schema:
             type: string
             minLength: 1
@@ -161,13 +152,13 @@ paths:
         - name: group
           in: query
           required: false
-          description: Optional group filter. Part of the cache key when bbox is undefined.
+          description: Optional group filter. (Not used by mock)
           schema:
             type: string
         - name: historicDate
           in: query
           required: false
-          description: Optional historic date filter. Part of the cache key when bbox is undefined.
+          description: Optional historic date filter.
           schema:
             type: string
       responses:
@@ -256,8 +247,7 @@ components:
       type: object
       x-validation-source: ParcelNoGeometry.java (entity)
       description: |
-        Land parcel record without geometry. Stored in LMS database.
-        `validFrom`/`validTo` are `@Transient` (not in DB, populated from queries).
+        Land parcel record without geometry.
       properties:
         id:
           type: integer
