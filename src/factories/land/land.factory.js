@@ -1,5 +1,5 @@
 import { Boom } from '@hapi/boom'
-import { orgIdToSbi } from '../../factories/id-lookups.js'
+import { orgIdToSbi } from '../id-lookups.js'
 import { getLandParcels } from '../common-land.js'
 import { faker, safeSeed } from '../common.js'
 
@@ -102,13 +102,18 @@ export const retrieveParcelDetails = (orgId) => {
   }))
 }
 
-export const retrieveCovers = (orgId, sheetId, parcelId) => {
+export const retrieveCovers = (orgId, sheetId, parcelId, includeGeometries) => {
   const { covers: orgCovers } = retrieveOrgLand(orgId)
   // API returns empty array if no covers found even if invalid parcel reference
   const covers = orgCovers[`${sheetId}-${parcelId}`] || []
+
+  const features = includeGeometries
+    ? covers
+    : covers.map((cover) => ({ ...cover, geometry: null }))
+
   return {
     type: 'FeatureCollection',
-    features: covers
+    features
   }
 }
 

@@ -93,10 +93,35 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
-    test('Should return data for /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers', async () => {
+    test('Should return data for /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers with geometries omitted by default', async () => {
       const response = await mockServer.inject({
         method: 'GET',
         url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual({
+        type: 'FeatureCollection',
+        features: expect.arrayContaining([
+          {
+            id: 11769295,
+            properties: {
+              area: '10270.38',
+              code: '110',
+              name: 'Arable Land',
+              isBpsEligible: 'true'
+            },
+            type: 'Feature',
+            geometry: null
+          }
+        ])
+      })
+    })
+
+    test('Should return data for /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers with geometries included when requested', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers?includeGeometries=true'
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)

@@ -54,9 +54,9 @@ export const land = [
       const { sheetId, parcelId } = request.params
 
       const organisationId = extractOrganisationId(request)
-      extractIncludeGeometries(request)
+      const includeGeometries = extractIncludeGeometries(request)
 
-      const covers = retrieveCovers(organisationId, sheetId, parcelId)
+      const covers = retrieveCovers(organisationId, sheetId, parcelId, includeGeometries)
       return h.response(covers)
     }
   },
