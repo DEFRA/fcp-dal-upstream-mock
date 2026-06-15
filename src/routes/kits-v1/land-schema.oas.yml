@@ -66,6 +66,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ParcelDetails'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -89,12 +91,10 @@ paths:
         - name: includeGeometries
           in: query
           required: false
-          description: |
-            Whether to include geometry data. Treated as `true` only when the value
-            (case-insensitive) is the string "true"; any other value is treated as `false`.
+          description: Whether to include geometry data. Default false.
           schema:
-            type: string
-            default: 'false'
+            type: boolean
+            default: false
       responses:
         '200':
           description: Land cover feature collection at historic date
@@ -102,6 +102,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CapdFeatureCollectionLandCovers'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /lms/organisation/{organisationId}/covers-summary/historic/{historicDate}:
+    get:
+      tags:
+        - organisation
+      summary: Get aggregated land cover summary at a historic date
+      operationId: getLandCoverSummaryHistoric
+      description: |
+        Returns aggregated land cover area totals at `historicDate`. Calls
+        `organisationService.getLandCoverSummary(businessReference, historicDate)`.
+
+        **Authorization**: VIEWLAND required.
+      parameters:
+        - $ref: '#/components/parameters/organisationId'
+        - $ref: '#/components/parameters/historicDate'
+      responses:
+        '200':
+          description: Aggregated land cover summary at historic date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AreaInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -115,7 +147,8 @@ components:
       required: true
       description: Internal organisation identifier (Long)
       schema:
-        type: string
+        type: integer
+        format: int64
     historicDate:
       name: historicDate
       in: path
@@ -267,3 +300,17 @@ components:
           type: array
           description: GeoJSON coordinate array (structure depends on type)
           items: {}
+    AreaInfo:
+      type: object
+      x-validation-source: EligibleLandCoversInfo.AreaInfo (nested class)
+      description: Land cover area breakdown entry.
+      properties:
+        code:
+          type: string
+          description: Land cover classification code
+        name:
+          type: string
+          description: Land cover type name
+        area:
+          type: number
+          description: Area of this land cover type (in hectares)

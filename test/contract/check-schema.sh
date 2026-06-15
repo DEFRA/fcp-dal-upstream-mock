@@ -68,11 +68,11 @@ case "$1" in
   l | land )
     schema="kits-v1/land"
     mutations='. |
-.components.parameters.organisationId.schema.examples = ["5588135"] |
+.components.parameters.organisationId.schema.examples = [5588135] |
 .components.parameters.sheetId.schema.examples = ["TL8951"] |
 .components.parameters.parcelId.schema.examples = ["3227"] |
 .components.parameters.historicDate.schema.examples = ["19-Jul-24"] |
-.paths["/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers"].get.parameters[4].schema.examples = ["true", "false"]'
+.paths["/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers"].get.parameters[4].schema.examples = [true, false]'
     kits=true
     ;;
   o | org | organisation )

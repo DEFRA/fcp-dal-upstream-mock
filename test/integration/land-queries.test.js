@@ -158,9 +158,17 @@ describe('Basic queries for faked routes', () => {
     test('Should throw error for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate} if org does not exist', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/lms/organisation/nonexistent/covers-summary/historic/01-Jan-25'
+        url: '/extapi/lms/organisation/9999999999/covers-summary/historic/01-Jan-25'
       })
       expect(response.statusCode).toBe(500)
+    })
+
+    test('Should return 400 for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate} if organisationId is not numeric', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/nonexistent/covers-summary/historic/01-Jan-25'
+      })
+      expect(response.statusCode).toBe(400)
     })
   })
 })
