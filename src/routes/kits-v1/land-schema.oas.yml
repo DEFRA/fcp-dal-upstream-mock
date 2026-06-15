@@ -138,7 +138,50 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
-
+  /lms/organisation/{organisationId}/geometries:
+    get:
+      tags:
+        - organisation
+      summary: Get parcel geometries (GeoJSON feature collection) with bounding box filter
+      operationId: getParcelsGeometries
+      description: |
+        Returns parcel geometries as a GeoJSON feature collection, filtered by `bbox`.
+      parameters:
+        - $ref: '#/components/parameters/organisationId'
+        - name: bbox
+          in: query
+          required: true
+          description: |
+            Bounding box as comma-separated string: `left,bottom,right,top` (minLon,minLat,maxLon,maxLat).
+            Pass `0,0,0,0` to retrieve all geometries (bypasses spatial filter, uses cache).
+          schema:
+            type: string
+            example: '-2.5,51.2,-1.5,52.0'
+        - name: group
+          in: query
+          required: false
+          description: Optional group filter. Part of the cache key when bbox is undefined.
+          schema:
+            type: string
+        - name: historicDate
+          in: query
+          required: false
+          description: Optional historic date filter. Part of the cache key when bbox is undefined.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: GeoJSON feature collection of parcel geometries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapdFeatureCollectionParcel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 components:
   parameters:
     organisationId:
@@ -252,6 +295,38 @@ components:
         validTo:
           type: integer
           description: Validity end date as epoch milliseconds
+    ParcelWithGeometryDTO:
+      type: object
+      x-validation-source: ParcelWithGeometryDTO.java
+      description: |
+        GeoJSON Feature representing a parcel with full geometry. The `properties` map
+        contains: sheetId, parcelId, area (as string), pendingDigitisation (as string).
+        `type` is hardcoded as "Feature".
+      properties:
+        id:
+          type: integer
+          description: Unique parcel identifier
+        type:
+          type: string
+          description: GeoJSON type (always "Feature")
+          example: Feature
+        geometry:
+          $ref: '#/components/schemas/GeoJsonGeometry'
+        properties:
+          type: object
+          description: |
+            Feature properties map. Keys: sheetId, parcelId, area, pendingDigitisation.
+          additionalProperties:
+            type: string
+    CapdFeatureCollectionParcel:
+      type: object
+      description: GeoJSON-style feature collection of parcel geometries.
+      properties:
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParcelWithGeometryDTO'
+
     CapdFeatureCollectionLandCovers:
       type: object
       description: GeoJSON-style feature collection of land cover features.

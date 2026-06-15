@@ -2,6 +2,7 @@ import {
   retrieveCovers,
   retrieveCoversSummary,
   retrieveParcelDetails,
+  retrieveParcelGeometries,
   retrieveParcels
 } from '../../factories/land/land.factory.js'
 import Boom from '@hapi/boom'
@@ -68,6 +69,23 @@ export const land = [
 
       const coversSummary = retrieveCoversSummary(organisationId)
       return h.response(coversSummary)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/lms/organisation/{organisationId}/geometries',
+    handler: async (request, h) => {
+      const organisationId = extractOrganisationId(request)
+
+      // bbox is required by the upstream API but the mock doesn't spatially filter on
+      // it - the generated parcel geometries aren't tied to real-world coordinates, so
+      // all of the org's parcel geometries are returned regardless of bbox/historicDate.
+      if (!request.query.bbox) {
+        throw Boom.badRequest('bbox query parameter must be specified')
+      }
+
+      const geometries = retrieveParcelGeometries(organisationId)
+      return h.response(geometries)
     }
   }
 ]

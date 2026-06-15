@@ -117,6 +117,23 @@ export const retrieveCovers = (orgId, sheetId, parcelId, includeGeometries) => {
   }
 }
 
+export const retrieveParcelGeometries = (orgId) => {
+  const { parcelsDetailsGeo } = retrieveOrgLand(orgId)
+  return {
+    features: parcelsDetailsGeo.map(({ parcel }) => ({
+      id: parcel.id,
+      type: 'Feature',
+      geometry: parcel.geometry,
+      properties: {
+        sheetId: parcel.properties.sheetId,
+        parcelId: parcel.properties.parcelId,
+        area: String(parcel.properties.area),
+        pendingDigitisation: String(parcel.properties.pendingDigitisation)
+      }
+    }))
+  }
+}
+
 export const retrieveCoversSummary = (orgId) => {
   // Strangely this API does actually throw an error for non-existent orgId
   if (!orgIdToSbi[orgId]) {
