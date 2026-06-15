@@ -195,5 +195,68 @@ describe('Basic queries for faked routes', () => {
       })
       expect(response.statusCode).toBe(400)
     })
+
+    test('Should return data for /lms/organisation/{organisationId}/geometries', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/geometries?bbox=0,0,0,0'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json).toEqual({
+        features: expect.arrayContaining([
+          expect.objectContaining({
+            id: 7386091,
+            type: 'Feature',
+            properties: {
+              sheetId: 'SS6627',
+              parcelId: '5662',
+              area: '10270.39',
+              pendingDigitisation: 'false'
+            },
+            geometry: expect.objectContaining({ type: 'Polygon' })
+          })
+        ])
+      })
+    })
+
+    test('Should return 400 for /lms/organisation/{organisationId}/geometries if bbox is missing', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/geometries'
+      })
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 for /lms/organisation/{organisationId}/geometries if bbox is empty', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/geometries?bbox='
+      })
+      expect(response.statusCode).toBe(400)
+    })
+
+    test.each([
+      ['too few coordinates', '1,1,1'],
+      ['too many coordinates', '1,1,1,1,1'],
+      ['non-numeric coordinates', 'a,b,c,d']
+    ])(
+      'Should return 404 for /lms/organisation/{organisationId}/geometries if bbox has %s (%s)',
+      async (_description, bbox) => {
+        const response = await mockServer.inject({
+          method: 'GET',
+          url: `/extapi/lms/organisation/1111111111/geometries?bbox=${bbox}`
+        })
+        expect(response.statusCode).toBe(404)
+      }
+    )
+
+    test('Should return data for /lms/organisation/{organisationId}/geometries if bbox contains signed/leading-zero coordinates', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/geometries?bbox=-1.5,%2B2.0,1,00.1'
+      })
+      expect(response.statusCode).toBe(200)
+    })
   })
 })

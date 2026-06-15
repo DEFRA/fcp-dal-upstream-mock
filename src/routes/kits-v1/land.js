@@ -15,6 +15,25 @@ const extractOrganisationId = (request) => {
   return organisationId
 }
 
+const validateBbox = (request) => {
+  const { bbox } = request.query
+
+  if (!bbox) {
+    throw Boom.badRequest('bbox query parameter must be specified')
+  }
+
+  // Upstream returns 404 (not 400) if bbox isn't exactly 4 comma-separated numbers
+  const coordinates = bbox.split(',')
+  if (
+    coordinates.length !== 4 ||
+    !coordinates.every((coordinate) => /^[+-]?\d*\.?\d+$/.test(coordinate))
+  ) {
+    throw Boom.notFound()
+  }
+
+  return bbox
+}
+
 const extractIncludeGeometries = (request) => {
   const { includeGeometries } = request.query
   if (
@@ -77,12 +96,11 @@ export const land = [
     handler: async (request, h) => {
       const organisationId = extractOrganisationId(request)
 
-      // bbox is required by the upstream API but the mock doesn't spatially filter on
-      // it - the generated parcel geometries aren't tied to real-world coordinates, so
-      // all of the org's parcel geometries are returned regardless of bbox/historicDate.
-      if (!request.query.bbox) {
-        throw Boom.badRequest('bbox query parameter must be specified')
-      }
+      // bbox is required and validated by the upstream API but the mock doesn't
+      // spatially filter on it - the generated parcel geometries aren't tied to
+      // real-world coordinates, so all the org's parcel geometries are returned
+      // regardless of bbox/historicDate.
+      validateBbox(request)
 
       const geometries = retrieveParcelGeometries(organisationId)
       return h.response(geometries)
