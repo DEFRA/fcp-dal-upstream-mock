@@ -18,6 +18,7 @@ usage() {
   echo "Where the argument specifies which schema to test:"
   echo "  a  | auth | authenticate - test the Authenticate schema"
   echo "  b  | bank                - test the Bank Change Service schema"
+  echo "  l  | land                - test the Land schema"
   echo "  o  | org | organisation  - test the Organisation schema"
   echo "  p  | person              - test the Person schema"
   echo "  r  | rd | reference-data - test the Reference Data schema"
@@ -62,6 +63,16 @@ case "$1" in
     schema="kits-v1/authenticate"
     mutations='. |
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0].schema.examples = [1105739979,1106046692,1106077237,1100932879,1105430162]'
+    kits=true
+    ;;
+  l | land )
+    schema="kits-v1/land"
+    mutations='. |
+.components.parameters.organisationId.schema.examples = ["5588135"] |
+.components.parameters.sheetId.schema.examples = ["TL8951"] |
+.components.parameters.parcelId.schema.examples = ["3227"] |
+.components.parameters.historicDate.schema.examples = ["19-Jul-24"] |
+.paths["/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers"].get.parameters[4].schema.examples = ["true", "false"]'
     kits=true
     ;;
   o | org | organisation )
