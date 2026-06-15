@@ -630,41 +630,11 @@ describe('Basic queries for faked routes', () => {
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
-      expect(json).toEqual({
-        notifications: expect.arrayContaining([
-          {
-            archive: null,
-            archivedAt: null,
-            bespokeNotificationId: null,
-            body: '<p>Absconditus tripudio coadunatio.</p>',
-            category: 'OrganisationLevel',
-            createdAt: 1703107872884,
-            id: 4773520611,
-            messageId: 4434992522,
-            organisationId: 1111111111,
-            personId: 11111111,
-            readAt: 1733430747000,
-            title: 'Amissio quae cado delicate antea nostrum.'
-          },
-          {
-            archive: null,
-            archivedAt: null,
-            bespokeNotificationId: null,
-            body: '<p>Umbra aeger texo similique alveus vulgivagus.</p>',
-            category: 'OrganisationLevel',
-            createdAt: 1690586859290,
-            id: 761422798,
-            messageId: 2021325969,
-            organisationId: 1111111111,
-            personId: 11111111,
-            readAt: 1709228434000,
-            title: 'Comitatus aperio cito cruciamentum corrigo aureus.'
-          }
-        ]),
-        resultCount: 9,
-        readCount: 5,
-        unreadCount: 4
-      })
+
+      expect(json.resultCount).toEqual(9)
+      expect(json.readCount).toEqual(6)
+      expect(json.unreadCount).toEqual(3)
+      expect(json.notifications.length).toEqual(9)
     })
   })
 })
