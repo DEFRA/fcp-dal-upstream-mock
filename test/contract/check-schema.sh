@@ -71,6 +71,8 @@ case "$1" in
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "106554744" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "200629003" |
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "200665008" |
+.components.schemas.SearchRequestBody.examples[3].primarySearchPhrase = "Wood" |
+.components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "YO18 8RL" |
 .paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233] |
 .paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233]'
     kits=true
@@ -81,7 +83,12 @@ case "$1" in
 .paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
-.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899"'
+.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "1101089899" |
+.components.schemas.SearchRequestBody.examples[3].primarySearchPhrase = "116172867" |
+.components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "Truelove" |
+.components.schemas.SearchRequestBody.examples[5].primarySearchPhrase = "EX14 2XA" |
+.components.schemas.SearchRequestBody.examples[6].primarySearchPhrase = "123456" |
+.components.schemas.SearchRequestBody.examples[7].primarySearchPhrase = "123456"'
     kits=true
     ;;
   r | rd | reference-data )
@@ -123,9 +130,12 @@ if ${kits} ; then # KITS gateway
     usage
     exit 1
   fi
+  # NOTE: endpoint-specific check exclusions are configured in schemathesis.toml
   docker run --rm --network=host --pull always \
     -v ${baseDir}/tmp:/tmp \
+    -v ${baseDir}/schemathesis.toml:/tmp/schemathesis.toml:ro \
     schemathesis/schemathesis:stable \
+      --config-file /tmp/schemathesis.toml \
       run /tmp/schema.json \
         --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
         --header "x-api-key: ${CDP_API_KEY}" \
