@@ -47,8 +47,8 @@ describe('Fake Payments', () => {
       })
       expect(statusCode).toBe(200)
       expect(result).toConformToSchema(schema.components.schemas.PaymentsData)
-      expect(result.parmPayments.length).toEqual(29)
-      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 29'])
+      expect(result.parmPayments.length).toEqual(38)
+      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 38'])
     })
 
     it('should filter payments by FromDate', async () => {
@@ -110,8 +110,8 @@ describe('Fake Payments', () => {
         }
       })
       expect(statusCode).toBe(200)
-      expect(result.parmPayments.length).toEqual(29)
-      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 29'])
+      expect(result.parmPayments.length).toEqual(38)
+      expect(result.InfoMessages).toEqual(['No. of payments retrieved = 38'])
     })
 
     it('honours static data if set', async () => {
@@ -130,9 +130,9 @@ describe('Fake Payments', () => {
       expect(result).toEqual({
         Result: true,
         parmSupplierInfo: {
-          parmHoldCodes: ['AUTOVERIFY', 'NTHLD'],
-          parmAccountLast4: '****6784',
-          parmSortCode: '032113',
+          parmHoldCodes: ['NTHLD'],
+          parmAccountLast4: '****7840',
+          parmSortCode: '321133',
           parmSupplier: 'Little, Stoltenberg and Brakus'
         },
         parmPayments: [], // empty payments array set in `id-lookups.js`
