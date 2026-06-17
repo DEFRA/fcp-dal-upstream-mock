@@ -456,7 +456,7 @@ export const orgIdLookup = {
   // dedicated org for every /organisation/search searchFieldType
   9100000: {
     sbi: 910000000,
-    customers: [9100000],
+    customers: [{ personId: 9100000 }],
     overrides: {
       name: 'Blue Barn Farm',
       vendorNumber: '123456',
