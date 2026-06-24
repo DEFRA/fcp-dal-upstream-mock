@@ -131,7 +131,7 @@ export const staticPersonData = {
   9100000: {
     crn: '9100000000',
     firstName: 'Searchable',
-    lastName: 'Smith',
+    lastName: 'Searchington',
     personalIdentifiers: ['116172867'],
     address: {
       address1: '1 Search Lane',

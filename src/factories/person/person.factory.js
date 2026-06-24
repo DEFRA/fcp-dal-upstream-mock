@@ -118,14 +118,9 @@ const personMatchers = {
     allPeople()
       .filter((person) => person.personalIdentifiers?.includes(identifier))
       .slice(0, 1),
+  // upstream only matches on surname, not firstname/full-name
   CUSTOMER_NAME: (name) =>
-    allPeople().filter((person) =>
-      [person.firstName, person.lastName]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(name.toLowerCase())
-    ),
+    allPeople().filter((person) => person.lastName?.toLowerCase().includes(name.toLowerCase())),
   CUSTOMER_POSTCODE: (postcode) =>
     allPeople().filter(
       (person) =>

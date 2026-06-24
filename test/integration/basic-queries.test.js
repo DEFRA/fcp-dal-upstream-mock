@@ -687,7 +687,7 @@ describe('Basic queries for faked routes', () => {
       test.each([
         ['CUSTOMER_REFERENCE', '9100000000'],
         ['PERSONAL_IDENTIFIER', '116172867'],
-        ['CUSTOMER_NAME', 'sEArchable'], // partial match, ignoring case
+        ['CUSTOMER_NAME', 'sEArchington'], // partial surname match, ignoring case
         ['CUSTOMER_POSTCODE', 'ab12 3cd'], // full match, ignoring case and whitespace
         ['VENDOR_NUMBER', '123456'], // people of orgs with a matching vendor number
         ['TRADER_NUMBER', '654321'] // people of orgs with a matching trader number
@@ -699,7 +699,7 @@ describe('Basic queries for faked routes', () => {
         expect(json._data[0]).toEqual(
           expect.objectContaining({
             id: 9100000,
-            fullName: 'Searchable Smith',
+            fullName: 'Searchable Searchington',
             customerReference: '9100000000',
             personalIdentifiers: ['116172867'],
             primaryAddress: expect.objectContaining({ postalCode: 'AB12 3CD' })
