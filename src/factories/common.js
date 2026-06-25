@@ -76,17 +76,22 @@ export function generateId(startingId, excludeList) {
   return startingId
 }
 
-export const pagination = {
-  number: 0,
-  size: 20,
-  totalPages: 1,
-  numberOfElements: 1,
-  totalElements: 1
+export const paginate = (items, offset, limit) => {
+  const total = items.length
+  const start = Number.isInteger(offset) && offset > 0 ? offset : 0
+  const size = Number.isInteger(limit) && limit > 0 ? limit : total || 20
+  const data = items.slice(start, start + size)
+
+  return {
+    data,
+    page: {
+      number: Math.floor(start / size),
+      size,
+      totalPages: Math.ceil(total / size),
+      numberOfElements: data.length,
+      totalElements: total
+    }
+  }
 }
-export const pagination0 = {
-  number: 0,
-  size: 20,
-  totalPages: 1,
-  numberOfElements: 0,
-  totalElements: 0
-}
+
+export const normalisePostcode = (postcode) => `${postcode}`.replaceAll(/\s/g, '').toUpperCase()

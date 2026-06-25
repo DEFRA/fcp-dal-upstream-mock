@@ -146,8 +146,8 @@ describe('Basic queries for faked routes', () => {
         middleName: 'test-middle-name',
         lastName: 'test-last-name',
         dateOfBirth: -2,
-        landline: 'test-landline',
-        mobile: 'test-mobile',
+        landline: '01234 567890',
+        mobile: '07111 222333',
         email: 'test-email@test.com',
         doNotContact: !personFixture.doNotContact,
         emailValidated: !personFixture.emailValidated,
@@ -167,7 +167,7 @@ describe('Basic queries for faked routes', () => {
           doubleDependentLocality: 'test-double-dependent-locality',
           flatName: 'test-flat-name',
           pafOrganisationName: 'test-paf-organisation-name',
-          postalCode: 'test-postal-code',
+          postalCode: 'TE5 7PC',
           street: 'test-street',
           uprn: 'test-uprn'
         },
@@ -619,6 +619,155 @@ describe('Basic queries for faked routes', () => {
           role: 'Director'
         })
       )
+    })
+  })
+
+  describe('Search routes', () => {
+    const search = (url, searchFieldType, primarySearchPhrase) =>
+      mockServer.inject({
+        method: 'POST',
+        url,
+        payload: { searchFieldType, primarySearchPhrase }
+      })
+
+    describe('/organisation/search', () => {
+      test.each([
+        ['SBI', '910000000'],
+        ['BUSINESS_NAME', 'fArM'], // partial match, ignoring case
+        ['BUSINESS_POSTCODE', 'ab123cd'] // full match, ignoring case and whitespace
+      ])('Should find the organisation by %s', async (searchFieldType, primarySearchPhrase) => {
+        const response = await search(
+          '/extapi/organisation/search',
+          searchFieldType,
+          primarySearchPhrase
+        )
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toHaveLength(1)
+        expect(json._data[0]).toEqual(
+          expect.objectContaining({
+            id: 9100000,
+            sbi: 910000000,
+            name: 'Blue Barn Farm',
+            address: expect.objectContaining({ postalCode: 'AB12 3CD' })
+          })
+        )
+        expect(json._page).toEqual(
+          expect.objectContaining({ numberOfElements: 1, totalElements: 1 })
+        )
+      })
+
+      test('Should return empty results when nothing matches', async () => {
+        const response = await search('/extapi/organisation/search', 'SBI', '999999999')
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toEqual([])
+        expect(json._page).toEqual(
+          expect.objectContaining({ numberOfElements: 0, totalElements: 0 })
+        )
+      })
+
+      test('Should reject an unrecognised searchFieldType', async () => {
+        const response = await search('/extapi/organisation/search', 'NOT_A_TYPE', '910000000')
+        expect(response.statusCode).toBe(400)
+      })
+
+      test('Should error when only searchFieldType is provided', async () => {
+        const response = await search('/extapi/organisation/search', 'SBI', undefined)
+        expect(response.statusCode).toBe(500)
+      })
+
+      test('Should reject a too-short primarySearchPhrase', async () => {
+        const response = await search('/extapi/organisation/search', 'SBI', '12345678')
+        expect(response.statusCode).toBe(400)
+      })
+    })
+
+    describe('/person/search', () => {
+      test.each([
+        ['CUSTOMER_REFERENCE', '9100000000'],
+        ['PERSONAL_IDENTIFIER', '116172867'],
+        ['CUSTOMER_NAME', 'sEArchington'], // partial surname match, ignoring case
+        ['CUSTOMER_POSTCODE', 'ab12 3cd'], // full match, ignoring case and whitespace
+        ['VENDOR_NUMBER', '123456'], // people of orgs with a matching vendor number
+        ['TRADER_NUMBER', '654321'] // people of orgs with a matching trader number
+      ])('Should find the person by %s', async (searchFieldType, primarySearchPhrase) => {
+        const response = await search('/extapi/person/search', searchFieldType, primarySearchPhrase)
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toHaveLength(1)
+        expect(json._data[0]).toEqual(
+          expect.objectContaining({
+            id: 9100000,
+            fullName: 'Searchable Searchington',
+            customerReference: '9100000000',
+            personalIdentifiers: ['116172867'],
+            primaryAddress: expect.objectContaining({ postalCode: 'AB12 3CD' })
+          })
+        )
+        expect(json._page).toEqual(
+          expect.objectContaining({ numberOfElements: 1, totalElements: 1 })
+        )
+      })
+
+      test('Should return empty results when nothing matches', async () => {
+        const response = await search('/extapi/person/search', 'CUSTOMER_REFERENCE', '9999999999')
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+        expect(json._data).toEqual([])
+        expect(json._page).toEqual(
+          expect.objectContaining({ numberOfElements: 0, totalElements: 0 })
+        )
+      })
+
+      test('Should reject an unrecognised searchFieldType', async () => {
+        const response = await search('/extapi/person/search', 'NOT_A_TYPE', '9100000000')
+        expect(response.statusCode).toBe(400)
+      })
+
+      test('Should error when only searchFieldType is provided', async () => {
+        const response = await search('/extapi/person/search', 'CUSTOMER_NAME', undefined)
+        expect(response.statusCode).toBe(500)
+      })
+
+      test('Should reject a too-short primarySearchPhrase', async () => {
+        const response = await search('/extapi/person/search', 'CUSTOMER_REFERENCE', '123456789')
+        expect(response.statusCode).toBe(400)
+      })
+    })
+
+    describe('pagination', () => {
+      const pagedSearch = (url, searchFieldType, primarySearchPhrase, offset, limit) =>
+        mockServer.inject({
+          method: 'POST',
+          url,
+          payload: { searchFieldType, primarySearchPhrase, offset, limit }
+        })
+
+      test.each([
+        ['/extapi/organisation/search', 'BUSINESS_NAME', 'and'],
+        ['/extapi/person/search', 'CUSTOMER_NAME', 'a']
+      ])('slices %s by offset and limit', async (url, searchFieldType, primarySearchPhrase) => {
+        const all = JSON.parse(
+          (await pagedSearch(url, searchFieldType, primarySearchPhrase, 0, 1000)).payload
+        )._data
+        expect(all.length).toBeGreaterThan(2)
+
+        const offset = 2
+        const limit = 2
+        const response = await pagedSearch(url, searchFieldType, primarySearchPhrase, offset, limit)
+        expect(response.statusCode).toBe(200)
+        const json = JSON.parse(response.payload)
+
+        expect(json._data).toEqual(all.slice(offset, offset + limit))
+        expect(json._page).toEqual({
+          number: 1,
+          size: limit,
+          totalPages: Math.ceil(all.length / limit),
+          numberOfElements: json._data.length,
+          totalElements: all.length
+        })
+      })
     })
   })
 

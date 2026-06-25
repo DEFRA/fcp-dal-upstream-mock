@@ -1,17 +1,54 @@
 import Boom from '@hapi/boom'
-import { pagination, pagination0 } from '../../factories/common.js'
-import { sbiToOrgId } from '../../factories/id-lookups.js'
+import { paginate } from '../../factories/common.js'
 import {
   createOrganisation,
   lockOrganisation,
   retrieveOrganisation,
   retrieveOrganisationCustomers,
+  searchOrganisations,
   unlockOrganisation,
   updateAdditionalOrganisationDetails,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
-import { checkId } from '../../utils/shared-datatypes.js'
+import { checkId, checkSearchPhrase } from '../../utils/shared-datatypes.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+// `primarySearchPhrase` constraints for each searchFieldType
+const searchFieldTypes = {
+  SBI: { minLength: 9, minNumber: 100000000 },
+  BUSINESS_NAME: { minLength: 2, minNumber: 10 },
+  BUSINESS_POSTCODE: { minLength: 5, minNumber: 10000 }
+}
+
+const mapOrgToSearchResult = ({
+  id,
+  name,
+  sbi,
+  additionalSbiIds,
+  confirmed,
+  lastUpdatedOn,
+  landConfirmed,
+  deactivated,
+  locked,
+  address,
+  correspondenceAddress,
+  isFinancialToBusinessAddr,
+  isCorrespondenceAsBusinessAddr
+}) => ({
+  id,
+  name,
+  sbi,
+  additionalSbiIds,
+  confirmed,
+  lastUpdatedOn,
+  landConfirmed,
+  deactivated,
+  locked,
+  address,
+  correspondenceAddress,
+  isFinancialToBusinessAddr,
+  isCorrespondenceAsBusinessAddr
+})
 
 const validateLockOrganisationPayload = await createPayloadValidator(
   'routes/kits-v1/organisation-schema.oas.yml',
@@ -53,74 +90,15 @@ export const organisation = [
     method: 'POST',
     path: '/organisation/search',
     handler: async (request, h) => {
-      const body = request.payload
-      const searchSbi = body?.primarySearchPhrase
+      const { searchFieldType, searchPhrase } = checkSearchPhrase(request, searchFieldTypes)
+      const { offset, limit } = request.payload
 
-      // Only search by SBI supported by mock
-      if (
-        !searchSbi ||
-        body?.searchFieldType !== 'SBI' ||
-        !(typeof searchSbi === 'number' || typeof searchSbi === 'string')
-      ) {
-        // mimic the actual upstream response for missing searchFieldType
-        throw Boom.internal(
-          'missing or invalid searchFieldType/primarySearchPhrase, expected "SBI" and SBI number\n' +
-            `searchFieldType: '${body?.searchFieldType}', primarySearchPhrase: '${searchSbi}'`,
-          request
-        )
-      }
+      const matches = searchOrganisations(searchFieldType, searchPhrase)
+      const { data, page } = paginate(matches, offset, limit)
 
-      // SBI must be at least 9 characters long
-      if (
-        // upstream checks the character length of the number
-        (`${searchSbi}`?.length || 0) < 9 ||
-        // we also have to check for a big enough integer to satisfy the schema
-        (typeof searchSbi === 'number' && searchSbi < 100000000)
-      ) {
-        throw Boom.badRequest(`bad SBI: ${searchSbi}, it must comprise 9 or more digits`, request)
-      }
-
-      // return empty result if no orgId found but no "errors" encountered
-      const orgId = sbiToOrgId[searchSbi]
-      if (!orgId) {
-        return h.response({ _data: [], _page: pagination0 })
-      }
-
-      // reduce the response to the subset of fields for search results
-      const {
-        id,
-        name,
-        sbi,
-        additionalSbiIds,
-        confirmed,
-        lastUpdatedOn,
-        landConfirmed,
-        deactivated,
-        locked,
-        address,
-        correspondenceAddress,
-        isFinancialToBusinessAddr,
-        isCorrespondenceAsBusinessAddr
-      } = retrieveOrganisation(orgId)
       return h.response({
-        _data: [
-          {
-            id,
-            name,
-            sbi,
-            additionalSbiIds,
-            confirmed,
-            lastUpdatedOn,
-            landConfirmed,
-            deactivated,
-            locked,
-            address,
-            correspondenceAddress,
-            isFinancialToBusinessAddr,
-            isCorrespondenceAsBusinessAddr
-          }
-        ],
-        _page: pagination
+        _data: data.map(mapOrgToSearchResult),
+        _page: page
       })
     }
   },

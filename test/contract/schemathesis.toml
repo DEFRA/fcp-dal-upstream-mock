@@ -1,0 +1,18 @@
+# Schemathesis configuration for the contract tests.
+# Isolates check exclusions to specific endpoints, rather than disabling them schema-wide.
+
+# The upstream accepts search phrases that violate the documented length limits (it coerces
+# the input), so `negative_data_rejection` cannot pass for the search endpoints.
+[[operations]]
+include-path = "/organisation/search"
+include-method = "POST"
+
+[operations.checks.negative_data_rejection]
+enabled = false
+
+[[operations]]
+include-path = "/person/search"
+include-method = "POST"
+
+[operations.checks.negative_data_rejection]
+enabled = false

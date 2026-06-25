@@ -8,7 +8,16 @@ import {
   personIdToOrgIds,
   sbiToOrgId
 } from '../../factories/id-lookups.js'
-import { fakeAddress, fakeIds, faker, generateId, nft, nullOrFake, safeSeed } from '../common.js'
+import {
+  fakeAddress,
+  fakeIds,
+  faker,
+  generateId,
+  nft,
+  normalisePostcode,
+  nullOrFake,
+  safeSeed
+} from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
 
 const organisations = {}
@@ -226,6 +235,23 @@ export const retrieveOrganisation = (orgId) => {
 
   return organisations[orgId] ?? generateOrganisation(orgId, sbi, overrides)
 }
+
+const allOrganisations = () => Object.keys(orgIdLookup).map((orgId) => retrieveOrganisation(orgId))
+
+const organisationMatchers = {
+  SBI: (sbi) => (sbiToOrgId[sbi] ? [retrieveOrganisation(sbiToOrgId[sbi])] : []),
+  BUSINESS_NAME: (name) =>
+    allOrganisations().filter((org) => org.name?.toLowerCase().includes(name.toLowerCase())),
+  BUSINESS_POSTCODE: (postcode) =>
+    allOrganisations().filter(
+      (org) =>
+        org.address?.postalCode &&
+        normalisePostcode(org.address.postalCode) === normalisePostcode(postcode)
+    )
+}
+
+export const searchOrganisations = (searchFieldType, searchPhrase) =>
+  organisationMatchers[searchFieldType](searchPhrase)
 
 export const retrieveOrganisationCustomers = (orgId) => {
   const personIds = orgIdToPersonIds[orgId] || []
