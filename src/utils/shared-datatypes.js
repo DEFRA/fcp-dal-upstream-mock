@@ -12,3 +12,43 @@ export const checkId = (request, idName) => {
 
   return `${id}`
 }
+
+export const checkSearchPhrase = (request, searchFieldTypes) => {
+  const { searchFieldType, primarySearchPhrase } = request.payload ?? {}
+
+  const constraints = searchFieldTypes[searchFieldType]
+  if (!constraints) {
+    throw Boom.badRequest(`unrecognised searchFieldType: '${searchFieldType}'`, request)
+  }
+
+  const phraseType = typeof primarySearchPhrase
+  if (
+    primarySearchPhrase == null ||
+    !(
+      phraseType === 'string' ||
+      phraseType === 'number' ||
+      (constraints.allowBoolean && phraseType === 'boolean')
+    )
+  ) {
+    throw Boom.internal(
+      'missing or invalid primarySearchPhrase\n' +
+        `searchFieldType: '${searchFieldType}', primarySearchPhrase: '${primarySearchPhrase}'`,
+      request
+    )
+  }
+
+  if (
+    `${primarySearchPhrase}`.length < constraints.minLength ||
+    (phraseType === 'number' &&
+      constraints.minNumber !== undefined &&
+      primarySearchPhrase < constraints.minNumber)
+  ) {
+    throw Boom.badRequest(
+      `bad primarySearchPhrase: ${primarySearchPhrase}, ` +
+        `it must comprise ${constraints.minLength} or more characters`,
+      request
+    )
+  }
+
+  return { searchFieldType, searchPhrase: `${primarySearchPhrase}` }
+}

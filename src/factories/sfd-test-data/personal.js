@@ -93,6 +93,27 @@ const minimalMandatoryAddress = {
   uprn: null
 }
 
+const nullAddress = {
+  address1: null,
+  address2: null,
+  address3: null,
+  address4: null,
+  address5: null,
+  pafOrganisationName: null,
+  flatName: null,
+  buildingNumberRange: null,
+  buildingName: null,
+  street: null,
+  city: null,
+  county: null,
+  postalCode: null,
+  country: null,
+  uprn: null,
+  dependentLocality: null,
+  doubleDependentLocality: null,
+  addressTypeId: null
+}
+
 // Base applied to every person so address is predictable unless the entry overrides address.
 const defaultPersonOverride = { address: minimalMandatoryAddress }
 
@@ -1108,7 +1129,11 @@ const personLookupEntries = {
 export const sfdPersonLookup = Object.fromEntries(
   Object.entries(personLookupEntries).map(([id, entry]) => [
     id,
-    { ...defaultPersonOverride, ...entry }
+    {
+      ...defaultPersonOverride,
+      ...entry,
+      address: { ...nullAddress, ...(entry.address ?? defaultPersonOverride.address) }
+    }
   ])
 )
 
