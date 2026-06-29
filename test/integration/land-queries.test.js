@@ -41,6 +41,22 @@ describe('Basic queries for faked routes', () => {
       )
     })
 
+    test('Should return 403 for /lms/organisation/{organisationId}/parcels/historic/{historicDate} if organisationId is not numeric', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/nonexistent/parcels/historic/01-Jan-25'
+      })
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('Should return 500 for /lms/organisation/{organisationId}/parcels/historic/{historicDate} if historicDate is invalid', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/parcels/historic/invalid'
+      })
+      expect(response.statusCode).toBe(500)
+    })
+
     test('Should return data for /lms/organisation/{organisationId}/parcels/historic/{historicDate} where land is NOT defined in id-lookups for the organisation', async () => {
       const response = await mockServer.inject({
         method: 'GET',
@@ -91,6 +107,22 @@ describe('Basic queries for faked routes', () => {
           expect.objectContaining({ parcelId: '3818', sheetId: 'SS6828' })
         ])
       )
+    })
+
+    test('Should return 403 for /lms/organisation/{organisationId}/parcel-details/historic/{historicDate} if organisationId is not numeric', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/nonexistent/parcel-details/historic/01-Jan-25'
+      })
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('Should return 403 for /lms/organisation/{organisationId}/parcel-details/historic/{historicDate} if historicDate is invalid', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/parcel-details/historic/invalid'
+      })
+      expect(response.statusCode).toBe(403)
     })
 
     test('Should return data for /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers with geometries omitted by default', async () => {
@@ -154,6 +186,33 @@ describe('Basic queries for faked routes', () => {
       })
     })
 
+    test('Should return 403 for /lms/organisation/{organisationId}/land-covers if organisationId is not numeric', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/nonexistent/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers'
+      })
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('Should treat includeGeometries=null as false for land-covers', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers?includeGeometries=null'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json.features[0].geometry).toBeNull()
+    })
+
+    test('Should treat any unrecognised includeGeometries value as false', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers?includeGeometries=foo'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(JSON.parse(response.payload).features[0].geometry).toBeNull()
+    })
+
     test('Should return data for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate}', async () => {
       const response = await mockServer.inject({
         method: 'GET',
@@ -188,12 +247,20 @@ describe('Basic queries for faked routes', () => {
       expect(response.statusCode).toBe(500)
     })
 
-    test('Should return 400 for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate} if organisationId is not numeric', async () => {
+    test('Should return 403 for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate} if organisationId is not numeric', async () => {
       const response = await mockServer.inject({
         method: 'GET',
         url: '/extapi/lms/organisation/nonexistent/covers-summary/historic/01-Jan-25'
       })
-      expect(response.statusCode).toBe(400)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('Should return 403 for /lms/organisation/{organisationId}/covers-summary/historic/{historicDate} if historicDate is invalid', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/1111111111/covers-summary/historic/invalid'
+      })
+      expect(response.statusCode).toBe(403)
     })
 
     test('Should return data for /lms/organisation/{organisationId}/geometries', async () => {
@@ -218,6 +285,14 @@ describe('Basic queries for faked routes', () => {
           })
         ])
       })
+    })
+
+    test('Should return 403 for /lms/organisation/{organisationId}/geometries if organisationId is not numeric', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/lms/organisation/nonexistent/geometries?bbox=0,0,0,0'
+      })
+      expect(response.statusCode).toBe(403)
     })
 
     test('Should return 400 for /lms/organisation/{organisationId}/geometries if bbox is missing', async () => {

@@ -34,12 +34,19 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ParcelNoGeometry'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '403':
+          description: Returned by upstream if organisationId has an invalid format
+          content:
+            text/html:
+              schema:
+                type: string
         '500':
-          $ref: '#/components/responses/InternalError'
+          description: Returned by upstream if historicDate has an invalid format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /lms/organisation/{organisationId}/parcel-details/historic/{historicDate}:
     get:
       tags:
@@ -60,12 +67,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ParcelDetails'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        '403':
+          description: Returned by upstream if organisationId or historicDate has an invalid format
+          content:
+            text/html:
+              schema:
+                type: string
+
   /lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers:
     get:
       tags:
@@ -75,8 +83,6 @@ paths:
       description: |
         Returns land covers for a parcel at `historicDate`. Calls
         `parcelService.getParcelLandCovers(sheetId, parcelId, historicDate, includeGeometries)`.
-
-        **Authorization**: VIEWLAND required.
       parameters:
         - $ref: '#/components/parameters/organisationId'
         - $ref: '#/components/parameters/sheetId'
@@ -87,8 +93,8 @@ paths:
           required: false
           description: Whether to include geometry data. Default false.
           schema:
-            type: boolean
-            default: false
+            type: string
+            default: 'false'
       responses:
         '200':
           description: Land cover feature collection at historic date
@@ -96,12 +102,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CapdFeatureCollectionLandCovers'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        '403':
+          description: Returned by upstream if any of the parameters are badly formed
+          content:
+            text/html:
+              schema:
+                type: string
 
   /lms/organisation/{organisationId}/covers-summary/historic/{historicDate}:
     get:
@@ -125,10 +131,19 @@ paths:
                   $ref: '#/components/schemas/AreaInfo'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '403':
+          description: Returned by upstream if historicDate has an invalid format
+          content:
+            text/html:
+              schema:
+                type: string
         '500':
-          $ref: '#/components/responses/InternalError'
+          description: Returned by upstream if org can't be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /lms/organisation/{organisationId}/geometries:
     get:
       tags:
@@ -148,7 +163,7 @@ paths:
           schema:
             type: string
             minLength: 1
-            example: '-2.5,51.2,-1.5,52.0'
+            examples: ['0,0,0,0']
         - name: group
           in: query
           required: false
@@ -163,17 +178,30 @@ paths:
             type: string
       responses:
         '200':
-          description: GeoJSON feature collection of parcel geometries
+          description: GeoJSON feature collection of parcel geometries (empty feature list if organisationId/bbox combination results in no match)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CapdFeatureCollectionParcel'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Returned by upstream if bounding box is not supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
+          description: Returned by upstream if bounding box is not formatted correctly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Returned by upstream if organisationId has an invalid format
+          content:
+            text/html:
+              schema:
+                type: string
+
 components:
   parameters:
     organisationId:
@@ -184,6 +212,7 @@ components:
       schema:
         type: integer
         format: int64
+        examples: [1111111111]
     historicDate:
       name: historicDate
       in: path
@@ -192,7 +221,7 @@ components:
         Date for historical data retrieval. Format: `DD-MMM-YY` date string (e.g. `19-Jul-24`).
       schema:
         type: string
-        example: '19-Jul-24'
+        examples: ['19-Jul-24']
     sheetId:
       name: sheetId
       in: path
@@ -200,6 +229,7 @@ components:
       description: OS map sheet identifier
       schema:
         type: string
+        examples: ['SS6627']
     parcelId:
       name: parcelId
       in: path
@@ -207,6 +237,7 @@ components:
       description: Parcel identifier within the OS sheet
       schema:
         type: string
+        examples: ['5662']
 
   securitySchemes:
     mTLS:
@@ -229,12 +260,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    InternalError:
-      description: Unexpected service error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
+
   schemas:
     ErrorResponse:
       type: object

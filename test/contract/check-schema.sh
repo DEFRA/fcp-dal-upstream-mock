@@ -72,8 +72,7 @@ case "$1" in
 .components.parameters.sheetId.schema.examples = ["TL8951"] |
 .components.parameters.parcelId.schema.examples = ["3227"] |
 .components.parameters.historicDate.schema.examples = ["19-Jul-24"] |
-.paths["/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers"].get.parameters[4].schema.examples = [true, false] |
-.paths["/lms/organisation/{organisationId}/geometries"].get.parameters[1].schema.examples = ["0,0,0,0"]'
+.paths["/lms/organisation/{organisationId}/parcel/sheet-id/{sheetId}/parcel-id/{parcelId}/historic/{historicDate}/land-covers"].get.parameters[4].schema.examples = [true, false]'
     kits=true
     ;;
   o | org | organisation )

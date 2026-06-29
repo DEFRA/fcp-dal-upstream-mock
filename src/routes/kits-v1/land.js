@@ -6,11 +6,15 @@ import {
   retrieveParcels
 } from '../../factories/land/land.factory.js'
 import Boom from '@hapi/boom'
+import { createLogger } from '../../common/helpers/logging/logger.js'
+
+const logger = createLogger('land.route')
 
 const extractOrganisationId = (request) => {
   const organisationId = request.params.organisationId
   if (!Number.isInteger(Number(organisationId))) {
-    throw Boom.badRequest(`Bad request`)
+    logger.warn(`Badly formed organisation ID (${organisationId})`)
+    throw Boom.forbidden()
   }
   return organisationId
 }
@@ -26,8 +30,9 @@ const validateBbox = (request) => {
   const coordinates = bbox.split(',')
   if (
     coordinates.length !== 4 ||
-    !coordinates.every((coordinate) => /^[+-]?\d*\.?\d+$/.test(coordinate))
+    coordinates.some((coordinate) => Number.isNaN(Number.parseFloat(coordinate)))
   ) {
+    logger.warn('bbox must contain 4 comma separated numbers')
     throw Boom.notFound()
   }
 
@@ -36,14 +41,17 @@ const validateBbox = (request) => {
 
 const extractIncludeGeometries = (request) => {
   const { includeGeometries } = request.query
-  if (
-    includeGeometries !== undefined &&
-    !['true', 'false'].includes(includeGeometries.toLowerCase())
-  ) {
-    throw Boom.badRequest(`invalid includeGeometries: ${includeGeometries}`)
-  }
-
   return includeGeometries?.toLowerCase() === 'true'
+}
+
+// Dates must have format DD-MMM-YY (e.g. 10-Jul-24)
+const HISTORIC_DATE_PATTERN = /^\d{2}-[A-Za-z]{3}-\d{2}$/
+
+const validateHistoricDate = (request, errorFunction) => {
+  const { historicDate } = request.params
+  if (!HISTORIC_DATE_PATTERN.test(historicDate)) {
+    throw errorFunction()
+  }
 }
 
 export const land = [
@@ -52,6 +60,7 @@ export const land = [
     path: '/lms/organisation/{organisationId}/parcels/historic/{historicDate}',
     handler: async (request, h) => {
       const organisationId = extractOrganisationId(request)
+      validateHistoricDate(request, Boom.internal)
 
       const parcels = retrieveParcels(organisationId)
       return h.response(parcels)
@@ -62,6 +71,7 @@ export const land = [
     path: '/lms/organisation/{organisationId}/parcel-details/historic/{historicDate}',
     handler: async (request, h) => {
       const organisationId = extractOrganisationId(request)
+      validateHistoricDate(request, Boom.forbidden)
 
       const parcelDetails = retrieveParcelDetails(organisationId)
       return h.response(parcelDetails)
@@ -85,6 +95,7 @@ export const land = [
     path: '/lms/organisation/{organisationId}/covers-summary/historic/{historicDate}',
     handler: async (request, h) => {
       const organisationId = extractOrganisationId(request)
+      validateHistoricDate(request, Boom.forbidden)
 
       const coversSummary = retrieveCoversSummary(organisationId)
       return h.response(coversSummary)
