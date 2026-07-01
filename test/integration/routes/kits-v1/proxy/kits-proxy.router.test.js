@@ -184,7 +184,7 @@ describe('KITS Proxy router', () => {
       expect(response.headers['set-cookie']).toBeUndefined()
     })
 
-    test('sets content-encoding: identity on all responses', async () => {
+    test('does not force a content-encoding header on responses', async () => {
       mockUpstreamResponse()
 
       const response = await server.inject({
@@ -192,10 +192,10 @@ describe('KITS Proxy router', () => {
         url: '/internal/extapi/person/123/summary'
       })
 
-      expect(response.headers['content-encoding']).toBe('identity')
+      expect(response.headers['content-encoding']).toBeUndefined()
     })
 
-    test('sets content-encoding: identity on error responses', async () => {
+    test('does not force a content-encoding header on error responses', async () => {
       mockUpstreamResponse({ status: 500 })
 
       const response = await server.inject({
@@ -203,7 +203,19 @@ describe('KITS Proxy router', () => {
         url: '/internal/extapi/person/123/summary'
       })
 
-      expect(response.headers['content-encoding']).toBe('identity')
+      expect(response.headers['content-encoding']).toBeUndefined()
+    })
+
+    test('compresses large responses when the caller accepts gzip', async () => {
+      mockUpstreamResponse({ body: { _data: { description: 'x'.repeat(2000) } } })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/internal/extapi/person/123/summary',
+        headers: { 'accept-encoding': 'gzip' }
+      })
+
+      expect(response.headers['content-encoding']).toBe('gzip')
     })
 
     test('returns upstream status code to caller', async () => {
