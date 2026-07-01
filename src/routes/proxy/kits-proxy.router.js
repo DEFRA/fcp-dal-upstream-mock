@@ -73,10 +73,8 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
           response.header(name, value)
         }
 
-        // Any content encoding applied by the upstream is lost when we create an ArrayBuffer from the
-        // upstream response body, so using the upstream's content-encoding would be incorrect here.
-        // Make it clear to any downstream caller that the body is not encoded
-        response.header('content-encoding', 'identity')
+        // Body is already decoded by fetch, so no content-encoding header is set here -
+        // this lets Hapi's own compression negotiate and gzip the response as normal.
         return response
       } catch (error) {
         logger.error(JSON.stringify(error))
