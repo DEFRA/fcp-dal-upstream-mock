@@ -1,8 +1,10 @@
 import { faker } from '../../factories/common.js'
 import {
   bankAccountStatusByOrgId,
+  bankExistingAccountsByOrgId,
   bankLockedPairs,
   bankValidateTestAccounts,
+  frnToOrgId,
   sbiToOrgId
 } from '../../factories/id-lookups.js'
 
@@ -217,6 +219,16 @@ export const bank = [
         updatedRecently: status.updatedRecently,
         new: status.new
       })
+    }
+  },
+  {
+    method: 'GET',
+    path: '/bank-change-service/v1/existing-accounts/{frn}',
+    handler: async (request, h) => {
+      const { frn } = request.params
+      const orgId = frnToOrgId[frn]
+      const accounts = bankExistingAccountsByOrgId[orgId] ?? []
+      return h.response({ accounts })
     }
   },
   {
