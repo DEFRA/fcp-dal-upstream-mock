@@ -620,6 +620,50 @@ describe('Basic queries for faked routes', () => {
         })
       )
     })
+
+    test('Should return customers for /authorisation/organisation/{organisationId} for SFD business-details org', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/3009000'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data.length).toBeGreaterThan(0)
+      // Verify each customer has expected shape with id and customerReference
+      json._data.forEach((customer) => {
+        expect(customer).toHaveProperty('id')
+        expect(customer).toHaveProperty('customerReference')
+      })
+    })
+
+    test('Should return customers for /authorisation/organisation/{organisationId} for SFD business-details org with multiple customers', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/3009001'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data.length).toBeGreaterThan(0)
+      // Verify each customer has expected shape with id and customerReference
+      json._data.forEach((customer) => {
+        expect(customer).toHaveProperty('id')
+        expect(customer).toHaveProperty('customerReference')
+      })
+    })
+
+    test('Should return customers for /authorisation/organisation/{organisationId} for SFD performance-data org', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/5583575'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data.length).toBeGreaterThan(0)
+      json._data.forEach((customer) => {
+        expect(customer).toHaveProperty('id')
+        expect(customer).toHaveProperty('customerReference')
+      })
+    })
   })
 
   describe('Search routes', () => {

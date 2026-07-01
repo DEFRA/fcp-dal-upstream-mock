@@ -6,4 +6,17 @@ import { sfdBusinessLookupCore } from './business.js'
 import { sfdPersonLookup as sfdPersonLookupEdgeCase } from './personal.js'
 import { sfdPersonLookupPerformance, sfdBusinessLookupPerformance } from './performance.js'
 export const sfdPersonLookup = { ...sfdPersonLookupEdgeCase, ...sfdPersonLookupPerformance }
-export const sfdBusinessLookup = { ...sfdBusinessLookupCore, ...sfdBusinessLookupPerformance }
+
+const sfdBusinessLookupMerged = { ...sfdBusinessLookupCore, ...sfdBusinessLookupPerformance }
+// Single source of truth for customer shape: coerce raw person-id numbers to { personId }.
+export const sfdBusinessLookup = Object.fromEntries(
+  Object.entries(sfdBusinessLookupMerged).map(([orgId, orgData]) => [
+    orgId,
+    {
+      ...orgData,
+      customers: Array.isArray(orgData.customers)
+        ? orgData.customers.map((c) => (typeof c === 'number' ? { personId: c } : c))
+        : orgData.customers
+    }
+  ])
+)
