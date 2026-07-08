@@ -147,12 +147,14 @@ const buildValidateSuccess = (status, account) => {
       bank: {}
     }
   }
-  if (isPresent(account.iban)) response.account.iban = account.iban
+  if (isPresent(account.iban)) response.account.iban = String(account.iban)
   if (account.bank) {
-    if (isPresent(account.bank.name)) response.account.bank.name = account.bank.name
+    if (isPresent(account.bank.name)) response.account.bank.name = String(account.bank.name)
     const sortCode = normaliseSortCode(account.bank.sortCode)
     if (sortCode) response.account.bank.sortCode = sortCode
-    if (isPresent(account.bank.swiftCode)) response.account.bank.swiftCode = account.bank.swiftCode
+    if (isPresent(account.bank.swiftCode)) {
+      response.account.bank.swiftCode = String(account.bank.swiftCode)
+    }
   }
   return response
 }
