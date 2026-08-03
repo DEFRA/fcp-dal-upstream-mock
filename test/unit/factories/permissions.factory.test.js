@@ -63,9 +63,11 @@ describe('permissions.factory', () => {
       expect(data).toEqual({ notARealFunction: false })
     })
 
-    it('recognises every function documented in the OAS AuthorisationData schema', async () => {
+    it('recognises every function documented in the OAS response schema', async () => {
       const schema = await loadSchema('routes/kits-v1/permissions-schema.oas.yml')
-      const documented = Object.keys(schema.components.schemas.AuthorisationData.properties)
+      const documented = Object.keys(
+        schema.components.schemas.AuthorisationByFunctionResponse.properties.data.properties
+      )
       expect([...KNOWN_FUNCTIONS].sort()).toEqual(documented.sort())
     })
   })

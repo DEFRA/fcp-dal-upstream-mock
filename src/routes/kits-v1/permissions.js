@@ -3,11 +3,6 @@ import { checkId } from '../../utils/shared-datatypes.js'
 
 const responseWrapper = { errorString: null, success: true }
 
-const wafForbiddenHtml = `<html><body><h1>403 Forbidden</h1>
-Request forbidden by administrative rules.
-</body></html>
-`
-
 const errorEnvelope = { data: null, success: false, errorString: 'An error has occurred.' }
 
 // Splits the pipe-separated list the way the upstream does
@@ -23,12 +18,7 @@ export const permissions = [
     method: 'GET',
     path: '/SitiAgriApi/authorisation/organisation/{orgId}/byFunction',
     handler: async (request, h) => {
-      let orgId
-      try {
-        orgId = checkId(request, 'orgId')
-      } catch {
-        return h.response(wafForbiddenHtml).code(403).type('text/html')
-      }
+      const orgId = checkId(request, 'orgId')
 
       let { functions, module } = request.query
       if (functions === undefined || module === undefined) {

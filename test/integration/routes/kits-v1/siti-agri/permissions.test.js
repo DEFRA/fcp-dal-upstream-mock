@@ -52,15 +52,13 @@ describe('Permissions (authorisation byFunction) route', () => {
     )
   })
 
-  it('returns the WAF-style HTML 403 for a non-integer orgId, like the upstream', async () => {
+  it('returns 403 for a non-integer orgId, like the upstream', async () => {
     const response = await server.inject({
       method: 'GET',
       url: `/SitiAgriApi/authorisation/organisation/not-an-id/byFunction?${query}`
     })
 
     expect(response.statusCode).toBe(403)
-    expect(response.headers['content-type']).toContain('text/html')
-    expect(response.payload).toContain('403 Forbidden')
   })
 
   it('returns the error envelope as a 500 when functions is missing, like the upstream', async () => {

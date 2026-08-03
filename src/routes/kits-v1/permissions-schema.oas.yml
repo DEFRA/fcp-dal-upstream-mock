@@ -161,10 +161,51 @@ components:
                 </body></html>
 
   schemas:
-    ResponseWrapper:
+    AuthorisationByFunctionResponse:
       type: object
       properties:
-        data: {} # left abstract, to be overridden in specific responses
+        data:
+          type: object
+          description: >
+            A map of requested function name to a boolean indicating whether the external user is
+            authorised to perform it. Only the functions requested via `byFunction` are returned,
+            so every property is optional. The recognised external-user functions are listed
+            below.
+          properties:
+            addOrRemoveOrTransferLand: { type: boolean }
+            addRoleOrPrivilege: { type: boolean }
+            amendApplication: { type: boolean }
+            amendBankAccountDetails: { type: boolean }
+            amendBusinessDetails: { type: boolean }
+            amendControlledBusinessInfo: { type: boolean }
+            amendELMApplications: { type: boolean }
+            amendEntitlements: { type: boolean }
+            amendLegallyResponsiblePeople: { type: boolean }
+            amendNewYoungFarmerProcess: { type: boolean }
+            applyForBPS: { type: boolean }
+            closeBusiness: { type: boolean }
+            confirmBusiness: { type: boolean }
+            deleteBusiness: { type: boolean }
+            modifyRoleOrPrivilege: { type: boolean }
+            removeRoleOrPrivilege: { type: boolean }
+            submitApplication: { type: boolean }
+            submitELMApplications: { type: boolean }
+            updateLandUse: { type: boolean }
+            viewApplication: { type: boolean }
+            viewBusinessBankAccount: { type: boolean }
+            viewBusinessDetails: { type: boolean }
+            viewCPH: { type: boolean }
+            viewCSAgreements: { type: boolean }
+            viewCSApplications: { type: boolean }
+            viewCSClaims: { type: boolean }
+            viewCountrysideStewardship: { type: boolean }
+            viewELMApplications: { type: boolean }
+            viewEntitlements: { type: boolean }
+            viewLand: { type: boolean }
+            viewLegallyResponsiblePeople: { type: boolean }
+          # the pipe-separated list is caller-supplied, so unrecognised functions may be echoed back
+          additionalProperties:
+            type: boolean
         errorString:
           type: [string, 'null']
         success:
@@ -174,66 +215,23 @@ components:
         - errorString
         - success
       additionalProperties: false
-    AuthorisationByFunctionResponse:
-      allOf:
-        - $ref: '#/components/schemas/ResponseWrapper'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/AuthorisationData'
     ErrorResponse:
       description: >
         The service's JSON error envelope - the same wrapper as a success response, but with
         `data` nulled, `success` false and the reason in `errorString`.
-      allOf:
-        - $ref: '#/components/schemas/ResponseWrapper'
-        - type: object
-          properties:
-            data:
-              type: 'null'
-            errorString:
-              type: string
-    AuthorisationData:
       type: object
-      description: >
-        A map of requested function name to a boolean indicating whether the external user is
-        authorised to perform it. Only the functions requested via `byFunction` are returned, so
-        every property is optional. The recognised external-user functions are listed below.
       properties:
-        addOrRemoveOrTransferLand: { type: boolean }
-        addRoleOrPrivilege: { type: boolean }
-        amendApplication: { type: boolean }
-        amendBankAccountDetails: { type: boolean }
-        amendBusinessDetails: { type: boolean }
-        amendControlledBusinessInfo: { type: boolean }
-        amendELMApplications: { type: boolean }
-        amendEntitlements: { type: boolean }
-        amendLegallyResponsiblePeople: { type: boolean }
-        amendNewYoungFarmerProcess: { type: boolean }
-        applyForBPS: { type: boolean }
-        closeBusiness: { type: boolean }
-        confirmBusiness: { type: boolean }
-        deleteBusiness: { type: boolean }
-        modifyRoleOrPrivilege: { type: boolean }
-        removeRoleOrPrivilege: { type: boolean }
-        submitApplication: { type: boolean }
-        submitELMApplications: { type: boolean }
-        updateLandUse: { type: boolean }
-        viewApplication: { type: boolean }
-        viewBusinessBankAccount: { type: boolean }
-        viewBusinessDetails: { type: boolean }
-        viewCPH: { type: boolean }
-        viewCSAgreements: { type: boolean }
-        viewCSApplications: { type: boolean }
-        viewCSClaims: { type: boolean }
-        viewCountrysideStewardship: { type: boolean }
-        viewELMApplications: { type: boolean }
-        viewEntitlements: { type: boolean }
-        viewLand: { type: boolean }
-        viewLegallyResponsiblePeople: { type: boolean }
-      # the pipe-separated list is caller-supplied, so unrecognised functions may be echoed back
-      additionalProperties:
-        type: boolean
+        data:
+          type: 'null'
+        errorString:
+          type: string
+        success:
+          type: boolean
+      required:
+        - data
+        - errorString
+        - success
+      additionalProperties: false
 
   securitySchemes:
     mTLS:
