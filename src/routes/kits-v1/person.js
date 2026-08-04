@@ -134,13 +134,17 @@ export const person = [
         throw Boom.badData('validation error while processing input', request)
       }
 
-      // Convert dateOfBirth from seconds (DAL) to milliseconds (stored format)
-      const updates =
-        typeof body.dateOfBirth === 'number' && body.dateOfBirth > 0
-          ? { ...body, dateOfBirth: body.dateOfBirth * 1000 }
-          : body
+      // Convert dateOfBirth from seconds (DAL) to milliseconds (stored format).
+      // The schema allows integer, string, or null; integers/strings may be negative (pre-1970).
+      const rawDob = body.dateOfBirth
+      if (rawDob != null) {
+        const secs = typeof rawDob === 'string' ? Number(rawDob) : rawDob
+        if (Number.isFinite(secs)) {
+          body.dateOfBirth = secs * 1000
+        }
+      }
 
-      updatePerson(personId, updates)
+      updatePerson(personId, body)
       return h.response().code(204)
     }
   }
