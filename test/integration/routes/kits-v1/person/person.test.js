@@ -297,5 +297,31 @@ describe('Person routes', () => {
         message: 'validation error while processing input'
       })
     })
+
+    test('should convert dateOfBirth from seconds to milliseconds on PUT', async () => {
+      const secondsSinceEpoch = 1735689600 // 2025-01-01
+      const expectedMilliseconds = 1735689600000
+
+      // fetch current state so we send a complete valid payload
+      const { result: current } = await server.inject({
+        method: 'GET',
+        url: '/person/11111111/summary'
+      })
+
+      const putResponse = await server.inject({
+        method: 'PUT',
+        url: '/person/11111111',
+        headers: { email: 'test@defra.gov.uk' },
+        payload: { ...current._data, dateOfBirth: secondsSinceEpoch }
+      })
+      expect(putResponse.statusCode).toBe(204)
+
+      const getResponse = await server.inject({
+        method: 'GET',
+        url: '/person/11111111/summary'
+      })
+      expect(getResponse.statusCode).toBe(200)
+      expect(getResponse.result._data.dateOfBirth).toBe(expectedMilliseconds)
+    })
   })
 })
