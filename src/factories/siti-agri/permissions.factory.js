@@ -38,9 +38,6 @@ export const KNOWN_FUNCTIONS = [
 
 const knownFunctions = new Set(KNOWN_FUNCTIONS)
 
-const hashFunctionName = (name) =>
-  [...name].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) % 2147483647, 7)
-
 export const retrieveAuthorisationByFunction = (orgId, functions) => {
   return functions.reduce((data, functionName) => {
     // The upstream echoes unrecognised function names back with a false.
@@ -49,7 +46,7 @@ export const retrieveAuthorisationByFunction = (orgId, functions) => {
       return data
     }
     // Seed per org+function so a function's flag is stable regardless of what else is requested.
-    safeSeed([orgId, hashFunctionName(functionName)])
+    safeSeed([orgId, functionName])
     data[functionName] = faker.datatype.boolean()
     return data
   }, {})
