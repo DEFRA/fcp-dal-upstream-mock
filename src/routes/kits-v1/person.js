@@ -138,7 +138,7 @@ export const person = [
       // The schema allows integer, string, or null; integers/strings may be negative (pre-1970).
       const rawDob = body.dateOfBirth
       if (rawDob != null) {
-        const secs = typeof rawDob === 'string' ? Number(rawDob) : rawDob
+        const secs = Number(rawDob)
         if (Number.isFinite(secs)) {
           body.dateOfBirth = secs * 1000
         }
