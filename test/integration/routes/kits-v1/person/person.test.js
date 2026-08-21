@@ -64,6 +64,15 @@ describe('Person routes', () => {
       expect(statusCode).toBe(200)
       expect(result).toEqual({ _data: { emailDuplicated: false } })
     })
+
+    it('should not report a duplicate when the matching person has not validated their email', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/unvalidated@the-closet.net/validateEmail'
+      })
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({ _data: { emailDuplicated: false } })
+    })
   })
 
   it('should GET a person conforming to the schema', async () => {

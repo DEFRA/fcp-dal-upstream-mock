@@ -69,7 +69,9 @@ export const person = [
     path: '/person/{email}/validateEmail',
     handler: async (request, h) => {
       const email = request.params.email.toLowerCase()
-      const emailDuplicated = allPeople().some((person) => person.email?.toLowerCase() === email)
+      const emailDuplicated = allPeople().some(
+        (person) => person.email?.toLowerCase() === email && person.emailValidated
+      )
       return h.response({ _data: { emailDuplicated } })
     }
   },
