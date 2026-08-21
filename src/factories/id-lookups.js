@@ -37,6 +37,16 @@ export const staticPersonData = {
     title: null,
     otherTitle: null
   },
+  11111121: {
+    // static data overrides example - duplicate email that is NOT validated
+    crn: '1111112100',
+    firstName: 'Baby',
+    middleName: null,
+    lastName: 'Skeleton',
+    email: 'unvalidated@the-closet.net',
+    emailValidated: false,
+    confirmed: true
+  },
   // Person in org 333333333
   11111120: {
     crn: '1111111901',
