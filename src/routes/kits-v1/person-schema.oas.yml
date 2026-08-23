@@ -31,8 +31,9 @@ paths:
             type: 'string'
       responses:
         '200':
-          description: "successfully returns a flag to indicate if the email is\
-            \ duplicate. Returns result inside CapdResponse"
+          description: >
+            Successfully returns a flag to indicate if the email is duplicate.
+            Returns result inside CapdResponse
           content:
             application/json:
               schema:
@@ -49,6 +50,9 @@ paths:
                 required:
                   - '_data'
                 additionalProperties: false
+        '403':
+          description: Checking for duplicate email is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
         '500':
           description: 'Error confirming if email is duplicated'
           content:
@@ -62,6 +66,7 @@ paths:
                   message:
                     type: string
                     example: 'There was an error processing your request.'
+
   /person/{personId}/summary:
     get:
       tags:
@@ -98,13 +103,15 @@ paths:
         '404':
           description: 'Person not found'
           $ref: '#/components/responses/NotFound'
+
   /person/search:
     post:
       tags:
         - 'person'
       summary: 'Search for a person'
       description: >
-        Search for a person by CRN, personal identifier, customer name, customer postcode, vendor number, or trader number.
+        Search for a person by CRN, personal identifier, customer name, customer postcode,
+        vendor number, or trader number.
       operationId: 'searchPerson'
       requestBody:
         required: true
@@ -114,7 +121,8 @@ paths:
               $ref: '#/components/schemas/SearchRequestBody'
       responses:
         '200':
-          description: 'Successfully returns list of customer summary. Returns result inside a CapdPageResponse'
+          description: >
+            Successfully returns list of customer summary. Returns result inside a CapdPageResponse.
           content:
             application/json:
               schema:
@@ -132,7 +140,8 @@ paths:
                 additionalProperties: false
         '400':
           description: >
-            The `primarySearchPhrase` is shorter than the minimum length for the selected `searchFieldType`, or the `searchFieldType` is not recognised.
+            The `primarySearchPhrase` is shorter than the minimum length for the selected `searchFieldType`,
+            or the `searchFieldType` is not recognised.
           $ref: '#/components/responses/BadRequest'
         '500':
           description: 'Internal server error, or only `searchFieldType` was provided.'
@@ -148,6 +157,7 @@ paths:
                     type: string
                     example: >
                       There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
+
   /person/{personId}:
     put:
       tags:
@@ -273,7 +283,8 @@ components:
     SearchRequestBody:
       type: object
       description: >
-        Search for a person by one of the options. The required length of `primarySearchPhrase` depends on the chosen `searchFieldType`:
+        Search for a person by one of the options. The required length of `primarySearchPhrase` depends
+        on the chosen `searchFieldType`:
           - `CUSTOMER_REFERENCE` - the full 10-digit CRN; returns 0 or 1 results.
           - `PERSONAL_IDENTIFIER` - the full personal identifier, at least 9 characters; returns 0 or 1 results.
           - `CUSTOMER_NAME` - partial first and/or last name (non-empty); returns 0 or more results.
