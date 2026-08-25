@@ -44,3 +44,32 @@ npm run test:contract
 ```
 
 The above creates a local `docker compose` environment, spinning up the mock API and running `schemathesis` against it.
+
+## Known exceptions
+
+Endpoint-specific check exclusions (where the upstream's actual behaviour can't be expressed in
+the OAS) live as commented `[[operations]]` blocks in [`schemathesis.toml`](./schemathesis.toml).
+
+One exception needs more than config, so it's documented here instead:
+
+**`PUT /person/{personId}` - `dateOfBirth`**
+
+`dateOfBirth` must be before "now", which OAS has no way to express (there's no relative-to-request-time
+constraint) - the schema just bounds it to a very large integer. This means Schemathesis can generate a
+schema-valid `dateOfBirth` that's actually in the future, which the API correctly 422s but which reads as
+a `positive_data_acceptance` failure ("valid data was rejected").
+
+Disabling `positive_data_acceptance` for the whole operation would also stop checking every other field
+on this endpoint (title, name, address, phone, email, etc.), so instead:
+
+- [`hooks.py`](./hooks.py) registers a `map_body` hook scoped to this operation that rewrites any generated
+  `dateOfBirth` landing in the future back into the past.
+- This fixes the `Examples` and `Fuzzing` phases, but Schemathesis does not apply body-generation hooks
+  during the `Coverage` phase - which always probes `dateOfBirth`'s schema-max boundary, a guaranteed
+  future date. There's no way to disable a single phase for one operation via config.
+- So `PUT /person/{personId}` is excluded from the main `person` schema run and tested separately with
+  `--phases=examples,fuzzing` (see the `person` handling in [`compose.yml`](./compose.yml) and
+  [`check-schema.sh`](./check-schema.sh)).
+
+Net effect: `positive_data_acceptance` is fully checked for this endpoint except for the `Coverage`
+phase's boundary probe on `dateOfBirth` specifically.

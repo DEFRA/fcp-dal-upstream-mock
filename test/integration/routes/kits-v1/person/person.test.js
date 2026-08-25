@@ -279,7 +279,6 @@ describe('Person routes', () => {
         firstName: 'test-first-name',
         middleName: 'test-middle-name',
         lastName: 'test-last-name',
-        // Input as seconds
         dateOfBirth: -2,
         landline: '01234 567890',
         mobile: '07111 222333',
@@ -336,8 +335,7 @@ describe('Person routes', () => {
       expect(updated.statusCode).toBe(200)
       expect(updated.result._data).toEqual({
         ...payload,
-        // Output as milliseconds
-        dateOfBirth: -2000,
+        dateOfBirth: -2,
         // data which should not be updated remains the same
         customerReferenceNumber: personFixture._data.customerReferenceNumber,
         emailValidated: personFixture._data.emailValidated,
@@ -367,13 +365,13 @@ describe('Person routes', () => {
     })
 
     test.each([
-      [1735689600, 1735689600000, 'positive number'],
-      [-1735689600, -1735689600000, 'negative number'],
-      ['1735689600', 1735689600000, 'positive string'],
-      ['-1735689600', -1735689600000, 'negative string']
+      [1735689600, 1735689600, 'positive number'],
+      [-1735689600, -1735689600, 'negative number'],
+      ['1735689600', 1735689600, 'positive string'],
+      ['-1735689600', -1735689600, 'negative string']
     ])(
-      'should convert dateOfBirth from seconds to milliseconds on PUT (%s)',
-      async (input, expected, description) => {
+      'should store dateOfBirth as milliseconds without conversion on PUT (%s)',
+      async (input, expected) => {
         // fetch current state so we send a complete valid payload
         const { result: current } = await server.inject({
           method: 'GET',
