@@ -82,3 +82,21 @@ enabled = false
 
 # ======================= END OF =======================
 # ================== Land land-covers ==================
+
+
+
+# ======================= START OF =======================
+# ==================== Person update =====================
+
+[[operations]]
+include-path = "/person/{personId}"
+include-method = "PUT"
+
+# Skip: dateOfBirth must be before now, which cannot be expressed in OAS.
+# e.g. dateOfBirth 9999999999998 is valid per schema (integer <= 9999999999999)
+# but 422s because it is in the future.
+[operations.checks.positive_data_acceptance]
+enabled = false
+
+# ======================= END OF =======================
+# ==================== Person update =====================
