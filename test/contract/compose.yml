@@ -4,6 +4,9 @@ services:
     # payload bodies with the forbidden "__proto__" property name!!
     image: schemathesis/schemathesis:4.7.7
     entrypoint: sh
+    environment:
+      # loaded by hooks.py; see README.md "Known exceptions" for why
+      SCHEMATHESIS_HOOKS: hooks
     command:
       - -c
       - |
@@ -12,13 +15,29 @@ services:
           echo "Running contract tests for schema: $${schema}"
           auth_header="email: $${TEST_USER_EMAIL:-testuser01@defra.gov.uk}"
           if [ "$${schema}" = "payments" ]; then auth_header='Authorization: bearer token'; fi
+          extra_args=""
+          if [ "$${schema}" = "person" ]; then
+            # updatePersonDetails is tested separately below (see README.md "Known exceptions")
+            extra_args="--exclude-operation-id updatePersonDetails"
+          fi
           # NOTE: endpoint-specific check/warning exclusions are configured in schemathesis.toml
           schemathesis --config-file /schemathesis.toml run -H "$${auth_header}" \
             --exclude-checks=unsupported_method,not_a_server_error \
             --report-vcr-path /tmp/$${schema}.logs.yaml \
+            $${extra_args} \
             "http://dal-mock:3100/schemata/$${schema}.yml"
           result=$((result | $?))
         done
+
+        echo "Running contract tests for schema: person (PUT /person/{personId}, Examples+Fuzzing only)"
+        schemathesis --config-file /schemathesis.toml run -H "email: $${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
+          --exclude-checks=unsupported_method,not_a_server_error \
+          --include-operation-id updatePersonDetails \
+          --phases=examples,fuzzing \
+          --report-vcr-path /tmp/person-update.logs.yaml \
+          "http://dal-mock:3100/schemata/person.yml"
+        result=$((result | $?))
+
         if [ $${result} -eq 0 ] ; then
           echo -e "\n✅ All contract tests passed successfully."
         else
@@ -33,3 +52,4 @@ services:
     volumes:
       - ./test/contract/logs:/tmp
       - ./test/contract/schemathesis.toml:/schemathesis.toml:ro
+      - ./test/contract/hooks.py:/app/hooks.py:ro

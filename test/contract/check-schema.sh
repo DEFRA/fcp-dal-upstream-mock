@@ -42,8 +42,12 @@ usage() {
 
 cleanup() {
   local status=$?
-  if [ ${status} -ne 0 ] && [ -f "${baseDir}/tmp/vcr.yaml" ]; then
-    echo "NOTE: report from the failed run left at ${baseDir}/tmp/vcr.yaml" 1>&2
+  if [ ${status} -ne 0 ]; then
+    for report in vcr.yaml vcr-person-update.yaml; do
+      if [ -f "${baseDir}/tmp/${report}" ]; then
+        echo "NOTE: report from the failed run left at ${baseDir}/tmp/${report}" 1>&2
+      fi
+    done
     return
   fi
   rm -rf "${baseDir}/tmp"
@@ -192,9 +196,16 @@ if [ "${gateway}" = "kits-internal" ]; then # KITS internal gateway
     exit 1
   fi
   # NOTE: endpoint-specific check exclusions are configured in schemathesis.toml
+  extra_args=""
+  if [ "${schema}" = "kits-v1/person" ]; then
+    # updatePersonDetails is tested separately below; see README.md "Known exceptions"
+    extra_args="--exclude-operation-id updatePersonDetails"
+  fi
   docker run --rm --network=host --pull always \
     -v ${baseDir}/tmp:/tmp \
     -v ${baseDir}/schemathesis.toml:/tmp/schemathesis.toml:ro \
+    -v ${baseDir}/hooks.py:/app/hooks.py:ro \
+    -e SCHEMATHESIS_HOOKS=hooks \
     schemathesis/schemathesis:stable \
       --config-file /tmp/schemathesis.toml \
       run /tmp/schema.json \
@@ -202,7 +213,27 @@ if [ "${gateway}" = "kits-internal" ]; then # KITS internal gateway
         --header "x-api-key: ${CDP_API_KEY}" \
         --exclude-checks=unsupported_method,not_a_server_error \
         --report-vcr-path /tmp/vcr.yaml \
+        ${extra_args} \
         --url "${KITS_INTERNAL_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
+
+  if [ "${schema}" = "kits-v1/person" ]; then
+    echo "Running PUT /person/{personId} separately (Examples+Fuzzing only; see README.md \"Known exceptions\")"
+    docker run --rm --network=host --pull always \
+      -v ${baseDir}/tmp:/tmp \
+      -v ${baseDir}/schemathesis.toml:/tmp/schemathesis.toml:ro \
+      -v ${baseDir}/hooks.py:/app/hooks.py:ro \
+      -e SCHEMATHESIS_HOOKS=hooks \
+      schemathesis/schemathesis:stable \
+        --config-file /tmp/schemathesis.toml \
+        run /tmp/schema.json \
+          --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
+          --header "x-api-key: ${CDP_API_KEY}" \
+          --exclude-checks=unsupported_method,not_a_server_error \
+          --include-operation-id updatePersonDetails \
+          --phases=examples,fuzzing \
+          --report-vcr-path /tmp/vcr-person-update.yaml \
+          --url "${KITS_INTERNAL_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
+  fi
 
 elif [ "${gateway}" = "kits-external" ]; then # KITS EXTERNAL gateway
   if [ -z "${CDP_API_KEY}" ]; then
