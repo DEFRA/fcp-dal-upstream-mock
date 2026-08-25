@@ -1,5 +1,6 @@
 import { authenticate } from '../routes/kits-v1/authenticate-data.js'
 import { bank } from '../routes/kits-v1/bank.js'
+import { internalUser } from '../routes/kits-v1/internal-user.js'
 import { land } from '../routes/kits-v1/land.js'
 import { notifications } from '../routes/kits-v1/messages.js'
 import { organisation } from '../routes/kits-v1/organisation.js'
@@ -18,6 +19,7 @@ const router = {
         ...authenticate,
         ...sitiagri,
         ...permissions,
+        ...internalUser,
         ...notifications,
         ...land,
         ...bank,
