@@ -430,14 +430,14 @@ components:
             - type: boolean
           description: 'Last name of the person'
         dateOfBirth:
-          description: 'Date of birth as a Unix timestamp'
+          description: 'Date of birth as a Unix timestamp in milliseconds. Must be before the current time.'
           oneOf:
             - type: integer
               format: int64
               minimum: -999999999999999
-              maximum: 999999999999
+              maximum: 9999999999999
             - type: string
-              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
+              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,13})?$'
             - type: 'null'
         landline:
           oneOf:
