@@ -5,8 +5,10 @@ import { errorEnvelope, parseRequestedFunctions, responseWrapper } from './permi
 
 export const matchingPersonIds = (people, email) => {
   const lowered = email.toLowerCase()
+  // Only validated emails count, matching the observed upstream behavior of
+  // /person/{email}/validateEmail (not directly probed for this endpoint).
   return people
-    .filter((person) => person.email?.toLowerCase() === lowered)
+    .filter((person) => person.email?.toLowerCase() === lowered && person.emailValidated)
     .map((person) => person.id)
 }
 

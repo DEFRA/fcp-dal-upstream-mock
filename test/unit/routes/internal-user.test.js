@@ -3,17 +3,18 @@ import { internalUser, matchingPersonIds } from '../../../src/routes/kits-v1/int
 
 vi.mock('../../../src/factories/person/person.factory.js', () => ({
   allPeople: () => [
-    { id: 1, email: 'shared@the-mock.net' },
-    { id: 2, email: 'shared@the-mock.net' }
+    { id: 1, email: 'shared@the-mock.net', emailValidated: true },
+    { id: 2, email: 'shared@the-mock.net', emailValidated: true }
   ]
 }))
 
 const people = [
-  { id: 1, email: 'one@example.com' },
-  { id: 2, email: 'two@example.com' },
-  { id: 3, email: 'TWO@example.com' },
+  { id: 1, email: 'one@example.com', emailValidated: true },
+  { id: 2, email: 'two@example.com', emailValidated: true },
+  { id: 3, email: 'TWO@example.com', emailValidated: true },
   { id: 4, email: null },
-  { id: 5 }
+  { id: 5 },
+  { id: 6, email: 'unvalidated@example.com', emailValidated: false }
 ]
 
 describe('internal-user route - matchingPersonIds', () => {
@@ -32,6 +33,10 @@ describe('internal-user route - matchingPersonIds', () => {
   it('returns no ids when nobody matches, ignoring people without an email', () => {
     expect(matchingPersonIds(people, 'nobody@example.com')).toEqual([])
     expect(matchingPersonIds(people, '')).toEqual([])
+  })
+
+  it('ignores people whose email is not validated, like /person/{email}/validateEmail', () => {
+    expect(matchingPersonIds(people, 'unvalidated@example.com')).toEqual([])
   })
 })
 

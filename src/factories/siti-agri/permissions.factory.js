@@ -94,10 +94,10 @@ export const KNOWN_INTERNAL_FUNCTIONS = [
 const knownFunctions = new Set(KNOWN_FUNCTIONS)
 const knownInternalFunctions = new Set(KNOWN_INTERNAL_FUNCTIONS)
 
-const authorisationByFunction = (knownFunctions, seed, functions) => {
+const authorisationByFunction = (functionSet, seed, functions) => {
   return functions.reduce((data, functionName) => {
     // The upstream echoes unrecognised function names back with a false.
-    if (!knownFunctions.has(functionName)) {
+    if (!functionSet.has(functionName)) {
       data[functionName] = false
       return data
     }

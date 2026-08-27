@@ -58,6 +58,13 @@ describe('Internal user routes', () => {
       expect(other.payload).not.toBe(first.payload)
     })
 
+    it("returns 0 for a known person whose email is not validated, like /person/{email}/validateEmail's behavior", async () => {
+      const response = await postEmail('unvalidated@the-closet.net')
+
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('0')
+    })
+
     it('returns 0 for an unknown non-Defra email, like the upstream', async () => {
       const response = await postEmail('no-such-user@example.com')
 
