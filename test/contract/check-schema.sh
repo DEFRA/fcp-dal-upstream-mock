@@ -13,11 +13,12 @@ usage() {
   echo "Run schemathesis contract tests against the upstream KITS (internal or external gateway) or Hitachi."
   echo "All tests are run against the 'upgrade' API env."
   echo
-  echo "Usage: $0 {a|auth|authenticate|b|bank|l|land|o|org|organisation|p|person|perm|permissions|r|rd|reference-data|pd|payments|s|sa|siti-agri|help}"
+  echo "Usage: $0 {a|auth|authenticate|b|bank|iu|internal-user|l|land|o|org|organisation|p|person|perm|permissions|r|rd|reference-data|pd|payments|s|sa|siti-agri|help}"
   echo
   echo "Where the argument specifies which schema to test:"
   echo "  a  | auth | authenticate - test the Authenticate schema"
   echo "  b  | bank                - test the Bank Change Service schema"
+  echo "  iu | internal-user       - test the Internal User Authorisation schema"
   echo "  l  | land                - test the Land schema"
   echo "  o  | org | organisation  - test the Organisation schema"
   echo "  p  | person              - test the Person schema"
@@ -104,6 +105,11 @@ case "$1" in
     schema="kits-v1/authenticate"
     mutations='. |
 .paths["/external-auth/security-answers/{crn}"].get.parameters[0].schema.examples = [1105739979,1106046692,1106077237,1100932879,1105430162]'
+    gateway="kits-internal"
+    ;;
+  iu | internal-user )
+    schema="kits-v1/internal-user"
+    mutations='.'
     gateway="kits-internal"
     ;;
   l | land )
