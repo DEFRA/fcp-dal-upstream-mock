@@ -81,7 +81,7 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
         response.header('content-encoding', 'identity')
         return response
       } catch (error) {
-        logger.error(JSON.stringify(error))
+        logger.error({ err: error }, `Proxy request to ${targetUrl} failed`)
         throw error
       }
     }

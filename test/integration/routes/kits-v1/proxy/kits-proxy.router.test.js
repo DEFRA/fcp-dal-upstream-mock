@@ -15,8 +15,9 @@ vi.mock('node:tls', () => ({
 const INTERNAL_URL = 'http://internal-gateway.test'
 const EXTERNAL_URL = 'http://external-gateway.test'
 
+const mockLoggerError = vi.fn()
 vi.mock('../../../../../src/common/helpers/logging/logger.js', () => ({
-  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() })
+  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: mockLoggerError })
 }))
 
 let mockMTLSConfig = {
@@ -68,6 +69,7 @@ describe('KITS Proxy router', () => {
 
   beforeEach(() => {
     mockFetch.mockReset()
+    mockLoggerError.mockClear()
   })
 
   describe('/internal/extapi', () => {
@@ -262,6 +264,22 @@ describe('KITS Proxy router', () => {
       await server.inject({ method: 'GET', url: '/internal/extapi' })
 
       expect(mockFetch).toHaveBeenCalledWith(`${INTERNAL_URL}/`, expect.anything())
+    })
+
+    test('logs the underlying error and returns 500 when the upstream request fails', async () => {
+      const upstreamError = new Error('fetch failed')
+      mockFetch.mockRejectedValueOnce(upstreamError)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/internal/extapi/person/123/summary'
+      })
+
+      expect(response.statusCode).toBe(500)
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        { err: upstreamError },
+        expect.stringContaining(`${INTERNAL_URL}/person/123/summary`)
+      )
     })
   })
 
