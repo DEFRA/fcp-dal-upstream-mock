@@ -1,335 +1,191 @@
-swagger: '2.0'
-info: {}
+openapi: '3.0.1'
+info:
+  title: CAPD Places Service
+  version: v1
+  x-source-repository: capd-places-service
+  x-schema-incomplete: true
+  description: |
+    Proxy service for OS Places API postcode-to-address lookups. Accepts a postcode,
+    calls the Ordnance Survey Places API, and returns a list of addresses.
+
+    **Upstream consumers**: Portal front-end (address lookup during registration and
+    land change flows).
+    **Downstream dependencies**: Ordnance Survey (OS) Places API.
+
+    **Authentication**: No authentication scheme declared in this service.
+
+    **Note**: Source code repository is not available in this workspace. Schemas are
+    based on the generated Swagger 2.0 spec; `x-schema-incomplete: true` is applied
+    throughout.
+
+    **Response envelope**: Responses are wrapped in a `CapdResponse._data` envelope
+    (Dropwizard/Jersey service pattern).
+
+    **Error handling**:
+    - HTTP 400: OS Places API returned an error for the given postcode (passes through
+      the OS Places API error response)
+    - HTTP 500: Error occurred when calling the OS Places API client
+
+servers:
+  - url: http://localhost:8080
+    description: Local Dropwizard development server
+
 tags:
-  - name: Status
-  - name: Places
-schemes:
-  - http
+  - name: status
+    description: Application health check
+  - name: places
+    description: Postcode address lookup
+
 paths:
   /status:
     get:
       tags:
-        - Status
-      summary: Application Healthcheck
-      description: Checks service health.
+        - status
+      summary: Application health check
       operationId: getStatus
-      produces:
-        - text/plain
-      parameters: []
+      description: Returns plain text indicating service health.
       responses:
         '200':
-          description: Application health status
+          description: Service is up
+          content:
+            text/plain:
+              schema:
+                type: string
+
   /places/{postCode}:
     get:
       tags:
-        - Places
-      summary: Get the Address
-      description: Get the Address associated with the given Postcode
+        - places
+      summary: Get addresses for a postcode
       operationId: places
-      produces:
-        - application/json
+      description: |
+        Looks up addresses associated with a UK postcode via the OS Places API.
+        Returns the matching addresses and the normalised postcode.
+
+        **HTTP 200**: Addresses found and returned.
+        **HTTP 400**: OS Places API returned an error for the postcode (e.g. invalid
+          format or postcode not found). The OS Places API error is passed through.
+        **HTTP 500**: Unexpected error calling the OS Places API client.
+
+        **Note**: Postcode format is not server-side validated; the request is forwarded
+        to OS Places as-is. The `message` field in the response may contain OS Places
+        error details on failure.
       parameters:
         - name: postCode
           in: path
-          description: Post Code
           required: true
-          type: string
+          description: |
+            UK postcode to look up. Passed directly to OS Places API. Standard UK postcode
+            format expected (e.g. SW1A 1AA). No server-side format validation.
+          schema:
+            type: string
+            example: SW1A 1AA
       responses:
         '200':
-          description: Addresses is returned successfully
-          schema:
-            $ref: '#/definitions/CapdResponse'
+          description: Addresses returned for the postcode
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapdResponseCapdPlaces'
+              examples:
+                found:
+                  value:
+                    _data:
+                      postCode: SW1A 1AA
+                      addresses:
+                        - uprn: '100023336956'
+                          address: '10 DOWNING STREET, LONDON, SW1A 2AA'
+                          buildingNumber: '10'
+                          street: DOWNING STREET
+                          city: LONDON
+                          postCode: SW1A 1AA
         '400':
-          description: Error from os places api for postcode, will return the http error from the request
-          schema:
-            $ref: '#/definitions/WebApplicationException'
+          description: |
+            OS Places API returned an error for the postcode. The error response from
+            OS Places is passed through.
+          content:
+            application/json:
+              schema:
+                type: object
+                x-schema-incomplete: true
+                description: Error response passed through from OS Places API
         '500':
-          description: Error when calling os places client postcode
-          schema:
-            $ref: '#/definitions/WebApplicationException'
-definitions:
-  Address:
-    type: object
-    properties:
-      uprn:
-        type: string
-      organisationName:
-        type: string
-      address:
-        type: string
-      buildingNumber:
-        type: string
-      buildingName:
-        type: string
-      flatNumber:
-        type: string
-      street:
-        type: string
-      city:
-        type: string
-      dependentLocality:
-        type: string
-      doubleDependentLocality:
-        type: string
-      postCode:
-        type: string
-  CapdPlaces:
-    type: object
-    properties:
-      postCode:
-        type: string
-      addresses:
-        type: array
-        items:
-          $ref: '#/definitions/Address'
-      message:
-        type: string
-  CapdResponse:
-    type: object
-    properties:
-      _data:
-        type: object
-  CapdResponseCapdPlaces:
-    type: object
-    properties:
-      _data:
-        $ref: '#/definitions/CapdPlaces'
-  EntityTag:
-    type: object
-    properties:
-      value:
-        type: string
-      weak:
-        type: boolean
-  Link:
-    type: object
-    properties:
-      rels:
-        type: array
-        items:
+          description: Unexpected error calling OS Places API
+          content:
+            application/json:
+              schema:
+                type: object
+                x-schema-incomplete: true
+
+components:
+  schemas:
+    CapdResponseCapdPlaces:
+      type: object
+      description: CapdResponse envelope wrapping a CapdPlaces payload.
+      properties:
+        _data:
+          $ref: '#/components/schemas/CapdPlaces'
+
+    CapdPlaces:
+      type: object
+      x-schema-incomplete: true
+      x-validation-source: Not available (no source repository)
+      description: Postcode lookup result containing matching addresses.
+      properties:
+        postCode:
           type: string
-      uriBuilder:
-        $ref: '#/definitions/UriBuilder'
-      uri:
-        type: string
-        format: uri
-      rel:
-        type: string
-      title:
-        type: string
-      params:
-        type: object
-        additionalProperties:
-          type: string
-      type:
-        type: string
-  Locale:
-    type: object
-    properties:
-      script:
-        type: string
-      country:
-        type: string
-      variant:
-        type: string
-      extensionKeys:
-        type: array
-        uniqueItems: true
-        items:
-          type: string
-      unicodeLocaleAttributes:
-        type: array
-        uniqueItems: true
-        items:
-          type: string
-      unicodeLocaleKeys:
-        type: array
-        uniqueItems: true
-        items:
-          type: string
-      iso3Language:
-        type: string
-      iso3Country:
-        type: string
-      displayLanguage:
-        type: string
-      displayScript:
-        type: string
-      displayCountry:
-        type: string
-      displayVariant:
-        type: string
-      displayName:
-        type: string
-      language:
-        type: string
-  MediaType:
-    type: object
-    properties:
-      type:
-        type: string
-      subtype:
-        type: string
-      parameters:
-        type: object
-        additionalProperties:
-          type: string
-      wildcardType:
-        type: boolean
-      wildcardSubtype:
-        type: boolean
-  NewCookie:
-    type: object
-    properties:
-      name:
-        type: string
-      value:
-        type: string
-      version:
-        type: integer
-        format: int32
-      path:
-        type: string
-      domain:
-        type: string
-      comment:
-        type: string
-      maxAge:
-        type: integer
-        format: int32
-      expiry:
-        type: string
-        format: date-time
-      secure:
-        type: boolean
-      httpOnly:
-        type: boolean
-  Response:
-    type: object
-    properties:
-      entity:
-        type: object
-      lastModified:
-        type: string
-        format: date-time
-      date:
-        type: string
-        format: date-time
-      headers:
-        type: object
-        additionalProperties:
+          description: The postcode that was looked up (may be normalised from the input).
+          example: SW1A 1AA
+        addresses:
           type: array
+          description: List of addresses matching the postcode.
           items:
-            type: object
-      metadata:
-        type: object
-        additionalProperties:
-          type: array
-          items:
-            type: object
-      statusInfo:
-        $ref: '#/definitions/StatusType'
-      mediaType:
-        $ref: '#/definitions/MediaType'
-      allowedMethods:
-        type: array
-        uniqueItems: true
-        items:
+            $ref: '#/components/schemas/Address'
+        message:
           type: string
-      cookies:
-        type: object
-        additionalProperties:
-          $ref: '#/definitions/NewCookie'
-      entityTag:
-        $ref: '#/definitions/EntityTag'
-      links:
-        type: array
-        uniqueItems: true
-        items:
-          $ref: '#/definitions/Link'
-      stringHeaders:
-        type: object
-        additionalProperties:
-          type: array
-          items:
-            type: string
-      status:
-        type: integer
-        format: int32
-      length:
-        type: integer
-        format: int32
-      language:
-        $ref: '#/definitions/Locale'
-      location:
-        type: string
-        format: uri
-  StackTraceElement:
-    type: object
-    properties:
-      methodName:
-        type: string
-      fileName:
-        type: string
-      lineNumber:
-        type: integer
-        format: int32
-      className:
-        type: string
-      nativeMethod:
-        type: boolean
-  StatusType:
-    type: object
-    properties:
-      family:
-        type: string
-        enum:
-          - INFORMATIONAL
-          - SUCCESSFUL
-          - REDIRECTION
-          - CLIENT_ERROR
-          - SERVER_ERROR
-          - OTHER
-      statusCode:
-        type: integer
-        format: int32
-      reasonPhrase:
-        type: string
-  Throwable:
-    type: object
-    properties:
-      cause:
-        $ref: '#/definitions/Throwable'
-      stackTrace:
-        type: array
-        items:
-          $ref: '#/definitions/StackTraceElement'
-      message:
-        type: string
-      localizedMessage:
-        type: string
-      suppressed:
-        type: array
-        items:
-          $ref: '#/definitions/Throwable'
-  UriBuilder:
-    type: object
-  WebApplicationException:
-    type: object
-    properties:
-      cause:
-        $ref: '#/definitions/Throwable'
-      stackTrace:
-        type: array
-        items:
-          $ref: '#/definitions/StackTraceElement'
-      response:
-        $ref: '#/definitions/Response'
-      message:
-        type: string
-      localizedMessage:
-        type: string
-      suppressed:
-        type: array
-        items:
-          $ref: '#/definitions/Throwable'
+          description: |
+            Optional message field. May contain error details from OS Places API on failure.
+
+    Address:
+      type: object
+      x-schema-incomplete: true
+      x-validation-source: Not available (no source repository)
+      description: |
+        A single address from the OS Places API. Field availability depends on the OS Places
+        API response — some fields may be absent for some addresses.
+      properties:
+        uprn:
+          type: string
+          description: Unique Property Reference Number
+          example: '100023336956'
+        organisationName:
+          type: string
+          description: Organisation name at this address (if applicable)
+        address:
+          type: string
+          description: Full formatted address string
+        buildingNumber:
+          type: string
+          description: Building number
+        buildingName:
+          type: string
+          description: Building name (if applicable)
+        flatNumber:
+          type: string
+          description: Flat or unit number (if applicable)
+        street:
+          type: string
+          description: Street name
+        city:
+          type: string
+          description: City or town
+        dependentLocality:
+          type: string
+          description: Dependent locality (e.g. district or neighbourhood)
+        doubleDependentLocality:
+          type: string
+          description: Double dependent locality (rare — sub-locality)
+        postCode:
+          type: string
+          description: Full postcode for this address
+          example: SW1A 1AA
