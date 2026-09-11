@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { createLogger } from '../../common/helpers/logging/logger.js'
 import { config } from '../../config.js'
 import { paginate } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
@@ -11,6 +12,8 @@ import {
 } from '../../factories/person/person.factory.js'
 import { checkSearchPhrase } from '../../utils/shared-datatypes.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const logger = createLogger('person.route')
 
 // `primarySearchPhrase` constraints for each searchFieldType
 const searchFieldTypes = {
@@ -143,10 +146,14 @@ export const person = [
       }
 
       if (!validateUpdatePersonPayload(request.payload)) {
+        logger.info(
+          `validateUpdatePersonPayload failed: ${JSON.stringify(validateUpdatePersonPayload.errors)}`
+        )
         throw Boom.badData('validation error while processing input', request)
       }
 
       if (body.dateOfBirth != null && body.dateOfBirth > Date.now()) {
+        logger.info(`dateOfBirth is in the future: ${body.dateOfBirth}`)
         throw Boom.badData('validation error while processing input', request)
       }
 
