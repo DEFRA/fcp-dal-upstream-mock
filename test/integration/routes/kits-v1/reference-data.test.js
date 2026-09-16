@@ -13,14 +13,18 @@ describe('Reference Data routes', () => {
     ])
   })
 
-  it('should GET reference data conforming to the schema', async () => {
+  it.each([
+    ['business types', '/reference/business-types'],
+    ['legal status', '/reference/legalstatus'],
+    ['titles', '/reference/titles']
+  ])('should GET %s reference data conforming to the schema', async (_description, url) => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/reference/legalstatus'
+      url
     })
     expect(statusCode).toBe(200)
     expect(result).toConformToSchema(
-      schema.paths['/reference/legalstatus'].get.responses['200'].content['application/json'].schema
+      schema.paths[url].get.responses['200'].content['application/json'].schema
     )
   })
 })
