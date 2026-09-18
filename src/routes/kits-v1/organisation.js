@@ -1,6 +1,7 @@
 import Boom from '@hapi/boom'
 import { paginate } from '../../factories/common.js'
 import {
+  createAuthorisation,
   createOrganisation,
   deactivateOrganisation,
   lockOrganisation,
@@ -10,6 +11,7 @@ import {
   searchOrganisations,
   unlockOrganisation,
   updateAdditionalOrganisationDetails,
+  updateAuthorisation,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { checkId, checkSearchPhrase } from '../../utils/shared-datatypes.js'
@@ -234,6 +236,36 @@ export const organisation = [
       reactivateOrganisation(organisationId)
 
       return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation',
+    handler: async (request, h) => {
+      const orgId = checkId(request, 'orgId')
+      try {
+        createAuthorisation(orgId, request.payload)
+        return h.response({ success: true }).code(201)
+      } catch {
+        return h.response({ success: false })
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}',
+    handler: async (request, h) => {
+      const orgId = checkId(request, 'orgId')
+      const personId = checkId(request, 'personId')
+
+      console.log(JSON.stringify(request.payload, null, 2))
+
+      try {
+        updateAuthorisation(orgId, personId, request.payload)
+        return h.response({ success: true }).code(200)
+      } catch (e) {
+        return h.response({ success: false, errorString: e.message })
+      }
     }
   }
 ]
