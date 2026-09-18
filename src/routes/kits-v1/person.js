@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { config } from '../../config.js'
-import { paginate } from '../../factories/common.js'
+import { fakeId, paginate, safeSeed } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
   allPeople,
@@ -48,11 +48,33 @@ const mapPersonToSearchResult = ({
   deactivated
 })
 
+const mapPersonToPartyDigitalContact = ({ id, emailValidated, email }, requestEmail) => {
+  safeSeed([id, 'partyDigitalContactId'])
+
+  return {
+    id: fakeId(),
+    partyId: id, // partyId is the personId here (a party can also be an organisation elsewhere)
+    mdmPartyContactId: null,
+    digitalContactType: { id: 100301, type: 'Email Address' }, // 100301 = EMAIL_ADDRESS (not 100306 CORRESPONDENCE_EMAIL)
+    digitalAddress: email, // Bit unusual, but the API echos back the same email address passed in the url params
+    validated:
+      email === requestEmail &&
+      emailValidated /* Not been able to confirm this is how this works as we only have 1
+    // external test account with an unvalidated account and no email support */
+  }
+}
+
 const validateUpdatePersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
   (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
 )
 
+/**
+ * Get the personId from the request params
+ * @param {*} request
+ * @returns personId
+ * @throws {Boom.Boom} 403 if personId is not an integer in the acceptable range
+ */
 const checkPersonId = (request) => {
   const personId = Number.parseInt(request.params.personId, 10)
 
@@ -76,6 +98,20 @@ export const person = [
         (person) => person.email?.toLowerCase() === email && person.emailValidated
       )
       return h.response({ _data: { emailDuplicated } })
+    }
+  },
+  {
+    method: 'GET',
+    path: '/person/{personId}/{email}/confirm',
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
+      const person = retrievePerson(personId)
+
+      if (!person.email) {
+        throw Boom.notFound()
+      }
+
+      return h.response({ _data: mapPersonToPartyDigitalContact(person, request.params.email) })
     }
   },
   {
