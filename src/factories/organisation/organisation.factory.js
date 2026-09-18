@@ -302,3 +302,101 @@ export const unlockOrganisation = (orgId) => {
     throw Boom.internal(e.message)
   }
 }
+
+const sameId = (a, b) => String(a) === String(b)
+
+const personIdsForOrg = (orgId) => orgIdToPersonIds[orgId] || []
+
+const hasAuthorisation = (orgId, personId) =>
+  personIdsForOrg(orgId).some((id) => sameId(id, personId))
+
+const retrieveExistingPerson = (personId) => {
+  try {
+    return retrievePerson(personId)
+  } catch {
+    throw Boom.notFound(`person with personId ${personId} not found`)
+  }
+}
+
+const privilegeNamesForPerson = (personPrivileges, personId) => {
+  if (!Array.isArray(personPrivileges)) return undefined
+  const match = personPrivileges.find((entry) => sameId(entry.personId, personId))
+  return match?.privilegeNames
+}
+
+const roleForPerson = (personRoles, personId) => {
+  if (!Array.isArray(personRoles) || personRoles.length === 0) return undefined
+  const match = personRoles.find((entry) => sameId(entry.personId, personId)) ?? personRoles[0]
+  return match?.role
+}
+
+/**
+ * Create an authorisation (link a person to an organisation with role + privileges).
+ * Throws Boom errors for missing org/person or duplicate link.
+ */
+export const createAuthorisation = (orgId, payload) => {
+  retrieveOrganisation(orgId)
+
+  const personRoles = payload?.personRoles ?? []
+  if (!Array.isArray(personRoles) || personRoles.length === 0) {
+    throw Boom.badRequest('personRoles array is required')
+  }
+
+  const results = []
+
+  for (const pr of personRoles) {
+    const personId = pr.personId
+    if (!personId) {
+      throw Boom.badRequest('personId is required in personRoles entry')
+    }
+
+    const person = retrieveExistingPerson(personId)
+
+    if (hasAuthorisation(orgId, personId)) {
+      throw Boom.conflict(`person ${personId} is already authorised on organisation ${orgId}`)
+    }
+
+    if (!orgIdToPersonIds[orgId]) orgIdToPersonIds[orgId] = []
+    orgIdToPersonIds[orgId].push(personId)
+
+    if (!personIdToOrgIds[personId]) personIdToOrgIds[personId] = []
+    if (!personIdToOrgIds[personId].some((id) => sameId(id, orgId))) {
+      personIdToOrgIds[personId].push(Number(orgId))
+    }
+
+    const role = pr.role ?? null
+    const privilegeNames = privilegeNamesForPerson(payload?.personPrivileges, personId) ?? []
+
+    person.role = role
+    person.privileges = privilegeNames
+
+    results.push({ personId, role, privileges: privilegeNames })
+  }
+
+  return results
+}
+
+/**
+ * Update an existing authorisation for a person on an organisation.
+ * Throws Boom errors for missing org/person or missing existing link.
+ */
+export const updateAuthorisation = (orgId, personId, payload) => {
+  retrieveOrganisation(orgId)
+
+  if (!hasAuthorisation(orgId, personId)) {
+    throw Boom.notFound(`person ${personId} is not currently authorised on organisation ${orgId}`)
+  }
+
+  const person = retrieveExistingPerson(personId)
+  const role = roleForPerson(payload?.personRoles, personId)
+  if (role !== undefined) person.role = role
+
+  const privs = privilegeNamesForPerson(payload?.personPrivileges, personId)
+  if (privs !== undefined) person.privileges = privs
+
+  return {
+    personId: Number(personId),
+    role: person.role,
+    privileges: person.privileges
+  }
+}
