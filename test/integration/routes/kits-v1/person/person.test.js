@@ -75,6 +75,64 @@ describe('Person routes', () => {
     })
   })
 
+  describe('GET /person/{personId}/{email}/confirm', () => {
+    it('should report the email as validated when it matches an already-validated person email, conforming to the schema', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111119/skeleton@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({
+        _data: {
+          id: expect.any(Number),
+          partyId: 11111119,
+          mdmPartyContactId: null,
+          digitalContactType: { id: 100301, type: 'Email Address' },
+          digitalAddress: 'skeleton@the-closet.net',
+          validated: true
+        }
+      })
+      expect(result._data.id).not.toBe(11111119)
+      expect(result).toConformToSchema(
+        schema.paths['/person/{personId}/{email}/confirm'].get.responses['200'].content[
+          'application/json'
+        ].schema
+      )
+    })
+
+    it('should not update the person record, and should not report the email as validated when the person has not validated their email', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/unvalidated@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data.validated).toBe(false)
+
+      const { result: summaryResult } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/summary'
+      })
+      expect(summaryResult._data.emailValidated).toBe(false)
+    })
+
+    it('should return 404 when the person does not have any email assigned', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/3010085/someone@example.com/confirm'
+      })
+      expect(statusCode).toBe(404)
+      expect(result.message).toBe('Person does not have any email assigned')
+    })
+
+    it('should return 403 for an invalid personId', async () => {
+      const { statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/not-a-number/someone@example.com/confirm'
+      })
+      expect(statusCode).toBe(403)
+    })
+  })
+
   it('should GET a person conforming to the schema', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',

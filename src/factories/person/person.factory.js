@@ -106,7 +106,7 @@ export const allPeople = () =>
 // find all the people belonging to orgs matching the search function
 const peopleInOrgsWhere = (search) => {
   const orgIds = Object.keys(orgIdLookup).filter((orgId) => search(retrieveOrganisation(orgId)))
-  // only persons that exsist
+  // only persons that exist
   const personIds = new Set(orgIds.flatMap((orgId) => orgIdToPersonIds[orgId] ?? []))
   return [...personIds]
     .filter((personId) => personId in staticPersonData)
