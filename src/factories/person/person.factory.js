@@ -137,6 +137,14 @@ export const searchPeople = (searchFieldType, searchPhrase) =>
 
 export const updatePerson = (personId, updatesToPerson) => {
   const person = retrievePerson(personId)
+  const updatedPerson = applyUpdates(personUpdateSchema, person, updatesToPerson)
 
-  return (people[personId] = applyUpdates(personUpdateSchema, person, updatesToPerson))
+  // A changed email address invalidates the PartyDigitalContact record - it must be
+  // re-verified via POST /verify-email/{digitalContactPartyId} before it is trusted again.
+  // Matched case-insensitively, consistent with GET /person/{email}/validateEmail.
+  if (updatedPerson.email?.toLowerCase() !== person.email?.toLowerCase()) {
+    updatedPerson.emailValidated = false
+  }
+
+  return (people[personId] = updatedPerson)
 }

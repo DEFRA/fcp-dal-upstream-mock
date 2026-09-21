@@ -115,6 +115,53 @@ paths:
                   message:
                     type: string
                     example: 'There was an error processing your request.'
+  /verify-email/{digitalContactPartyId}:
+    post:
+      tags:
+        - 'person'
+      summary: 'Sends a verification email'
+      description: >
+        Sends a verification email to the PartyDigitalContact identified by digitalContactPartyId,
+        as returned by GET /person/{personId}/{email}/confirm
+      operationId: 'verifyEmail'
+      parameters:
+        - name: 'digitalContactPartyId'
+          in: 'path'
+          description: 'The unique ID of the PartyDigitalContact record.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: 'Verification email sent. Returns result inside a CapdResponse'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    type: string
+                required:
+                  - '_data'
+                additionalProperties: false
+        '404':
+          description: 'No digital contact found for the given digitalContactPartyId'
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: 'Error sending email'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: 'There was an error processing your request.'
   /person/{personId}/summary:
     get:
       tags:
