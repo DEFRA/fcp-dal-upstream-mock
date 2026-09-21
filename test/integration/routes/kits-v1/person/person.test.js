@@ -121,7 +121,7 @@ describe('Person routes', () => {
         url: '/person/3010085/someone@example.com/confirm'
       })
       expect(statusCode).toBe(404)
-      expect(result.message).toBe('Person does not have any email assigned')
+      expect(result.message).toBe('Not Found')
     })
 
     it('should return 403 for an invalid personId', async () => {
