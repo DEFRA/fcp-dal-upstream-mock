@@ -1,8 +1,12 @@
 import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { config } from '../../config.js'
-import { fakeId, paginate, safeSeed } from '../../factories/common.js'
-import { crnToPersonId } from '../../factories/id-lookups.js'
+import { paginate } from '../../factories/common.js'
+import {
+  crnToPersonId,
+  digitalContactPartyIdToPersonId,
+  personIdToDigitalContactPartyId
+} from '../../factories/id-lookups.js'
 import {
   allPeople,
   retrievePerson,
@@ -48,21 +52,17 @@ const mapPersonToSearchResult = ({
   deactivated
 })
 
-const mapPersonToPartyDigitalContact = ({ id, emailValidated, email }, requestEmail) => {
-  safeSeed([id, 'partyDigitalContactId'])
-
-  return {
-    id: fakeId(),
-    partyId: id, // partyId is the personId here (a party can also be an organisation elsewhere)
-    mdmPartyContactId: null,
-    digitalContactType: { id: 100301, type: 'Email Address' }, // 100301 = EMAIL_ADDRESS (not 100306 CORRESPONDENCE_EMAIL)
-    digitalAddress: email, // Bit unusual, but the API echos back the same email address passed in the url params
-    validated:
-      email === requestEmail &&
-      emailValidated /* Not been able to confirm this is how this works as we only have 1
+const mapPersonToPartyDigitalContact = ({ id, emailValidated, email }, requestEmail) => ({
+  id: personIdToDigitalContactPartyId[id],
+  partyId: id, // partyId is the personId here (a party can also be an organisation elsewhere)
+  mdmPartyContactId: null,
+  digitalContactType: { id: 100301, type: 'Email Address' }, // 100301 = EMAIL_ADDRESS (not 100306 CORRESPONDENCE_EMAIL)
+  digitalAddress: email, // Bit unusual, but the API echos back the same email address passed in the url params
+  validated:
+    email === requestEmail &&
+    emailValidated /* Not been able to confirm this is how this works as we only have 1
     // external test account with an unvalidated account and no email support */
-  }
-}
+})
 
 const validateUpdatePersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
@@ -70,23 +70,27 @@ const validateUpdatePersonPayload = await createPayloadValidator(
 )
 
 /**
- * Get the personId from the request params
+ * Get an integer path param from the request, in the range accepted by upstream
  * @param {*} request
- * @returns personId
- * @throws {Boom.Boom} 403 if personId is not an integer in the acceptable range
+ * @param {string} paramName
+ * @returns the parsed id
+ * @throws {Boom.Boom} 403 if the param is not an integer in the acceptable range
  */
-const checkPersonId = (request) => {
-  const personId = Number.parseInt(request.params.personId, 10)
+const checkPathId = (request, paramName) => {
+  const id = Number.parseInt(request.params[paramName], 10)
 
-  if (Number.isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+  if (Number.isNaN(id) || id < 0 || `${id}`.length > 20) {
     throw Boom.forbidden(
-      `bad personId: ${personId}, is not an integer in the acceptable range`,
+      `bad ${paramName}: ${id}, is not an integer in the acceptable range`,
       request
     )
   }
 
-  return personId
+  return id
 }
+
+const checkPersonId = (request) => checkPathId(request, 'personId')
+const checkDigitalContactPartyId = (request) => checkPathId(request, 'digitalContactPartyId')
 
 export const person = [
   {
@@ -112,6 +116,23 @@ export const person = [
       }
 
       return h.response({ _data: mapPersonToPartyDigitalContact(person, request.params.email) })
+    }
+  },
+  {
+    method: 'POST',
+    path: '/verify-email/{digitalContactPartyId}',
+    handler: async (request, h) => {
+      const digitalContactPartyId = checkDigitalContactPartyId(request)
+      const personId = digitalContactPartyIdToPersonId[digitalContactPartyId]
+
+      if (personId === undefined) {
+        // After testing this end point in cdp test (upgrade), is seems to return success regardless of whether the person is found.
+        // Leaving this as a 404 for now, but need to remove this check as well as from the person-schema.oas.yml
+        // if the behaviour is the same in cdp ext-test (perf-test)
+        throw Boom.notFound()
+      }
+
+      return h.response({ _data: 'Success' })
     }
   },
   {
