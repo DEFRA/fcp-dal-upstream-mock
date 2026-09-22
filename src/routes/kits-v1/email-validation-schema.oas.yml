@@ -1,0 +1,100 @@
+openapi: 3.1.0
+info:
+  title: Email validation API
+  description: API for saving and validating a person's email verification link
+  version: '1.0.0'
+  license:
+    name: 'Open Government Licence v3.0'
+    url: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3'
+security:
+  - mTLS: []
+servers:
+  - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
+    description: 'The test server for KITS/V1 APIs'
+tags:
+  - name: 'email-validation'
+    description: 'Operations related to email address verification'
+paths:
+  /external-auth/email-validation:
+    post:
+      tags:
+        - 'email-validation'
+      summary: 'Save an email validation record'
+      description: >
+        Saves or replaces the email validation record for a customer reference. Replacing an
+        existing record for the same CRN always succeeds with 200, even when the email is
+        unchanged.
+      operationId: 'saveEmailValidation'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailValidationRequest'
+      responses:
+        '200':
+          description: 'Email validation record saved.'
+        '403':
+          description: 'Email already associated with a different customer reference.'
+        '500':
+          description: 'Internal server error.'
+  /external-auth/email-validation/validate-email:
+    post:
+      tags:
+        - 'email-validation'
+      summary: 'Validate an email verification link'
+      description: >
+        Validates a previously saved email validation record by customer reference, party
+        digital contact ID and email.
+      operationId: 'validateEmail'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailValidationRequest'
+      responses:
+        '200':
+          description: 'Email validated successfully.'
+        '401':
+          description: 'Email verification link has expired.'
+        '404':
+          description: 'No matching email validation record found.'
+
+components:
+  schemas:
+    EmailValidationRequest:
+      type: 'object'
+      additionalProperties: false
+      properties:
+        customerReference:
+          type: 'string'
+          maxLength: 10
+          description: 'Customer Reference Number (CRN) of the person.'
+        partyDigitalContactId:
+          type: 'integer'
+          description: 'Party digital contact ID.'
+        email:
+          type: 'string'
+          format: 'email'
+          description: 'Email address to validate.'
+        linkSentDate:
+          type: 'string'
+          format: 'date-time'
+          description: 'Timestamp when the validation link was sent.'
+      required:
+        - 'customerReference'
+        - 'partyDigitalContactId'
+        - 'email'
+        - 'linkSentDate'
+      example:
+        customerReference: '1111111100'
+        partyDigitalContactId: 123456
+        email: 'person@example.com'
+        linkSentDate: '2023-10-01T12:00:00Z'
+
+  securitySchemes:
+    mTLS:
+      type: mutualTLS
+      description: >
+        Mutual TLS authentication. Client must present a certificate issued by the server.
