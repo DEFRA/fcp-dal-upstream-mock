@@ -102,6 +102,9 @@ paths:
         '404':
           description: 'Person does not have any email assigned'
           $ref: '#/components/responses/NotFound'
+        '409':
+          description: 'Email address is already verified'
+          $ref: '#/components/responses/Conflict'
         '500':
           description: 'Dao exception encountered when retrieving complete person profile'
           content:
@@ -332,6 +335,19 @@ components:
               message:
                 type: string
                 example: HTTP 404 Not Found
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 409
+              message:
+                type: string
+                example: HTTP 409 Conflict
     Forbidden:
       description: Forbidden
       content:
