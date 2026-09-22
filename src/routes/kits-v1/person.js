@@ -5,6 +5,7 @@ import { paginate } from '../../factories/common.js'
 import { crnToPersonId, personIdToDigitalContactPartyId } from '../../factories/id-lookups.js'
 import {
   allPeople,
+  createPerson,
   deactivatePerson,
   lockPerson,
   retrievePerson,
@@ -82,6 +83,11 @@ const validateDeactivatePersonPayload = await createPayloadValidator(
   (schema) =>
     schema.paths['/person/{personId}/deactivate'].post.requestBody.content['application/json']
       .schema
+)
+
+const validateCreatePersonPayload = await createPayloadValidator(
+  'routes/kits-v1/person-schema.oas.yml',
+  (schema) => schema.paths['/person/create'].post.requestBody.content['application/json'].schema
 )
 
 /**
@@ -300,6 +306,24 @@ export const person = [
 
       deactivatePerson(personId)
       return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/person/create',
+    handler: async (request, h) => {
+      if (request.payload === '' || request.payload === null) {
+        throw Boom.badRequest('source cannot be null', request)
+      }
+      if (typeof request.payload !== 'object' || Array.isArray(request.payload)) {
+        throw Boom.badRequest('missing or invalid request body', request)
+      }
+      if (!validateCreatePersonPayload(request.payload)) {
+        throw Boom.badData('validation error while processing input', request)
+      }
+      return h.response({
+        _data: createPerson(request.payload)
+      })
     }
   }
 ]

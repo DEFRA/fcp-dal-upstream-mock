@@ -10,12 +10,14 @@ import {
   staticPersonData
 } from '../../factories/id-lookups.js'
 import { applyUpdates } from '../../utils/applyUpdates.js'
-import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
+import { fakeAddress, fakeIds, faker, generateId, normalisePostcode, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const logger = createLogger('person.factory')
 
 const people = {}
+const startingPersonId = 11111111
+const startingCrn = 1111111100
 
 const generatePerson = (personId, crn, overrides = {}) => {
   personId = safeSeed(personId)
@@ -184,4 +186,38 @@ export const deactivatePerson = (personId) => {
     throw Boom.notFound(`Person not found`)
   }
   person.deactivated = true
+}
+
+export const createPerson = (payload = {}) => {
+  const usedPersonIds = [...Object.keys(staticPersonData), ...Object.keys(people)].map(Number)
+  const usedCrns = [
+    ...Object.values(staticPersonData).map(({ crn }) => Number(crn)),
+    ...Object.values(people).map(({ customerReferenceNumber }) => Number(customerReferenceNumber))
+  ]
+
+  const generatedPersonId = generateId(startingPersonId, usedPersonIds)
+  const generatedCrn = generateId(startingCrn, usedCrns)
+
+  // Coerced and filtered the same way as updatePerson, so only personUpdateSchema fields are
+  // taken from the payload - id and customerReferenceNumber stay as allocated above.
+  const person = {
+    ...applyUpdates(
+      personUpdateSchema,
+      generatePerson(generatedPersonId, `${generatedCrn}`),
+      payload
+    ),
+    emailValidated: false,
+    locked: false,
+    deactivated: false,
+    confirmed: true
+  }
+  const { id, customerReferenceNumber, ...details } = person
+  people[id] = person
+
+  crnToPersonId[customerReferenceNumber] = `${id}`
+  personIdToOrgIds[id] = []
+
+  staticPersonData[id] = { crn: customerReferenceNumber, ...details }
+
+  return `${customerReferenceNumber}`
 }
