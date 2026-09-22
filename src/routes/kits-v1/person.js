@@ -115,6 +115,13 @@ export const person = [
         throw Boom.notFound()
       }
 
+      if (
+        person.email.toLowerCase() === request.params.email.toLowerCase() &&
+        person.emailValidated
+      ) {
+        throw Boom.conflict('Email address is already verified', request)
+      }
+
       return h.response({ _data: mapPersonToPartyDigitalContact(person, request.params.email) })
     }
   },

@@ -76,28 +76,25 @@ describe('Person routes', () => {
   })
 
   describe('GET /person/{personId}/{email}/confirm', () => {
-    it('should report the email as validated when it matches an already-validated person email, conforming to the schema', async () => {
+    it('should return 409 when the email is already verified', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
         url: '/person/11111119/skeleton@the-closet.net/confirm'
       })
-      expect(statusCode).toBe(200)
-      expect(result).toEqual({
-        _data: {
-          id: expect.any(Number),
-          partyId: 11111119,
-          mdmPartyContactId: null,
-          digitalContactType: { id: 100301, type: 'Email Address' },
-          digitalAddress: 'skeleton@the-closet.net',
-          validated: true
-        }
-      })
-      expect(result._data.id).not.toBe(11111119)
+      expect(statusCode).toBe(409)
       expect(result).toConformToSchema(
-        schema.paths['/person/{personId}/{email}/confirm'].get.responses['200'].content[
+        schema.paths['/person/{personId}/{email}/confirm'].get.responses['409'].content[
           'application/json'
         ].schema
       )
+    })
+
+    it('should return 409 when the email is already verified, regardless of case', async () => {
+      const { statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111119/SKELETON@the-closet.NET/confirm'
+      })
+      expect(statusCode).toBe(409)
     })
 
     it('should not update the person record, and should not report the email as validated when the person has not validated their email', async () => {
@@ -144,8 +141,8 @@ describe('Person routes', () => {
 
     it('should return a 200 for a known digitalContactPartyId, conforming to the schema', async () => {
       const digitalContactPartyId = await getDigitalContactPartyId(
-        11111119,
-        'skeleton@the-closet.net'
+        11111121,
+        'unvalidated@the-closet.net'
       )
 
       const { result, statusCode } = await server.inject({
