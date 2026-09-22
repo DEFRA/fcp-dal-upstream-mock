@@ -5,6 +5,7 @@ import { paginate } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
   allPeople,
+  createPerson,
   retrievePerson,
   retrievePersonOrgs,
   searchPeople,
@@ -159,6 +160,15 @@ export const person = [
 
       updatePerson(personId, body)
       return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/person/create',
+    handler: async (request, h) => {
+      return h.response({
+        _data: createPerson(request.payload)
+      })
     }
   }
 ]
