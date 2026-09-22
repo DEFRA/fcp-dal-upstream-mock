@@ -1,8 +1,10 @@
 import Boom from '@hapi/boom'
+import { createLogger } from '../../common/helpers/logging/logger.js'
 import { config } from '../../config.js'
 import { paginate } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
+  allPeople,
   retrievePerson,
   retrievePersonOrgs,
   searchPeople,
@@ -10,6 +12,8 @@ import {
 } from '../../factories/person/person.factory.js'
 import { checkSearchPhrase } from '../../utils/shared-datatypes.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
+
+const logger = createLogger('person.route')
 
 // `primarySearchPhrase` constraints for each searchFieldType
 const searchFieldTypes = {
@@ -63,6 +67,17 @@ const checkPersonId = (request) => {
 }
 
 export const person = [
+  {
+    method: 'GET',
+    path: '/person/{email}/validateEmail',
+    handler: async (request, h) => {
+      const email = request.params.email.toLowerCase()
+      const emailDuplicated = allPeople().some(
+        (person) => person.email?.toLowerCase() === email && person.emailValidated
+      )
+      return h.response({ _data: { emailDuplicated } })
+    }
+  },
   {
     method: 'GET',
     path: '/person/{personId}/summary',
@@ -131,6 +146,14 @@ export const person = [
       }
 
       if (!validateUpdatePersonPayload(request.payload)) {
+        logger.info(
+          `validateUpdatePersonPayload failed: ${JSON.stringify(validateUpdatePersonPayload.errors)}`
+        )
+        throw Boom.badData('validation error while processing input', request)
+      }
+
+      if (body.dateOfBirth != null && body.dateOfBirth > Date.now()) {
+        logger.info(`dateOfBirth is in the future: ${body.dateOfBirth}`)
         throw Boom.badData('validation error while processing input', request)
       }
 

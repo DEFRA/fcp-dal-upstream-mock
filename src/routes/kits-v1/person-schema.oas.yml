@@ -15,6 +15,53 @@ servers:
   - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
     description: The test server for KITS/V1 APIs
 paths:
+  /person/{email}/validateEmail:
+    get:
+      tags:
+        - 'person'
+      summary: 'Validates emails'
+      description: 'Returns a boolean to indicate if the email is duplicated'
+      operationId: 'isEmailDuplicated'
+      parameters:
+        - name: 'email'
+          in: 'path'
+          description: 'email'
+          required: true
+          schema:
+            type: 'string'
+      responses:
+        '200':
+          description: "successfully returns a flag to indicate if the email is\
+            \ duplicate. Returns result inside CapdResponse"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    type: object
+                    properties:
+                      emailDuplicated:
+                        type: boolean
+                    required:
+                      - 'emailDuplicated'
+                    additionalProperties: false
+                required:
+                  - '_data'
+                additionalProperties: false
+        '500':
+          description: 'Error confirming if email is duplicated'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: 'There was an error processing your request.'
   /person/{personId}/summary:
     get:
       tags:
@@ -383,14 +430,14 @@ components:
             - type: boolean
           description: 'Last name of the person'
         dateOfBirth:
-          description: 'Date of birth as a Unix timestamp'
+          description: 'Date of birth as a Unix timestamp in milliseconds. Must be before the current time.'
           oneOf:
             - type: integer
               format: int64
               minimum: -999999999999999
-              maximum: 999999999999
+              maximum: 9999999999999
             - type: string
-              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,12})?$'
+              pattern: '^(-[0-9]{1,15}$|^[0-9]{1,13})?$'
             - type: 'null'
         landline:
           oneOf:

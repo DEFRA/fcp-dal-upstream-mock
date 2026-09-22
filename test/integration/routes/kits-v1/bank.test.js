@@ -7,10 +7,10 @@ const validateUrl = '/bank-change-service/v1/validate'
 const knownSbi = 222222222
 
 const validPayload = () => ({
-  organisationId: '2222222222',
+  organisationId: '222222222',
   personId: '22222220',
   sbi: String(knownSbi),
-  frn: '2222222222',
+  frn: '222222222',
   crn: '2222222000',
   submissionDateTime: '02/05/2026 14:12:11',
   account: {
@@ -86,9 +86,25 @@ describe('POST /bank-change-service/v1/submit', () => {
       const { statusCode } = await server.inject({ method: 'POST', url, payload })
       expect(statusCode).toBe(200)
     })
+
+    it('accepts non-string field values, mirroring upstream', async () => {
+      const payload = validPayload()
+      payload.account.number = 11111100
+      payload.account.buildingSocietyRollNumber = 12345
+      const { statusCode } = await server.inject({ method: 'POST', url, payload })
+      expect(statusCode).toBe(200)
+    })
   })
 
   describe('error scenarios', () => {
+    it('returns 400 with code 20 when the request body is missing', async () => {
+      const { result, statusCode } = await server.inject({ method: 'POST', url })
+      expect(statusCode).toBe(400)
+      expect(result).toEqual({
+        errors: [{ code: 20, description: 'Request body is missing' }]
+      })
+    })
+
     it('returns 400 with code 20 when all top-level required fields are missing', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
@@ -209,7 +225,7 @@ describe('GET /bank-change-service/v1/locked-status/{organisationId}/{personId}'
   it('returns locked:false for an org/person pair that has no recent failures', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/locked-status/1111111111/11111111'
+      url: '/bank-change-service/v1/locked-status/111111111/11111111'
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({ locked: false })
@@ -218,7 +234,7 @@ describe('GET /bank-change-service/v1/locked-status/{organisationId}/{personId}'
   it('returns locked:true', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/locked-status/1111111111/11111119'
+      url: '/bank-change-service/v1/locked-status/111111111/11111119'
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({ locked: true })
@@ -229,7 +245,7 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
   it('returns editable:true for an organisation with no overrides', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/account-status/1111111111'
+      url: '/bank-change-service/v1/account-status/111111111'
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -243,7 +259,7 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
   it('returns editable:false when the org was recently submitted', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/account-status/2222222222'
+      url: '/bank-change-service/v1/account-status/222222222'
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -257,7 +273,7 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
   it('returns editable:false when the org is new', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/account-status/3333333333'
+      url: '/bank-change-service/v1/account-status/333333333'
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -280,6 +296,31 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
       updatedRecently: true,
       new: false
     })
+  })
+})
+
+describe('GET /bank-change-service/v1/existing-accounts/{frn}', () => {
+  it('returns the accounts held in DAX for a known FRN', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/existing-accounts/2222222222'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      accounts: [
+        { number: '1234', currency: 'GBP' },
+        { number: '5678', currency: 'EUR' }
+      ]
+    })
+  })
+
+  it('returns an empty accounts list for an FRN with no accounts in DAX', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/existing-accounts/9999999999'
+    })
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({ accounts: [] })
   })
 })
 
@@ -349,6 +390,18 @@ describe('POST /bank-change-service/v1/validate', () => {
   })
 
   describe('failure scenarios', () => {
+    it('returns one of the valid statuses for an unseeded account number', async () => {
+      const payload = validValidatePayload()
+      payload.account.number = '99999999'
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: validateUrl,
+        payload
+      })
+      expect(statusCode).toBe(200)
+      expect(['MATCH', 'PARTIAL_MATCH', 'FAILED']).toContain(result.status)
+    })
+
     it('returns FAILED for the FAILED test account number', async () => {
       const payload = validValidatePayload()
       payload.account.number = '33333300'
@@ -366,6 +419,14 @@ describe('POST /bank-change-service/v1/validate', () => {
   })
 
   describe('validation error scenarios', () => {
+    it('returns 400 with code 20 when the request body is missing', async () => {
+      const { result, statusCode } = await server.inject({ method: 'POST', url: validateUrl })
+      expect(statusCode).toBe(400)
+      expect(result).toEqual({
+        errors: [{ code: 20, description: 'Request body is missing' }]
+      })
+    })
+
     it('returns 400 with code 20 when required top-level fields are missing', async () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
@@ -407,6 +468,22 @@ describe('POST /bank-change-service/v1/validate', () => {
       })
       expect(statusCode).toBe(400)
       expect(result.errors[0].description).toMatch(/Unknown account type/)
+    })
+  })
+})
+
+describe('GET /bank-change-service/v1/country-codes', () => {
+  it('returns the country/currency mapping conforming to the schema', async () => {
+    const { result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/bank-change-service/v1/country-codes'
+    })
+    expect(statusCode).toBe(200)
+    expect(result.countriesCurrency).toEqual({
+      GB: 'GBP',
+      IE: 'EUR',
+      IRL: 'EUR',
+      PT: 'EUR'
     })
   })
 })
