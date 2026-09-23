@@ -267,15 +267,6 @@ paths:
       responses:
         '201':
           description: 'Authorisation created.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  _data:
-                    type: array
-                    items:
-                      type: object
         '400':
           description: 'Invalid payload'
           content:
@@ -287,7 +278,7 @@ paths:
         '404':
           description: 'Organisation or person not found.'
         '409':
-          description: 'Person already authorised on the organisation.'
+          description: 'Relation already exists.'
 
   /SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}:
     put:
@@ -317,13 +308,6 @@ paths:
       responses:
         '200':
           description: 'Authorisation updated.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  _data:
-                    type: object
         '400':
           description: 'Invalid payload'
           content:
@@ -460,6 +444,7 @@ components:
       properties:
         personRoles:
           type: array
+          maxItems: 1
           items:
             type: object
             properties:
@@ -469,6 +454,7 @@ components:
                 type: integer
         personPrivileges:
           type: array
+          maxItems: 1
           items:
             type: object
             properties:

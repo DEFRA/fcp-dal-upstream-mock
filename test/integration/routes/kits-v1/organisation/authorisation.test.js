@@ -36,19 +36,21 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const { statusCode, payload } = await mockServer.inject({
       method: 'POST',
       url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      headers: { authorization: 'Bearer token' },
       payload: createPayload
     })
     expect(statusCode).toBe(201)
     const body = JSON.parse(payload)
-    expect(body._data).toEqual(
+    expect(body).toEqual(
       expect.arrayContaining([expect.objectContaining({ personId: 22222220, role: 'Agent' })])
     )
   })
 
   it('POST should return 409 when the person is already authorised on the organisation', async () => {
-    const { statusCode } = await mockServer.inject({
+    const { statusCode, payload } = await mockServer.inject({
       method: 'POST',
       url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      headers: { authorization: 'Bearer token' },
       payload: {
         personRoles: [
           {
@@ -59,22 +61,24 @@ describe('Authorisation create & update (Ticket #29)', () => {
         personPrivileges: [
           {
             personId: 11111111,
-            privilegeNames: ['Amend - business']
+            privilegeNames: ['Amend - business', 'Submit - bps']
           }
         ]
       }
     })
     expect(statusCode).toBe(409)
+    const body = JSON.parse(payload)
+    expect(body).toEqual({ success: false, errorString: 'Relation already exists' })
   })
 
-  it('POST should return 403 when email header is present (CV user)', async () => {
+  it('POST should return 401 when authorization header is missing or invalid', async () => {
     const { statusCode } = await mockServer.inject({
       method: 'POST',
       url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
-      headers: { email: 'cv@example.com' },
+      headers: { authorization: 'Bearer wrong-token' },
       payload: createPayload
     })
-    expect(statusCode).toBe(403)
+    expect(statusCode).toBe(401)
   })
 
   const updatePayload = {
@@ -96,11 +100,12 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const { statusCode, payload } = await mockServer.inject({
       method: 'PUT',
       url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111',
+      headers: { authorization: 'Bearer token' },
       payload: updatePayload
     })
     expect(statusCode).toBe(200)
     const body = JSON.parse(payload)
-    expect(body._data).toEqual(
+    expect(body).toEqual(
       expect.objectContaining({
         personId: 11111111,
         privileges: expect.arrayContaining(['Amend - land'])
@@ -108,38 +113,43 @@ describe('Authorisation create & update (Ticket #29)', () => {
     )
   })
 
-  it('PUT should persist sibling personRoles and personPrivileges on the person', async () => {
-    const { statusCode } = await mockServer.inject({
-      method: 'PUT',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111',
-      payload: updatePayload
-    })
-    expect(statusCode).toBe(200)
+  it('PUT should reject identical payload with 409 Relation already exists (not idempotent)', async () => {
+    // 22222222 is NOT initially linked to org 111111111 — guaranteed clean start
+    const payload = {
+      personRoles: [{ role: 'Agent', personId: 22222222 }],
+      personPrivileges: [
+        { personId: 22222222, privilegeNames: ['Amend - land', 'Submit - cs app'] }
+      ]
+    }
 
-    const readBack = await mockServer.inject({
-      method: 'GET',
-      url: '/extapi/authorisation/organisation/111111111'
+    // Create the initial link via POST (clean path)
+    const create = await mockServer.inject({
+      method: 'POST',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      headers: { authorization: 'Bearer token' },
+      payload
     })
-    expect(readBack.statusCode).toBe(200)
-    const customers = JSON.parse(readBack.payload)._data
-    expect(customers).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: 11111111,
-          role: 'Agent',
-          privileges: expect.arrayContaining(['Amend - land', 'Submit - cs app'])
-        })
-      ])
-    )
+    expect(create.statusCode).toBe(201)
+
+    // First PUT with the same payload must fail with 409 because the relation now exists
+    const first = await mockServer.inject({
+      method: 'PUT',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222222',
+      headers: { authorization: 'Bearer token' },
+      payload
+    })
+    expect(first.statusCode).toBe(409)
+    const body = JSON.parse(first.payload)
+    expect(body).toEqual({ success: false, errorString: 'Relation already exists' })
   })
 
-  it('PUT should return 403 when email header is present (CV user)', async () => {
+  it('PUT should return 401 when authorization header is missing or invalid', async () => {
     const { statusCode } = await mockServer.inject({
       method: 'PUT',
       url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111',
-      headers: { email: 'cv@example.com' },
+      headers: { authorization: 'Bearer wrong-token' },
       payload: { personRoles: [] }
     })
-    expect(statusCode).toBe(403)
+    expect(statusCode).toBe(401)
   })
 })

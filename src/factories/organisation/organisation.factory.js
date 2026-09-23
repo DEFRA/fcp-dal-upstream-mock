@@ -20,6 +20,52 @@ import {
 } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
 
+// All valid privilege names that can be assigned via create/update authorisation.
+// Generated from the permissions matrix.
+const VALID_PRIVILEGE_NAMES = new Set([
+  // Basic Payment Scheme (BPS)
+  'NO ACCESS - BPS',
+  'View - bps',
+  'Amend - bps',
+  'Submit - bps',
+
+  // Business Details
+  'View - business',
+  'Amend - business',
+  'Make legal changes - business',
+  'Full permission - business',
+
+  // Countryside Stewardship (Agreements)
+  'NO ACCESS - CS AGREE',
+  'View - cs agree',
+  'Amend - cs agree',
+  'Submit - cs agree',
+
+  // Countryside Stewardship (Applications)
+  'NO ACCESS - CS APP',
+  'VIEW - CS APP',
+  'Amend - cs app',
+  'Submit - cs app',
+
+  // Entitlements
+  'NO ACCESS - ENTITLEMENT',
+  'View - entitlement',
+  'Amend - entitlement',
+
+  // Environmental Land Management (Applications)
+  'ELM_APPLICATION_NO_ACCESS',
+  'ELM_APPLICATION_VIEW',
+  'ELM_APPLICATION_AMEND',
+  'ELM_APPLICATION_SUBMIT',
+
+  // Land Details
+  'NO ACCESS - LAND',
+  'View - land',
+  'Amend - land'
+])
+
+const isValidPrivilegeName = (name) => VALID_PRIVILEGE_NAMES.has(name)
+
 const organisations = {}
 let startingOrgId = 1000000
 let startingSbi = 100000000
@@ -321,18 +367,16 @@ const retrieveExistingPerson = (personId) => {
 const privilegeNamesForPerson = (personPrivileges, personId) => {
   if (!Array.isArray(personPrivileges)) return undefined
   const match = personPrivileges.find((entry) => sameId(entry.personId, personId))
-  return match?.privilegeNames
-}
-
-const roleForPerson = (personRoles, personId) => {
-  if (!Array.isArray(personRoles) || personRoles.length === 0) return undefined
-  const match = personRoles.find((entry) => sameId(entry.personId, personId)) ?? personRoles[0]
-  return match?.role
+  const names = match?.privilegeNames
+  if (Array.isArray(names) && names.some((n) => !isValidPrivilegeName(n))) {
+    throw new Error('invalid privilege string')
+  }
+  return names
 }
 
 /**
  * Create an authorisation (link a person to an organisation with role + privileges).
- * Throws Boom errors for missing org/person or duplicate link.
+ * Throws Boom errors for missing org/person, bad payload, duplicate relationship, or invalid privileges.
  */
 export const createAuthorisation = (orgId, payload) => {
   retrieveOrganisation(orgId)
@@ -340,6 +384,14 @@ export const createAuthorisation = (orgId, payload) => {
   const personRoles = payload?.personRoles ?? []
   if (!Array.isArray(personRoles) || personRoles.length === 0) {
     throw Boom.badRequest('personRoles array is required')
+  }
+  if (personRoles.length > 1) {
+    throw Boom.conflict('Relation already exists')
+  }
+
+  const personPrivileges = payload?.personPrivileges ?? []
+  if (Array.isArray(personPrivileges) && personPrivileges.length > 1) {
+    throw Boom.conflict('Relation already exists')
   }
 
   const results = []
@@ -353,8 +405,11 @@ export const createAuthorisation = (orgId, payload) => {
     const person = retrieveExistingPerson(personId)
 
     if (hasAuthorisation(orgId, personId)) {
-      throw Boom.conflict(`person ${personId} is already authorised on organisation ${orgId}`)
+      throw Boom.conflict('Relation already exists')
     }
+
+    const role = pr.role ?? null
+    const privilegeNames = privilegeNamesForPerson(payload?.personPrivileges, personId) ?? []
 
     if (!orgIdToPersonIds[orgId]) orgIdToPersonIds[orgId] = []
     orgIdToPersonIds[orgId].push(personId)
@@ -363,9 +418,6 @@ export const createAuthorisation = (orgId, payload) => {
     if (!personIdToOrgIds[personId].some((id) => sameId(id, orgId))) {
       personIdToOrgIds[personId].push(Number(orgId))
     }
-
-    const role = pr.role ?? null
-    const privilegeNames = privilegeNamesForPerson(payload?.personPrivileges, personId) ?? []
 
     person.role = role
     person.privileges = privilegeNames
@@ -378,7 +430,13 @@ export const createAuthorisation = (orgId, payload) => {
 
 /**
  * Update an existing authorisation for a person on an organisation.
- * Throws Boom errors for missing org/person or missing existing link.
+ * Rejects with 409 "Relation already exists" if the same role/privileges are already set (not idempotent).
+ * Throws Boom errors for missing org/person or duplicate relation.
+ */
+/**
+ * Update a single person\u2019s authorisation on an organisation.
+ * Payload may contain at most one entry in personRoles and at most one entry in personPrivileges.
+ * If present, the personId in each entry must match the personId from the route path.
  */
 export const updateAuthorisation = (orgId, personId, payload) => {
   retrieveOrganisation(orgId)
@@ -388,11 +446,47 @@ export const updateAuthorisation = (orgId, personId, payload) => {
   }
 
   const person = retrieveExistingPerson(personId)
-  const role = roleForPerson(payload?.personRoles, personId)
-  if (role !== undefined) person.role = role
 
-  const privs = privilegeNamesForPerson(payload?.personPrivileges, personId)
-  if (privs !== undefined) person.privileges = privs
+  const personRoles = payload?.personRoles ?? []
+  if (!Array.isArray(personRoles) || personRoles.length > 1) {
+    throw Boom.conflict('Relation already exists')
+  }
+  if (personRoles.length === 1) {
+    const roleEntry = personRoles[0]
+    if (!sameId(roleEntry?.personId, personId)) {
+      throw Boom.badRequest('personId in personRoles entry must match the personId in the URL path')
+    }
+  }
+
+  const personPrivileges = payload?.personPrivileges ?? []
+  if (!Array.isArray(personPrivileges) || personPrivileges.length > 1) {
+    throw Boom.conflict('Relation already exists')
+  }
+  if (personPrivileges.length === 1) {
+    const privEntry = personPrivileges[0]
+    if (!sameId(privEntry?.personId, personId)) {
+      throw Boom.badRequest(
+        'personId in personPrivileges entry must match the personId in the URL path'
+      )
+    }
+  }
+
+  const roleEntry = personRoles[0]
+  const newRole = roleEntry ? (roleEntry.role ?? null) : undefined
+  const newPrivs = privilegeNamesForPerson(payload?.personPrivileges, personId) ?? []
+
+  // Check if the incoming payload matches the current state exactly
+  const roleUnchanged = newRole === person.role
+  const privsUnchanged =
+    newPrivs.length === (person.privileges || []).length &&
+    newPrivs.every((p) => (person.privileges || []).includes(p))
+
+  if (roleUnchanged && privsUnchanged) {
+    throw Boom.conflict('Relation already exists')
+  }
+
+  if (newRole !== undefined) person.role = newRole
+  if (newPrivs !== undefined) person.privileges = newPrivs
 
   return {
     personId: Number(personId),
