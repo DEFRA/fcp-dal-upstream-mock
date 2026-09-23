@@ -1,6 +1,7 @@
 import Boom from '@hapi/boom'
 import { paginate } from '../../factories/common.js'
 import {
+  createAuthorisation,
   createOrganisation,
   lockOrganisation,
   retrieveOrganisation,
@@ -8,6 +9,7 @@ import {
   searchOrganisations,
   unlockOrganisation,
   updateAdditionalOrganisationDetails,
+  updateAuthorisation,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
 import { checkId, checkSearchPhrase } from '../../utils/shared-datatypes.js'
@@ -186,6 +188,59 @@ export const organisation = [
       unlockOrganisation(organisationId)
 
       return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation',
+    handler: async (request, h) => {
+      // Same dummy authorisation check as the Hitachi payments endpoint
+      if (request?.headers?.authorization?.toLowerCase() !== 'bearer token') {
+        return h.response().code(401)
+      }
+
+      const orgId = checkId(request, 'orgId')
+      try {
+        const result = createAuthorisation(orgId, request.payload)
+        return h.response(result).code(201)
+      } catch (e) {
+        if (e.isBoom && e.output.statusCode === 404 && /organisation/i.test(e.message)) {
+          return h.response({ success: false, errorString: 'Parent user id not found' }).code(500)
+        }
+        if (e.isBoom && e.output.statusCode === 409) {
+          return h.response({ success: false, errorString: 'Relation already exists' }).code(409)
+        }
+        return h.response({ success: false, errorString: 'An error has occured' }).code(500)
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}',
+    handler: async (request, h) => {
+      // Same dummy authorisation check as the Hitachi payments endpoint
+      if (request?.headers?.authorization?.toLowerCase() !== 'bearer token') {
+        return h.response().code(401)
+      }
+
+      const orgId = checkId(request, 'orgId')
+      const personId = checkId(request, 'personId')
+
+      try {
+        const result = updateAuthorisation(orgId, personId, request.payload)
+        return h.response(result).code(200)
+      } catch (e) {
+        if (e.isBoom && e.output.statusCode === 404) {
+          if (/organisation/i.test(e.message)) {
+            return h.response({ success: false, errorString: 'Parent user id not found' }).code(500)
+          }
+          return h.response({ success: false, errorString: 'Person not found' }).code(404)
+        }
+        if (e.isBoom && e.output.statusCode === 409) {
+          return h.response({ success: false, errorString: 'Relation already exists' }).code(409)
+        }
+        return h.response({ success: false, errorString: 'An error has occured' }).code(500)
+      }
     }
   }
 ]
