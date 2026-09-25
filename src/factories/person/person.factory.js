@@ -75,6 +75,7 @@ export const retrievePerson = (personId) => {
 
   const { crn, ...overrides } = staticPersonData[personId] ?? {}
   if (!crn) {
+    logger.info(`Person with personId ${personId} not found`)
     throw Boom.notFound(`person with personId ${personId} not found`)
   }
 
@@ -147,4 +148,13 @@ export const updatePerson = (personId, updatesToPerson) => {
   }
 
   return (people[personId] = updatedPerson)
+}
+
+export const markPersonEmailValidated = (crn) => {
+  const personId = crnToPersonId[crn]
+  if (!personId) {
+    return
+  }
+
+  retrievePerson(personId).emailValidated = true
 }

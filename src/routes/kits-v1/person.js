@@ -112,6 +112,7 @@ export const person = [
       const person = retrievePerson(personId)
 
       if (!person.email) {
+        logger.info(`confirm email: person with personId ${personId} has no email address`)
         throw Boom.notFound()
       }
 
@@ -119,6 +120,7 @@ export const person = [
         person.email.toLowerCase() === request.params.email.toLowerCase() &&
         person.emailValidated
       ) {
+        logger.info(`Email for person with personId ${personId} is already validated`)
         throw Boom.conflict('Email address is already verified', request)
       }
 
@@ -136,6 +138,9 @@ export const person = [
         // After testing this end point in cdp test (upgrade), is seems to return success regardless of whether the person is found.
         // Leaving this as a 404 for now, but need to remove this check as well as from the person-schema.oas.yml
         // if the behaviour is the same in cdp ext-test (perf-test)
+        logger.info(
+          `No digital contact party found for digitalContactPartyId ${digitalContactPartyId}`
+        )
         throw Boom.notFound()
       }
 

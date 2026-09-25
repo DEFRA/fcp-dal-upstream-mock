@@ -14,7 +14,7 @@ export const saveEmailValidation = ({
   const normalisedEmail = normaliseEmail(email)
   const owningCrn = crnByEmail[normalisedEmail]
   if (owningCrn && owningCrn !== customerReference) {
-    return { conflict: true }
+    return { conflict: true, owningCrn }
   }
 
   const existing = recordsByCrn[customerReference]
@@ -34,6 +34,16 @@ export const saveEmailValidation = ({
 }
 
 export const findEmailValidation = (customerReference) => recordsByCrn[customerReference]
+
+export const deleteEmailValidation = (customerReference) => {
+  const existing = recordsByCrn[customerReference]
+  if (!existing) {
+    return
+  }
+
+  delete crnByEmail[normaliseEmail(existing.email)]
+  delete recordsByCrn[customerReference]
+}
 
 export const isEmailValidationLinkExpired = (linkSentDate) => {
   const sentAt = new Date(linkSentDate).getTime()
