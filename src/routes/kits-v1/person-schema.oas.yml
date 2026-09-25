@@ -99,6 +99,9 @@ paths:
                 required:
                   - '_data'
                 additionalProperties: false
+        '403':
+          description: A WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
         '404':
           description: 'Person does not have any email assigned'
           $ref: '#/components/responses/NotFound'
@@ -149,6 +152,9 @@ paths:
                 required:
                   - '_data'
                 additionalProperties: false
+        '403':
+          description: A WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
         '404':
           description: 'No digital contact found for the given digitalContactPartyId'
           $ref: '#/components/responses/NotFound'
