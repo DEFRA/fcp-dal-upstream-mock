@@ -75,6 +75,107 @@ describe('Person routes', () => {
     })
   })
 
+  describe('GET /person/{personId}/{email}/confirm', () => {
+    it('should return 409 when the email is already verified', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111119/skeleton@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(409)
+      expect(result).toConformToSchema(
+        schema.paths['/person/{personId}/{email}/confirm'].get.responses['409'].content[
+          'application/json'
+        ].schema
+      )
+    })
+
+    it('should return 409 when the email is already verified, regardless of case', async () => {
+      const { statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111119/SKELETON@the-closet.NET/confirm'
+      })
+      expect(statusCode).toBe(409)
+    })
+
+    it('should not update the person record, and should not report the email as validated when the person has not validated their email', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/unvalidated@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data.validated).toBe(false)
+
+      const { result: summaryResult } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/summary'
+      })
+      expect(summaryResult._data.emailValidated).toBe(false)
+    })
+
+    it('should return 404 when the person does not have any email assigned', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/3010085/someone@example.com/confirm'
+      })
+      expect(statusCode).toBe(404)
+      expect(result.message).toBe('Not Found')
+    })
+
+    it('should return 403 for an invalid personId', async () => {
+      const { statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/not-a-number/someone@example.com/confirm'
+      })
+      expect(statusCode).toBe(403)
+    })
+  })
+
+  describe('POST /verify-email/{digitalContactPartyId}', () => {
+    const getDigitalContactPartyId = async (personId, email) => {
+      const { result } = await server.inject({
+        method: 'GET',
+        url: `/person/${personId}/${email}/confirm`
+      })
+      return result._data.id
+    }
+
+    it('should return a 200 for a known digitalContactPartyId, conforming to the schema', async () => {
+      const digitalContactPartyId = await getDigitalContactPartyId(
+        11111121,
+        'unvalidated@the-closet.net'
+      )
+
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: `/verify-email/${digitalContactPartyId}`
+      })
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({ _data: 'Success' })
+      expect(result).toConformToSchema(
+        schema.paths['/verify-email/{digitalContactPartyId}'].post.responses['200'].content[
+          'application/json'
+        ].schema
+      )
+    })
+
+    // TODO: Need to verify this behaviour in ext-test as in test a 200 is returned regardless
+    it('should return 404 for a well-formed but unknown digitalContactPartyId', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/verify-email/999999999'
+      })
+      expect(statusCode).toBe(404)
+    })
+
+    it('should return 403 for an invalid digitalContactPartyId', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/verify-email/not-a-number'
+      })
+      expect(statusCode).toBe(403)
+    })
+  })
+
   it('should GET a person conforming to the schema', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
@@ -338,7 +439,8 @@ describe('Person routes', () => {
         dateOfBirth: -2,
         // data which should not be updated remains the same
         customerReferenceNumber: personFixture._data.customerReferenceNumber,
-        emailValidated: personFixture._data.emailValidated,
+        // the email address changed, so the PartyDigitalContact must be re-verified
+        emailValidated: false,
         confirmed: personFixture._data.confirmed,
         locked: personFixture._data.locked,
         deactivated: personFixture._data.deactivated,
@@ -385,6 +487,74 @@ describe('Person routes', () => {
         error: 'Unprocessable Entity',
         message: 'validation error while processing input'
       })
+    })
+    test('should invalidate emailValidated when the email address changes on PUT /person/{personId}', async () => {
+      const { result: current } = await server.inject({
+        method: 'GET',
+        url: '/person/11111113/summary'
+      })
+      expect(current._data.email).not.toBe('changed@defra.gov.uk')
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: '/person/11111113',
+        headers: { email: 'test@defra.gov.uk' },
+        payload: { ...current._data, email: 'changed@defra.gov.uk' }
+      })
+      expect(response.statusCode).toBe(204)
+
+      const { result: updated } = await server.inject({
+        method: 'GET',
+        url: '/person/11111113/summary'
+      })
+      expect(updated._data.email).toBe('changed@defra.gov.uk')
+      expect(updated._data.emailValidated).toBe(false)
+    })
+
+    test('should leave emailValidated untouched on PUT /person/{personId} when the email address is unchanged', async () => {
+      const { result: current } = await server.inject({
+        method: 'GET',
+        url: '/person/11111114/summary'
+      })
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: '/person/11111114',
+        headers: { email: 'test@defra.gov.uk' },
+        payload: { ...current._data, doNotContact: !current._data.doNotContact }
+      })
+      expect(response.statusCode).toBe(204)
+
+      const { result: updated } = await server.inject({
+        method: 'GET',
+        url: '/person/11111114/summary'
+      })
+      expect(updated._data.email).toBe(current._data.email)
+      expect(updated._data.emailValidated).toBe(current._data.emailValidated)
+    })
+
+    test('should leave emailValidated untouched on PUT /person/{personId} when only the email casing changes', async () => {
+      const { result: current } = await server.inject({
+        method: 'GET',
+        url: '/person/11111115/summary'
+      })
+      const recasedEmail =
+        current._data.email[0].toUpperCase() + current._data.email.slice(1).toLowerCase()
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: '/person/11111115',
+        headers: { email: 'test@defra.gov.uk' },
+        payload: { ...current._data, email: recasedEmail }
+      })
+      expect(response.statusCode).toBe(204)
+
+      const { result: updated } = await server.inject({
+        method: 'GET',
+        url: '/person/11111115/summary'
+      })
+      expect(updated._data.email).toBe(recasedEmail)
+      expect(updated._data.emailValidated).toBe(current._data.emailValidated)
     })
 
     test.each([

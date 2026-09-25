@@ -62,6 +62,115 @@ paths:
                   message:
                     type: string
                     example: 'There was an error processing your request.'
+  /person/{personId}/{email}/confirm:
+    get:
+      tags:
+        - 'person'
+      summary: 'Confirms an email'
+      description: >
+        Verifies if the email can be used and marked as validated by the user
+      operationId: 'confirmEmail'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'The unique ID of the requested person.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            examples: [11111111, 11112222, 22222222]
+        - name: 'email'
+          in: 'path'
+          description: 'email'
+          required: true
+          schema:
+            type: 'string'
+      responses:
+        '200':
+          description: 'PartyDigitalContact model with all data filled in. Returns result inside a CapdResponse'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    $ref: '#/components/schemas/PartyDigitalContact'
+                required:
+                  - '_data'
+                additionalProperties: false
+        '403':
+          description: A WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 'Person does not have any email assigned'
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 'Email address is already verified'
+          $ref: '#/components/responses/Conflict'
+        '500':
+          description: 'Dao exception encountered when retrieving complete person profile'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: 'There was an error processing your request.'
+  /verify-email/{digitalContactPartyId}:
+    post:
+      tags:
+        - 'person'
+      summary: 'Sends a verification email'
+      description: >
+        Sends a verification email to the PartyDigitalContact identified by digitalContactPartyId,
+        as returned by GET /person/{personId}/{email}/confirm
+      operationId: 'verifyEmail'
+      parameters:
+        - name: 'digitalContactPartyId'
+          in: 'path'
+          description: 'The unique ID of the PartyDigitalContact record.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: 'Verification email sent. Returns result inside a CapdResponse'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    type: string
+                required:
+                  - '_data'
+                additionalProperties: false
+        '403':
+          description: A WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 'No digital contact found for the given digitalContactPartyId'
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: 'Error sending email'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: 'There was an error processing your request.'
   /person/{personId}/summary:
     get:
       tags:
@@ -232,6 +341,19 @@ components:
               message:
                 type: string
                 example: HTTP 404 Not Found
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 409
+              message:
+                type: string
+                example: HTTP 409 Conflict
     Forbidden:
       description: Forbidden
       content:
@@ -610,6 +732,41 @@ components:
         - 'postalCode'
         - 'street'
         - 'uprn'
+
+    PartyDigitalContact:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        partyId:
+          type: integer
+        mdmPartyContactId:
+          type: [integer, 'null']
+        digitalContactType:
+          $ref: '#/components/schemas/DigitalContactType'
+        digitalAddress:
+          type: [string, 'null']
+        validated:
+          type: boolean
+      required:
+        - 'id'
+        - 'partyId'
+        - 'mdmPartyContactId'
+        - 'digitalContactType'
+        - 'digitalAddress'
+        - 'validated'
+    DigitalContactType:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        type:
+          type: [string, 'null']
+      required:
+        - 'id'
+        - 'type'
 
     FullPersonDetails:
       type: object

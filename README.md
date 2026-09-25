@@ -147,14 +147,15 @@ git config --global core.autocrlf false
 
 More information about each logical area of the API can be found by accessing its associated schema.
 
-| Endpoint                          | Description                                                                                                                                      |
-| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET: /health`                    | Basic platform health check                                                                                                                      |
-| `GET: /schemata/authenticate.yml` | Defines the API for `Authenticate` question answers at `/extapi/external-auth/security-answers/{crn}`                                            |
-| `GET: /schemata/organisation.yml` | Defines the API for `organisation` data at `/extapi/organisation`                                                                                |
-| `GET: /schemata/payments.yml`     | Defines the API for `payments` data at `/api/services/RSFVendPaymentDetailsServiceGroup/RSFVendPaymentDetailsService/getSupplierPaymentsPackage` |
-| `GET: /schemata/person.yml`       | Defines the API for `person` data at `/extapi/person`                                                                                            |
-| `GET: /schemata/siti-agri.yml`    | Defines the API for `Siti-Agri` data at `/SitiAgriApi/cv`                                                                                        |
+| Endpoint                              | Description                                                                                                                                      |
+| :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET: /health`                        | Basic platform health check                                                                                                                      |
+| `GET: /schemata/authenticate.yml`     | Defines the API for `Authenticate` question answers at `/extapi/external-auth/security-answers/{crn}`                                            |
+| `GET: /schemata/email-validation.yml` | Defines the API for `email validation` records at `/extapi/external-auth/email-validation`                                                       |
+| `GET: /schemata/organisation.yml`     | Defines the API for `organisation` data at `/extapi/organisation`                                                                                |
+| `GET: /schemata/payments.yml`         | Defines the API for `payments` data at `/api/services/RSFVendPaymentDetailsServiceGroup/RSFVendPaymentDetailsService/getSupplierPaymentsPackage` |
+| `GET: /schemata/person.yml`           | Defines the API for `person` data at `/extapi/person`                                                                                            |
+| `GET: /schemata/siti-agri.yml`        | Defines the API for `Siti-Agri` data at `/SitiAgriApi/cv`                                                                                        |
 
 ## Schema testing against the KITS upgrade service
 
