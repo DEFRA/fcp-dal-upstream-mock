@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { createLogger } from '../../common/helpers/logging/logger.js'
 import { personUpdateSchema } from '../../common/update-schemas.js'
 import {
   crnToPersonId,
@@ -11,6 +12,8 @@ import {
 import { applyUpdates } from '../../utils/applyUpdates.js'
 import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
+
+const logger = createLogger('person.factory')
 
 const people = {}
 
