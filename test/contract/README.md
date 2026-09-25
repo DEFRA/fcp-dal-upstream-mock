@@ -44,3 +44,4 @@ npm run test:contract
 ```
 
 The above creates a local `docker compose` environment, spinning up the mock API and running `schemathesis` against it.
+test
