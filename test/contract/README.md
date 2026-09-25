@@ -44,3 +44,17 @@ npm run test:contract
 ```
 
 The above creates a local `docker compose` environment, spinning up the mock API and running `schemathesis` against it.
+
+### Generated test data
+
+`schemathesis` generates random test data, so by default each run would exercise different inputs.
+To keep PR checks stable, the local mock run uses a fixed seed (see [`compose.yml`](./compose.yml)), so the same data is generated each time.
+To reproduce a failure seen elsewhere, or to explore different generated data, override the seed:
+
+```shell
+CONTRACT_TEST_SEED=12345 npm run test:contract
+```
+
+The requests/responses of each run are recorded in `test/contract/logs/<schema>.logs.yaml` (uploaded as a build artifact when the PR check fails).
+
+Runs against KITS via `check-schema.sh` are deliberately left random, to catch upstream behaviour drifting from the schemata.
