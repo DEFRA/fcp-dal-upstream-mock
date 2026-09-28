@@ -66,8 +66,9 @@ export const emailValidation = [
       }
 
       markPersonEmailValidated(customerReference)
-      // TODO: assuming this api also deleted the email validation record, but will need to test with actual api
+      // TODO: assuming this api also deletes the email validation record, but will need to test with actual api
       // once we have access
+      // TODO: confirm whether this endpoint also updates a users email address
       deleteEmailValidation(customerReference)
 
       return h.response().code(200)
