@@ -199,7 +199,7 @@ describe('Person routes', () => {
       )
     })
 
-    // TODO: Need to verify this behaviour in ext-test as in test a 200 is returned regardless
+    // TODO: Need to verify this behaviour after calling email-validation api as currently receiving 500 responses
     it('should return 404 for a well-formed but unknown digitalContactPartyId', async () => {
       const { statusCode } = await server.inject({
         method: 'POST',
