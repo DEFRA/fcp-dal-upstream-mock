@@ -52,16 +52,13 @@ const mapPersonToSearchResult = ({
   deactivated
 })
 
-const mapPersonToPartyDigitalContact = ({ id, emailValidated, email }, requestEmail) => ({
+const mapPersonToPartyDigitalContact = ({ id, emailValidated }, requestEmail) => ({
   id: personIdToDigitalContactPartyId[id],
   partyId: id, // partyId is the personId here (a party can also be an organisation elsewhere)
   mdmPartyContactId: null,
   digitalContactType: { id: 100301, type: 'Email Address' }, // 100301 = EMAIL_ADDRESS (not 100306 CORRESPONDENCE_EMAIL)
-  digitalAddress: email, // Bit unusual, but the API echos back the same email address passed in the url params
-  validated:
-    email === requestEmail &&
-    emailValidated /* Not been able to confirm this is how this works as we only have 1
-    // external test account with an unvalidated account and no email support */
+  digitalAddress: requestEmail, // Bit unusual, but the API echos back the same email address passed in the url params
+  validated: emailValidated // Returns whether the persons existing email is validated, not the one in the request!
 })
 
 const validateUpdatePersonPayload = await createPayloadValidator(
@@ -133,11 +130,9 @@ export const person = [
     handler: async (request, h) => {
       const digitalContactPartyId = checkDigitalContactPartyId(request)
       const personId = digitalContactPartyIdToPersonId[digitalContactPartyId]
-
+      // TODO: Need to verify the behaviour of this API once we have access to the  /email-validation
+      // api which should get called prior to this
       if (personId === undefined) {
-        // After testing this end point in cdp test (upgrade), is seems to return success regardless of whether the person is found.
-        // Leaving this as a 404 for now, but need to remove this check as well as from the person-schema.oas.yml
-        // if the behaviour is the same in cdp ext-test (perf-test)
         logger.info(
           `No digital contact party found for digitalContactPartyId ${digitalContactPartyId}`
         )

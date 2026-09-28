@@ -112,6 +112,47 @@ describe('Person routes', () => {
       expect(summaryResult._data.emailValidated).toBe(false)
     })
 
+    it('should return the party digital contact for the person, conforming to the schema', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/unvalidated@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data).toEqual({
+        id: expect.any(Number),
+        partyId: 11111121,
+        mdmPartyContactId: null,
+        digitalContactType: { id: 100301, type: 'Email Address' },
+        digitalAddress: 'unvalidated@the-closet.net',
+        validated: false
+      })
+      expect(result).toConformToSchema(
+        schema.paths['/person/{personId}/{email}/confirm'].get.responses['200'].content[
+          'application/json'
+        ].schema
+      )
+    })
+
+    it("should echo back the requested email, but report the person's existing email validation status", async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111119/someone-else@example.com/confirm'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data.validated).toBe(true)
+      expect(result._data.digitalAddress).toBe('someone-else@example.com')
+    })
+
+    it('should report the existing email as not validated when confirming a different email for an unvalidated person', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/someone-else@example.com/confirm'
+      })
+      expect(statusCode).toBe(200)
+      expect(result._data.validated).toBe(false)
+      expect(result._data.digitalAddress).toBe('someone-else@example.com')
+    })
+
     it('should return 404 when the person does not have any email assigned', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
