@@ -197,9 +197,15 @@ export const organisation = [
       const orgId = checkId(request, 'orgId')
       try {
         createAuthorisation(orgId, request.payload)
-        return h.response({ success: true }).code(201)
-      } catch {
-        return h.response({ success: false })
+        return h.response({ data: null, success: true }).code(201)
+      } catch (e) {
+        if (e.isBoom && e.output.statusCode === 404 && /organisation/i.test(e.message)) {
+          return h.response({ success: false, errorString: 'Parent user id not found' }).code(500)
+        }
+        if (e.isBoom && e.output.statusCode === 409) {
+          return h.response({ success: false, errorString: 'Relation already exists' }).code(409)
+        }
+        return h.response({ success: false, errorString: 'An error has occurred' }).code(500)
       }
     }
   },
@@ -210,13 +216,20 @@ export const organisation = [
       const orgId = checkId(request, 'orgId')
       const personId = checkId(request, 'personId')
 
-      console.log(JSON.stringify(request.payload, null, 2))
-
       try {
         updateAuthorisation(orgId, personId, request.payload)
-        return h.response({ success: true }).code(200)
+        return h.response({ data: null, success: true }).code(200)
       } catch (e) {
-        return h.response({ success: false, errorString: e.message })
+        if (e.isBoom && e.output.statusCode === 404) {
+          if (/organisation/i.test(e.message)) {
+            return h.response({ success: false, errorString: 'Parent user id not found' }).code(500)
+          }
+          return h.response({ success: false, errorString: 'Person not found' }).code(404)
+        }
+        if (e.isBoom && e.output.statusCode === 409) {
+          return h.response({ success: false, errorString: 'Relation already exists' }).code(409)
+        }
+        return h.response({ success: false, errorString: 'An error has occured' }).code(500)
       }
     }
   }

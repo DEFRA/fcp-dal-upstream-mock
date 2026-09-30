@@ -272,22 +272,22 @@ paths:
               schema:
                 type: object
                 properties:
-                  _data:
-                    type: array
-                    items:
-                      type: object
+                  data:
+                    type: 'null'
+                  success:
+                    type: boolean
+                    example: true
+                required: ['data', 'success']
         '400':
           description: 'Invalid payload'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        '403':
-          description: 'CV users are not permitted to create authorisations.'
         '404':
           description: 'Organisation or person not found.'
         '409':
-          description: 'Person already authorised on the organisation.'
+          description: 'Relation already exists.'
 
   /SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}:
     put:
@@ -322,16 +322,18 @@ paths:
               schema:
                 type: object
                 properties:
-                  _data:
-                    type: object
+                  data:
+                    type: 'null'
+                  success:
+                    type: boolean
+                    example: true
+                required: ['data', 'success']
         '400':
           description: 'Invalid payload'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        '403':
-          description: 'CV users are not permitted to update authorisations.'
         '404':
           description: 'Organisation, person, or authorisation link not found.'
 
@@ -460,6 +462,7 @@ components:
       properties:
         personRoles:
           type: array
+          maxItems: 1
           items:
             type: object
             properties:
@@ -469,6 +472,7 @@ components:
                 type: integer
         personPrivileges:
           type: array
+          maxItems: 1
           items:
             type: object
             properties:
