@@ -8,6 +8,7 @@
     "source.fixAll.eslint": "always",
     "source.sortImports": "explicit"
   },
+  "eslint.validate": ["javascript"],
   "prettier.enable": true,
   "prettier.configPath": "prettier.config.js",
   "prettier.requireConfig": true,

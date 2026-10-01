@@ -88,7 +88,7 @@ const createIntermediateHistory = (count = 1, overrides = {}) =>
   Array.from({ length: faker.number.int({ min: count * 2, max: count * 12 }) }, () =>
     createHistory(overrides)
   )
-const createHistoryFromTransition = (transition, overrides = {}) => {
+const createHistoryFromTransition = (transition, _overrides = {}) => {
   const history = [
     ...faker.helpers.weightedArrayElement([
       {
