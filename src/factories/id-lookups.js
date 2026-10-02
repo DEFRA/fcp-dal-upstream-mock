@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { faker, safeSeed } from './common.js'
+import { faker, fakeId, safeSeed } from './common.js'
 import { sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
 
 export const staticPersonData = {
@@ -531,6 +531,18 @@ export const orgIdLookup = {
 export const crnToPersonId = Object.fromEntries(
   Object.entries(staticPersonData).map(([personId, { crn }]) => [crn, personId])
 )
+
+// The id of each person's PartyDigitalContact record (see /person/{personId}/{email}/confirm),
+// derived the same way for every known person so it can be looked up in either direction.
+export const personIdToDigitalContactPartyId = {}
+export const digitalContactPartyIdToPersonId = {}
+
+Object.keys(staticPersonData).forEach((personId) => {
+  safeSeed([personId, 'partyDigitalContactId'])
+  const digitalContactPartyId = fakeId()
+  personIdToDigitalContactPartyId[personId] = digitalContactPartyId
+  digitalContactPartyIdToPersonId[digitalContactPartyId] = personId
+})
 export const sbiToOrgId = {}
 export const orgIdToSbi = {}
 export const frnToOrgId = {}

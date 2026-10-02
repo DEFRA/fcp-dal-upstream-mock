@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { createLogger } from '../../common/helpers/logging/logger.js'
 import { personUpdateSchema } from '../../common/update-schemas.js'
 import {
   crnToPersonId,
@@ -11,6 +12,8 @@ import {
 import { applyUpdates } from '../../utils/applyUpdates.js'
 import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
+
+const logger = createLogger('person.factory')
 
 const people = {}
 
@@ -75,6 +78,7 @@ export const retrievePerson = (personId) => {
 
   const { crn, ...overrides } = staticPersonData[personId] ?? {}
   if (!crn) {
+    logger.info(`Person with personId ${personId} not found`)
     throw Boom.notFound(`person with personId ${personId} not found`)
   }
 
@@ -106,7 +110,7 @@ export const allPeople = () =>
 // find all the people belonging to orgs matching the search function
 const peopleInOrgsWhere = (search) => {
   const orgIds = Object.keys(orgIdLookup).filter((orgId) => search(retrieveOrganisation(orgId)))
-  // only persons that exsist
+  // only persons that exist
   const personIds = new Set(orgIds.flatMap((orgId) => orgIdToPersonIds[orgId] ?? []))
   return [...personIds]
     .filter((personId) => personId in staticPersonData)
@@ -137,6 +141,23 @@ export const searchPeople = (searchFieldType, searchPhrase) =>
 
 export const updatePerson = (personId, updatesToPerson) => {
   const person = retrievePerson(personId)
+  const updatedPerson = applyUpdates(personUpdateSchema, person, updatesToPerson)
 
-  return (people[personId] = applyUpdates(personUpdateSchema, person, updatesToPerson))
+  // A changed email address invalidates the PartyDigitalContact record - it must be
+  // re-verified via POST /verify-email/{digitalContactPartyId} before it is trusted again.
+  // Matched case-insensitively, consistent with GET /person/{email}/validateEmail.
+  if (updatedPerson.email?.toLowerCase() !== person.email?.toLowerCase()) {
+    updatedPerson.emailValidated = false
+  }
+
+  return (people[personId] = updatedPerson)
+}
+
+export const markPersonEmailValidated = (crn) => {
+  const personId = crnToPersonId[crn]
+  if (!personId) {
+    return
+  }
+
+  retrievePerson(personId).emailValidated = true
 }
