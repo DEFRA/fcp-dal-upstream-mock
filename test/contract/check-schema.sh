@@ -6,6 +6,7 @@ baseDir=`cd $(dirname $0) ; pwd`
 cd $baseDir
 rootDir=`cd ../.. ; pwd`
 mkdir -p ./tmp
+chmod 777 ./tmp
 
 usage() {
   set +x
