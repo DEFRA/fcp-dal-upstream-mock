@@ -60,12 +60,6 @@ const validateLockPersonPayload = await createPayloadValidator(
     schema.paths['/person/{personId}/lock'].post.requestBody.content['application/json'].schema
 )
 
-const validateUnlockPersonPayload = await createPayloadValidator(
-  'routes/kits-v1/person-schema.oas.yml',
-  (schema) =>
-    schema.paths['/person/{personId}/unlock'].post.requestBody.content['application/json'].schema
-)
-
 const checkPersonId = (request) => {
   const personId = Number.parseInt(request.params.personId, 10)
 
