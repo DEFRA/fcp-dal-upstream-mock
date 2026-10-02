@@ -15,6 +15,40 @@ servers:
   - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
     description: The test server for KITS/V1 APIs
 paths:
+  /reference/titles:
+    get:
+      tags:
+        - reference-data
+      summary: The enum of titles for a person
+      description: >
+        Request to get the accepted titles for a person.
+        These are the allowed values when updating the title of a person.
+      operationId: getTitles
+      responses:
+        '200':
+          description: A list of titles
+          $ref: '#/components/responses/Titles'
+        '403':
+          description: Getting titles is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+
+  /reference/business-types:
+    get:
+      tags:
+        - reference-data
+      summary: The enum of business types & their codes
+      description: >
+        Request to get the accepted business types & codes for a business.
+        These are the allowed values when updating the business type of a business.
+      operationId: getBusinessTypes
+      responses:
+        '200':
+          description: A list of business types and their codes
+          $ref: '#/components/responses/ReferenceData'
+        '403':
+          description: Getting business types is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+
   /reference/legalstatus:
     get:
       tags:
@@ -52,6 +86,19 @@ components:
                     description:
                       type: string
                       description: The human-readable description of the reference datum
+    Titles:
+      description: A list of titles for a person
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              _data:
+                type: array
+                items:
+                  type: string
+                  description: The title for a person
+
     Forbidden:
       description: Forbidden
       content:
