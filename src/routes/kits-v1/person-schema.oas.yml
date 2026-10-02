@@ -50,8 +50,14 @@ paths:
                 required:
                   - '_data'
                 additionalProperties: false
+        '400':
+          description: >
+            The request was rejected before reaching the service because the `email` path segment
+            could not be parsed as a URI (e.g. control characters or an encoded `%` or `/`),
+            typically as an HTML "Bad Message 400" page.
+          $ref: '#/components/responses/BadRequest'
         '403':
-          description: Checking for duplicate email is forbidden, or a WAF rule has been triggered.
+          description: A WAF rule has been triggered.
           $ref: '#/components/responses/Forbidden'
         '500':
           description: 'Error confirming if email is duplicated'
