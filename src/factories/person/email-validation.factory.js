@@ -1,7 +1,13 @@
 const LINK_VALIDITY_HOURS = 12
 
-const recordsByCrn = {}
-const crnByEmail = {}
+/**
+ * Lookup of email validation records by crn.
+ * An email validation record is used to identify a customer that
+ * has requested to validate their email address during the login process
+ * (you cannot login with a non validated email address)
+ * crn is the key, email validation record is the value
+ */
+const emailValidationRecordsByCrn = {}
 
 const normaliseEmail = (email) => String(email ?? '').toLowerCase()
 
@@ -12,37 +18,30 @@ export const saveEmailValidation = ({
   linkSentDate
 }) => {
   const normalisedEmail = normaliseEmail(email)
-  const owningCrn = crnByEmail[normalisedEmail]
-  if (owningCrn && owningCrn !== customerReference) {
-    return { conflict: true, owningCrn }
+  const conflictingRecord = Object.values(emailValidationRecordsByCrn).find(
+    (record) =>
+      normaliseEmail(record.email) === normalisedEmail &&
+      record.customerReference !== customerReference
+  )
+  if (conflictingRecord) {
+    return { conflict: true, owningCrn: conflictingRecord.customerReference }
   }
 
-  const existing = recordsByCrn[customerReference]
-  if (existing) {
-    delete crnByEmail[normaliseEmail(existing.email)]
-  }
-
-  recordsByCrn[customerReference] = {
+  emailValidationRecordsByCrn[customerReference] = {
     customerReference,
     partyDigitalContactId,
     email,
     linkSentDate
   }
-  crnByEmail[normalisedEmail] = customerReference
 
   return { conflict: false }
 }
 
-export const findEmailValidation = (customerReference) => recordsByCrn[customerReference]
+export const findEmailValidation = (customerReference) =>
+  emailValidationRecordsByCrn[customerReference]
 
 export const deleteEmailValidation = (customerReference) => {
-  const existing = recordsByCrn[customerReference]
-  if (!existing) {
-    return
-  }
-
-  delete crnByEmail[normaliseEmail(existing.email)]
-  delete recordsByCrn[customerReference]
+  delete emailValidationRecordsByCrn[customerReference]
 }
 
 export const isEmailValidationLinkExpired = (linkSentDate) => {

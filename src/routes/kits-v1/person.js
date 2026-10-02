@@ -132,6 +132,7 @@ export const person = [
       const personId = digitalContactPartyIdToPersonId[digitalContactPartyId]
       // TODO: Need to verify the behaviour of this API once we have access to the  /email-validation
       // api which should get called prior to this
+      // see https://eaflood.atlassian.net/browse/FCPDAL-440
       if (personId === undefined) {
         logger.info(
           `No digital contact party found for digitalContactPartyId ${digitalContactPartyId}`

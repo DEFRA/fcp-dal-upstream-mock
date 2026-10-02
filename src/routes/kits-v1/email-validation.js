@@ -19,6 +19,7 @@ export const emailValidation = [
       // a: no customer exists for the reference
       // b: no digital contact records exists for the partyDigitalContactId
       // c: the email doesn't match that of the partyDigitalContactId
+      // see https://eaflood.atlassian.net/browse/FCPDAL-440
       const { conflict, owningCrn } = saveEmailValidation(request.payload ?? {})
       if (conflict) {
         logger.info(
