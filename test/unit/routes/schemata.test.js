@@ -9,15 +9,17 @@ describe('Fake Person', () => {
     await server.register([inert, schemata])
     await server.initialize()
   })
-  ;['authenticate', 'person', 'organisation', 'siti-agri', 'permissions'].forEach((schema) => {
-    it(`should fetch the ${schema} schema file`, async () => {
-      const result = await server.inject({
-        method: 'GET',
-        url: `/schemata/${schema}.yml`
+  ;['authenticate', 'person', 'organisation', 'siti-agri', 'permissions', 'internal-user'].forEach(
+    (schema) => {
+      it(`should fetch the ${schema} schema file`, async () => {
+        const result = await server.inject({
+          method: 'GET',
+          url: `/schemata/${schema}.yml`
+        })
+        expect(result.statusCode).toBe(200)
       })
-      expect(result.statusCode).toBe(200)
-    })
-  })
+    }
+  )
 
   it('should return 404 for non-existent schema', async () => {
     const result = await server.inject({

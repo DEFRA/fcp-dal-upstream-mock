@@ -1,9 +1,9 @@
 import { retrieveAuthorisationByFunction } from '../../factories/siti-agri/permissions.factory.js'
 import { checkId } from '../../utils/shared-datatypes.js'
 
-const responseWrapper = { errorString: null, success: true }
+export const responseWrapper = { errorString: null, success: true }
 
-const errorEnvelope = { data: null, success: false, errorString: 'An error has occurred.' }
+export const errorEnvelope = { data: null, success: false, errorString: 'An error has occurred.' }
 
 // Splits the pipe-separated list the way the upstream does
 export const parseRequestedFunctions = (functions) => {
