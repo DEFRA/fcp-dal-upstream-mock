@@ -7,6 +7,7 @@ cd $baseDir
 rootDir=`cd ../.. ; pwd`
 mkdir -p ./tmp
 chmod 777 ./tmp
+KITS_EXTERNAL_URL="${KITS_EXTERNAL_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/external/extapi}"
 
 usage() {
   set +x
@@ -14,7 +15,7 @@ usage() {
   echo "Run schemathesis contract tests against the upstream KITS (internal or external gateway) or Hitachi."
   echo "All tests are run against the 'upgrade' API env."
   echo
-  echo "Usage: $0 {a|auth|authenticate|b|bank|iu|internal-user|l|land|o|org|organisation|p|person|perm|permissions|r|rd|reference-data|pd|payments|s|sa|siti-agri|help}"
+  echo "Usage: $0 {a|auth|authenticate|b|bank|iu|internal-user|l|land|o|org|organisation|p|person|pe|person-external|perm|permissions|r|rd|reference-data|pd|payments|s|sa|siti-agri|help}"
   echo
   echo "Where the argument specifies which schema to test:"
   echo "  a  | auth | authenticate - test the Authenticate schema"
@@ -22,7 +23,9 @@ usage() {
   echo "  iu | internal-user       - test the Internal User Authorisation schema"
   echo "  l  | land                - test the Land schema"
   echo "  o  | org | organisation  - test the Organisation schema"
-  echo "  p  | person              - test the Person schema"
+  echo "  p  | person              - test the Person schema (KITS internal gateway endpoints only)"
+  echo "  pe | person-external     - test the Person schema endpoints on the KITS EXTERNAL gateway"
+  echo "                           (/person/{personId}/{email}/confirm and /verify-email/{digitalContactPartyId})"
   echo "  perm | permissions       - test the Authorisation (Permissions) schema (KITS EXTERNAL gateway)"
   echo "  r  | rd | reference-data - test the Reference Data schema"
   echo "  pd | payments            - test the Payment Details schema"
@@ -36,6 +39,8 @@ usage() {
   echo "  DEFRA_ID_TOKEN - a pre-issued Defra Identity token; if unset one is generated"
   echo "                   with scripts/get-defra-id-token.js, which needs DEFRA_ID_CRN,"
   echo "                   DEFRA_ID_PASSWORD and the DEFRA_ID_* client config (see .env.example)"
+  echo "  DEFRA_ID_PERSON_ID / DEFRA_ID_EMAIL - the Defra ID user's personId and email, used as"
+  echo "                   examples for person-external; looked up from their person summary if unset"
   echo "  KITS_EXTERNAL_URL - the URL of the KITS EXTERNAL proxy endpoint (defaults to"
   echo "                      the deployed mock's /proxy/external/extapi ephemeral route)"
   echo "or..."
@@ -74,6 +79,32 @@ resolve_defra_id_token() {
   }
   DEFRA_ID_CRN="${DEFRA_ID_CRN:-$( claim contactId )}"
   ORG_ID="${DEFRA_ID_RELATIONSHIP_ID:-$( claim currentRelationshipId )}"
+}
+
+# Resolve the Defra ID user's personId and email (PERSON_ID, PERSON_EMAIL) from the KITS
+# EXTERNAL gateway's person summary, requested with the personId override (3337243) and
+# their crn. Either can be set explicitly with DEFRA_ID_PERSON_ID / DEFRA_ID_EMAIL.
+resolve_defra_id_person() {
+  PERSON_ID="${DEFRA_ID_PERSON_ID}"
+  PERSON_EMAIL="${DEFRA_ID_EMAIL}"
+  if [ -n "${PERSON_ID}" ] && [ -n "${PERSON_EMAIL}" ]; then
+    return
+  fi
+  local summary
+  summary=$( curl --silent --fail \
+    --header "x-api-key: ${CDP_API_KEY}" \
+    --header "Authorization: ${DEFRA_ID_TOKEN}" \
+    --header "crn: ${DEFRA_ID_CRN}" \
+    "${KITS_EXTERNAL_URL}/person/3337243/summary" ) || {
+    echo "ERROR: could not retrieve the person summary for crn ${DEFRA_ID_CRN}; set DEFRA_ID_PERSON_ID and DEFRA_ID_EMAIL" 1>&2
+    exit 1
+  }
+  PERSON_ID="${PERSON_ID:-$( echo "${summary}" | jq -r '._data.id // empty' )}"
+  PERSON_EMAIL="${PERSON_EMAIL:-$( echo "${summary}" | jq -r '._data.email // empty' )}"
+  if [ -z "${PERSON_ID}" ] || [ -z "${PERSON_EMAIL}" ]; then
+    echo "ERROR: the person summary for crn ${DEFRA_ID_CRN} had no id/email; set DEFRA_ID_PERSON_ID and DEFRA_ID_EMAIL" 1>&2
+    exit 1
+  fi
 }
 
 # check OPTION argument
@@ -138,7 +169,9 @@ case "$1" in
     ;;
   p | person )
     schema="kits-v1/person"
+    # NOTE: the confirm and verify-email endpoints are on the KITS EXTERNAL gateway, see person-external
     mutations='. |
+del(.paths["/person/{personId}/{email}/confirm"], .paths["/verify-email/{digitalContactPartyId}"]) |
 .paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
@@ -167,6 +200,18 @@ case "$1" in
     gateway="kits-internal"
     ;;
   # KITS APIs (EXTERNAL gateway)
+  pe | person-external )
+    schema="kits-v1/person"
+    resolve_defra_id_token
+    resolve_defra_id_person
+    # only the Person endpoints served by the KITS EXTERNAL gateway, see person
+    # NOTE: confirm 404s unless personId is the token user's, so seed it (and their email) as examples
+    mutations='. |
+.paths |= with_entries(select(.key == "/person/{personId}/{email}/confirm" or .key == "/verify-email/{digitalContactPartyId}")) |
+.paths["/person/{personId}/{email}/confirm"].get.parameters[0].schema.examples = ['"${PERSON_ID}"'] |
+.paths["/person/{personId}/{email}/confirm"].get.parameters[1].schema.examples = ["'"${PERSON_EMAIL}"'", "contract-test@example.com"]'
+    gateway="kits-external"
+    ;;
   perm | permissions )
     schema="kits-v1/permissions"
     resolve_defra_id_token
@@ -236,7 +281,7 @@ elif [ "${gateway}" = "kits-external" ]; then # KITS EXTERNAL gateway
         --header "crn: ${DEFRA_ID_CRN}" \
         --exclude-checks=unsupported_method,not_a_server_error \
         --report-vcr-path /tmp/vcr.yaml \
-        --url "${KITS_EXTERNAL_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/external/extapi}"
+        --url "${KITS_EXTERNAL_URL}"
 
 else # hitachi
   if [ -z "${HITACHI_CLIENT_SECRET}" ]; then
