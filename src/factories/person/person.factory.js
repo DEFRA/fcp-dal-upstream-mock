@@ -12,6 +12,10 @@ import { applyUpdates } from '../../utils/applyUpdates.js'
 import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
+import { createLogger } from '../../common/helpers/logging/logger.js'
+
+const logger = createLogger('person.factory')
+
 const people = {}
 
 const generatePerson = (personId, crn, overrides = {}) => {
@@ -129,7 +133,8 @@ const personMatchers = {
         normalisePostcode(person.address.postalCode) === normalisePostcode(postcode)
     ),
   VENDOR_NUMBER: (phrase) => peopleInOrgsWhere((org) => org.vendorNumber?.startsWith(phrase)),
-  TRADER_NUMBER: (phrase) => peopleInOrgsWhere((org) => org.traderNumber?.startsWith(phrase))
+  TRADER_NUMBER: (phrase) => peopleInOrgsWhere((org) => org.traderNumber?.startsWith(phrase)),
+  PERSON_ID: (personId) => allPeople().find((person) => person.id === personId)
 }
 
 export const searchPeople = (searchFieldType, searchPhrase) =>
@@ -140,3 +145,13 @@ export const updatePerson = (personId, updatesToPerson) => {
 
   return (people[personId] = applyUpdates(personUpdateSchema, person, updatesToPerson))
 }
+
+export const lockPerson = (personId, locked = true) => {
+  const person = searchPeople('PERSON_ID', personId)
+  if (!person) {
+    throw Boom.notFound(`Person not found`)
+  }
+  person.locked = locked
+}
+
+export const unlockPerson = (personId) => lockPerson(personId, false)

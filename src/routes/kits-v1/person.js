@@ -5,6 +5,7 @@ import { paginate } from '../../factories/common.js'
 import { crnToPersonId } from '../../factories/id-lookups.js'
 import {
   allPeople,
+  lockPerson,
   retrievePerson,
   retrievePersonOrgs,
   searchPeople,
@@ -51,6 +52,12 @@ const mapPersonToSearchResult = ({
 const validateUpdatePersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
   (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
+)
+
+const validateLockPersonPayload = await createPayloadValidator(
+  'routes/kits-v1/person-schema.oas.yml',
+  (schema) =>
+    schema.paths['/person/{personId}/lock'].post.requestBody.content['application/json'].schema
 )
 
 const checkPersonId = (request) => {
@@ -158,6 +165,21 @@ export const person = [
       }
 
       updatePerson(personId, body)
+      return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/person/{personId}/lock',
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
+      const body = request.payload
+
+      if (!validateLockPersonPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      lockPerson(personId)
       return h.response().code(204)
     }
   }

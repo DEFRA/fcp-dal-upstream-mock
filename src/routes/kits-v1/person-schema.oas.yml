@@ -148,6 +148,41 @@ paths:
                     type: string
                     example: >
                       There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
+  /person/{personId}/lock:
+    post:
+      tags:
+        - 'person'
+      summary: 'Lock Person.'
+      description: 'Request to lock a person by ID.'
+      operationId: 'lockPerson'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'The unique ID of the requested person.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            examples: [11111111, 11112222, 22222222]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockPersonRequestBody'
+      responses:
+        '204':
+          description: 'Successfully locked person.'
+        '400':
+          description: 'Invalid reason and notes'
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Getting an internal user's details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 'Person not found'
+          $ref: '#/components/responses/NotFound'
   /person/{personId}:
     put:
       tags:
@@ -383,6 +418,53 @@ components:
           primarySearchPhrase: '123456'
         - searchFieldType: 'TRADER_NUMBER'
           primarySearchPhrase: '654321'
+    LockPersonRequestBody:
+      type: object
+      examples:
+        - partyNoteType: 'LockPerson'
+          reason: 'Account review'
+        - partyNoteType: 'LockPerson'
+          note: 'testing locking'
+        - partyNoteType: 'LockPerson'
+          note: 'testing locking'
+          reason: 'Account review'
+      anyOf:
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'LockPerson'
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'reason']
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'LockPerson'
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'note']
     PersonalUpdateRequest:
       type: 'object'
       properties:
