@@ -72,6 +72,13 @@ export const schemata = {
             file: path.join(__dirname, '../routes/kits-v1/reference-data-schema.oas.yml')
           }
         },
+        {
+          method: 'GET',
+          path: '/schemata/email-validation.yml',
+          handler: {
+            file: path.join(__dirname, '../routes/kits-v1/email-validation-schema.oas.yml')
+          }
+        },
 
         // Hitachi schemata
         {

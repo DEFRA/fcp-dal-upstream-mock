@@ -2,7 +2,11 @@ import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { config } from '../../config.js'
 import { paginate } from '../../factories/common.js'
-import { crnToPersonId } from '../../factories/id-lookups.js'
+import {
+  crnToPersonId,
+  digitalContactPartyIdToPersonId,
+  personIdToDigitalContactPartyId
+} from '../../factories/id-lookups.js'
 import {
   allPeople,
   retrievePerson,
@@ -48,23 +52,42 @@ const mapPersonToSearchResult = ({
   deactivated
 })
 
+const mapPersonToPartyDigitalContact = ({ id, emailValidated }, requestEmail) => ({
+  id: personIdToDigitalContactPartyId[id],
+  partyId: id, // partyId is the personId here (a party can also be an organisation elsewhere)
+  mdmPartyContactId: null,
+  digitalContactType: { id: 100301, type: 'Email Address' }, // 100301 = EMAIL_ADDRESS (not 100306 CORRESPONDENCE_EMAIL)
+  digitalAddress: requestEmail, // Bit unusual, but the API echos back the same email address passed in the url params
+  validated: emailValidated // Returns whether the persons existing email is validated, not the one in the request!
+})
+
 const validateUpdatePersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
   (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
 )
 
-const checkPersonId = (request) => {
-  const personId = Number.parseInt(request.params.personId, 10)
+/**
+ * Get an integer path param from the request, in the range accepted by upstream
+ * @param {*} request
+ * @param {string} paramName
+ * @returns the parsed id
+ * @throws {Boom.Boom} 403 if the param is not an integer in the acceptable range
+ */
+const checkPathId = (request, paramName) => {
+  const id = Number.parseInt(request.params[paramName], 10)
 
-  if (Number.isNaN(personId) || personId < 0 || `${personId}`.length > 20) {
+  if (Number.isNaN(id) || id < 0 || `${id}`.length > 20) {
     throw Boom.forbidden(
-      `bad personId: ${personId}, is not an integer in the acceptable range`,
+      `bad ${paramName}: ${id}, is not an integer in the acceptable range`,
       request
     )
   }
 
-  return personId
+  return id
 }
+
+const checkPersonId = (request) => checkPathId(request, 'personId')
+const checkDigitalContactPartyId = (request) => checkPathId(request, 'digitalContactPartyId')
 
 export const person = [
   {
@@ -76,6 +99,48 @@ export const person = [
         (person) => person.email?.toLowerCase() === email && person.emailValidated
       )
       return h.response({ _data: { emailDuplicated } })
+    }
+  },
+  {
+    method: 'GET',
+    path: '/person/{personId}/{email}/confirm',
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
+      const person = retrievePerson(personId)
+
+      if (!person.email) {
+        logger.info(`confirm email: person with personId ${personId} has no email address`)
+        throw Boom.notFound()
+      }
+
+      if (
+        person.email.toLowerCase() === request.params.email.toLowerCase() &&
+        person.emailValidated
+      ) {
+        logger.info(`Email for person with personId ${personId} is already validated`)
+        throw Boom.conflict('Email address is already verified', request)
+      }
+
+      return h.response({ _data: mapPersonToPartyDigitalContact(person, request.params.email) })
+    }
+  },
+  {
+    method: 'POST',
+    path: '/verify-email/{digitalContactPartyId}',
+    handler: async (request, h) => {
+      const digitalContactPartyId = checkDigitalContactPartyId(request)
+      const personId = digitalContactPartyIdToPersonId[digitalContactPartyId]
+      // TODO: Need to verify the behaviour of this API once we have access to the  /email-validation
+      // api which should get called prior to this
+      // see https://eaflood.atlassian.net/browse/FCPDAL-440
+      if (personId === undefined) {
+        logger.info(
+          `No digital contact party found for digitalContactPartyId ${digitalContactPartyId}`
+        )
+        throw Boom.notFound()
+      }
+
+      return h.response({ _data: 'Success' })
     }
   },
   {
