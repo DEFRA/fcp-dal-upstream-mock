@@ -90,6 +90,30 @@ describe('Changes to organisation data', () => {
       )
     })
 
+    it('should create an organisation for a person not yet in any organisation', async () => {
+      // person 11111121 exists in static data but is not a customer of any organisation
+      let { statusCode, payload } = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111121/summary`
+      })
+      expect(statusCode).toBe(200)
+      expect(JSON.parse(payload)._data).toEqual([])
+      ;({ statusCode, payload } = await mockServer.inject({
+        method: 'POST',
+        url: '/extapi/organisation/create/11111121',
+        payload: createOrgPayload
+      }))
+      expect(statusCode).toBe(200)
+      const { id, sbi } = JSON.parse(payload)._data
+
+      ;({ statusCode, payload } = await mockServer.inject({
+        method: 'GET',
+        url: `/extapi/organisation/person/11111121/summary`
+      }))
+      expect(statusCode).toBe(200)
+      expect(JSON.parse(payload)._data).toEqual([expect.objectContaining({ id, sbi })])
+    })
+
     it("should add the creating person to the organisation's people", async () => {
       let { statusCode, payload } = await mockServer.inject({
         method: 'POST',
