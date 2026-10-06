@@ -54,7 +54,11 @@ const proxyRoute = (routePath, baseUrl, mtlsConfig) => {
       payload: { output: 'data', parse: false }
     },
     handler: async (request, h) => {
-      const forwardedPath = request.params.path ?? ''
+      // Forward the raw (still percent-encoded) path rather than request.params.path, which hapi
+      // has already decoded: re-sending a decoded path corrupts it upstream, e.g. `%25` becomes a bare
+      // `%`, `%2F` adds a path segment and `%3F` starts a query string
+      const routePrefix = request.route.path.replace('{path*}', '')
+      const forwardedPath = request.url.pathname.slice(routePrefix.length)
       const targetUrl = `${baseUrl}/${forwardedPath}${request.url.search}`
 
       logger.debug(`Proxying ${request.method.toUpperCase()} ${targetUrl}`)

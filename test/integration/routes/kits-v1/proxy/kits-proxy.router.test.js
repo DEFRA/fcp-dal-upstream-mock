@@ -119,6 +119,18 @@ describe('KITS Proxy router', () => {
       )
     })
 
+    test.each([
+      ['a literal % in a path parameter', 'person/%25%F1%83%88%B2/validateEmail'],
+      ['an encoded / in a path parameter', 'person/a%2Fb/validateEmail'],
+      ['an encoded ? in a path parameter', 'person/a%3Fb/validateEmail']
+    ])('forwards the path still percent-encoded for %s', async (_, path) => {
+      mockUpstreamResponse()
+
+      await server.inject({ method: 'GET', url: `/internal/extapi/${path}` })
+
+      expect(mockFetch).toHaveBeenCalledWith(`${INTERNAL_URL}/${path}`, expect.anything())
+    })
+
     test('forwards POST with body to upstream', async () => {
       mockUpstreamResponse({ body: { _data: [] } })
 
