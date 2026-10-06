@@ -10,12 +10,14 @@ import {
   staticPersonData
 } from '../../factories/id-lookups.js'
 import { applyUpdates } from '../../utils/applyUpdates.js'
-import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
+import { fakeAddress, fakeIds, faker, generateId, normalisePostcode, safeSeed } from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const logger = createLogger('person.factory')
 
 const people = {}
+let startingPersonId = 11111111
+let startingCrn = 1111111100
 
 const generatePerson = (personId, crn, overrides = {}) => {
   personId = safeSeed(personId)
@@ -160,4 +162,31 @@ export const markPersonEmailValidated = (crn) => {
   }
 
   retrievePerson(personId).emailValidated = true
+}
+
+const logger = createLogger('person.route')
+
+export const createPerson = (overrides = {}) => {
+  const usedPersonIds = [...Object.keys(staticPersonData), ...Object.keys(people)].map(Number)
+  const usedCrns = [
+    ...Object.values(staticPersonData).map(({ crn }) => Number(crn)),
+    ...Object.values(people).map(({ customerReferenceNumber }) => Number(customerReferenceNumber))
+  ]
+
+  startingPersonId = generateId(startingPersonId, usedPersonIds)
+  startingCrn = generateId(startingCrn, usedCrns)
+
+  const person = generatePerson(startingPersonId, `${startingCrn}`, overrides)
+
+  // IDs are allocated by the mock and cannot be overridden by the request payload.
+  person.id = startingPersonId
+  person.customerReferenceNumber = `${startingCrn}`
+
+  crnToPersonId[person.customerReferenceNumber] = `${person.id}`
+  personIdToOrgIds[person.id] = []
+  people[startingPersonId] = person
+
+  logger.info(`the people are ${JSON.stringify(people[startingPersonId], null, 2)}`)
+
+  return person
 }
