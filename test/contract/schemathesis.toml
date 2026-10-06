@@ -100,3 +100,22 @@ enabled = false
 
 # ======================= END OF =======================
 # ==================== Person update =====================
+
+
+
+# ======================= START OF =======================
+# ================ Person validateEmail ==================
+
+[[operations]]
+include-path = "/person/{email}/validateEmail"
+include-method = "GET"
+
+# Skip: the email path segment is a free string, but upstream rejects some valid values
+# before reaching the service. e.g. an encoded '#' (%23) is decoded and treated as a
+# fragment, truncating the path and giving 400 "Zero length BigInteger"; control chars or
+# an encoded '%' or '/' give 400 "Bad Message".
+[operations.checks.positive_data_acceptance]
+enabled = false
+
+# ======================= END OF =======================
+# ================ Person validateEmail ==================

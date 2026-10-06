@@ -54,7 +54,9 @@ paths:
           description: >
             The request was rejected before reaching the service because the `email` path segment
             could not be parsed as a URI (e.g. control characters or an encoded `%` or `/`),
-            typically as an HTML "Bad Message 400" page.
+            typically as an HTML "Bad Message 400" page. An encoded `#` (`%23`) is decoded upstream
+            and treated as a fragment, truncating the path so it routes to an endpoint expecting a
+            numeric id, giving a "Zero length BigInteger" 400.
           $ref: '#/components/responses/BadRequest'
         '403':
           description: A WAF rule has been triggered.
