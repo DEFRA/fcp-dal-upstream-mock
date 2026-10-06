@@ -161,3 +161,13 @@ export const markPersonEmailValidated = (crn) => {
 
   retrievePerson(personId).emailValidated = true
 }
+
+export const lockPerson = (personId, locked = true) => {
+  const person = allPeople().find((person) => person.id === personId)
+  if (!person) {
+    throw Boom.notFound(`Person not found`)
+  }
+  person.locked = locked
+}
+
+export const unlockPerson = (personId) => lockPerson(personId, false)

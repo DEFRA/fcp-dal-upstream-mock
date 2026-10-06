@@ -3908,7 +3908,7 @@ paths:
       summary: 'Lock person.'
       description: |
         Locks a person. `reason` and `note` required. `partyNoteType` must be `LockPerson`.
-        HTTP 403 if already locked. HTTP 404 if not found.
+        HTTP 404 if not found.
       operationId: 'lockPerson'
       security:
         - CallerIdAuth: []
@@ -3927,16 +3927,10 @@ paths:
             schema:
               $ref: '#/components/schemas/PartyNoteRequest'
       responses:
-        '200':
+        '204':
           description: 'Person locked.'
         '400':
           description: 'reason or note missing.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '403':
-          description: 'Person already locked.'
           content:
             application/json:
               schema:

@@ -1,5 +1,5 @@
 import { fakeId, faker, nullOrFake, safeSeed } from './common.js'
-import { orgIdToSbi, personIdToOrgIds, staticPersonData, orgIdLookup } from './id-lookups.js'
+import { orgIdLookup, personIdToOrgIds } from './id-lookups.js'
 
 const businessPersonMessages = {}
 const maxYearsInPast = 4
