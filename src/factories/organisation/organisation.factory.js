@@ -126,6 +126,8 @@ export const createOrganisation = (personId, payload) => {
   orgIdLookup[id] = { sbi }
   frnToOrgId[payload.businessReference] = id
   frnToPaymentOverrides[payload.businessReference] = {}
+  // the person may not be in any org yet
+  personIdToOrgIds[personId] ??= []
   personIdToOrgIds[personId].push(id)
   orgIdToPersonIds[id] = [personId]
 
