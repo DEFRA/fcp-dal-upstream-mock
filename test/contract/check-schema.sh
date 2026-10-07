@@ -170,8 +170,10 @@ case "$1" in
   p | person )
     schema="kits-v1/person"
     # NOTE: the confirm and verify-email endpoints are on the KITS EXTERNAL gateway, see person-external
+    # NOTE: deactivate is left out, as it cannot be undone and generated personIds may be real people
     mutations='. |
 del(.paths["/person/{personId}/{email}/confirm"], .paths["/verify-email/{digitalContactPartyId}"]) |
+del(.paths["/person/{personId}/deactivate"]) |
 .paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
