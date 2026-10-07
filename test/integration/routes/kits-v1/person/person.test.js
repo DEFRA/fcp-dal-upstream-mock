@@ -312,46 +312,93 @@ describe('Person routes', () => {
     )
   })
 
-  test('should lock a person', async () => {
-    const personId = 11111111
+  describe('POST /person/{personId}/lock', () => {
+    test('should lock a person', async () => {
+      const personId = 11111111
 
-    const lockRes = await server.inject({
-      method: 'POST',
-      url: `/person/${personId}/lock`,
-      payload: {
-        partyNoteType: 'LockPerson',
-        reason: 'Testing lock behaviour'
-      }
+      const lockRes = await server.inject({
+        method: 'POST',
+        url: `/person/${personId}/lock`,
+        payload: {
+          partyNoteType: 'LockPerson',
+          reason: 'Testing lock behaviour'
+        }
+      })
+
+      expect(lockRes.statusCode).toBe(204)
+
+      const lockedPerson = await server.inject({
+        method: 'GET',
+        url: `/person/${personId}/summary`
+      })
+
+      expect(lockedPerson.statusCode).toBe(200)
+      expect(lockedPerson.result._data.locked).toBe(true)
     })
 
-    expect(lockRes.statusCode).toBe(204)
+    test('should throw an error when trying to lock a person who does not exist', async () => {
+      const personId = 99999999
 
-    const lockedPerson = await server.inject({
-      method: 'GET',
-      url: `/person/${personId}/summary`
+      const { statusCode, result } = await server.inject({
+        method: 'POST',
+        url: `/person/${personId}/lock`,
+        payload: {
+          partyNoteType: 'LockPerson',
+          reason: 'Testing lock behaviour'
+        }
+      })
+
+      expect(statusCode).toBe(404)
+      expect(result).toEqual({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Person not found'
+      })
     })
-
-    expect(lockedPerson.statusCode).toBe(200)
-    expect(lockedPerson.result._data.locked).toBe(true)
   })
 
-  test('should throw an error when trying to lock a person who does not exist', async () => {
-    const personId = 99999999
+  describe('POST /person/{personId}/unlock', () => {
+    test('should unlock a person', async () => {
+      const personId = 11111111
 
-    const { statusCode, result } = await server.inject({
-      method: 'POST',
-      url: `/person/${personId}/lock`,
-      payload: {
-        partyNoteType: 'LockPerson',
-        reason: 'Testing lock behaviour'
-      }
+      const unlockRes = await server.inject({
+        method: 'POST',
+        url: `/person/${personId}/unlock`,
+        payload: {
+          partyNoteType: 'UnlockPerson',
+          reason: 'Testing unlock behaviour'
+        }
+      })
+
+      expect(unlockRes.statusCode).toBe(204)
+
+      const unlockedPerson = await server.inject({
+        method: 'GET',
+        url: `/person/${personId}/summary`
+      })
+
+      expect(unlockedPerson.statusCode).toBe(200)
+      expect(unlockedPerson.result._data.locked).toBe(false)
     })
 
-    expect(statusCode).toBe(404)
-    expect(result).toEqual({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'Person not found'
+    test('should throw an error when trying to unlock a person who does not exist', async () => {
+      const personId = 99999999
+
+      const { statusCode, result } = await server.inject({
+        method: 'POST',
+        url: `/person/${personId}/unlock`,
+        payload: {
+          partyNoteType: 'UnlockPerson',
+          reason: 'Testing unlock behaviour'
+        }
+      })
+
+      expect(statusCode).toBe(404)
+      expect(result).toEqual({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Person not found'
+      })
     })
   })
 

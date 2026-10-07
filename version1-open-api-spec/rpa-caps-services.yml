@@ -3935,8 +3935,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 'Upstream service error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: 'Person not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Error processing lock request. Reason or note exceeds maximum length or upstream service error.'
           content:
             application/json:
               schema:
@@ -3967,7 +3979,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PartyNoteRequest'
       responses:
-        '200':
+        '204':
           description: 'Person unlocked.'
         '400':
           description: 'reason or note missing.'
@@ -3976,13 +3988,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: 'Person not locked; cannot unlock.'
+          description: 'Upstream service error.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: 'Person not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Error processing lock request. Reason or note exceeds maximum length or upstream service error.'
           content:
             application/json:
               schema:

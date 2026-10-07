@@ -322,6 +322,55 @@ paths:
                     type: string
                     example: 'There was an error processing your request.'
 
+  /person/{personId}/unlock:
+    post:
+      tags:
+        - 'person'
+      summary: 'Unlock Person.'
+      description: 'Request to unlock a person by ID.'
+      operationId: 'unlockPerson'
+      parameters:
+        - name: 'personId'
+          in: 'path'
+          description: 'The unique ID of the requested person.'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            examples: [11111111, 11112222, 22222222]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlockPersonRequestBody'
+      responses:
+        '204':
+          description: 'Successfully unlocked person.'
+        '400':
+          description: 'Invalid reason and notes'
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Getting an internal user's details is forbidden, or a WAF rule has been triggered.
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 'Person not found'
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: 'Error processing the request to unlock a person. Reason or note exceeds the maximum length, or the upstream fails to process the request.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: 'There was an error processing your request.'
+
   /person/{personId}:
     put:
       tags:
@@ -605,6 +654,53 @@ components:
               type: string
               enum:
                 - 'LockPerson'
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'note']
+    UnlockPersonRequestBody:
+      type: object
+      examples:
+        - partyNoteType: 'UnlockPerson'
+          reason: 'Account review'
+        - partyNoteType: 'UnlockPerson'
+          note: 'testing locking'
+        - partyNoteType: 'UnlockPerson'
+          note: 'testing locking'
+          reason: 'Account review'
+      anyOf:
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'UnlockPerson'
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'reason']
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'UnlockPerson'
             note:
               oneOf:
                 - type: number
