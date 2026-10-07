@@ -171,3 +171,11 @@ export const lockPerson = (personId, locked = true) => {
 }
 
 export const unlockPerson = (personId) => lockPerson(personId, false)
+
+export const deactivatePerson = (personId) => {
+  const person = allPeople().find((person) => person.id === personId)
+  if (!person) {
+    throw Boom.notFound(`Person not found`)
+  }
+  person.deactivated = true
+}

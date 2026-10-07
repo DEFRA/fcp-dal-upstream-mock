@@ -9,6 +9,7 @@ import {
 } from '../../factories/id-lookups.js'
 import {
   allPeople,
+  deactivatePerson,
   lockPerson,
   retrievePerson,
   retrievePersonOrgs,
@@ -78,6 +79,13 @@ const validateUnlockPersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
   (schema) =>
     schema.paths['/person/{personId}/unlock'].post.requestBody.content['application/json'].schema
+)
+
+const validateDeactivatePersonPayload = await createPayloadValidator(
+  'routes/kits-v1/person-schema.oas.yml',
+  (schema) =>
+    schema.paths['/person/{personId}/deactivate'].post.requestBody.content['application/json']
+      .schema
 )
 
 /**
@@ -265,6 +273,26 @@ export const person = [
       }
 
       unlockPerson(personId)
+      return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/person/{personId}/deactivate',
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
+
+      if (!validateDeactivatePersonPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      // kits upgrade fails with a 500 (not a 400) above these lengths
+      const { reason, note } = request.payload
+      if (`${reason ?? ''}`.length > 100 || `${note ?? ''}`.length > 4000) {
+        throw Boom.internal('reason or note exceeds the maximum length', request)
+      }
+
+      deactivatePerson(personId)
       return h.response().code(204)
     }
   }

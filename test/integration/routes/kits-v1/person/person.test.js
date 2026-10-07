@@ -402,6 +402,98 @@ describe('Person routes', () => {
     })
   })
 
+  describe('POST /person/{personId}/deactivate', () => {
+    test('should deactivate a person', async () => {
+      // arrange
+      const personId = 11111120
+      const before = await server.inject({ method: 'GET', url: `/person/${personId}/summary` })
+      expect(before.result._data.deactivated).toBe(false)
+
+      // act
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: `/person/${personId}/deactivate`,
+        payload: {
+          partyNoteType: 'DeactivatePerson',
+          reason: 'Customer deceased',
+          note: 'Confirmed by next of kin'
+        }
+      })
+
+      // assert
+      expect(statusCode).toBe(204)
+      const after = await server.inject({ method: 'GET', url: `/person/${personId}/summary` })
+      expect(after.result._data.deactivated).toBe(true)
+    })
+
+    test('should return 404 when the person does not exist', async () => {
+      // arrange / act
+      const { statusCode, result } = await server.inject({
+        method: 'POST',
+        url: '/person/99999999/deactivate',
+        payload: { partyNoteType: 'DeactivatePerson', reason: 'a reason', note: 'a note' }
+      })
+
+      // assert
+      expect(statusCode).toBe(404)
+      expect(result.message).toBe('Person not found')
+    })
+
+    test.each([
+      ['only a reason is given', { partyNoteType: 'DeactivatePerson', reason: 'a reason' }],
+      ['only a note is given', { partyNoteType: 'DeactivatePerson', note: 'a note' }]
+    ])('should return 204 when %s', async (_, payload) => {
+      // arrange / act
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/person/11111141/deactivate',
+        payload
+      })
+
+      // assert
+      expect(statusCode).toBe(204)
+    })
+
+    test.each([
+      ['reason', 100, 204],
+      ['reason', 101, 500],
+      ['note', 4000, 204],
+      ['note', 4001, 500]
+    ])('should handle a %s of %i characters with %i', async (field, length, expected) => {
+      // arrange
+      const payload = { partyNoteType: 'DeactivatePerson', [field]: 'x'.repeat(length) }
+
+      // act
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/person/11111141/deactivate',
+        payload
+      })
+
+      // assert
+      expect(statusCode).toBe(expected)
+    })
+
+    test.each([
+      ['neither reason nor note is given', { partyNoteType: 'DeactivatePerson' }],
+      ['reason and note are empty', { partyNoteType: 'DeactivatePerson', reason: '', note: '' }],
+      [
+        'partyNoteType is wrong',
+        { partyNoteType: 'LockPerson', reason: 'a reason', note: 'a note' }
+      ]
+    ])('should return 400 when %s', async (_, payload) => {
+      // arrange / act
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/person/11111141/deactivate',
+        payload
+      })
+
+      // assert
+      expect(statusCode).toBe(400)
+    })
+  })
+
   describe('the external gateway', () => {
     test('should return data /person/{personId}/summary corresponding to crn for personIdOverride', async () => {
       const { result, statusCode } = await server.inject({
