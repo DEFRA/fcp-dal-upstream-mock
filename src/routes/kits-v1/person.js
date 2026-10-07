@@ -13,6 +13,7 @@ import {
   retrievePerson,
   retrievePersonOrgs,
   searchPeople,
+  unlockPerson,
   updatePerson
 } from '../../factories/person/person.factory.js'
 import { checkSearchPhrase } from '../../utils/shared-datatypes.js'
@@ -71,6 +72,12 @@ const validateLockPersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
   (schema) =>
     schema.paths['/person/{personId}/lock'].post.requestBody.content['application/json'].schema
+)
+
+const validateUnlockPersonPayload = await createPayloadValidator(
+  'routes/kits-v1/person-schema.oas.yml',
+  (schema) =>
+    schema.paths['/person/{personId}/unlock'].post.requestBody.content['application/json'].schema
 )
 
 /**
@@ -244,6 +251,20 @@ export const person = [
       }
 
       lockPerson(personId)
+      return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/person/{personId}/unlock',
+    handler: async (request, h) => {
+      const personId = checkPersonId(request)
+
+      if (!validateUnlockPersonPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      unlockPerson(personId)
       return h.response().code(204)
     }
   }
