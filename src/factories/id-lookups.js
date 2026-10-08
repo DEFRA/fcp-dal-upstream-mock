@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { faker, fakeId, safeSeed } from './common.js'
+import { fakeId, faker, safeSeed } from './common.js'
 import { sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
 
 export const staticPersonData = {
@@ -524,6 +524,38 @@ export const orgIdLookup = {
       { personId: 9000020 },
       { personId: 9000021 }
     ]
+  },
+  // dedicated org for deactivate/reactivate
+  9200000: {
+    sbi: 920000000,
+    customers: [{ personId: 9200000 }],
+    overrides: {
+      name: 'Blue Barn',
+      vendorNumber: '123456',
+      traderNumber: '654321',
+      address: {
+        address1: 'Blue Barn',
+        address2: null,
+        address3: null,
+        address4: null,
+        address5: null,
+        pafOrganisationName: 'Blue Barn Farm',
+        flatName: null,
+        buildingNumberRange: null,
+        buildingName: null,
+        street: null,
+        city: 'Searchton',
+        county: null,
+        postalCode: 'AB12 3XX',
+        country: 'England',
+        uprn: '920000000001',
+        dependentLocality: null,
+        doubleDependentLocality: null,
+        addressTypeId: null
+      },
+      locked: true,
+      deactivated: false
+    }
   }
 }
 
