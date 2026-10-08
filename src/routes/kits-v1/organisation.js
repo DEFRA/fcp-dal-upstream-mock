@@ -2,6 +2,7 @@ import Boom from '@hapi/boom'
 import { paginate } from '../../factories/common.js'
 import {
   createOrganisation,
+  deactivateOrganisation,
   lockOrganisation,
   retrieveOrganisation,
   retrieveOrganisationCustomers,
@@ -61,6 +62,14 @@ const validateUnlockOrganisationPayload = await createPayloadValidator(
   'routes/kits-v1/organisation-schema.oas.yml',
   (schema) =>
     schema.paths['/organisation/{organisationId}/unlock'].post.requestBody.content[
+      'application/json'
+    ].schema
+)
+
+const validateDeactivateOrganisationPayload = await createPayloadValidator(
+  'routes/kits-v1/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/deactivate'].post.requestBody.content[
       'application/json'
     ].schema
 )
@@ -184,6 +193,21 @@ export const organisation = [
       }
 
       unlockOrganisation(organisationId)
+
+      return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/deactivate',
+    handler: async (request, h) => {
+      const organisationId = checkId(request, 'organisationId')
+
+      if (!validateDeactivateOrganisationPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      deactivateOrganisation(organisationId)
 
       return h.response().code(204)
     }

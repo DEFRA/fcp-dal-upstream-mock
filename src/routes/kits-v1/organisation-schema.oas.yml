@@ -244,6 +244,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationError'
+  /organisation/{organisationId}/deactivate:
+    post:
+      tags:
+        - 'organisation'
+      summary: 'The ability for an internal user to deactivate (soft delete) a business (organisation) record.'
+      description: 'Request to deactivate an Organisation by party Id.'
+      operationId: 'deactivateOrganisation'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: 'organisationId'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            examples: [1000000000, 1111111111, 2222222222]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeactivateRequestBody'
+      responses:
+        '204':
+          description: 'Successfully deactivated Organisation'
+        '400':
+          description: 'Invalid reason and notes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '403':
+          description: 'Invalid organisationId.'
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '404':
+          description: 'organisation not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '500':
+          description: >
+            Error processing the request to deactivate an organisation. 
+            Reason exceeds 100 characters, note exceeds 4000 characters,
+            organisationId not found,
+            or the upstream fails to process the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationError'
 components:
   schemas:
     # request objects
@@ -380,6 +441,53 @@ components:
               type: string
               enum:
                 - 'UnlockOrganisation'
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'reason']
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'UnlockOrganisation'
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'note']
+    DeactivateRequestBody:
+      type: object
+      examples:
+        - partyNoteType: 'DeactivateOrganisation'
+          note: 'testing deactivation'
+        - partyNoteType: 'DeactivateOrganisation'
+          reason: 'Business Structure Changes'
+        - partyNoteType: 'DeactivateOrganisation'
+          reason: 'Business Structure Changes'
+          note: 'testing deactivation'
+      anyOf:
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'DeactivateOrganisation'
             reason:
               oneOf:
                 - type: number
