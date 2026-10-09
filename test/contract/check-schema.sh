@@ -156,7 +156,9 @@ case "$1" in
     ;;
   o | org | organisation )
     schema="kits-v1/organisation"
+    # NOTE: deactivate and reactivate are left out, as generated organisationIds may be real businesses
     mutations='. |
+del(.paths["/organisation/{organisationId}/deactivate"], .paths["/organisation/{organisationId}/reactivate"]) |
 .paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5849659,5852711,5858233 ] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "106554744" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "200629003" |

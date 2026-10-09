@@ -556,6 +556,16 @@ export const orgIdLookup = {
       locked: true,
       deactivated: false
     }
+  },
+  // dedicated org for reactivate, starts locked and deactivated
+  9200001: {
+    sbi: 920000001,
+    customers: [],
+    overrides: {
+      name: 'Green Gate',
+      locked: true,
+      deactivated: true
+    }
   }
 }
 
