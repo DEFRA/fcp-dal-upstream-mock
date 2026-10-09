@@ -44,3 +44,9 @@ npm run test:contract
 ```
 
 The above creates a local `docker compose` environment, spinning up the mock API and running `schemathesis` against it.
+
+By default, this runs against all schemas. To restrict this to a subset, set the `SCHEMAS` environment variable to a space-separated list before running the script, e.g.:
+
+```shell
+SCHEMAS="land bank" npm run test:contract
+```
