@@ -318,3 +318,17 @@ export const deactivateOrganisation = (orgId) => {
     throw Boom.internal(e.message)
   }
 }
+
+export const reactivateOrganisation = (orgId) => {
+  try {
+    const org = retrieveOrganisation(orgId)
+    if (!org.locked || !org.deactivated) {
+      throw new Error(`organisation with orgId ${orgId} is not locked and deactivated`)
+    }
+
+    org.deactivated = false
+  } catch (e) {
+    // If not found or not locked and deactivated, throw internal error to match upstream
+    throw Boom.internal(e.message)
+  }
+}

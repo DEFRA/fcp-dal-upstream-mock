@@ -305,6 +305,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationError'
+  /organisation/{organisationId}/reactivate:
+    post:
+      tags:
+        - 'organisation'
+      summary: 'The ability for an internal user to reactivate a business (organisation) record.'
+      description: 'Request to reactivate a locked and deactivated Organisation by party Id.'
+      operationId: 'reactivateOrganisation'
+      parameters:
+        - name: 'organisationId'
+          in: 'path'
+          description: 'organisationId'
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            examples: [1000000000, 1111111111, 2222222222]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactivateRequestBody'
+      responses:
+        '204':
+          description: 'Successfully reactivated Organisation'
+        '400':
+          description: 'Invalid reason and notes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '403':
+          description: 'Invalid organisationId.'
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '500':
+          description: >
+            Error processing the request to reactivate an organisation.
+            Organisation is not locked and deactivated, organisationId not found,
+            or the upstream fails to process the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationError'
 components:
   schemas:
     # request objects
@@ -506,6 +560,54 @@ components:
               type: string
               enum:
                 - 'UnlockOrganisation'
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'note']
+
+    ReactivateRequestBody:
+      type: object
+      examples:
+        - partyNoteType: 'ReactivateOrganisation'
+          note: 'testing reactivation'
+        - partyNoteType: 'ReactivateOrganisation'
+          reason: 'Business Structure Changes'
+        - partyNoteType: 'ReactivateOrganisation'
+          reason: 'Business Structure Changes'
+          note: 'testing reactivation'
+      anyOf:
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'ReactivateOrganisation'
+            reason:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                  minLength: 1
+            note:
+              oneOf:
+                - type: number
+                - type: boolean
+                - type: string
+                - type: 'null'
+          required: ['partyNoteType', 'reason']
+        - properties:
+            partyNoteType:
+              type: string
+              enum:
+                - 'ReactivateOrganisation'
             note:
               oneOf:
                 - type: number

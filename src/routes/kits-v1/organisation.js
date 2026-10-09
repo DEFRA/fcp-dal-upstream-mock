@@ -4,6 +4,7 @@ import {
   createOrganisation,
   deactivateOrganisation,
   lockOrganisation,
+  reactivateOrganisation,
   retrieveOrganisation,
   retrieveOrganisationCustomers,
   searchOrganisations,
@@ -70,6 +71,14 @@ const validateDeactivateOrganisationPayload = await createPayloadValidator(
   'routes/kits-v1/organisation-schema.oas.yml',
   (schema) =>
     schema.paths['/organisation/{organisationId}/deactivate'].post.requestBody.content[
+      'application/json'
+    ].schema
+)
+
+const validateReactivateOrganisationPayload = await createPayloadValidator(
+  'routes/kits-v1/organisation-schema.oas.yml',
+  (schema) =>
+    schema.paths['/organisation/{organisationId}/reactivate'].post.requestBody.content[
       'application/json'
     ].schema
 )
@@ -208,6 +217,21 @@ export const organisation = [
       }
 
       deactivateOrganisation(organisationId)
+
+      return h.response().code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/organisation/{organisationId}/reactivate',
+    handler: async (request, h) => {
+      const organisationId = checkId(request, 'organisationId')
+
+      if (!validateReactivateOrganisationPayload(request.payload)) {
+        throw Boom.badRequest('validation error while processing input', request)
+      }
+
+      reactivateOrganisation(organisationId)
 
       return h.response().code(204)
     }
