@@ -269,7 +269,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AuthorisationCreateRequest'
       responses:
-        '201':
+        '200':
           description: 'Authorisation created.'
           content:
             application/json:
@@ -281,6 +281,8 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  errorString:
+                    type: 'null'
                 required: ['data', 'success']
         '400':
           description: 'Invalid payload'
@@ -303,9 +305,27 @@ paths:
                     Request forbidden by administrative rules.
                     </body></html>
         '404':
-          description: 'Organisation or person not found.'
+          description: >
+            `Person not found.` when a `personId` in the body does not exist, otherwise `Organisation not found.`
+            when the `orgId` does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamError'
+              example:
+                data: null
+                success: false
+                errorString: 'Person not found.'
         '409':
-          description: 'Relation already exists.'
+          description: '`Relation already exists` when the person is already linked to the organisation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamError'
+              example:
+                data: null
+                success: false
+                errorString: 'Relation already exists'
 
   /SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}:
     put:
@@ -349,6 +369,8 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  errorString:
+                    type: 'null'
                 required: ['data', 'success']
         '400':
           description: 'Invalid payload'
@@ -372,9 +394,18 @@ paths:
                     </body></html>
         '404':
           description: >
-            Organisation, person, or authorisation link not found. A non-numeric `personId` is not
-            routed upstream and returns the application server's HTML 404 page instead.
+            `Organisation not found.` when the `orgId` does not exist.
+            `Person not found.` when the person does not exist or is not linked to the organisation.
+            A non-numeric `personId` is not routed upstream and returns the application
+            server's HTML 404 page instead.
           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamError'
+              example:
+                data: null
+                success: false
+                errorString: 'Person not found.'
             text/html:
               schema:
                 type: string
@@ -1075,6 +1106,18 @@ components:
           type: [integer, 'null']
 
     # errors
+    UpstreamError:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        success:
+          type: boolean
+          example: false
+        errorString:
+          type: string
+          example: 'An error has occurred.'
+      required: ['data', 'success', 'errorString']
     BadRequest:
       type: object
       properties:

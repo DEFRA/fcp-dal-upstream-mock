@@ -377,12 +377,10 @@ const privilegeNamesForPerson = (personPrivileges, personId) => {
 }
 
 /**
- * Create an authorisation (link a person to an organisation with role + privileges).
- * Throws Boom errors for missing org/person, bad payload, duplicate relationship, or invalid privileges.
+ * Create an authorisation (link a person to an organisation with role + privileges), checking in
+ * upstream's order: payload, people, organisation, then existing links.
  */
 export const createAuthorisation = (orgId, payload) => {
-  retrieveOrganisation(orgId)
-
   const personRoles = payload?.personRoles ?? []
   if (!Array.isArray(personRoles) || personRoles.length === 0) {
     throw Boom.badRequest('personRoles array is required')
@@ -396,15 +394,16 @@ export const createAuthorisation = (orgId, payload) => {
     throw Boom.conflict('Relation already exists')
   }
 
+  if (personRoles.some((pr) => !pr.personId)) {
+    throw Boom.badRequest('personId is required in personRoles entry')
+  }
+  const people = personRoles.map((pr) => [pr, retrieveExistingPerson(pr.personId)])
+  retrieveOrganisation(orgId)
+
   const results = []
 
-  for (const pr of personRoles) {
+  for (const [pr, person] of people) {
     const personId = pr.personId
-    if (!personId) {
-      throw Boom.badRequest('personId is required in personRoles entry')
-    }
-
-    const person = retrieveExistingPerson(personId)
 
     if (hasAuthorisation(orgId, personId)) {
       throw Boom.conflict('Relation already exists')
@@ -438,11 +437,11 @@ export const createAuthorisation = (orgId, payload) => {
 export const updateAuthorisation = (orgId, personId, payload) => {
   retrieveOrganisation(orgId)
 
+  const person = retrieveExistingPerson(personId)
+
   if (!hasAuthorisation(orgId, personId)) {
     throw Boom.notFound(`person ${personId} is not currently authorised on organisation ${orgId}`)
   }
-
-  const person = retrieveExistingPerson(personId)
 
   const personRoles = payload?.personRoles ?? []
   if (!Array.isArray(personRoles) || personRoles.length > 1) {

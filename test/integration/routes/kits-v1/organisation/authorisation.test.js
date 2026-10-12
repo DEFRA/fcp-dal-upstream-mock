@@ -39,9 +39,9 @@ describe('Authorisation create & update (Ticket #29)', () => {
       headers: { authorization: 'Bearer token' },
       payload: createPayload
     })
-    expect(statusCode).toBe(201)
+    expect(statusCode).toBe(200)
     const body = JSON.parse(payload)
-    expect(body).toEqual({ data: null, success: true })
+    expect(body).toEqual({ data: null, success: true, errorString: null })
   })
 
   it('POST should return 409 when the person is already authorised on the organisation', async () => {
@@ -66,7 +66,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     })
     expect(statusCode).toBe(409)
     const body = JSON.parse(payload)
-    expect(body).toEqual({ success: false, errorString: 'Relation already exists' })
+    expect(body).toEqual({ data: null, success: false, errorString: 'Relation already exists' })
   })
 
   const updatePayload = {
@@ -93,7 +93,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     })
     expect(statusCode).toBe(200)
     const body = JSON.parse(payload)
-    expect(body).toEqual({ data: null, success: true })
+    expect(body).toEqual({ data: null, success: true, errorString: null })
   })
 
   it('PUT should succeed and be idempotent when the same payload is submitted again', async () => {
@@ -112,7 +112,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
       headers: { authorization: 'Bearer token' },
       payload
     })
-    expect(create.statusCode).toBe(201)
+    expect(create.statusCode).toBe(200)
 
     // PUT with the same payload succeeds (idempotent)
     const first = await mockServer.inject({
@@ -122,7 +122,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
       payload
     })
     expect(first.statusCode).toBe(200)
-    expect(JSON.parse(first.payload)).toEqual({ data: null, success: true })
+    expect(JSON.parse(first.payload)).toEqual({ data: null, success: true, errorString: null })
 
     // Second identical PUT also succeeds
     const second = await mockServer.inject({
@@ -132,7 +132,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
       payload
     })
     expect(second.statusCode).toBe(200)
-    expect(JSON.parse(second.payload)).toEqual({ data: null, success: true })
+    expect(JSON.parse(second.payload)).toEqual({ data: null, success: true, errorString: null })
   })
 
   describe('path parameter validation', () => {
@@ -154,10 +154,11 @@ describe('Authorisation create & update (Ticket #29)', () => {
     )
 
     it.each(['0', '01', '9223372036854775807', '9'.repeat(20)])(
-      'POST should accept orgId %s past validation (unknown organisation)',
+      'POST should accept orgId %s past validation error and return unknown organisation instead',
       async (orgId) => {
-        const { statusCode } = await postTo(orgId)
-        expect(statusCode).not.toBe(403)
+        const { statusCode, payload } = await postTo(orgId)
+        expect(statusCode).toBe(404)
+        expect(JSON.parse(payload).errorString).toBe('Organisation not found.')
       }
     )
 
@@ -199,5 +200,69 @@ describe('Authorisation create & update (Ticket #29)', () => {
         expect(statusCode).toBe(200)
       }
     )
+
+    it.each(['-1', '0'])('PUT should return 404 when personId is %s', async (personId) => {
+      const { statusCode } = await mockServer.inject({
+        method: 'PUT',
+        url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${personId}`,
+        headers: { authorization: 'Bearer token' },
+        payload: updatePayload
+      })
+      expect(statusCode).toBe(404)
+    })
+  })
+
+  describe('PUT 404s', () => {
+    const put = (orgId, personId, payload) =>
+      mockServer.inject({
+        method: 'PUT',
+        url: `/extapi/SitiAgriApi/authorisation/organisation/${orgId}/authorisation/person/${personId}`,
+        headers: { authorization: 'Bearer token' },
+        payload
+      })
+
+    it('should return 404 Organisation not found when the org does not exist', async () => {
+      const { statusCode, payload: body } = await put(0, 11111111, updatePayload)
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(body)).toEqual({
+        data: null,
+        success: false,
+        errorString: 'Organisation not found.'
+      })
+    })
+  })
+
+  describe('POST lookups', () => {
+    const post = (orgId, payload) =>
+      mockServer.inject({
+        method: 'POST',
+        url: `/extapi/SitiAgriApi/authorisation/organisation/${orgId}/authorisation`,
+        headers: { authorization: 'Bearer token' },
+        payload
+      })
+    const bodyForPerson = (personId, roles, privilegeNames) => ({
+      personRoles: roles.map((role) => ({ role, personId })),
+      personPrivileges: [{ personId, privilegeNames }]
+    })
+
+    it('should return 404 Person not found before checking the organisation', async () => {
+      const { statusCode, payload } = await post(0, bodyForPerson(1, ['Agent'], []))
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual({
+        data: null,
+        success: false,
+        errorString: 'Person not found.'
+      })
+    })
+
+    it('should return 404 Organisation not found for a known person', async () => {
+      const { statusCode, payload } = await post(0, bodyForPerson(22222224, ['Agent'], []))
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual({
+        data: null,
+        success: false,
+        errorString: 'Organisation not found.'
+      })
+    })
   })
 })

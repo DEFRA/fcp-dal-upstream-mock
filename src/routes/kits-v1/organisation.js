@@ -254,15 +254,23 @@ export const organisation = [
       const orgId = checkOrgIdDigits(request)
       try {
         createAuthorisation(orgId, request.payload)
-        return h.response({ data: null, success: true }).code(201)
+        return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404 && /organisation/i.test(e.message)) {
-          return h.response({ success: false, errorString: 'Parent user id not found' }).code(500)
+        if (e.isBoom && e.output.statusCode === 404) {
+          const errorString = /^organisation with orgId/.test(e.message)
+            ? 'Organisation not found.'
+            : 'Person not found.'
+          return h.response({ data: null, success: false, errorString }).code(404)
         }
         if (e.isBoom && e.output.statusCode === 409) {
-          return h.response({ success: false, errorString: 'Relation already exists' }).code(409)
+          return h
+            .response({ data: null, success: false, errorString: 'Relation already exists' })
+            .code(409)
         }
-        return h.response({ success: false, errorString: 'An error has occurred' }).code(500)
+        // upstream reports every other payload problem as a 500
+        return h
+          .response({ data: null, success: false, errorString: 'An error has occurred.' })
+          .code(500)
       }
     }
   },
@@ -278,18 +286,23 @@ export const organisation = [
 
       try {
         updateAuthorisation(orgId, personId, request.payload)
-        return h.response({ data: null, success: true }).code(200)
+        return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
+        // upstream reports an unknown org and an unknown or unlinked person as 404s
         if (e.isBoom && e.output.statusCode === 404) {
-          if (/organisation/i.test(e.message)) {
-            return h.response({ success: false, errorString: 'Parent user id not found' }).code(500)
-          }
-          return h.response({ success: false, errorString: 'Person not found' }).code(404)
+          const errorString = /^organisation with orgId/.test(e.message)
+            ? 'Organisation not found.'
+            : 'Person not found.'
+          return h.response({ data: null, success: false, errorString }).code(404)
         }
         if (e.isBoom && e.output.statusCode === 409) {
-          return h.response({ success: false, errorString: 'Relation already exists' }).code(409)
+          return h
+            .response({ data: null, success: false, errorString: 'Relation already exists' })
+            .code(409)
         }
-        return h.response({ success: false, errorString: 'An error has occured' }).code(500)
+        return h
+          .response({ data: null, success: false, errorString: 'An error has occurred.' })
+          .code(500)
       }
     }
   }
