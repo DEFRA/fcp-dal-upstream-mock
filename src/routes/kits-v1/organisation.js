@@ -14,7 +14,12 @@ import {
   updateAuthorisation,
   updateOrganisation
 } from '../../factories/organisation/organisation.factory.js'
-import { checkId, checkSearchPhrase } from '../../utils/shared-datatypes.js'
+import {
+  checkId,
+  checkOrgIdDigits,
+  checkSearchPhrase,
+  parsePersonId
+} from '../../utils/shared-datatypes.js'
 import { createPayloadValidator } from '../../utils/validatePayload.js'
 
 // `primarySearchPhrase` constraints for each searchFieldType
@@ -68,6 +73,10 @@ const validateUnlockOrganisationPayload = await createPayloadValidator(
       'application/json'
     ].schema
 )
+
+// upstream returns Tomcat's HTML 404 page when a path segment fails to route; only the status and
+// content type matter to callers, so this is a minimal placeholder for the body
+const notFoundPage = '<html><body><h1>HTTP Status 404 – Not Found</h1></body></html>'
 
 const validateDeactivateOrganisationPayload = await createPayloadValidator(
   'routes/kits-v1/organisation-schema.oas.yml',
@@ -242,7 +251,7 @@ export const organisation = [
     method: 'POST',
     path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation',
     handler: async (request, h) => {
-      const orgId = checkId(request, 'orgId')
+      const orgId = checkOrgIdDigits(request)
       try {
         createAuthorisation(orgId, request.payload)
         return h.response({ data: null, success: true }).code(201)
@@ -261,8 +270,11 @@ export const organisation = [
     method: 'PUT',
     path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}',
     handler: async (request, h) => {
-      const orgId = checkId(request, 'orgId')
-      const personId = checkId(request, 'personId')
+      const orgId = checkOrgIdDigits(request)
+      const personId = parsePersonId(request)
+      if (personId === null) {
+        return h.response(notFoundPage).type('text/html').code(404)
+      }
 
       try {
         updateAuthorisation(orgId, personId, request.payload)

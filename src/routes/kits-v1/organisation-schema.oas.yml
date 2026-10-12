@@ -256,8 +256,12 @@ paths:
         - name: 'orgId'
           in: 'path'
           required: true
+          description: >
+            Must be 1-20 digits (leading zeros count towards the length); anything else is
+            rejected upstream with a 403 before the request body is read.
           schema:
-            type: integer
+            type: string
+            pattern: '^[0-9]{1,20}$'
       requestBody:
         required: true
         content:
@@ -284,6 +288,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
+        '403':
+          description: >
+            The `orgId` is not 1-20 digits. Upstream reports this validation failure as a 403.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
         '404':
           description: 'Organisation or person not found.'
         '409':
@@ -301,8 +319,12 @@ paths:
         - name: 'orgId'
           in: 'path'
           required: true
+          description: >
+            Must be 1-20 digits (leading zeros count towards the length); anything else is
+            rejected upstream with a 403 before the request body is read.
           schema:
-            type: integer
+            type: string
+            pattern: '^[0-9]{1,20}$'
         - name: 'personId'
           in: 'path'
           required: true
@@ -334,8 +356,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
+        '403':
+          description: >
+            The `orgId` is not 1-20 digits. Upstream reports this validation failure as a 403.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
         '404':
-          description: 'Organisation, person, or authorisation link not found.'
+          description: >
+            Organisation, person, or authorisation link not found. A non-numeric `personId` is not
+            routed upstream and returns the application server's HTML 404 page instead.
+          content:
+            text/html:
+              schema:
+                type: string
 
   /organisation/{organisationId}/deactivate:
     post:

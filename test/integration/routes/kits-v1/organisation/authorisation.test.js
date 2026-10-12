@@ -134,4 +134,70 @@ describe('Authorisation create & update (Ticket #29)', () => {
     expect(second.statusCode).toBe(200)
     expect(JSON.parse(second.payload)).toEqual({ data: null, success: true })
   })
+
+  describe('path parameter validation', () => {
+    const postTo = (orgId) =>
+      mockServer.inject({
+        method: 'POST',
+        url: `/extapi/SitiAgriApi/authorisation/organisation/${orgId}/authorisation`,
+        headers: { authorization: 'Bearer token' },
+        payload: createPayload
+      })
+
+    it.each(['-1', '+1', '1.0', '1e3', 'abc', '9'.repeat(21), '0000000000000000000001'])(
+      'POST should return the upstream 403 HTML when orgId is %s',
+      async (orgId) => {
+        const { statusCode, payload } = await postTo(encodeURIComponent(orgId))
+        expect(statusCode).toBe(403)
+        expect(payload).toContain('Request forbidden by administrative rules.')
+      }
+    )
+
+    it.each(['0', '01', '9223372036854775807', '9'.repeat(20)])(
+      'POST should accept orgId %s past validation (unknown organisation)',
+      async (orgId) => {
+        const { statusCode } = await postTo(orgId)
+        expect(statusCode).not.toBe(403)
+      }
+    )
+
+    it('PUT should return the upstream 403 HTML when orgId is invalid', async () => {
+      const { statusCode, payload } = await mockServer.inject({
+        method: 'PUT',
+        url: '/extapi/SitiAgriApi/authorisation/organisation/-1/authorisation/person/11111111',
+        headers: { authorization: 'Bearer token' },
+        payload: updatePayload
+      })
+      expect(statusCode).toBe(403)
+      expect(payload).toContain('Request forbidden by administrative rules.')
+    })
+
+    it.each(['abc', 'null,null'])(
+      'PUT should return the HTML 404 page when personId is %s',
+      async (personId) => {
+        const { statusCode, headers, payload } = await mockServer.inject({
+          method: 'PUT',
+          url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${encodeURIComponent(personId)}`,
+          headers: { authorization: 'Bearer token' },
+          payload: updatePayload
+        })
+        expect(statusCode).toBe(404)
+        expect(headers['content-type']).toMatch(/^text\/html/)
+        expect(payload).toContain('HTTP Status 404 – Not Found')
+      }
+    )
+
+    it.each(['+11111111', '0011111111'])(
+      'PUT should ignore leading zeros and plus sign in person id (personId %s)',
+      async (personId) => {
+        const { statusCode } = await mockServer.inject({
+          method: 'PUT',
+          url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${encodeURIComponent(personId)}`,
+          headers: { authorization: 'Bearer token' },
+          payload: updatePayload
+        })
+        expect(statusCode).toBe(200)
+      }
+    )
+  })
 })
