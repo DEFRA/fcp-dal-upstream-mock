@@ -285,11 +285,18 @@ paths:
                     type: 'null'
                 required: ['data', 'success']
         '400':
-          description: 'Invalid payload'
+          description: >
+            Invalid payload. Malformed JSON or unrecognised fields are rejected by the upstream
+            JSON deserialiser before validation, returning the raw error message as plain text.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BadRequest'
+                anyOf:
+                  - $ref: '#/components/schemas/UpstreamError'
+                  - $ref: '#/components/schemas/BadRequest'
+            text/plain:
+              schema:
+                type: string
         '403':
           description: >
             The `orgId` is not 1-20 digits. Upstream reports this validation failure as a 403.
@@ -326,6 +333,15 @@ paths:
                 data: null
                 success: false
                 errorString: 'Relation already exists'
+        '500':
+          description: >
+            No request body, a body missing `personRoles` or `personPrivileges`, an empty
+            `personRoles`, or an entry without a `personId`. Upstream reports these validation
+            failures as a 500.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamError'
 
   /SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}:
     put:
@@ -373,11 +389,20 @@ paths:
                     type: 'null'
                 required: ['data', 'success']
         '400':
-          description: 'Invalid payload'
+          description: >
+            Invalid payload. Malformed JSON or unrecognised fields are rejected by the upstream
+            JSON deserialiser before validation, returning the raw error message as plain text.
+            A body missing `personRoles` or `personPrivileges` returns `An error has occurred.`
+            (only once the organisation and person have been found; otherwise a 404).
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BadRequest'
+                anyOf:
+                  - $ref: '#/components/schemas/UpstreamError'
+                  - $ref: '#/components/schemas/BadRequest'
+            text/plain:
+              schema:
+                type: string
         '403':
           description: >
             The `orgId` is not 1-20 digits. Upstream reports this validation failure as a 403.
@@ -395,7 +420,8 @@ paths:
         '404':
           description: >
             `Organisation not found.` when the `orgId` does not exist.
-            `Person not found.` when the person does not exist or is not linked to the organisation.
+            `Person not found.` when the person does not exist or is not linked to the
+            organisation, or a `personId` in the body differs from the `personId` in the path.
             A non-numeric `personId` is not routed upstream and returns the application
             server's HTML 404 page instead.
           content:
@@ -409,6 +435,14 @@ paths:
             text/html:
               schema:
                 type: string
+        '500':
+          description: >
+            No request body, or a `personRoles`/`personPrivileges` entry without a `personId`.
+            Upstream reports these validation failures as a 500.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamError'
 
   /organisation/{organisationId}/deactivate:
     post:
@@ -647,12 +681,16 @@ components:
           required: ['partyNoteType', 'note']
     AuthorisationCreateRequest:
       type: object
+      additionalProperties: false
+      required: ['personRoles', 'personPrivileges']
       properties:
         personRoles:
           type: array
           maxItems: 1
           items:
             type: object
+            additionalProperties: false
+            required: ['personId']
             properties:
               role:
                 type: string
@@ -663,6 +701,8 @@ components:
           maxItems: 1
           items:
             type: object
+            additionalProperties: false
+            required: ['personId']
             properties:
               personId:
                 type: integer

@@ -221,6 +221,28 @@ describe('Authorisation create & update (Ticket #29)', () => {
         payload
       })
 
+    it.each([
+      ['personRoles', { ...updatePayload, personRoles: [{ role: 'Agent', personId: 999999999 }] }],
+      [
+        'personPrivileges',
+        {
+          ...updatePayload,
+          personPrivileges: [{ personId: 999999999, privilegeNames: ['Amend - land'] }]
+        }
+      ]
+    ])(
+      'should return 404 Person not found when the %s personId differs from the path',
+      async (_, payload) => {
+        const { statusCode, payload: body } = await put(111111111, 11111111, payload)
+        expect(statusCode).toBe(404)
+        expect(JSON.parse(body)).toEqual({
+          data: null,
+          success: false,
+          errorString: 'Person not found.'
+        })
+      }
+    )
+
     it('should return 404 Organisation not found when the org does not exist', async () => {
       const { statusCode, payload: body } = await put(0, 11111111, updatePayload)
       expect(statusCode).toBe(404)
@@ -229,6 +251,50 @@ describe('Authorisation create & update (Ticket #29)', () => {
         success: false,
         errorString: 'Organisation not found.'
       })
+    })
+  })
+
+  const upstreamError = { data: null, success: false, errorString: 'An error has occurred.' }
+
+  describe('payload validation', () => {
+    const inject = (method, url, payload) =>
+      mockServer.inject({
+        method,
+        url: `/extapi/SitiAgriApi/authorisation/organisation/${url}`,
+        headers: { authorization: 'Bearer token' },
+        payload
+      })
+    const putUrl = '111111111/authorisation/person/11111111'
+    const postUrl = '111111111/authorisation'
+
+    it.each([
+      ['PUT', putUrl, undefined],
+      ['PUT', putUrl, { personRoles: [], personPrivileges: [{ privilegeNames: [] }] }],
+      ['PUT', putUrl, { personRoles: [{ role: 'Agent' }], personPrivileges: [] }],
+      ['POST', postUrl, undefined],
+      ['POST', postUrl, {}],
+      ['POST', postUrl, { personRoles: createPayload.personRoles }],
+      ['POST', postUrl, { personRoles: [], personPrivileges: createPayload.personPrivileges }],
+      ['POST', postUrl, { ...createPayload, personPrivileges: [{ privilegeNames: [] }] }]
+    ])('%s %s with payload %j should return 500', async (method, url, payload) => {
+      const { statusCode, payload: body } = await inject(method, url, payload)
+      expect(statusCode).toBe(500)
+      expect(JSON.parse(body)).toEqual(upstreamError)
+    })
+
+    it.each([[{}], [{ personRoles: [] }], [{ personPrivileges: [] }]])(
+      'PUT with payload %j should return 400',
+      async (payload) => {
+        const { statusCode, payload: body } = await inject('PUT', putUrl, payload)
+        expect(statusCode).toBe(400)
+        expect(JSON.parse(body)).toEqual(upstreamError)
+      }
+    )
+
+    it('PUT should check the person exists before the payload', async () => {
+      const { statusCode, payload } = await inject('PUT', '111111111/authorisation/person/1', {})
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload).errorString).toBe('Person not found.')
     })
   })
 
@@ -264,5 +330,47 @@ describe('Authorisation create & update (Ticket #29)', () => {
         errorString: 'Organisation not found.'
       })
     })
+  })
+
+  describe('unrecognised fields', () => {
+    const urls = {
+      POST: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      PUT: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111'
+    }
+    const role = { role: 'Agent', personId: 11111111 }
+    const privilege = { personId: 11111111, privilegeNames: ['Amend - land'] }
+
+    it.each(
+      ['POST', 'PUT'].flatMap((method) => [
+        [method, 'body', { personRoles: [role], personPrivileges: [privilege], x: 1 }],
+        [
+          method,
+          'personRoles',
+          { personRoles: [{ ...role, x: 1 }], personPrivileges: [privilege] }
+        ],
+        [
+          method,
+          'personPrivileges',
+          { personRoles: [role], personPrivileges: [{ ...privilege, x: 1 }] }
+        ]
+      ])
+    )(
+      '%s should return a plain-text 400 naming the field in %s',
+      async (method, where, payload) => {
+        const {
+          statusCode,
+          headers,
+          payload: body
+        } = await mockServer.inject({
+          method,
+          url: urls[method],
+          headers: { authorization: 'Bearer token' },
+          payload
+        })
+        expect(statusCode).toBe(400)
+        expect(headers['content-type']).toMatch(/^text\/plain/)
+        expect(body).toBe(`Unrecognized field "x" in ${where}`)
+      }
+    )
   })
 })

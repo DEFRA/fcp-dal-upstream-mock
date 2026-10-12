@@ -10,6 +10,7 @@ import {
   retrieveOrganisationCustomers,
   searchOrganisations,
   unlockOrganisation,
+  unrecognisedAuthorisationField,
   updateAdditionalOrganisationDetails,
   updateAuthorisation,
   updateOrganisation
@@ -252,6 +253,10 @@ export const organisation = [
     path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation',
     handler: async (request, h) => {
       const orgId = checkOrgIdDigits(request)
+      const unrecognised = unrecognisedAuthorisationField(request.payload)
+      if (unrecognised) {
+        return h.response(unrecognised).type('text/plain').code(400)
+      }
       try {
         createAuthorisation(orgId, request.payload)
         return h.response({ data: null, success: true, errorString: null }).code(200)
@@ -283,17 +288,27 @@ export const organisation = [
       if (personId === null) {
         return h.response(notFoundPage).type('text/html').code(404)
       }
+      const unrecognised = unrecognisedAuthorisationField(request.payload)
+      if (unrecognised) {
+        return h.response(unrecognised).type('text/plain').code(400)
+      }
 
       try {
         updateAuthorisation(orgId, personId, request.payload)
         return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
-        // upstream reports an unknown org and an unknown or unlinked person as 404s
+        // upstream reports an unknown org, an unknown or unlinked person and a body personId that
+        // differs from the path personId all as 404s
         if (e.isBoom && e.output.statusCode === 404) {
           const errorString = /^organisation with orgId/.test(e.message)
             ? 'Organisation not found.'
             : 'Person not found.'
           return h.response({ data: null, success: false, errorString }).code(404)
+        }
+        if (e.isBoom && e.output.statusCode === 400) {
+          return h
+            .response({ data: null, success: false, errorString: 'An error has occurred.' })
+            .code(400)
         }
         if (e.isBoom && e.output.statusCode === 409) {
           return h
