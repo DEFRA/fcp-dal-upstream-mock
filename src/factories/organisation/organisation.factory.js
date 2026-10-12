@@ -454,13 +454,7 @@ export const createAuthorisation = (orgId, payload) => {
     const role = pr.role ?? null
     const privilegeNames = privilegeNamesForPerson(personPrivileges, personId) ?? []
 
-    if (!orgIdToPersonIds[orgId]) orgIdToPersonIds[orgId] = []
-    orgIdToPersonIds[orgId].push(personId)
-
-    if (!personIdToOrgIds[personId]) personIdToOrgIds[personId] = []
-    if (!personIdToOrgIds[personId].some((id) => sameId(id, orgId))) {
-      personIdToOrgIds[personId].push(Number(orgId))
-    }
+    linkPerson(orgId, personId)
 
     person.role = role
     person.privileges = privilegeNames
@@ -471,8 +465,25 @@ export const createAuthorisation = (orgId, payload) => {
   return results
 }
 
+const linkPerson = (orgId, personId) => {
+  if (!orgIdToPersonIds[orgId]) orgIdToPersonIds[orgId] = []
+  orgIdToPersonIds[orgId].push(Number(personId))
+
+  if (!personIdToOrgIds[personId]) personIdToOrgIds[personId] = []
+  if (!personIdToOrgIds[personId].some((id) => sameId(id, orgId))) {
+    personIdToOrgIds[personId].push(Number(orgId))
+  }
+}
+
+const unlinkPerson = (orgId, personId) => {
+  orgIdToPersonIds[orgId] = personIdsForOrg(orgId).filter((id) => !sameId(id, personId))
+  personIdToOrgIds[personId] = (personIdToOrgIds[personId] || []).filter((id) => !sameId(id, orgId))
+}
+
 /**
- * Update a single person’s authorisation on an organisation (idempotent).
+ * Set a single person’s authorisation on an organisation (idempotent), as upstream does:
+ * - a person not yet linked to the organisation is linked
+ * - explicitly empty personRoles and personPrivileges arrays remove the link
  * Payload may contain at most one entry in personRoles and at most one entry in personPrivileges.
  * The personId in each entry must match the personId from the route path; upstream reports a
  * mismatch as the person not being found.
@@ -481,11 +492,6 @@ export const updateAuthorisation = (orgId, personId, payload) => {
   retrieveOrganisation(orgId)
 
   const person = retrieveExistingPerson(personId)
-
-  if (!hasAuthorisation(orgId, personId)) {
-    throw Boom.notFound(`person ${personId} is not currently authorised on organisation ${orgId}`)
-  }
-
   checkAuthorisationPayload(payload)
 
   const { personRoles, personPrivileges } = payload
@@ -500,6 +506,10 @@ export const updateAuthorisation = (orgId, personId, payload) => {
       'personId in personPrivileges entry must match the personId in the URL path'
     )
   }
+  if (personRoles.length === 0 && personPrivileges.length === 0) {
+    unlinkPerson(orgId, personId)
+    return { personId: Number(personId), role: null, privileges: [] }
+  }
 
   const roleEntry = personRoles[0]
   const newRole = roleEntry ? (roleEntry.role ?? null) : undefined
@@ -513,6 +523,9 @@ export const updateAuthorisation = (orgId, personId, payload) => {
 
   if (newRole !== undefined) person.role = newRole
   if (newPrivs !== undefined) person.privileges = newPrivs
+  if (!hasAuthorisation(orgId, personId)) {
+    linkPerson(orgId, personId)
+  }
 
   return {
     personId: Number(personId),

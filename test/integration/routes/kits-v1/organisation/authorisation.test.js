@@ -256,6 +256,47 @@ describe('Authorisation create & update (Ticket #29)', () => {
 
   const upstreamError = { data: null, success: false, errorString: 'An error has occurred.' }
 
+  describe('PUT links and unlinks', () => {
+    // 22222223 exists but is only a customer of org 222222222
+    const url =
+      '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222223'
+    const linkPayload = {
+      personRoles: [{ role: 'Agent', personId: 22222223 }],
+      personPrivileges: [{ personId: 22222223, privilegeNames: ['Amend - land'] }]
+    }
+    const put = (payload) =>
+      mockServer.inject({ method: 'PUT', url, headers: { authorization: 'Bearer token' }, payload })
+    const customerIds = async () => {
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111',
+        headers: { email: 'test@defra.gov.uk' }
+      })
+      return JSON.parse(payload)._data.map(({ id }) => Number(id))
+    }
+
+    it('should link a person who is not yet authorised on the organisation', async () => {
+      expect(await customerIds()).not.toContain(22222223)
+      const { statusCode } = await put(linkPayload)
+      expect(statusCode).toBe(200)
+      expect(await customerIds()).toContain(22222223)
+    })
+
+    it('should return 400 and not unlink when the arrays are omitted', async () => {
+      const { statusCode, payload } = await put({})
+      expect(statusCode).toBe(400)
+      expect(JSON.parse(payload)).toEqual(upstreamError)
+      expect(await customerIds()).toContain(22222223)
+    })
+
+    it('should unlink when personRoles and personPrivileges are both empty', async () => {
+      const { statusCode, payload } = await put({ personRoles: [], personPrivileges: [] })
+      expect(statusCode).toBe(200)
+      expect(JSON.parse(payload)).toEqual({ data: null, success: true, errorString: null })
+      expect(await customerIds()).not.toContain(22222223)
+    })
+  })
+
   describe('payload validation', () => {
     const inject = (method, url, payload) =>
       mockServer.inject({

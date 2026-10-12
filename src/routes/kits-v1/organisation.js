@@ -297,8 +297,8 @@ export const organisation = [
         updateAuthorisation(orgId, personId, request.payload)
         return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
-        // upstream reports an unknown org, an unknown or unlinked person and a body personId that
-        // differs from the path personId all as 404s
+        // upstream reports an unknown org, an unknown person and a body personId that differs
+        // from the path personId all as 404s
         if (e.isBoom && e.output.statusCode === 404) {
           const errorString = /^organisation with orgId/.test(e.message)
             ? 'Organisation not found.'

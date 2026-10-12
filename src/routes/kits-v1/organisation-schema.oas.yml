@@ -349,7 +349,9 @@ paths:
         - 'organisation'
         - 'authorisation'
       summary: "Update a person's authorisation on a business."
-      description: 'Change role and/or privileges for an existing person-organisation link.'
+      description: >
+        Set a person's role and privileges on a business. A person not yet linked to the business
+        is linked; empty `personRoles` and `personPrivileges` arrays remove the link.
       operationId: 'updateAuthorisation'
       parameters:
         - name: 'orgId'
@@ -420,10 +422,8 @@ paths:
         '404':
           description: >
             `Organisation not found.` when the `orgId` does not exist.
-            `Person not found.` when the person does not exist or is not linked to the
-            organisation, or a `personId` in the body differs from the `personId` in the path.
-            A non-numeric `personId` is not routed upstream and returns the application
-            server's HTML 404 page instead.
+            `Person not found.` when the person does not exist or a `personId`
+            in the body differs from the `personId` in the path.
           content:
             application/json:
               schema:
