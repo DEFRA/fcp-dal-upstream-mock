@@ -382,7 +382,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
         ]
       })
       expect(statusCode).toBe(200)
-      const privileges = ['Amend - land', 'Submit - bps']
+      const privileges = ['Amend - land', 'AMEND - LAND - SA', 'Submit - bps', 'SUBMIT - BPS - SA']
       // as upstream, each row lists the privileges once per role
       expect(await rows()).toEqual([
         { role: 'Agent', privileges: [...privileges, ...privileges] },
@@ -396,7 +396,9 @@ describe('Authorisation create & update (Ticket #29)', () => {
         personPrivileges: [{ personId: 11111111, privilegeNames: ['Submit - bps'] }]
       })
       expect(statusCode).toBe(200)
-      expect(await rows()).toEqual([{ role: 'Agent', privileges: ['Submit - bps'] }])
+      expect(await rows()).toEqual([
+        { role: 'Agent', privileges: ['Submit - bps', 'SUBMIT - BPS - SA'] }
+      ])
     })
   })
 
@@ -454,7 +456,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
       const rows = JSON.parse(payload)
         ._data.filter(({ id }) => id === 22222224)
         .map(({ role, privileges }) => ({ role, privileges }))
-      const privileges = ['Amend - land', 'Submit - bps']
+      const privileges = ['Amend - land', 'AMEND - LAND - SA', 'Submit - bps', 'SUBMIT - BPS - SA']
       // as upstream, each row lists the privileges once per role
       expect(rows).toEqual([
         { role: 'Agent', privileges: [...privileges, ...privileges] },
@@ -530,5 +532,76 @@ describe('Authorisation create & update (Ticket #29)', () => {
         expect(body).toBe(`Unrecognized field "x" in ${where}`)
       }
     )
+  })
+
+  describe('privilege names', () => {
+    const put = (privilegeNames) =>
+      mockServer.inject({
+        method: 'PUT',
+        url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111',
+        headers: { authorization: 'Bearer token' },
+        payload: {
+          personRoles: [{ role: 'Agent', personId: 11111111 }],
+          personPrivileges: [{ personId: 11111111, privilegeNames }]
+        }
+      })
+    const privileges = async () => {
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111'
+      })
+      return JSON.parse(payload)._data.find(({ id }) => id === 11111111).privileges
+    }
+
+    it.each([
+      [
+        'adds the "- SA" counterpart of each scheme privilege',
+        ['View - land', 'NO ACCESS - BPS', 'Submit - cs agree', 'Amend - entitlement'],
+        [
+          'View - land',
+          'VIEW - LAND - SA',
+          'NO ACCESS - BPS',
+          'NO ACCESS - BPS - SA',
+          'Submit - cs agree',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - entitlement',
+          'AMEND - ENTITLEMENT - SA'
+        ]
+      ],
+      [
+        'adds nothing for business and ELM privileges',
+        ['View - business', 'Full permission - business', 'ELM_APPLICATION_SUBMIT'],
+        ['View - business', 'Full permission - business', 'ELM_APPLICATION_SUBMIT']
+      ],
+      ['keeps a "- SA" privilege on its own', ['AMEND - LAND - SA'], ['AMEND - LAND - SA']],
+      [
+        'does not repeat a "- SA" privilege already sent',
+        ['Amend - land', 'AMEND - LAND - SA'],
+        ['Amend - land', 'AMEND - LAND - SA']
+      ],
+      [
+        'matches names case-insensitively, storing upstream spelling',
+        ['amend - LAND', 'VIEW - CS APP', 'amend - bps - sa'],
+        [
+          'Amend - land',
+          'AMEND - LAND - SA',
+          'View - cs app',
+          'VIEW - CS APP - SA',
+          'AMEND - BPS - SA'
+        ]
+      ]
+    ])('should %s', async (_, sent, stored) => {
+      const { statusCode } = await put(sent)
+      expect(statusCode).toBe(200)
+      expect(await privileges()).toEqual(stored)
+    })
+
+    it('should return 500 and change nothing for an unknown privilege', async () => {
+      await put(['View - business'])
+      const { statusCode, payload } = await put(['Not a privilege'])
+      expect(statusCode).toBe(500)
+      expect(JSON.parse(payload).errorString).toBe('An error has occurred.')
+      expect(await privileges()).toEqual(['View - business'])
+    })
   })
 })

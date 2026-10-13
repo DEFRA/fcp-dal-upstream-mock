@@ -22,7 +22,7 @@ import { retrievePerson } from '../person/person.factory.js'
 
 // All valid privilege names that can be assigned via create/update authorisation.
 // Generated from the permissions matrix.
-const VALID_PRIVILEGE_NAMES = new Set([
+const PRIVILEGE_NAMES = [
   // Basic Payment Scheme (BPS)
   'NO ACCESS - BPS',
   'View - bps',
@@ -43,7 +43,7 @@ const VALID_PRIVILEGE_NAMES = new Set([
 
   // Countryside Stewardship (Applications)
   'NO ACCESS - CS APP',
-  'VIEW - CS APP',
+  'View - cs app',
   'Amend - cs app',
   'Submit - cs app',
 
@@ -62,9 +62,20 @@ const VALID_PRIVILEGE_NAMES = new Set([
   'NO ACCESS - LAND',
   'View - land',
   'Amend - land'
-])
+]
 
-const isValidPrivilegeName = (name) => VALID_PRIVILEGE_NAMES.has(name)
+// Upstream grants each scheme privilege (land, BPS, entitlement and CS) together with an
+// upper-case "- SA" counterpart, which can also be assigned on its own
+const SCHEME_PRIVILEGE = / - (land|bps|entitlement|cs app|cs agree)$/i
+const schemeCounterpart = (name) =>
+  SCHEME_PRIVILEGE.test(name) ? `${name.toUpperCase()} - SA` : null
+
+// Upstream matches privilege names case-insensitively, storing its own spelling
+const CANONICAL_PRIVILEGE_NAMES = new Map(
+  PRIVILEGE_NAMES.flatMap((name) => [name, schemeCounterpart(name)])
+    .filter(Boolean)
+    .map((name) => [name.toLowerCase(), name])
+)
 
 const organisations = {}
 let startingOrgId = 1000000
@@ -435,14 +446,18 @@ const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileg
   if (new Set(roles).size < roles.length) {
     throw Boom.conflict('Relation already exists')
   }
-  const privilegeNames = personPrivileges.flatMap(({ privilegeNames }) => privilegeNames ?? [])
-  if (privilegeNames.some((name) => !isValidPrivilegeName(name))) {
+  const privilegeNames = personPrivileges
+    .flatMap(({ privilegeNames }) => privilegeNames ?? [])
+    .map((name) => CANONICAL_PRIVILEGE_NAMES.get(String(name).toLowerCase()))
+  if (privilegeNames.includes(undefined)) {
     throw new Error('invalid privilege string')
   }
 
   authorisations[authorisationKey(orgId, personId)] = {
     roles: roles.length ? roles : authorisationFor(orgId, personId, person).roles,
-    privileges: [...new Set(privilegeNames)]
+    privileges: [
+      ...new Set(privilegeNames.flatMap((name) => [name, schemeCounterpart(name) ?? []].flat()))
+    ]
   }
 }
 
