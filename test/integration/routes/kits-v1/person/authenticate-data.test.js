@@ -34,4 +34,107 @@ describe('Fake Authenticate data', () => {
       ].schema
     )
   })
+
+  describe('POST /external-auth/security-answers/{crn}', () => {
+    it('should save security answers that are then returned by GET', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/1111111400',
+        payload: { date: '2020-01-01', event: 'Graduation', location: 'London', email: 'a@b.com' }
+      })
+      expect(statusCode).toBe(200)
+
+      const { result } = await server.inject({
+        method: 'GET',
+        url: '/external-auth/security-answers/1111111400'
+      })
+      expect(result).toEqual({
+        customerReference: '1111111400',
+        memorableDate: '2020-01-01',
+        memorableEvent: 'Graduation',
+        memorableLocation: 'London',
+        lastUpdatedOn: expect.any(String)
+      })
+      expect(result).toConformToSchema(
+        schema.paths['/external-auth/security-answers/{crn}'].get.responses['200'].content[
+          'application/json'
+        ].schema
+      )
+    })
+
+    it('should save null for omitted answers', async () => {
+      await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/1111111300',
+        payload: { date: '2021-02-02' }
+      })
+
+      const { result } = await server.inject({
+        method: 'GET',
+        url: '/external-auth/security-answers/1111111300'
+      })
+      expect(result).toMatchObject({
+        memorableDate: '2021-02-02',
+        memorableEvent: null,
+        memorableLocation: null
+      })
+    })
+
+    it('should not reject a payload with unknown fields', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/1111111100',
+        payload: { date: '2020-01-01', unknown: 'field' }
+      })
+      expect(statusCode).toBe(200)
+    })
+
+    it('should not reject an empty payload', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/1111111100'
+      })
+      expect(statusCode).toBe(200)
+    })
+
+    it.each(['date', 'event', 'location'])(
+      'should return 500 when %s is longer than 256 characters',
+      async (field) => {
+        const { statusCode } = await server.inject({
+          method: 'POST',
+          url: '/external-auth/security-answers/1111111100',
+          payload: { [field]: 'a'.repeat(257) }
+        })
+        expect(statusCode).toBe(500)
+      }
+    )
+
+    it('should save answers that are exactly 256 characters', async () => {
+      const answer = 'a'.repeat(256)
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/1111111100',
+        payload: { date: answer, event: answer, location: answer }
+      })
+      expect(statusCode).toBe(200)
+    })
+
+    it('should return 403 for an invalid CRN', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/abc',
+        payload: { date: '2020-01-01' }
+      })
+      expect(statusCode).toBe(403)
+    })
+
+    it('should return 404 for an unknown CRN', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/9999999999',
+        payload: { date: '2020-01-01' }
+      })
+      expect(statusCode).toBe(404)
+    })
+  })
 })

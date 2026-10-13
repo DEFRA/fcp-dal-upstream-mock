@@ -86,6 +86,78 @@ paths:
                     type: string
                     example: >
                       There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
+    post:
+      tags:
+        - 'authenticate'
+      summary: 'Save security answers for a person'
+      description: >
+        Saves (replacing any existing) memorable security question answers for a person
+        identified by the provided CRN.
+      operationId: 'saveSecurityAnswers'
+      parameters:
+        - name: 'crn'
+          in: 'path'
+          description: 'CRN of the person to save security answers for.'
+          required: true
+          schema:
+            type: 'string'
+            pattern: '^[1-9][0-9]{9,19}$'
+            examples:
+              - '1111111100'
+              - '1111111200'
+              - '1111111300'
+              - '1111111400'
+              - '1111111500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityAnswersRequest'
+      responses:
+        '200':
+          description: 'Security answers saved successfully.'
+        '403':
+          description: >
+            Saving a person's Authenticate details is forbidden, or a WAF rule has been triggered.
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                forbidden:
+                  summary: Forbidden HTML response
+                  value: |
+                    <html><body><h1>403 Forbidden</h1>
+                    Request forbidden by administrative rules.
+                    </body></html>
+        '404':
+          description: 'Person not found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: 'HTTP 404 Not Found'
+        '500':
+          description: 'Internal server error, e.g. when a memorable answer is longer than 256 characters.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).'
 
 components:
   schemas:
@@ -122,6 +194,27 @@ components:
         memorableEvent: 'Graduation'
         memorableLocation: 'London'
         lastUpdatedOn: '2023-10-01T12:00:00Z'
+
+    SecurityAnswersRequest:
+      type: 'object'
+      properties:
+        date:
+          type: 'string'
+          description: 'Memorable date answer.'
+        event:
+          type: 'string'
+          description: 'Memorable event answer.'
+        location:
+          type: 'string'
+          description: 'Memorable location answer.'
+        email:
+          type: 'string'
+          description: 'Email used as a security answer.'
+      example:
+        date: '2020-01-01'
+        event: 'Graduation'
+        location: 'London'
+        email: 'person@example.com'
 
   securitySchemes:
     mTLS:
