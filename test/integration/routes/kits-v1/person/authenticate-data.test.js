@@ -80,13 +80,21 @@ describe('Fake Authenticate data', () => {
       })
     })
 
-    it('should return 400 for an invalid payload', async () => {
+    it('should not reject a payload with unknown fields', async () => {
       const { statusCode } = await server.inject({
         method: 'POST',
         url: '/external-auth/security-answers/1111111100',
-        payload: { date: 123, unknown: 'field' }
+        payload: { date: '2020-01-01', unknown: 'field' }
       })
-      expect(statusCode).toBe(400)
+      expect(statusCode).toBe(200)
+    })
+
+    it('should not reject an empty payload', async () => {
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: '/external-auth/security-answers/1111111100'
+      })
+      expect(statusCode).toBe(200)
     })
 
     it.each(['date', 'event', 'location'])(

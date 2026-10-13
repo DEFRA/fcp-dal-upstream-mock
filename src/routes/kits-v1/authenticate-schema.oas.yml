@@ -117,19 +117,6 @@ paths:
       responses:
         '200':
           description: 'Security answers saved successfully.'
-        '400':
-          description: 'Invalid request body, or insufficient privileges.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: 'validation error while processing input'
         '403':
           description: >
             Saving a person's Authenticate details is forbidden, or a WAF rule has been triggered.
@@ -210,7 +197,6 @@ components:
 
     SecurityAnswersRequest:
       type: 'object'
-      additionalProperties: false
       properties:
         date:
           type: 'string'

@@ -1,18 +1,8 @@
-import Boom from '@hapi/boom'
 import {
   retrieveAuthenticateData,
   saveAuthenticateData
 } from '../../factories/person/authenticate-data.factory.js'
 import { checkId } from '../../utils/shared-datatypes.js'
-import { createPayloadValidator } from '../../utils/validatePayload.js'
-
-const validateSecurityAnswersPayload = await createPayloadValidator(
-  'routes/kits-v1/authenticate-schema.oas.yml',
-  (schema) =>
-    schema.paths['/external-auth/security-answers/{crn}'].post.requestBody.content[
-      'application/json'
-    ].schema
-)
 
 export const authenticate = [
   {
@@ -38,12 +28,9 @@ export const authenticate = [
     handler: async (request, h) => {
       const crn = checkId(request, 'crn')
 
-      if (!validateSecurityAnswersPayload(request.payload)) {
-        throw Boom.badRequest('validation error while processing input', request)
-      }
-
-      // Upstream returns 404 for an unknown CRN, and saves any omitted answers as null
-      saveAuthenticateData(crn, request.payload)
+      // Upstream does not validate the payload: it returns 404 for an unknown CRN,
+      // ignores unknown fields, and saves any omitted answers as null
+      saveAuthenticateData(crn, request.payload ?? {})
       return h.response().code(200)
     }
   }
