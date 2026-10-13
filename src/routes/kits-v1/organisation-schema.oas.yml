@@ -31,7 +31,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [1000000000, 1111111111, 2222222222]
+            examples: [100000000, 111111111, 222222222]
       responses:
         '200':
           description: 'Returns full organisation details.'
@@ -144,7 +144,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [1000000000, 1111111111, 2222222222]
+            examples: [100000000, 111111111, 222222222]
       requestBody:
         required: true
         content:
@@ -202,7 +202,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [1000000000, 1111111111, 2222222222]
+            examples: [100000000, 111111111, 222222222]
       requestBody:
         required: true
         content:
@@ -265,12 +265,24 @@ paths:
           schema:
             type: string
             pattern: '^[0-9]{1,20}$'
+            examples: ['111111111']
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/AuthorisationCreateRequest'
+            example:
+              personRoles:
+                - role: 'Helper'
+                  personId: 11111111
+              personPrivileges:
+                - personId: 11111111
+                  privilegeNames:
+                    - 'View - business'
+                    - 'Amend - land'
+                    - 'Amend - entitlement'
+                    - 'Submit - bps'
       responses:
         '200':
           description: 'Authorisation created.'
@@ -372,17 +384,30 @@ paths:
           schema:
             type: string
             pattern: '^[0-9]{1,20}$'
+            examples: ['111111111']
         - name: 'personId'
           in: 'path'
           required: true
           schema:
             type: integer
+            examples: [11111111]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/AuthorisationUpdateRequest'
+            example:
+              personRoles:
+                - role: 'Helper'
+                  personId: 11111111
+              personPrivileges:
+                - personId: 11111111
+                  privilegeNames:
+                    - 'View - business'
+                    - 'Amend - land'
+                    - 'Amend - entitlement'
+                    - 'Submit - bps'
       responses:
         '200':
           description: 'Authorisation updated.'

@@ -32,6 +32,11 @@ usage() {
   echo "  s  | sa | siti-agri      - test the Siti-Agri schema"
   echo "  h  | help                - show this help message"
   echo
+  echo "NOTE: the organisation schema's operations that write upstream (authorisation, lock and"
+  echo "      unlock) are only checked when an org and person are explicitly defined in environment variables:"
+  echo "  CONTRACT_WRITE_ORG_ID    - orgId to authorise, lock and unlock"
+  echo "  CONTRACT_WRITE_PERSON_ID - personId whose authorisation on that org is overwritten"
+  echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  CDP_API_KEY - CDP Platform developer API key "
   echo "  KITS_INTERNAL_URL  - the URL of the KITS API to use (this should be the DAL Mock proxy endpoint, via the ephemeral endpoint)"
@@ -49,8 +54,8 @@ usage() {
 
 cleanup() {
   local status=$?
-  if [ ${status} -ne 0 ] && [ -f "${baseDir}/tmp/vcr.yaml" ]; then
-    echo "NOTE: report from the failed run left at ${baseDir}/tmp/vcr.yaml" 1>&2
+  if [ ${status} -ne 0 ] && ls "${baseDir}"/tmp/*vcr.yaml > /dev/null 2>&1; then
+    echo "NOTE: reports from the failed run left in ${baseDir}/tmp" 1>&2
     return
   fi
   rm -rf "${baseDir}/tmp"
@@ -159,14 +164,45 @@ case "$1" in
     # NOTE: deactivate and reactivate are left out, as generated organisationIds may be real businesses
     mutations='. |
 del(.paths["/organisation/{organisationId}/deactivate"], .paths["/organisation/{organisationId}/reactivate"]) |
-.paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5849659,5852711,5858233 ] |
+.paths["/organisation/{organisationId}"].get.parameters[0].schema.examples = [5680131,5368904,5402818] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "106554744" |
-.components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "200629003" |
-.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "200665008" |
+.components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "114005062" |
+.components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "116342167" |
 .components.schemas.SearchRequestBody.examples[3].primarySearchPhrase = "Wood" |
-.components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "YO18 8RL" |
-.paths["/organisation/{organisationId}/lock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233] |
-.paths["/organisation/{organisationId}/unlock"].post.parameters[0].schema.examples = [5583781,5849659,5852711,5858233]'
+.components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "YO18 8RL"'
+    # These write upstream, so they only get the examples and coverage phases: fuzzing and
+    # stateful send other IDs (random ones, or real orgIds from other responses), which would not
+    # be safe against a real KITS env. Running from docker against the mock is unaffected and all
+    # phases will run.
+    write_operations='^(createAuthorisation|updateAuthorisation|lockOrganisation|unlockOrganisation)$'
+    # NOTE: the write operations are only checked when CONTRACT_WRITE_ORG_ID and
+    # CONTRACT_WRITE_PERSON_ID are set. The run will lock and unlock that org, and overwrite (and
+    # may remove) that person's authorisations on it, so use an org/person that is safe to modify (use RP
+    # Gateway to verify the state of that org/person before the run, then manually restore that
+    # state).
+    if [ -n "${CONTRACT_WRITE_ORG_ID}" ] && [ -n "${CONTRACT_WRITE_PERSON_ID}" ]; then
+      authorisation='.paths["/SitiAgriApi/authorisation/organisation/{orgId}/authorisation"].post'
+      person_authorisation='.paths["/SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}"].put'
+      # scheme privileges, to which upstream adds the matching "- SA" ones
+      authorisation_body='{
+  "personRoles": [{ "role": "Helper", "personId": '"${CONTRACT_WRITE_PERSON_ID}"' }],
+  "personPrivileges": [{ "personId": '"${CONTRACT_WRITE_PERSON_ID}"', "privilegeNames": ["View - business","Amend - land","Amend - entitlement","Submit - bps"] }]
+}'
+      mutations="${mutations} |
+.paths[\"/organisation/{organisationId}/lock\"].post.parameters[0].schema.examples = [${CONTRACT_WRITE_ORG_ID}] |
+.paths[\"/organisation/{organisationId}/unlock\"].post.parameters[0].schema.examples = [${CONTRACT_WRITE_ORG_ID}] |
+${authorisation}.parameters[0].schema.examples = [\"${CONTRACT_WRITE_ORG_ID}\"] |
+${authorisation}.requestBody.content[\"application/json\"].example = ${authorisation_body} |
+${person_authorisation}.parameters[0].schema.examples = [\"${CONTRACT_WRITE_ORG_ID}\"] |
+${person_authorisation}.parameters[1].schema.examples = [${CONTRACT_WRITE_PERSON_ID}] |
+${person_authorisation}.requestBody.content[\"application/json\"].example = ${authorisation_body}"
+    elif [ -n "${CONTRACT_WRITE_ORG_ID}${CONTRACT_WRITE_PERSON_ID}" ]; then
+      echo "ERROR: set both CONTRACT_WRITE_ORG_ID and CONTRACT_WRITE_PERSON_ID, or neither" 1>&2
+      usage
+      exit 1
+    else
+      skip_write_operations=true
+    fi
     gateway="kits-internal"
     ;;
   p | person )
@@ -248,17 +284,42 @@ if [ "${gateway}" = "kits-internal" ]; then # KITS internal gateway
     exit 1
   fi
   # NOTE: endpoint-specific check exclusions are configured in schemathesis.toml
-  docker run --rm --network=host --pull always \
-    -v ${baseDir}/tmp:/tmp \
-    -v ${baseDir}/schemathesis.toml:/tmp/schemathesis.toml:ro \
-    schemathesis/schemathesis:stable \
-      --config-file /tmp/schemathesis.toml \
-      run /tmp/schema.json \
-        --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
-        --header "x-api-key: ${CDP_API_KEY}" \
-        --exclude-checks=unsupported_method,not_a_server_error \
-        --report-vcr-path /tmp/vcr.yaml \
-        --url "${KITS_INTERNAL_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}"
+  # usage: run_kits_internal REPORT_NAME [SCHEMATHESIS_RUN_OPTION...]
+  run_kits_internal() {
+    local report_name="$1"
+    # drop REPORT_NAME, leaving only the schemathesis options in "$@"
+    shift
+    docker run --rm --network=host --pull always \
+      -v ${baseDir}/tmp:/tmp \
+      -v ${baseDir}/schemathesis.toml:/tmp/schemathesis.toml:ro \
+      schemathesis/schemathesis:stable \
+        --config-file /tmp/schemathesis.toml \
+        run /tmp/schema.json \
+          --header "email: ${TEST_USER_EMAIL:-testuser01@defra.gov.uk}" \
+          --header "x-api-key: ${CDP_API_KEY}" \
+          --exclude-checks=unsupported_method,not_a_server_error \
+          --report-vcr-path "/tmp/${report_name}" \
+          --url "${KITS_INTERNAL_URL:-https://ephemeral-protected.api.dev.cdp-int.defra.cloud/fcp-dal-upstream-mock/proxy/internal/extapi}" \
+          "$@"
+  }
+
+  if [ -n "${write_operations}" ]; then
+    # two passes, so the operations that write upstream skip the fuzzing and stateful phases
+    result=0
+    if [ "${skip_write_operations}" = true ]; then
+      echo "SKIPPED: the operations that write upstream, as CONTRACT_WRITE_ORG_ID and" 1>&2
+      echo "         CONTRACT_WRITE_PERSON_ID are not set (see $0 help)" 1>&2
+    else
+      echo "Checking the operations that write upstream (examples and coverage phases only)..."
+      run_kits_internal writes-vcr.yaml \
+        --include-operation-id-regex "${write_operations}" --phases examples,coverage || result=1
+    fi
+    echo "Checking the other operations (all phases)..."
+    run_kits_internal reads-vcr.yaml --exclude-operation-id-regex "${write_operations}" || result=1
+    exit ${result}
+  else
+    run_kits_internal vcr.yaml
+  fi
 
 elif [ "${gateway}" = "kits-external" ]; then # KITS EXTERNAL gateway
   if [ -z "${CDP_API_KEY}" ]; then
