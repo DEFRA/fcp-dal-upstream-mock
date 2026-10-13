@@ -250,7 +250,10 @@ paths:
         - 'organisation'
         - 'authorisation'
       summary: 'Add a person to a business (create authorisation).'
-      description: 'Link an existing person (by CRN/personId) to an organisation with role and privileges.'
+      description: >
+        Link an existing person to an organisation with roles and privileges. Every entry must be
+        for the same person; the person is linked once per role, each link with the privileges
+        from every `personPrivileges` entry.
       operationId: 'createAuthorisation'
       parameters:
         - name: 'orgId'
@@ -288,6 +291,8 @@ paths:
           description: >
             Invalid payload. Malformed JSON or unrecognised fields are rejected by the upstream
             JSON deserialiser before validation, returning the raw error message as plain text.
+            A body naming more than one person is reported as `An error has occurred.`, before
+            the person or organisation is looked up.
           content:
             application/json:
               schema:
@@ -324,7 +329,9 @@ paths:
                 success: false
                 errorString: 'Person not found.'
         '409':
-          description: '`Relation already exists` when the person is already linked to the organisation.'
+          description: >
+            `Relation already exists` when the person is already linked to the organisation or
+            `personRoles` repeats a role.
           content:
             application/json:
               schema:
@@ -350,8 +357,10 @@ paths:
         - 'authorisation'
       summary: "Update a person's authorisation on a business."
       description: >
-        Set a person's role and privileges on a business. A person not yet linked to the business
-        is linked; empty `personRoles` and `personPrivileges` arrays remove the link.
+        Set a person's roles and privileges on a business, linking them if they are not yet
+        linked. The person gets a link per role sent, replacing their existing roles, each link
+        with the privileges from every `personPrivileges` entry. Empty `personRoles` and
+        `personPrivileges` arrays remove the person from the business.
       operationId: 'updateAuthorisation'
       parameters:
         - name: 'orgId'
@@ -435,6 +444,17 @@ paths:
             text/html:
               schema:
                 type: string
+        '409':
+          description: >
+            `Relation already exists` when `personRoles` repeats a role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamError'
+              example:
+                data: null
+                success: false
+                errorString: 'Relation already exists'
         '500':
           description: >
             No request body, or a `personRoles`/`personPrivileges` entry without a `personId`.
@@ -686,7 +706,6 @@ components:
       properties:
         personRoles:
           type: array
-          maxItems: 1
           items:
             type: object
             additionalProperties: false
@@ -698,7 +717,6 @@ components:
                 type: integer
         personPrivileges:
           type: array
-          maxItems: 1
           items:
             type: object
             additionalProperties: false

@@ -339,7 +339,68 @@ describe('Authorisation create & update (Ticket #29)', () => {
     })
   })
 
-  describe('POST lookups', () => {
+  describe('PUT with multiple entries', () => {
+    const url =
+      '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111'
+    const put = (payload) =>
+      mockServer.inject({ method: 'PUT', url, headers: { authorization: 'Bearer token' }, payload })
+    const rows = async () => {
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111'
+      })
+      return JSON.parse(payload)
+        ._data.filter(({ id }) => id === 11111111)
+        .map(({ role, privileges }) => ({ role, privileges }))
+    }
+
+    it('should return 409 when personRoles repeats an entry', async () => {
+      const { statusCode, payload } = await put({
+        personRoles: [
+          { role: 'Agent', personId: 11111111 },
+          { role: 'Agent', personId: 11111111 }
+        ],
+        personPrivileges: []
+      })
+      expect(statusCode).toBe(409)
+      expect(JSON.parse(payload)).toEqual({
+        data: null,
+        success: false,
+        errorString: 'Relation already exists'
+      })
+    })
+
+    it('should link the person once per role, each with the combined privileges', async () => {
+      const { statusCode } = await put({
+        personRoles: [
+          { role: 'Agent', personId: 11111111 },
+          { role: 'Helper', personId: 11111111 }
+        ],
+        personPrivileges: [
+          { personId: 11111111, privilegeNames: ['Amend - land'] },
+          { personId: 11111111, privilegeNames: ['Submit - bps', 'Amend - land'] }
+        ]
+      })
+      expect(statusCode).toBe(200)
+      const privileges = ['Amend - land', 'Submit - bps']
+      // as upstream, each row lists the privileges once per role
+      expect(await rows()).toEqual([
+        { role: 'Agent', privileges: [...privileges, ...privileges] },
+        { role: 'Helper', privileges: [...privileges, ...privileges] }
+      ])
+    })
+
+    it('should replace the roles with those sent', async () => {
+      const { statusCode } = await put({
+        personRoles: [{ role: 'Agent', personId: 11111111 }],
+        personPrivileges: [{ personId: 11111111, privilegeNames: ['Submit - bps'] }]
+      })
+      expect(statusCode).toBe(200)
+      expect(await rows()).toEqual([{ role: 'Agent', privileges: ['Submit - bps'] }])
+    })
+  })
+
+  describe('POST lookups and multiple entries', () => {
     const post = (orgId, payload) =>
       mockServer.inject({
         method: 'POST',
@@ -371,6 +432,62 @@ describe('Authorisation create & update (Ticket #29)', () => {
         errorString: 'Organisation not found.'
       })
     })
+
+    it('should return 409 when personRoles repeats an entry', async () => {
+      const { statusCode } = await post(111111111, bodyForPerson(22222224, ['Agent', 'Agent'], []))
+      expect(statusCode).toBe(409)
+    })
+
+    it('should link the person once per role, each with the combined privileges', async () => {
+      const { statusCode } = await post(111111111, {
+        ...bodyForPerson(22222224, ['Agent', 'Helper'], ['Amend - land']),
+        personPrivileges: [
+          { personId: 22222224, privilegeNames: ['Amend - land'] },
+          { personId: 22222224, privilegeNames: ['Submit - bps'] }
+        ]
+      })
+      expect(statusCode).toBe(200)
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111'
+      })
+      const rows = JSON.parse(payload)
+        ._data.filter(({ id }) => id === 22222224)
+        .map(({ role, privileges }) => ({ role, privileges }))
+      const privileges = ['Amend - land', 'Submit - bps']
+      // as upstream, each row lists the privileges once per role
+      expect(rows).toEqual([
+        { role: 'Agent', privileges: [...privileges, ...privileges] },
+        { role: 'Helper', privileges: [...privileges, ...privileges] }
+      ])
+    })
+
+    it.each([
+      [
+        'personRoles',
+        {
+          personRoles: [
+            { role: 'Agent', personId: 22222224 },
+            { role: 'Agent', personId: 1 }
+          ],
+          personPrivileges: []
+        }
+      ],
+      [
+        'personPrivileges',
+        {
+          personRoles: [{ role: 'Agent', personId: 22222224 }],
+          personPrivileges: [{ personId: 1, privilegeNames: [] }]
+        }
+      ]
+    ])(
+      'should return 400 for a second person in %s, before looking anything up',
+      async (_, payload) => {
+        const { statusCode, payload: body } = await post(0, payload)
+        expect(statusCode).toBe(400)
+        expect(JSON.parse(body)).toEqual(upstreamError)
+      }
+    )
   })
 
   describe('unrecognised fields', () => {

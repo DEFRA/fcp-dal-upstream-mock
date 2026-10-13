@@ -267,6 +267,11 @@ export const organisation = [
             : 'Person not found.'
           return h.response({ data: null, success: false, errorString }).code(404)
         }
+        if (e.isBoom && e.output.statusCode === 400) {
+          return h
+            .response({ data: null, success: false, errorString: 'An error has occurred.' })
+            .code(400)
+        }
         if (e.isBoom && e.output.statusCode === 409) {
           return h
             .response({ data: null, success: false, errorString: 'Relation already exists' })

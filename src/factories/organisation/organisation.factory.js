@@ -301,20 +301,34 @@ const organisationMatchers = {
 export const searchOrganisations = (searchFieldType, searchPhrase) =>
   organisationMatchers[searchFieldType](searchPhrase)
 
+// Roles and privileges set through the authorisation endpoints, by organisation and person.
+// Upstream links a person once per role, each link with the same privileges; a link without an
+// entry here shows the person's own role and privileges.
+const authorisations = {}
+const authorisationKey = (orgId, personId) => `${Number(orgId)}:${Number(personId)}`
+
+const authorisationFor = (orgId, personId, person) =>
+  authorisations[authorisationKey(orgId, personId)] ?? {
+    roles: [person.role],
+    privileges: person.privileges
+  }
+
 export const retrieveOrganisationCustomers = (orgId) => {
   const personIds = orgIdToPersonIds[orgId] || []
-  const orgPeople = personIds.map((personId) => {
+  // upstream lists a person once per role, each row repeating the privileges once per role
+  const orgPeople = personIds.flatMap((personId) => {
     const person = retrievePerson(personId)
-    return {
+    const { roles, privileges } = authorisationFor(orgId, personId, person)
+    return roles.map((role) => ({
       id: personId,
       firstName: person.firstName,
       lastName: person.lastName,
       customerReference: person.customerReferenceNumber,
       confirmed: person.confirmed,
       lastUpdatedOn: person.lastUpdatedOn,
-      role: person.role,
-      privileges: person.privileges
-    }
+      role,
+      privileges: roles.flatMap(() => privileges)
+    }))
   })
   return orgPeople
 }
@@ -366,16 +380,6 @@ const retrieveExistingPerson = (personId) => {
   }
 }
 
-const privilegeNamesForPerson = (personPrivileges, personId) => {
-  if (!Array.isArray(personPrivileges)) return undefined
-  const match = personPrivileges.find((entry) => sameId(entry.personId, personId))
-  const names = match?.privilegeNames
-  if (Array.isArray(names) && names.some((n) => !isValidPrivilegeName(n))) {
-    throw new Error('invalid privilege string')
-  }
-  return names
-}
-
 // the field in `entry` that isn't one of `knownFields`, if any
 const unknownField = (entry, knownFields) =>
   entry && typeof entry === 'object'
@@ -408,14 +412,14 @@ export const unrecognisedAuthorisationField = (payload) => {
 }
 
 // Upstream requires a body with both arrays and a personId in every entry. A missing body or entry
-// personId is a 500 on both endpoints; a missing array is a 500 on POST but a 400 on PUT, so it
-// is thrown as a 400 for the route to map.
-const checkAuthorisationPayload = (payload) => {
+// personId is a 500 on both endpoints; a missing array is a 500 on POST but a 400 on PUT, so the
+// endpoint passes the Boom error to throw for it.
+const checkAuthorisationPayload = (payload, missingArrayError) => {
   if (!payload || typeof payload !== 'object') {
     throw Boom.internal('request body is required')
   }
   if (!Array.isArray(payload.personRoles) || !Array.isArray(payload.personPrivileges)) {
-    throw Boom.badRequest('personRoles and personPrivileges are both required')
+    throw missingArrayError('personRoles and personPrivileges are both required')
   }
   if (
     [...payload.personRoles, ...payload.personPrivileges].some((entry) => entry?.personId == null)
@@ -424,45 +428,50 @@ const checkAuthorisationPayload = (payload) => {
   }
 }
 
+// Upstream rejects a repeated role for a person, otherwise linking them once per role, each link
+// with the privileges from every entry; without a role, the existing roles are kept
+const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileges) => {
+  const roles = personRoles.map(({ role }) => role ?? null)
+  if (new Set(roles).size < roles.length) {
+    throw Boom.conflict('Relation already exists')
+  }
+  const privilegeNames = personPrivileges.flatMap(({ privilegeNames }) => privilegeNames ?? [])
+  if (privilegeNames.some((name) => !isValidPrivilegeName(name))) {
+    throw new Error('invalid privilege string')
+  }
+
+  authorisations[authorisationKey(orgId, personId)] = {
+    roles: roles.length ? roles : authorisationFor(orgId, personId, person).roles,
+    privileges: [...new Set(privilegeNames)]
+  }
+}
+
 /**
- * Create an authorisation (link a person to an organisation with role + privileges), checking in
- * upstream's order: payload, people, organisation, then existing links.
+ * Create an authorisation (link a person to an organisation with roles + privileges), checking in
+ * upstream's order: payload, person, organisation, then existing links. Upstream authorises one
+ * person per request, rejecting a body that names more than one with a 400.
  */
 export const createAuthorisation = (orgId, payload) => {
-  checkAuthorisationPayload(payload)
+  checkAuthorisationPayload(payload, Boom.internal)
 
   const { personRoles, personPrivileges } = payload
   if (personRoles.length === 0) {
-    throw Boom.badRequest('personRoles must not be empty')
+    throw Boom.internal('personRoles must not be empty')
   }
-  if (personRoles.length > 1 || personPrivileges.length > 1) {
-    throw Boom.conflict('Relation already exists')
+  const entries = [...personRoles, ...personPrivileges]
+  if (new Set(entries.map((entry) => String(entry.personId))).size > 1) {
+    throw Boom.badRequest('only one person can be authorised per request')
   }
 
-  const people = personRoles.map((pr) => [pr, retrieveExistingPerson(pr.personId)])
+  const { personId } = personRoles[0]
+  const person = retrieveExistingPerson(personId)
   retrieveOrganisation(orgId)
 
-  const results = []
-
-  for (const [pr, person] of people) {
-    const personId = pr.personId
-
-    if (hasAuthorisation(orgId, personId)) {
-      throw Boom.conflict('Relation already exists')
-    }
-
-    const role = pr.role ?? null
-    const privilegeNames = privilegeNamesForPerson(personPrivileges, personId) ?? []
-
-    linkPerson(orgId, personId)
-
-    person.role = role
-    person.privileges = privilegeNames
-
-    results.push({ personId, role, privileges: privilegeNames })
+  if (hasAuthorisation(orgId, personId)) {
+    throw Boom.conflict('Relation already exists')
   }
-
-  return results
+  applyAuthorisation(orgId, personId, person, personRoles, personPrivileges)
+  linkPerson(orgId, personId)
 }
 
 const linkPerson = (orgId, personId) => {
@@ -478,13 +487,13 @@ const linkPerson = (orgId, personId) => {
 const unlinkPerson = (orgId, personId) => {
   orgIdToPersonIds[orgId] = personIdsForOrg(orgId).filter((id) => !sameId(id, personId))
   personIdToOrgIds[personId] = (personIdToOrgIds[personId] || []).filter((id) => !sameId(id, orgId))
+  delete authorisations[authorisationKey(orgId, personId)]
 }
 
 /**
  * Set a single person’s authorisation on an organisation (idempotent), as upstream does:
  * - a person not yet linked to the organisation is linked
  * - explicitly empty personRoles and personPrivileges arrays remove the link
- * Payload may contain at most one entry in personRoles and at most one entry in personPrivileges.
  * The personId in each entry must match the personId from the route path; upstream reports a
  * mismatch as the person not being found.
  */
@@ -492,12 +501,9 @@ export const updateAuthorisation = (orgId, personId, payload) => {
   retrieveOrganisation(orgId)
 
   const person = retrieveExistingPerson(personId)
-  checkAuthorisationPayload(payload)
+  checkAuthorisationPayload(payload, Boom.badRequest)
 
   const { personRoles, personPrivileges } = payload
-  if (personRoles.length > 1 || personPrivileges.length > 1) {
-    throw Boom.conflict('Relation already exists')
-  }
   if (personRoles.some((entry) => !sameId(entry.personId, personId))) {
     throw Boom.notFound('personId in personRoles entry must match the personId in the URL path')
   }
@@ -508,29 +514,12 @@ export const updateAuthorisation = (orgId, personId, payload) => {
   }
   if (personRoles.length === 0 && personPrivileges.length === 0) {
     unlinkPerson(orgId, personId)
-    return { personId: Number(personId), role: null, privileges: [] }
+    return
   }
 
-  const roleEntry = personRoles[0]
-  const newRole = roleEntry ? (roleEntry.role ?? null) : undefined
-  const newPrivs = privilegeNamesForPerson(personPrivileges, personId) ?? []
-
-  // Check if the incoming payload matches the current state exactly
-  const roleUnchanged = newRole === person.role
-  const privsUnchanged =
-    newPrivs.length === (person.privileges || []).length &&
-    newPrivs.every((p) => (person.privileges || []).includes(p))
-
-  if (newRole !== undefined) person.role = newRole
-  if (newPrivs !== undefined) person.privileges = newPrivs
+  applyAuthorisation(orgId, personId, person, personRoles, personPrivileges)
   if (!hasAuthorisation(orgId, personId)) {
     linkPerson(orgId, personId)
-  }
-
-  return {
-    personId: Number(personId),
-    role: person.role,
-    privileges: person.privileges
   }
 }
 
