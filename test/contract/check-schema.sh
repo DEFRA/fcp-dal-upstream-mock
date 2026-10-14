@@ -170,10 +170,10 @@ del(.paths["/organisation/{organisationId}/deactivate"], .paths["/organisation/{
 .components.schemas.SearchRequestBody.examples[2].primarySearchPhrase = "116342167" |
 .components.schemas.SearchRequestBody.examples[3].primarySearchPhrase = "Wood" |
 .components.schemas.SearchRequestBody.examples[4].primarySearchPhrase = "YO18 8RL"'
-    # These write upstream, so they only get the examples and coverage phases: fuzzing and
-    # stateful send other IDs (random ones, or real orgIds from other responses), which would not
-    # be safe against a real KITS env. Running from docker against the mock is unaffected and all
-    # phases will run.
+    # These write upstream, so they only get the examples phase: the coverage phase makes up its
+    # own boundary IDs, fuzzing sends random ones and stateful sends real orgIds from other
+    # responses, none of which is safe against a real KITS env. Running from docker against the
+    # mock is unaffected and all phases will run.
     write_operations='^(createAuthorisation|updateAuthorisation|lockOrganisation|unlockOrganisation)$'
     # NOTE: the write operations are only checked when CONTRACT_WRITE_ORG_ID and
     # CONTRACT_WRITE_PERSON_ID are set. The run will lock and unlock that org, and overwrite (and
@@ -304,15 +304,15 @@ if [ "${gateway}" = "kits-internal" ]; then # KITS internal gateway
   }
 
   if [ -n "${write_operations}" ]; then
-    # two passes, so the operations that write upstream skip the fuzzing and stateful phases
+    # two passes, so the operations that write upstream only get the examples phase
     result=0
     if [ "${skip_write_operations}" = true ]; then
       echo "SKIPPED: the operations that write upstream, as CONTRACT_WRITE_ORG_ID and" 1>&2
       echo "         CONTRACT_WRITE_PERSON_ID are not set (see $0 help)" 1>&2
     else
-      echo "Checking the operations that write upstream (examples and coverage phases only)..."
+      echo "Checking the operations that write upstream (examples phase only)..."
       run_kits_internal writes-vcr.yaml \
-        --include-operation-id-regex "${write_operations}" --phases examples,coverage || result=1
+        --include-operation-id-regex "${write_operations}" --phases examples || result=1
     fi
     echo "Checking the other operations (all phases)..."
     run_kits_internal reads-vcr.yaml --exclude-operation-id-regex "${write_operations}" || result=1
