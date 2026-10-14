@@ -738,6 +738,10 @@ components:
             properties:
               role:
                 type: string
+                description: >
+                  Required by upstream, which reports a missing or empty role with a 500. Upstream
+                  also reports a role name it doesn't know (matched case-sensitively, e.g. `agent`
+                  is not `Agent`) with a 500, but its list of roles isn't published.
               personId:
                 type: integer
         personPrivileges:

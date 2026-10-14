@@ -648,4 +648,72 @@ describe('Authorisation create & update (Ticket #29)', () => {
       expect(await privileges()).toEqual(['View - business'])
     })
   })
+
+  describe('roles', () => {
+    const authorise = (method, path, personId, roleEntry) =>
+      mockServer.inject({
+        method,
+        url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/${path}`,
+        headers: { authorization: 'Bearer token' },
+        payload: {
+          personRoles: [{ personId, ...roleEntry }],
+          personPrivileges: [{ personId, privilegeNames: ['Amend - land'] }]
+        }
+      })
+    const rows = async (personId) => {
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111'
+      })
+      return JSON.parse(payload)
+        ._data.filter(({ id }) => id === personId)
+        .map(({ role, privileges }) => ({ role, privileges }))
+    }
+    const missingRoles = [
+      ['missing', {}],
+      ['null', { role: null }],
+      ['empty', { role: '' }]
+    ]
+
+    it.each(missingRoles)(
+      'POST should return 500 and not link the person when the role is %s',
+      async (_, roleEntry) => {
+        // 22222226 exists but is only a customer of org 222222222
+        const { statusCode, payload } = await authorise(
+          'POST',
+          'authorisation',
+          22222226,
+          roleEntry
+        )
+        expect(statusCode).toBe(500)
+        expect(JSON.parse(payload).errorString).toBe('An error has occurred.')
+        expect(await rows(22222226)).toEqual([])
+      }
+    )
+
+    it('POST should report a missing role before an existing link', async () => {
+      const { statusCode } = await authorise('POST', 'authorisation', 11111111, {})
+      expect(statusCode).toBe(500)
+    })
+
+    it.each(missingRoles)(
+      'PUT should return 500 and keep the existing roles when the role is %s',
+      async (_, roleEntry) => {
+        const path = 'authorisation/person/22222227'
+        await authorise('PUT', path, 22222227, { role: 'Agent' })
+        const before = await rows(22222227)
+        const { statusCode } = await authorise('PUT', path, 22222227, roleEntry)
+        expect(statusCode).toBe(500)
+        expect(await rows(22222227)).toEqual(before)
+      }
+    )
+
+    it('should accept a role name it cannot check against upstream', async () => {
+      const { statusCode } = await authorise('POST', 'authorisation', 22222228, { role: 'Bogus' })
+      expect(statusCode).toBe(200)
+      expect(await rows(22222228)).toEqual([
+        { role: 'Bogus', privileges: ['Amend - land', 'AMEND - LAND - SA'] }
+      ])
+    })
+  })
 })

@@ -450,10 +450,19 @@ const checkAuthorisationPayload = (payload, missingArrayError) => {
   }
 }
 
+// Upstream rejects an entry with a missing or empty role with a 500, before checking for existing
+// links. It also rejects a role name it doesn't know (case-sensitively, so `agent` isn't `Agent`),
+// but its list of roles isn't published, so any other name is accepted here.
+const checkRoles = (personRoles) => {
+  if (personRoles.some(({ role }) => !role)) {
+    throw Boom.internal('role is required in every personRoles entry')
+  }
+}
+
 // Upstream rejects a repeated role for a person, otherwise linking them once per role, each link
-// with the privileges from every entry; without a role, the existing roles are kept
+// with the privileges from every entry; with no personRoles entries, the existing roles are kept
 const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileges) => {
-  const roles = personRoles.map(({ role }) => role ?? null)
+  const roles = personRoles.map(({ role }) => role)
   if (new Set(roles).size < roles.length) {
     throw Boom.conflict('Relation already exists')
   }
@@ -474,8 +483,8 @@ const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileg
 
 /**
  * Create an authorisation (link a person to an organisation with roles + privileges), checking in
- * upstream's order: payload, person, organisation, then existing links. Upstream authorises one
- * person per request, rejecting a body that names more than one with a 400.
+ * upstream's order: payload, person, organisation, roles, then existing links. Upstream authorises
+ * one person per request, rejecting a body that names more than one with a 400.
  */
 export const createAuthorisation = (orgId, payload) => {
   checkAuthorisationPayload(payload, Boom.internal)
@@ -492,6 +501,7 @@ export const createAuthorisation = (orgId, payload) => {
   const { personId } = personRoles[0]
   const person = retrieveExistingPerson(personId)
   retrieveExistingOrganisation(orgId)
+  checkRoles(personRoles)
 
   if (hasAuthorisation(orgId, personId)) {
     throw Boom.conflict('Relation already exists')
@@ -546,6 +556,7 @@ export const updateAuthorisation = (orgId, personId, payload) => {
     return
   }
 
+  checkRoles(personRoles)
   applyAuthorisation(orgId, personId, person, personRoles, personPrivileges)
   if (!hasAuthorisation(orgId, personId)) {
     linkPerson(orgId, personId)
