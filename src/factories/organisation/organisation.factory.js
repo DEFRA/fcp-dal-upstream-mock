@@ -383,11 +383,22 @@ const personIdsForOrg = (orgId) => orgIdToPersonIds[orgId] || []
 const hasAuthorisation = (orgId, personId) =>
   personIdsForOrg(orgId).some((id) => sameId(id, personId))
 
+// The authorisation endpoints' 404s carry the `errorString` upstream reports for them
 const retrieveExistingPerson = (personId) => {
   try {
     return retrievePerson(personId)
   } catch {
-    throw Boom.notFound(`person with personId ${personId} not found`)
+    throw Boom.notFound(`person with personId ${personId} not found`, {
+      errorString: 'Person not found.'
+    })
+  }
+}
+
+const retrieveExistingOrganisation = (orgId) => {
+  try {
+    return retrieveOrganisation(orgId)
+  } catch (e) {
+    throw Boom.notFound(e.message, { errorString: 'Organisation not found.' })
   }
 }
 
@@ -480,7 +491,7 @@ export const createAuthorisation = (orgId, payload) => {
 
   const { personId } = personRoles[0]
   const person = retrieveExistingPerson(personId)
-  retrieveOrganisation(orgId)
+  retrieveExistingOrganisation(orgId)
 
   if (hasAuthorisation(orgId, personId)) {
     throw Boom.conflict('Relation already exists')
@@ -513,18 +524,21 @@ const unlinkPerson = (orgId, personId) => {
  * mismatch as the person not being found.
  */
 export const updateAuthorisation = (orgId, personId, payload) => {
-  retrieveOrganisation(orgId)
+  retrieveExistingOrganisation(orgId)
 
   const person = retrieveExistingPerson(personId)
   checkAuthorisationPayload(payload, Boom.badRequest)
 
   const { personRoles, personPrivileges } = payload
   if (personRoles.some((entry) => !sameId(entry.personId, personId))) {
-    throw Boom.notFound('personId in personRoles entry must match the personId in the URL path')
+    throw Boom.notFound('personId in personRoles entry must match the personId in the URL path', {
+      errorString: 'Person not found.'
+    })
   }
   if (personPrivileges.some((entry) => !sameId(entry.personId, personId))) {
     throw Boom.notFound(
-      'personId in personPrivileges entry must match the personId in the URL path'
+      'personId in personPrivileges entry must match the personId in the URL path',
+      { errorString: 'Person not found.' }
     )
   }
   if (personRoles.length === 0 && personPrivileges.length === 0) {

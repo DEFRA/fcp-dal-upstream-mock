@@ -79,6 +79,16 @@ const validateUnlockOrganisationPayload = await createPayloadValidator(
 // content type matter to callers, so this is a minimal placeholder for the body
 const notFoundPage = '<html><body><h1>HTTP Status 404 – Not Found</h1></body></html>'
 
+// Upstream reports an unknown org or person (including, on PUT, a body personId that differs from
+// the path personId) as a 404 naming which, a repeated role as a 409, and every other problem as
+// "An error has occurred." with a 400 or, for any error the factory doesn't classify, a 500
+const authorisationErrorResponse = (h, e) => {
+  const code = e.isBoom && [400, 404, 409].includes(e.output.statusCode) ? e.output.statusCode : 500
+  const errorStrings = { 404: e.data?.errorString, 409: 'Relation already exists' }
+  const errorString = errorStrings[code] ?? 'An error has occurred.'
+  return h.response({ data: null, success: false, errorString }).code(code)
+}
+
 const validateDeactivateOrganisationPayload = await createPayloadValidator(
   'routes/kits-v1/organisation-schema.oas.yml',
   (schema) =>
@@ -261,26 +271,7 @@ export const organisation = [
         createAuthorisation(orgId, request.payload)
         return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          const errorString = /^organisation with orgId/.test(e.message)
-            ? 'Organisation not found.'
-            : 'Person not found.'
-          return h.response({ data: null, success: false, errorString }).code(404)
-        }
-        if (e.isBoom && e.output.statusCode === 400) {
-          return h
-            .response({ data: null, success: false, errorString: 'An error has occurred.' })
-            .code(400)
-        }
-        if (e.isBoom && e.output.statusCode === 409) {
-          return h
-            .response({ data: null, success: false, errorString: 'Relation already exists' })
-            .code(409)
-        }
-        // upstream reports every other payload problem as a 500
-        return h
-          .response({ data: null, success: false, errorString: 'An error has occurred.' })
-          .code(500)
+        return authorisationErrorResponse(h, e)
       }
     }
   },
@@ -302,27 +293,7 @@ export const organisation = [
         updateAuthorisation(orgId, personId, request.payload)
         return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
-        // upstream reports an unknown org, an unknown person and a body personId that differs
-        // from the path personId all as 404s
-        if (e.isBoom && e.output.statusCode === 404) {
-          const errorString = /^organisation with orgId/.test(e.message)
-            ? 'Organisation not found.'
-            : 'Person not found.'
-          return h.response({ data: null, success: false, errorString }).code(404)
-        }
-        if (e.isBoom && e.output.statusCode === 400) {
-          return h
-            .response({ data: null, success: false, errorString: 'An error has occurred.' })
-            .code(400)
-        }
-        if (e.isBoom && e.output.statusCode === 409) {
-          return h
-            .response({ data: null, success: false, errorString: 'Relation already exists' })
-            .code(409)
-        }
-        return h
-          .response({ data: null, success: false, errorString: 'An error has occurred.' })
-          .code(500)
+        return authorisationErrorResponse(h, e)
       }
     }
   }
