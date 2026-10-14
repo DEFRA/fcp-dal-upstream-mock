@@ -7,7 +7,7 @@ import {
   orgIdToSbi,
   personIdToOrgIds,
   sbiToOrgId
-} from '../../factories/id-lookups.js'
+} from '../id-lookups.js'
 import {
   fakeAddress,
   fakeIds,
@@ -316,7 +316,7 @@ export const searchOrganisations = (searchFieldType, searchPhrase) =>
 // Upstream links a person once per role, each link with the same privileges; a link without an
 // entry here shows the person's own role and privileges.
 const authorisations = {}
-const authorisationKey = (orgId, personId) => `${Number(orgId)}:${Number(personId)}`
+const authorisationKey = (orgId, personId) => `${orgId}:${personId}`
 
 const authorisationFor = (orgId, personId, person) =>
   authorisations[authorisationKey(orgId, personId)] ?? {

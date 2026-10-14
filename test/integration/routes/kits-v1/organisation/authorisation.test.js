@@ -162,6 +162,50 @@ describe('Authorisation create & update (Ticket #29)', () => {
       }
     )
 
+    it('POST should ignore leading zeros in orgId', async () => {
+      // as upstream, 0111111111 is org 111111111, on which 11111111 is already authorised
+      const { statusCode, payload } = await mockServer.inject({
+        method: 'POST',
+        url: '/extapi/SitiAgriApi/authorisation/organisation/0111111111/authorisation',
+        headers: { authorization: 'Bearer token' },
+        payload: {
+          personRoles: [{ role: 'Agent', personId: 11111111 }],
+          personPrivileges: [{ personId: 11111111, privilegeNames: ['View - business'] }]
+        }
+      })
+      expect(statusCode).toBe(409)
+      expect(JSON.parse(payload).errorString).toBe('Relation already exists')
+    })
+
+    it('POST and PUT should store a leading-zero orgId and string personId as one authorisation', async () => {
+      const authorise = (method, url, privilegeNames) =>
+        mockServer.inject({
+          method,
+          url: `/extapi/SitiAgriApi/authorisation/organisation/${url}`,
+          headers: { authorization: 'Bearer token' },
+          payload: {
+            personRoles: [{ role: 'Agent', personId: '22222225' }],
+            personPrivileges: [{ personId: '22222225', privilegeNames }]
+          }
+        })
+      expect(
+        (await authorise('POST', '0111111111/authorisation', ['View - business'])).statusCode
+      ).toBe(200)
+      expect(
+        (await authorise('PUT', '00111111111/authorisation/person/22222225', ['Amend - business']))
+          .statusCode
+      ).toBe(200)
+
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111'
+      })
+      const rows = JSON.parse(payload)
+        ._data.filter(({ id }) => id === 22222225)
+        .map(({ role, privileges }) => ({ role, privileges }))
+      expect(rows).toEqual([{ role: 'Agent', privileges: ['Amend - business'] }])
+    })
+
     it('PUT should return the upstream 403 HTML when orgId is invalid', async () => {
       const { statusCode, payload } = await mockServer.inject({
         method: 'PUT',
