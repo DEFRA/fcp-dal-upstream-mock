@@ -1,9 +1,14 @@
 import fs from 'node:fs'
 import { fakeId, faker, safeSeed } from './common.js'
+import {
+  fcpBusinessLookupPerformance,
+  fcpPersonLookupPerformance
+} from './fcp-test-data/performance.js'
 import { sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
 
 export const staticPersonData = {
   ...sfdPersonLookup,
+  ...fcpPersonLookupPerformance,
 
   // people in org 111111111 only
   11111111: { crn: '1111111100' },
@@ -201,7 +206,7 @@ const validGeometries = JSON.parse(
 )
 export const orgIdLookup = {
   ...sfdBusinessLookup,
-
+  ...fcpBusinessLookupPerformance,
   100000000: {
     sbi: 100000000,
     customers: [], // org with no customers
