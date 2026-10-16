@@ -839,7 +839,7 @@ components:
             partyNoteType:
               type: string
               enum:
-                - 'UnlockOrganisation'
+                - 'DeactivateOrganisation'
             note:
               oneOf:
                 - type: number

@@ -459,7 +459,6 @@ components:
               pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}:\d{3}(?:Z|\+\d{2}:?\d{2})$'
               example: '2019-01-30T12:25:23:023+0000'
             - type: 'null'
-          type: [string, 'null']
         portal_status_p:
           type: [string, 'null']
         portal_status_s:
