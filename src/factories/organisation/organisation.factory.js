@@ -7,7 +7,7 @@ import {
   orgIdToSbi,
   personIdToOrgIds,
   sbiToOrgId
-} from '../../factories/id-lookups.js'
+} from '../id-lookups.js'
 import {
   fakeAddress,
   fakeIds,
@@ -19,6 +19,63 @@ import {
   safeSeed
 } from '../common.js'
 import { retrievePerson } from '../person/person.factory.js'
+
+// All valid privilege names that can be assigned via create/update authorisation.
+// Generated from the permissions matrix.
+const PRIVILEGE_NAMES = [
+  // Basic Payment Scheme (BPS)
+  'NO ACCESS - BPS',
+  'View - bps',
+  'Amend - bps',
+  'Submit - bps',
+
+  // Business Details
+  'View - business',
+  'Amend - business',
+  'Make legal changes - business',
+  'Full permission - business',
+
+  // Countryside Stewardship (Agreements)
+  'NO ACCESS - CS AGREE',
+  'View - cs agree',
+  'Amend - cs agree',
+  'Submit - cs agree',
+
+  // Countryside Stewardship (Applications)
+  'NO ACCESS - CS APP',
+  'View - cs app',
+  'Amend - cs app',
+  'Submit - cs app',
+
+  // Entitlements
+  'NO ACCESS - ENTITLEMENT',
+  'View - entitlement',
+  'Amend - entitlement',
+
+  // Environmental Land Management (Applications)
+  'ELM_APPLICATION_NO_ACCESS',
+  'ELM_APPLICATION_VIEW',
+  'ELM_APPLICATION_AMEND',
+  'ELM_APPLICATION_SUBMIT',
+
+  // Land Details
+  'NO ACCESS - LAND',
+  'View - land',
+  'Amend - land'
+]
+
+// Upstream grants each scheme privilege (land, BPS, entitlement and CS) together with an
+// upper-case "- SA" counterpart, which can also be assigned on its own
+const SCHEME_PRIVILEGE = / - (land|bps|entitlement|cs app|cs agree)$/i
+const schemeCounterpart = (name) =>
+  SCHEME_PRIVILEGE.test(name) ? `${name.toUpperCase()} - SA` : null
+
+// Upstream matches privilege names case-insensitively, storing its own spelling
+const CANONICAL_PRIVILEGE_NAMES = new Map(
+  PRIVILEGE_NAMES.flatMap((name) => [name, schemeCounterpart(name)])
+    .filter(Boolean)
+    .map((name) => [name.toLowerCase(), name])
+)
 
 const organisations = {}
 let startingOrgId = 1000000
@@ -255,20 +312,34 @@ const organisationMatchers = {
 export const searchOrganisations = (searchFieldType, searchPhrase) =>
   organisationMatchers[searchFieldType](searchPhrase)
 
+// Roles and privileges set through the authorisation endpoints, by organisation and person.
+// Upstream links a person once per role, each link with the same privileges; a link without an
+// entry here shows the person's own role and privileges.
+const authorisations = {}
+const authorisationKey = (orgId, personId) => `${orgId}:${personId}`
+
+const authorisationFor = (orgId, personId, person) =>
+  authorisations[authorisationKey(orgId, personId)] ?? {
+    roles: [person.role],
+    privileges: person.privileges
+  }
+
 export const retrieveOrganisationCustomers = (orgId) => {
   const personIds = orgIdToPersonIds[orgId] || []
-  const orgPeople = personIds.map((personId) => {
+  // upstream lists a person once per role, each row repeating the privileges once per role
+  const orgPeople = personIds.flatMap((personId) => {
     const person = retrievePerson(personId)
-    return {
+    const { roles, privileges } = authorisationFor(orgId, personId, person)
+    return roles.map((role) => ({
       id: personId,
       firstName: person.firstName,
       lastName: person.lastName,
       customerReference: person.customerReferenceNumber,
       confirmed: person.confirmed,
       lastUpdatedOn: person.lastUpdatedOn,
-      role: person.role,
-      privileges: person.privileges
-    }
+      role,
+      privileges: roles.flatMap(() => privileges)
+    }))
   })
   return orgPeople
 }
@@ -302,6 +373,193 @@ export const unlockOrganisation = (orgId) => {
   } catch (e) {
     // If not found or already unlocked, throw internal error to match upstream
     throw Boom.internal(e.message)
+  }
+}
+
+const sameId = (a, b) => String(a) === String(b)
+
+const personIdsForOrg = (orgId) => orgIdToPersonIds[orgId] || []
+
+const hasAuthorisation = (orgId, personId) =>
+  personIdsForOrg(orgId).some((id) => sameId(id, personId))
+
+// The authorisation endpoints' 404s carry the `errorString` upstream reports for them
+const retrieveExistingPerson = (personId) => {
+  try {
+    return retrievePerson(personId)
+  } catch {
+    throw Boom.notFound(`person with personId ${personId} not found`, {
+      errorString: 'Person not found.'
+    })
+  }
+}
+
+const retrieveExistingOrganisation = (orgId) => {
+  try {
+    return retrieveOrganisation(orgId)
+  } catch (e) {
+    throw Boom.notFound(e.message, { errorString: 'Organisation not found.' })
+  }
+}
+
+// the field in `entry` that isn't one of `knownFields`, if any
+const unknownField = (entry, knownFields) =>
+  entry && typeof entry === 'object'
+    ? Object.keys(entry).find((name) => !knownFields.includes(name))
+    : undefined
+
+// the first unknown field across an array of entries, if any
+const unknownEntryField = (entries, knownFields) =>
+  (Array.isArray(entries) ? entries : [])
+    .map((entry) => unknownField(entry, knownFields))
+    .find((field) => field !== undefined)
+
+/**
+ * Upstream's JSON deserialiser rejects a field its models don't declare, before anything else is
+ * checked, with a plain-text 400; returns a message naming the field, if any.
+ */
+export const unrecognisedAuthorisationField = (payload) => {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return undefined
+
+  const bodyField = unknownField(payload, ['personRoles', 'personPrivileges'])
+  if (bodyField) return `Unrecognized field "${bodyField}" in body`
+
+  const roleField = unknownEntryField(payload.personRoles, ['personId', 'role'])
+  if (roleField) return `Unrecognized field "${roleField}" in personRoles`
+
+  const privilegeField = unknownEntryField(payload.personPrivileges, ['personId', 'privilegeNames'])
+  if (privilegeField) return `Unrecognized field "${privilegeField}" in personPrivileges`
+
+  return undefined
+}
+
+// Upstream requires a body with both arrays and a personId in every entry. A missing body or entry
+// personId is a 500 on both endpoints; a missing array is a 500 on POST but a 400 on PUT, so the
+// endpoint passes the Boom error to throw for it.
+const checkAuthorisationPayload = (payload, missingArrayError) => {
+  if (!payload || typeof payload !== 'object') {
+    throw Boom.internal('request body is required')
+  }
+  if (!Array.isArray(payload.personRoles) || !Array.isArray(payload.personPrivileges)) {
+    throw missingArrayError('personRoles and personPrivileges are both required')
+  }
+  if (
+    [...payload.personRoles, ...payload.personPrivileges].some((entry) => entry?.personId == null)
+  ) {
+    throw Boom.internal('personId is required in every personRoles and personPrivileges entry')
+  }
+}
+
+// Upstream rejects an entry with a missing or empty role with a 500, before checking for existing
+// links. It also rejects a role name it doesn't know (case-sensitively, so `agent` isn't `Agent`),
+// but its list of roles isn't published, so any other name is accepted here.
+const checkRoles = (personRoles) => {
+  if (personRoles.some(({ role }) => !role)) {
+    throw Boom.internal('role is required in every personRoles entry')
+  }
+}
+
+// Upstream rejects a repeated role for a person, otherwise linking them once per role, each link
+// with the privileges from every entry; with no personRoles entries, the existing roles are kept
+const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileges) => {
+  const roles = personRoles.map(({ role }) => role)
+  if (new Set(roles).size < roles.length) {
+    throw Boom.conflict('Relation already exists')
+  }
+  const privilegeNames = personPrivileges
+    .flatMap(({ privilegeNames }) => privilegeNames ?? [])
+    .map((name) => CANONICAL_PRIVILEGE_NAMES.get(String(name).toLowerCase()))
+  if (privilegeNames.includes(undefined)) {
+    throw new Error('invalid privilege string')
+  }
+
+  authorisations[authorisationKey(orgId, personId)] = {
+    roles: roles.length ? roles : authorisationFor(orgId, personId, person).roles,
+    privileges: [
+      ...new Set(privilegeNames.flatMap((name) => [name, schemeCounterpart(name) ?? []].flat()))
+    ]
+  }
+}
+
+/**
+ * Create an authorisation (link a person to an organisation with roles + privileges), checking in
+ * upstream's order: payload, person, organisation, roles, then existing links. Upstream authorises
+ * one person per request, rejecting a body that names more than one with a 400.
+ */
+export const createAuthorisation = (orgId, payload) => {
+  checkAuthorisationPayload(payload, Boom.internal)
+
+  const { personRoles, personPrivileges } = payload
+  if (personRoles.length === 0) {
+    throw Boom.internal('personRoles must not be empty')
+  }
+  const entries = [...personRoles, ...personPrivileges]
+  if (new Set(entries.map((entry) => String(entry.personId))).size > 1) {
+    throw Boom.badRequest('only one person can be authorised per request')
+  }
+
+  const { personId } = personRoles[0]
+  const person = retrieveExistingPerson(personId)
+  retrieveExistingOrganisation(orgId)
+  checkRoles(personRoles)
+
+  if (hasAuthorisation(orgId, personId)) {
+    throw Boom.conflict('Relation already exists')
+  }
+  applyAuthorisation(orgId, personId, person, personRoles, personPrivileges)
+  linkPerson(orgId, personId)
+}
+
+const linkPerson = (orgId, personId) => {
+  if (!orgIdToPersonIds[orgId]) orgIdToPersonIds[orgId] = []
+  orgIdToPersonIds[orgId].push(Number(personId))
+
+  if (!personIdToOrgIds[personId]) personIdToOrgIds[personId] = []
+  if (!personIdToOrgIds[personId].some((id) => sameId(id, orgId))) {
+    personIdToOrgIds[personId].push(Number(orgId))
+  }
+}
+
+const unlinkPerson = (orgId, personId) => {
+  orgIdToPersonIds[orgId] = personIdsForOrg(orgId).filter((id) => !sameId(id, personId))
+  personIdToOrgIds[personId] = (personIdToOrgIds[personId] || []).filter((id) => !sameId(id, orgId))
+  delete authorisations[authorisationKey(orgId, personId)]
+}
+
+/**
+ * Set a single person’s authorisation on an organisation (idempotent), as upstream does:
+ * - a person not yet linked to the organisation is linked
+ * - explicitly empty personRoles and personPrivileges arrays remove the link
+ * The personId in each entry must match the personId from the route path; upstream reports a
+ * mismatch as the person not being found.
+ */
+export const updateAuthorisation = (orgId, personId, payload) => {
+  retrieveExistingOrganisation(orgId)
+
+  const person = retrieveExistingPerson(personId)
+  checkAuthorisationPayload(payload, Boom.badRequest)
+
+  const { personRoles, personPrivileges } = payload
+  if (personRoles.some((entry) => !sameId(entry.personId, personId))) {
+    throw Boom.notFound('personId in personRoles entry must match the personId in the URL path', {
+      errorString: 'Person not found.'
+    })
+  }
+  if (personPrivileges.some((entry) => !sameId(entry.personId, personId))) {
+    throw Boom.notFound(
+      'personId in personPrivileges entry must match the personId in the URL path',
+      { errorString: 'Person not found.' }
+    )
+  }
+  if (personRoles.length === 0 && personPrivileges.length === 0) {
+    unlinkPerson(orgId, personId)
+    return
+  }
+
+  checkRoles(personRoles)
+  applyAuthorisation(orgId, personId, person, personRoles, personPrivileges)
+  if (!hasAuthorisation(orgId, personId)) {
+    linkPerson(orgId, personId)
   }
 }
 

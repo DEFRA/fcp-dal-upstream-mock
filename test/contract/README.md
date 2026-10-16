@@ -31,6 +31,22 @@ test/contract/check-schema.sh person
 
 This will perform a bunch of tests to check the specified schema (in this case the `person` schema) correctly describes the KITS endpoints' functionality.
 
+### Organisation operations that write upstream
+
+The `organisation` schema's authorisation, lock and unlock operations write to KITS, so they are only checked when you explicitly define an org, and a person linked to it, for them to use:
+
+```shell
+export CONTRACT_WRITE_ORG_ID=[DISPOSABLE TEST ORG ID]
+export CONTRACT_WRITE_PERSON_ID=[PERSON LINKED TO THAT ORG]
+test/contract/check-schema.sh organisation
+```
+
+Without these, the rest of the schema is still checked and the write operations are reported as skipped. When set, the
+run locks and unlocks that org, and overwrites (and may remove) that person's authorisation on it, so check their state
+in RP Gateway before the run and restore it afterwards. The write operations only get schemathesis' examples
+phase, in a separate run from the rest of the schema: the coverage, fuzzing and stateful phases would send them other
+IDs, which could lock a real business or link the person to it.
+
 > NOTE: Only the KITS `upgrade` service is currently considered for testing, but other environments could also be checked by changing the target and providing the according mTLS details.
 
 > NOTE: The script uses [yq](https://github.com/mikefarah/yq) - ensure you have it installed, as it is not a project-level installation

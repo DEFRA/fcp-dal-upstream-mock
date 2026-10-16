@@ -13,6 +13,26 @@ export const checkId = (request, idName) => {
   return `${id}`
 }
 
+// Upstream SitiAgri authorisation endpoints reject an `orgId` that is not 1-20 digits with a 403
+// before the payload is read; returns it normalised, as upstream treats `0012` as org 12
+export const checkOrgIdDigits = (request) => {
+  const orgId = `${request?.params?.orgId}`
+
+  if (!/^[0-9]{1,20}$/.test(orgId)) {
+    throw Boom.forbidden(`bad orgId: ${orgId}, must be 1-20 digits`, request)
+  }
+
+  return BigInt(orgId).toString()
+}
+
+// Upstream SitiAgri authorisation endpoints only route an integer `personId` (signs and leading
+// zeros included, so `+12` and `0012` are person 12); returns it normalised, or null otherwise
+export const parsePersonId = (request) => {
+  const personId = `${request?.params?.personId}`
+
+  return /^[+-]?[0-9]+$/.test(personId) ? BigInt(personId).toString() : null
+}
+
 export const checkSearchPhrase = (request, searchFieldTypes) => {
   const { searchFieldType, primarySearchPhrase } = request.payload ?? {}
 
