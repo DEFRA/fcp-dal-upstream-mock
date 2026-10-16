@@ -33,7 +33,7 @@ const createMessageMock = (orgId, personId, overrides = {}) => {
 
 const generateMessagesPayload = (orgId, personId, overrides = null) => {
   const notifications = Array.from(
-    overrides ?? Array(faker.number.int({ min: 0, max: 10 })),
+    overrides ?? new Array(faker.number.int({ min: 0, max: 10 })),
     (messageOverrides) => createMessageMock(orgId, personId, messageOverrides)
   )
 
@@ -47,8 +47,17 @@ const generateMessagesPayload = (orgId, personId, overrides = null) => {
   }
 }
 
+const emptyMessagesPayload = {
+  notifications: [],
+  resultCount: 0,
+  readCount: 0,
+  unreadCount: 0
+}
+
 export const retrieveMessages = (orgId, personId, page = 1) => {
+  // Ensures totalPages is stable for the same orgId/personId
   ;[orgId, personId] = safeSeed([orgId, personId])
+  page = Number.parseInt(page) || 1
 
   const totalPages = faker.number.int({ min: 1, max: 3 })
 
@@ -56,27 +65,31 @@ export const retrieveMessages = (orgId, personId, page = 1) => {
   // Very strangely the upstream returns a successful response if they don't exist
   const orgIds = personIdToOrgIds[personId]
   if (!orgIds?.includes(orgId) || page > totalPages) {
-    return {
-      notifications: [],
-      resultCount: 0,
-      readCount: 0,
-      unreadCount: 0
-    }
+    return emptyMessagesPayload
   }
 
-  const messages = businessPersonMessages[`${orgId}-${personId}`]
+  // each page holds different messages, so cache them per page
+  const cacheKey = `${orgId}-${personId}-${page}`
+  const messages = businessPersonMessages[cacheKey]
   if (messages) {
     return messages
   }
 
   const { sbi, ...overrides } = orgIdLookup[orgId] ?? {}
+  const staticMessages = overrides.customers?.find((c) => personId === c?.personId)?.messages
 
-  let messagesPayload
-  messagesPayload = generateMessagesPayload(
-    orgId,
-    personId,
-    overrides.customers?.find((c) => personId === c?.personId).messages
-  )
-  businessPersonMessages[`${orgId}-${personId}`] = messagesPayload
+  // static messages are the complete list, so they only fill the first page
+  if (staticMessages && page > 1) {
+    return emptyMessagesPayload
+  }
+
+  // page 1 continues from the seed above (keeping existing data stable); later pages
+  // re-seed so they generate their own messages
+  if (page > 1) {
+    safeSeed([orgId, personId, page])
+  }
+
+  const messagesPayload = generateMessagesPayload(orgId, personId, staticMessages)
+  businessPersonMessages[cacheKey] = messagesPayload
   return messagesPayload
 }
