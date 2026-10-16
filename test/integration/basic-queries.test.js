@@ -516,5 +516,36 @@ describe('Basic queries for faked routes', () => {
       expect(json.unreadCount).toEqual(4)
       expect(json.notifications.length).toEqual(8)
     })
+
+    test('Should return different notifications for each page of /notifications', async () => {
+      const getPageIds = async (page) => {
+        const response = await mockServer.inject({
+          method: 'GET',
+          url: `/extapi/notifications?personId=11111111&organisationId=111111111&page=${page}`
+        })
+        return JSON.parse(response.payload).notifications.map(({ id }) => id)
+      }
+
+      const page1 = await getPageIds(1)
+      const page2 = await getPageIds(2)
+
+      expect(page1).toHaveLength(8)
+      expect(page2).toHaveLength(5)
+      expect(page2.filter((id) => page1.includes(id))).toEqual([])
+      expect(await getPageIds(3)).toEqual([])
+    })
+
+    test('Should only return static notifications on the first page of /notifications', async () => {
+      const getPageCount = async (page) => {
+        const response = await mockServer.inject({
+          method: 'GET',
+          url: `/extapi/notifications?personId=11111141&organisationId=333333334&page=${page}`
+        })
+        return JSON.parse(response.payload).notifications.length
+      }
+
+      expect(await getPageCount(1)).toEqual(15)
+      expect(await getPageCount(2)).toEqual(0)
+    })
   })
 })
