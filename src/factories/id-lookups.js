@@ -571,6 +571,16 @@ export const orgIdLookup = {
       locked: true,
       deactivated: true
     }
+  },
+  // dedicated org for lock, starts unlocked.
+  9200002: {
+    sbi: 920000002,
+    customers: [],
+    overrides: {
+      name: 'Locking Tests',
+      locked: false,
+      deactivated: false
+    }
   }
 }
 
