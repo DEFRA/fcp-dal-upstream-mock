@@ -36,6 +36,20 @@ describe('Organisation Deactivate/Reactivate', () => {
       expect(statusCode).toBe(400)
     })
 
+    it('should accept a deactivate payload with a note and no reason', async () => {
+      const organisationId = 100000000
+      const { statusCode } = await server.inject({
+        method: 'POST',
+        url: `/organisation/${organisationId}/deactivate`,
+        payload: {
+          partyNoteType: 'DeactivateOrganisation',
+          note: 'testing deactivation'
+        }
+      })
+      // passes payload validation, then fails because the organisation is not locked
+      expect(statusCode).toBe(500)
+    })
+
     it('should throw an error when deactivating an organisation if organisationId is invalid', async () => {
       const organisationId = 'invalid-id'
       const { statusCode } = await server.inject({

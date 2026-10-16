@@ -1,6 +1,6 @@
 {
   "name": "fcp-dal-upstream-mock",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "fcp-dal-upstream-mock",
   "main": "src/index.js",
   "type": "module",
@@ -44,8 +44,8 @@
     "undici": "^7.28.0"
   },
   "devDependencies": {
-    "@redocly/cli": "1.29.0",
-    "@vitest/coverage-v8": "4.1.9",
+    "@redocly/cli": "2.61.0",
+    "@vitest/coverage-v8": "4.1.11",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9.32.0",
     "eslint-plugin-import": "^2.31.0",
@@ -55,7 +55,7 @@
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
     "tough-cookie": "^6.0.2",
-    "vitest": "^4.1.9"
+    "vitest": "4.1.11"
   },
   "overrides": {
     "js-yaml": "^4.2.0",
