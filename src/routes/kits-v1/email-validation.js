@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import {
   deleteEmailValidation,
@@ -9,17 +10,38 @@ import { markPersonEmailValidated } from '../../factories/person/person.factory.
 
 const logger = createLogger('email-validation.route')
 
+const jerseyError = (request, h, message, statusCode) =>
+  h
+    .response({
+      servlet: 'jersey',
+      message,
+      url: request.path,
+      status: String(statusCode)
+    })
+    .code(statusCode)
+
 export const emailValidation = [
   {
     method: 'POST',
     path: '/external-auth/email-validation',
     handler: async (request, h) => {
-      const { customerReference } = request.payload ?? {}
-      // TODO: once we have access to this endpoint, check the behaviour when
-      // a: no customer exists for the reference
-      // b: no digital contact records exists for the partyDigitalContactId
-      // c: the email doesn't match that of the partyDigitalContactId
-      // see https://eaflood.atlassian.net/browse/FCPDAL-440
+      const { customerReference, partyDigitalContactId, email } = request.payload ?? {}
+      if (!customerReference) {
+        logger.info('No customerReference provided, cannot save email validation')
+        return jerseyError(request, h, 'Internal Server Error', 500)
+      }
+
+      // emulateUpstreamErrors turns these into upstream's unhandled exception body
+      if (partyDigitalContactId === undefined || partyDigitalContactId === null) {
+        throw Boom.internal('No partyDigitalContactId provided, cannot save email validation')
+      }
+
+      if (email === undefined || email === null) {
+        throw Boom.internal('No email provided, cannot save email validation')
+      }
+
+      // Upstream does not check the customer or digital contact exists, or that the email
+      // matches the digital contact - any of these is still saved with 200
       const { conflict, owningCrn } = saveEmailValidation(request.payload ?? {})
       if (conflict) {
         logger.info(
@@ -45,14 +67,7 @@ export const emailValidation = [
         logger.info(
           `No email validation record for partyDigitalContactId ${partyDigitalContactId} and email provided`
         )
-        return h
-          .response({
-            servlet: 'jersey',
-            message: 'Not Found',
-            url: request.path,
-            status: '404'
-          })
-          .code(404)
+        return jerseyError(request, h, 'Not Found', 404)
       }
 
       const { customerReference } = record

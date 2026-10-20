@@ -23,7 +23,10 @@ paths:
       description: >
         Saves or replaces the email validation record for a customer reference. Replacing an
         existing record for the same CRN always succeeds with 200, even when the email is
-        unchanged.
+        unchanged. The customer reference and party digital contact ID are not checked against
+        existing records, and the email is not checked against the party digital contact, so an
+        unknown CRN, unknown party digital contact ID or mismatched email is still saved with
+        200.
       operationId: 'saveEmailValidation'
       requestBody:
         required: true
@@ -37,7 +40,16 @@ paths:
         '403':
           description: 'Email already associated with a different customer reference.'
         '500':
-          description: 'Internal server error.'
+          description: >
+            Internal server error. A missing customerReference returns a Jersey error body; a
+            missing partyDigitalContactId or email returns an unhandled exception body with a log
+            ID.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/JerseyErrorResponse'
+                  - $ref: '#/components/schemas/UnhandledErrorResponse'
   /external-auth/email-validation/validate-email:
     post:
       tags:
@@ -64,7 +76,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundResponse'
+                $ref: '#/components/schemas/JerseyErrorResponse'
 
 components:
   schemas:
@@ -86,19 +98,19 @@ components:
         linkSentDate:
           type: 'string'
           format: 'date-time'
-          description: 'Timestamp when the validation link was sent.'
+          description: >
+            Timestamp when the validation link was sent.
       required:
         - 'customerReference'
         - 'partyDigitalContactId'
         - 'email'
-        - 'linkSentDate'
       example:
         customerReference: '1111111100'
         partyDigitalContactId: 123456
         email: 'person@example.com'
         linkSentDate: '2023-10-01T12:00:00Z'
-    NotFoundResponse:
-      description: 'Jersey servlet error body returned when no validation record matches the party digital contact ID and email.'
+    JerseyErrorResponse:
+      description: 'Jersey servlet error body returned for 404 and 500 responses.'
       type: 'object'
       properties:
         servlet:
@@ -118,6 +130,19 @@ components:
         - 'message'
         - 'url'
         - 'status'
+    UnhandledErrorResponse:
+      description: 'Error body returned for an unhandled server exception.'
+      type: 'object'
+      properties:
+        code:
+          type: 'integer'
+          example: 500
+        message:
+          type: 'string'
+          example: 'There was an error processing your request. It has been logged (ID 306542aad8b1dd09).'
+      required:
+        - 'code'
+        - 'message'
 
   securitySchemes:
     mTLS:

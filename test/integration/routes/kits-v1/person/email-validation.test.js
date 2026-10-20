@@ -1,4 +1,6 @@
 import Hapi from '@hapi/hapi'
+import { personIdToDigitalContactPartyId } from '../../../../../src/factories/id-lookups.js'
+import { emulateUpstreamErrors } from '../../../../../src/common/helpers/fail-action.js'
 import { retrievePerson } from '../../../../../src/factories/person/person.factory.js'
 import { emailValidation } from '../../../../../src/routes/kits-v1/email-validation.js'
 
@@ -25,6 +27,7 @@ let server
 beforeAll(async () => {
   server = Hapi.server()
   server.route(emailValidation)
+  server.ext('onPreResponse', emulateUpstreamErrors)
   await server.initialize()
 })
 
@@ -42,6 +45,41 @@ describe('POST /external-auth/email-validation', () => {
     expect(statusCode).toBe(200)
   })
 
+  it('returns 200 when no customer exists for the customerReference', async () => {
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: saveUrl,
+      payload: validPayload({ customerReference: '9898989800' })
+    })
+    expect(statusCode).toBe(200)
+  })
+
+  it('returns 200 when no digital contact exists for the partyDigitalContactId', async () => {
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: saveUrl,
+      payload: validPayload({ customerReference: '1818181800', partyDigitalContactId: 999999999 })
+    })
+    expect(statusCode).toBe(200)
+  })
+
+  it('returns 200 when the email does not match that of the partyDigitalContactId', async () => {
+    // person 11111222 owns this digital contact, with a different email address
+    const partyDigitalContactId = personIdToDigitalContactPartyId['11111222']
+    expect(retrievePerson('11111222').email).not.toBe('mismatched@example.com')
+
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: saveUrl,
+      payload: validPayload({
+        customerReference: '1111122200',
+        partyDigitalContactId,
+        email: 'mismatched@example.com'
+      })
+    })
+    expect(statusCode).toBe(200)
+  })
+
   it('returns 200 when replacing an existing record for the same CRN', async () => {
     const payload = validPayload({ customerReference: '3333333300' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
@@ -51,6 +89,42 @@ describe('POST /external-auth/email-validation', () => {
       url: saveUrl,
       payload: { ...payload, email: 'someone-else@example.com' }
     })
+    expect(statusCode).toBe(200)
+  })
+
+  it('returns 500 with a jersey error body when customerReference is missing', async () => {
+    const { customerReference, ...payload } = validPayload({ email: 'no-crn@example.com' })
+
+    const { statusCode, result } = await server.inject({ method: 'POST', url: saveUrl, payload })
+    expect(statusCode).toBe(500)
+    expect(result).toEqual({
+      servlet: 'jersey',
+      message: 'Internal Server Error',
+      url: saveUrl,
+      status: '500'
+    })
+  })
+
+  it.each(['partyDigitalContactId', 'email'])(
+    'returns 500 with an unhandled error body when %s is missing',
+    async (field) => {
+      const { [field]: _omitted, ...payload } = validPayload({ customerReference: '1616161600' })
+
+      const { statusCode, result } = await server.inject({ method: 'POST', url: saveUrl, payload })
+      expect(statusCode).toBe(500)
+      expect(result).toEqual({
+        code: 500,
+        message: expect.stringMatching(
+          /^There was an error processing your request\. It has been logged \(ID [0-9a-f]{16}\)\.$/
+        )
+      })
+    }
+  )
+
+  it('returns 200 when linkSentDate is missing', async () => {
+    const { linkSentDate, ...payload } = validPayload({ customerReference: '1717171700' })
+
+    const { statusCode } = await server.inject({ method: 'POST', url: saveUrl, payload })
     expect(statusCode).toBe(200)
   })
 
