@@ -2,11 +2,7 @@ import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { config } from '../../config.js'
 import { paginate } from '../../factories/common.js'
-import {
-  crnToPersonId,
-  digitalContactPartyIdToPersonId,
-  personIdToDigitalContactPartyId
-} from '../../factories/id-lookups.js'
+import { crnToPersonId, personIdToDigitalContactPartyId } from '../../factories/id-lookups.js'
 import {
   allPeople,
   deactivatePerson,
@@ -151,17 +147,16 @@ export const person = [
     path: '/verify-email/{digitalContactPartyId}',
     handler: async (request, h) => {
       const digitalContactPartyId = checkDigitalContactPartyId(request)
-      const personId = digitalContactPartyIdToPersonId[digitalContactPartyId]
-      // TODO: Need to verify the behaviour of this API once we have access to the  /email-validation
-      // api which should get called prior to this
-      // see https://eaflood.atlassian.net/browse/FCPDAL-440
-      if (personId === undefined) {
-        logger.info(
-          `No digital contact party found for digitalContactPartyId ${digitalContactPartyId}`
-        )
-        throw Boom.notFound()
+
+      // The body is the email address as plain text. Not thrown as a Boom error, as
+      // emulateUpstreamErrors would replace this body
+      const email = request.payload
+      if (typeof email !== 'string' || email.trim() === '') {
+        logger.info(`No email provided for digitalContactPartyId ${digitalContactPartyId}`)
+        return h.response({ code: 500, message: 'HTTP 500 Internal Server Error' }).code(500)
       }
 
+      // Upstream does not check the digital contact exists - an unknown id still succeeds
       return h.response({ _data: 'Success' })
     }
   },
