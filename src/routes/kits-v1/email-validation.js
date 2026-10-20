@@ -42,13 +42,7 @@ export const emailValidation = [
 
       // Upstream does not check the customer or digital contact exists, or that the email
       // matches the digital contact - any of these is still saved with 200
-      const { conflict, owningCrn } = saveEmailValidation(request.payload ?? {})
-      if (conflict) {
-        logger.info(
-          `Email is already associated with CRN ${owningCrn}, cannot save for CRN ${customerReference}`
-        )
-        return h.response().code(403)
-      }
+      saveEmailValidation(request.payload)
 
       // Upstream has a documented 409 (email already saved for this CRN) but code analysis
       // shows that path is dead — a same-CRN duplicate save silently succeeds with 200.

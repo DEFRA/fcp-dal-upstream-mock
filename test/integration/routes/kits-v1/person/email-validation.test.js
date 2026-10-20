@@ -128,7 +128,7 @@ describe('POST /external-auth/email-validation', () => {
     expect(statusCode).toBe(200)
   })
 
-  it('returns 403 when the email is already associated with a different CRN', async () => {
+  it('returns 200 when the email is already saved for a different CRN', async () => {
     const payload = validPayload({ customerReference: '4444444400', email: 'taken@example.com' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
 
@@ -137,7 +137,7 @@ describe('POST /external-auth/email-validation', () => {
       url: saveUrl,
       payload: { ...payload, customerReference: '5555555500' }
     })
-    expect(statusCode).toBe(403)
+    expect(statusCode).toBe(200)
   })
 })
 
@@ -235,19 +235,6 @@ describe('POST /external-auth/email-validation/validate-email', () => {
 
     const second = await server.inject({ method: 'POST', url: validateUrl, payload })
     expect(second.statusCode).toBe(404)
-  })
-
-  it('releases the email once validated, so another CRN can save it', async () => {
-    const payload = validPayload({ customerReference: '1212121200', email: 'freed@example.com' })
-    await server.inject({ method: 'POST', url: saveUrl, payload })
-    await server.inject({ method: 'POST', url: validateUrl, payload })
-
-    const { statusCode } = await server.inject({
-      method: 'POST',
-      url: saveUrl,
-      payload: { ...payload, customerReference: '1313131300' }
-    })
-    expect(statusCode).toBe(200)
   })
 
   it('returns 401 when the link has expired', async () => {

@@ -26,7 +26,8 @@ paths:
         unchanged. The customer reference and party digital contact ID are not checked against
         existing records, and the email is not checked against the party digital contact, so an
         unknown CRN, unknown party digital contact ID or mismatched email is still saved with
-        200.
+        200. Existing records for other CRNs are not checked, so the same email can be saved
+        for more than one CRN.
       operationId: 'saveEmailValidation'
       requestBody:
         required: true
@@ -37,8 +38,6 @@ paths:
       responses:
         '200':
           description: 'Email validation record saved.'
-        '403':
-          description: 'Email already associated with a different customer reference.'
         '500':
           description: >
             Internal server error. A missing customerReference returns a Jersey error body; a

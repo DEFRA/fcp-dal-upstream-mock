@@ -11,30 +11,28 @@ const emailValidationRecordsByCrn = {}
 
 const normaliseEmail = (email) => String(email ?? '').toLowerCase()
 
+/**
+ * Saves or replaces the email validation record for a customer.
+ * Upstream makes no checks against existing records: a new record is created, or the
+ * existing record for the same crn is replaced.
+ * @param {object} emailValidation
+ * @param {string} emailValidation.customerReference - crn of the customer
+ * @param {number} emailValidation.partyDigitalContactId - id of the party digital contact
+ * @param {string} emailValidation.email - email address to validate
+ * @param {string} [emailValidation.linkSentDate] - ISO timestamp the validation link was sent
+ */
 export const saveEmailValidation = ({
   customerReference,
   partyDigitalContactId,
   email,
   linkSentDate
 }) => {
-  const normalisedEmail = normaliseEmail(email)
-  const conflictingRecord = Object.values(emailValidationRecordsByCrn).find(
-    (record) =>
-      normaliseEmail(record.email) === normalisedEmail &&
-      record.customerReference !== customerReference
-  )
-  if (conflictingRecord) {
-    return { conflict: true, owningCrn: conflictingRecord.customerReference }
-  }
-
   emailValidationRecordsByCrn[customerReference] = {
     customerReference,
     partyDigitalContactId,
     email,
     linkSentDate
   }
-
-  return { conflict: false }
 }
 
 export const findEmailValidation = ({ partyDigitalContactId, email }) => {
