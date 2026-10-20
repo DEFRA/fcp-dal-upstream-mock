@@ -60,6 +60,10 @@ paths:
           description: 'Email verification link has expired.'
         '404':
           description: 'No matching email validation record found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
 
 components:
   schemas:
@@ -92,6 +96,27 @@ components:
         partyDigitalContactId: 123456
         email: 'person@example.com'
         linkSentDate: '2023-10-01T12:00:00Z'
+    NotFoundResponse:
+      description: 'Jersey servlet error body returned when no validation record exists for the CRN.'
+      type: 'object'
+      properties:
+        servlet:
+          type: 'string'
+          example: 'jersey'
+        message:
+          type: 'string'
+          example: 'Not Found'
+        url:
+          type: 'string'
+          example: '/external-auth/email-validation/validate-email'
+        status:
+          type: 'string'
+          example: '404'
+      required:
+        - 'servlet'
+        - 'message'
+        - 'url'
+        - 'status'
 
   securitySchemes:
     mTLS:

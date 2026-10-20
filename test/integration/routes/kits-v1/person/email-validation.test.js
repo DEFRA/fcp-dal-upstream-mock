@@ -62,12 +62,18 @@ describe('POST /external-auth/email-validation', () => {
 
 describe('POST /external-auth/email-validation/validate-email', () => {
   it('returns 404 when no record exists for the CRN', async () => {
-    const { statusCode } = await server.inject({
+    const { statusCode, result } = await server.inject({
       method: 'POST',
       url: validateUrl,
       payload: validPayload({ customerReference: '6666666600' })
     })
     expect(statusCode).toBe(404)
+    expect(result).toEqual({
+      servlet: 'jersey',
+      message: 'Not Found',
+      url: '/external-auth/email-validation/validate-email',
+      status: '404'
+    })
   })
 
   it('returns 200 when the record matches and the link has not expired', async () => {

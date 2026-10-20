@@ -42,7 +42,14 @@ export const emailValidation = [
 
       if (!record) {
         logger.info(`No email validation record for CRN ${customerReference}`)
-        return h.response().code(404)
+        return h
+          .response({
+            servlet: 'jersey',
+            message: 'Not Found',
+            url: request.path,
+            status: '404'
+          })
+          .code(404)
       }
 
       if (record.partyDigitalContactId !== partyDigitalContactId) {
