@@ -14,7 +14,7 @@ export const emailValidation = [
     method: 'POST',
     path: '/external-auth/email-validation',
     handler: async (request, h) => {
-      const { customerReference, email } = request.payload ?? {}
+      const { customerReference } = request.payload ?? {}
       // TODO: once we have access to this endpoint, check the behaviour when
       // a: no customer exists for the reference
       // b: no digital contact records exists for the partyDigitalContactId
@@ -23,7 +23,7 @@ export const emailValidation = [
       const { conflict, owningCrn } = saveEmailValidation(request.payload ?? {})
       if (conflict) {
         logger.info(
-          `Email ${email} is already associated with CRN ${owningCrn}, cannot save for CRN ${customerReference}`
+          `Email is already associated with CRN ${owningCrn}, cannot save for CRN ${customerReference}`
         )
         return h.response().code(403)
       }
@@ -37,11 +37,14 @@ export const emailValidation = [
     method: 'POST',
     path: '/external-auth/email-validation/validate-email',
     handler: async (request, h) => {
-      const { customerReference, partyDigitalContactId, email } = request.payload ?? {}
-      const record = findEmailValidation(customerReference)
+      // Upstream matches on partyDigitalContactId and email only; customerReference is ignored
+      const { partyDigitalContactId, email } = request.payload ?? {}
+      const record = findEmailValidation({ partyDigitalContactId, email })
 
       if (!record) {
-        logger.info(`No email validation record for CRN ${customerReference}`)
+        logger.info(
+          `No email validation record for partyDigitalContactId ${partyDigitalContactId} and email provided`
+        )
         return h
           .response({
             servlet: 'jersey',
@@ -52,19 +55,7 @@ export const emailValidation = [
           .code(404)
       }
 
-      if (record.partyDigitalContactId !== partyDigitalContactId) {
-        logger.info(
-          `partyDigitalContactId mismatch for CRN ${customerReference} (expected ${record.partyDigitalContactId}, received ${partyDigitalContactId})`
-        )
-        return h.response().code(404)
-      }
-
-      if (record.email?.toLowerCase() !== String(email ?? '').toLowerCase()) {
-        logger.info(
-          `email mismatch for CRN ${customerReference} (expected ${record.email}, received ${email})`
-        )
-        return h.response().code(404)
-      }
+      const { customerReference } = record
 
       if (isEmailValidationLinkExpired(record.linkSentDate)) {
         logger.info(
@@ -73,10 +64,7 @@ export const emailValidation = [
         return h.response().code(401)
       }
 
-      markPersonEmailValidated(customerReference)
-      // TODO: assuming this api also deletes the email validation record, but will need to test with actual api
-      // once we have access
-      // TODO: confirm whether this endpoint also updates a users email address
+      markPersonEmailValidated(customerReference, record.email)
       deleteEmailValidation(customerReference)
 
       return h.response().code(200)

@@ -37,8 +37,14 @@ export const saveEmailValidation = ({
   return { conflict: false }
 }
 
-export const findEmailValidation = (customerReference) =>
-  emailValidationRecordsByCrn[customerReference]
+export const findEmailValidation = ({ partyDigitalContactId, email }) => {
+  const normalisedEmail = normaliseEmail(email)
+  return Object.values(emailValidationRecordsByCrn).find(
+    (record) =>
+      record.partyDigitalContactId === partyDigitalContactId &&
+      normaliseEmail(record.email) === normalisedEmail
+  )
+}
 
 export const deleteEmailValidation = (customerReference) => {
   delete emailValidationRecordsByCrn[customerReference]

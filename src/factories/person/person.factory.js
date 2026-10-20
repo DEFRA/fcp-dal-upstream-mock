@@ -153,13 +153,18 @@ export const updatePerson = (personId, updatesToPerson) => {
   return (people[personId] = updatedPerson)
 }
 
-export const markPersonEmailValidated = (crn) => {
+export const markPersonEmailValidated = (crn, email) => {
   const personId = crnToPersonId[crn]
   if (!personId) {
     return
   }
 
-  retrievePerson(personId).emailValidated = true
+  const person = retrievePerson(personId)
+  // Validating an email address also makes it the person's email address
+  if (email) {
+    person.email = email
+  }
+  person.emailValidated = true
 }
 
 export const lockPerson = (personId, locked = true) => {

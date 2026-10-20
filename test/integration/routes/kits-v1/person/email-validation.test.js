@@ -5,6 +5,13 @@ import { emailValidation } from '../../../../../src/routes/kits-v1/email-validat
 const saveUrl = '/external-auth/email-validation'
 const validateUrl = '/external-auth/email-validation/validate-email'
 
+const notFoundBody = {
+  servlet: 'jersey',
+  message: 'Not Found',
+  url: validateUrl,
+  status: '404'
+}
+
 const validPayload = (overrides = {}) => ({
   customerReference: '1111111100',
   partyDigitalContactId: 123456,
@@ -61,19 +68,43 @@ describe('POST /external-auth/email-validation', () => {
 })
 
 describe('POST /external-auth/email-validation/validate-email', () => {
-  it('returns 404 when no record exists for the CRN', async () => {
+  it('returns 404 when no record matches the partyDigitalContactId and email', async () => {
     const { statusCode, result } = await server.inject({
       method: 'POST',
       url: validateUrl,
       payload: validPayload({ customerReference: '6666666600' })
     })
     expect(statusCode).toBe(404)
-    expect(result).toEqual({
-      servlet: 'jersey',
-      message: 'Not Found',
-      url: '/external-auth/email-validation/validate-email',
-      status: '404'
+    expect(result).toEqual(notFoundBody)
+  })
+
+  it('returns 404 when the partyDigitalContactId does not match the saved record', async () => {
+    const payload = validPayload({ customerReference: '1414141400' })
+    await server.inject({ method: 'POST', url: saveUrl, payload })
+
+    const { statusCode, result } = await server.inject({
+      method: 'POST',
+      url: validateUrl,
+      payload: { ...payload, partyDigitalContactId: 654321 }
     })
+    expect(statusCode).toBe(404)
+    expect(result).toEqual(notFoundBody)
+  })
+
+  it('ignores customerReference when matching, validating the saved record', async () => {
+    // person 11111131 owns the record; the request names a different CRN
+    const payload = validPayload({ customerReference: '1111113100' })
+    await server.inject({ method: 'POST', url: saveUrl, payload })
+
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: validateUrl,
+      payload: { ...payload, customerReference: '1515151500' }
+    })
+    expect(statusCode).toBe(200)
+
+    const second = await server.inject({ method: 'POST', url: validateUrl, payload })
+    expect(second.statusCode).toBe(404)
   })
 
   it('returns 200 when the record matches and the link has not expired', async () => {
@@ -101,6 +132,24 @@ describe('POST /external-auth/email-validation/validate-email', () => {
     })
     expect(statusCode).toBe(200)
     expect(retrievePerson('11111121').emailValidated).toBe(true)
+  })
+
+  it('updates the person email address to the validated email when it differs', async () => {
+    const payload = validPayload({
+      customerReference: '1111112200',
+      email: 'new-address@example.com'
+    })
+    await server.inject({ method: 'POST', url: saveUrl, payload })
+    expect(retrievePerson('11111122').email).not.toBe('new-address@example.com')
+
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: validateUrl,
+      payload
+    })
+    expect(statusCode).toBe(200)
+    expect(retrievePerson('11111122').email).toBe('new-address@example.com')
+    expect(retrievePerson('11111122').emailValidated).toBe(true)
   })
 
   it('deletes the record once validated, so it cannot be validated again', async () => {
@@ -146,11 +195,12 @@ describe('POST /external-auth/email-validation/validate-email', () => {
     const payload = validPayload({ customerReference: '9999999900' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
 
-    const { statusCode } = await server.inject({
+    const { statusCode, result } = await server.inject({
       method: 'POST',
       url: validateUrl,
       payload: { ...payload, email: 'wrong@example.com' }
     })
     expect(statusCode).toBe(404)
+    expect(result).toEqual(notFoundBody)
   })
 })

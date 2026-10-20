@@ -44,8 +44,9 @@ paths:
         - 'email-validation'
       summary: 'Validate an email verification link'
       description: >
-        Validates a previously saved email validation record by customer reference, party
-        digital contact ID and email.
+        Validates a previously saved email validation record matched by party digital contact
+        ID and email. The customer reference in the request is not used for matching.
+        On success the person's email address is updated to the validated email if it differs.
       operationId: 'validateEmail'
       requestBody:
         required: true
@@ -97,7 +98,7 @@ components:
         email: 'person@example.com'
         linkSentDate: '2023-10-01T12:00:00Z'
     NotFoundResponse:
-      description: 'Jersey servlet error body returned when no validation record exists for the CRN.'
+      description: 'Jersey servlet error body returned when no validation record matches the party digital contact ID and email.'
       type: 'object'
       properties:
         servlet:
