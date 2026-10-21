@@ -82,6 +82,7 @@ describe('Person routes', () => {
         url: '/person/11111119/skeleton@the-closet.net/confirm'
       })
       expect(statusCode).toBe(409)
+      expect(result.message).toBe('HTTP 409 Conflict')
       expect(result).toConformToSchema(
         schema.paths['/person/{personId}/{email}/confirm'].get.responses['409'].content[
           'application/json'
@@ -95,6 +96,20 @@ describe('Person routes', () => {
         url: '/person/11111119/SKELETON@the-closet.NET/confirm'
       })
       expect(statusCode).toBe(409)
+    })
+
+    it('should return 409 when the email is verified by another person, regardless of case', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/SKELETON@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(409)
+      expect(result.message).toBe('HTTP 409 Conflict')
+      expect(result).toConformToSchema(
+        schema.paths['/person/{personId}/{email}/confirm'].get.responses['409'].content[
+          'application/json'
+        ].schema
+      )
     })
 
     it('should not update the person record, and should not report the email as validated when the person has not validated their email', async () => {

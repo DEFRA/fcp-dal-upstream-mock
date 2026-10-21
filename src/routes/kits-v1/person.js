@@ -136,7 +136,18 @@ export const person = [
         person.emailValidated
       ) {
         logger.info(`Email for person with personId ${personId} is already validated`)
-        throw Boom.conflict('Email address is already verified', request)
+        throw Boom.conflict('HTTP 409 Conflict', request)
+      }
+
+      const email = request.params.email.toLowerCase()
+      if (
+        allPeople().some(
+          (other) =>
+            other.id !== personId && other.email?.toLowerCase() === email && other.emailValidated
+        )
+      ) {
+        logger.info(`confirm email: email is already verified by another person`)
+        throw Boom.conflict('HTTP 409 Conflict', request)
       }
 
       return h.response({ _data: mapPersonToPartyDigitalContact(person, request.params.email) })

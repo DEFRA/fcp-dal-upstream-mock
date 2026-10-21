@@ -118,7 +118,7 @@ paths:
           description: 'Person does not have any email assigned'
           $ref: '#/components/responses/NotFound'
         '409':
-          description: 'Email address is already verified'
+          description: 'Email address is already verified, either by this person or by another person'
           $ref: '#/components/responses/Conflict'
         '500':
           description: 'Dao exception encountered when retrieving complete person profile'
