@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import {
   deleteEmailValidation,
@@ -9,24 +10,39 @@ import { markPersonEmailValidated } from '../../factories/person/person.factory.
 
 const logger = createLogger('email-validation.route')
 
+const jerseyError = (request, h, message, statusCode) =>
+  h
+    .response({
+      servlet: 'jersey',
+      message,
+      url: request.path,
+      status: String(statusCode)
+    })
+    .code(statusCode)
+
 export const emailValidation = [
   {
     method: 'POST',
     path: '/external-auth/email-validation',
     handler: async (request, h) => {
-      const { customerReference, email } = request.payload ?? {}
-      // TODO: once we have access to this endpoint, check the behaviour when
-      // a: no customer exists for the reference
-      // b: no digital contact records exists for the partyDigitalContactId
-      // c: the email doesn't match that of the partyDigitalContactId
-      // see https://eaflood.atlassian.net/browse/FCPDAL-440
-      const { conflict, owningCrn } = saveEmailValidation(request.payload ?? {})
-      if (conflict) {
-        logger.info(
-          `Email ${email} is already associated with CRN ${owningCrn}, cannot save for CRN ${customerReference}`
-        )
-        return h.response().code(403)
+      const { customerReference, partyDigitalContactId, email } = request.payload ?? {}
+      if (!customerReference) {
+        logger.info('No customerReference provided, cannot save email validation')
+        return jerseyError(request, h, 'Internal Server Error', 500)
       }
+
+      // emulateUpstreamErrors turns these into upstream's unhandled exception body
+      if (partyDigitalContactId === undefined || partyDigitalContactId === null) {
+        throw Boom.internal('No partyDigitalContactId provided, cannot save email validation')
+      }
+
+      if (email === undefined || email === null) {
+        throw Boom.internal('No email provided, cannot save email validation')
+      }
+
+      // Upstream does not check the customer or digital contact exists, or that the email
+      // matches the digital contact - any of these is still saved with 200
+      saveEmailValidation(request.payload)
 
       // Upstream has a documented 409 (email already saved for this CRN) but code analysis
       // shows that path is dead — a same-CRN duplicate save silently succeeds with 200.
@@ -37,27 +53,18 @@ export const emailValidation = [
     method: 'POST',
     path: '/external-auth/email-validation/validate-email',
     handler: async (request, h) => {
-      const { customerReference, partyDigitalContactId, email } = request.payload ?? {}
-      const record = findEmailValidation(customerReference)
+      // Upstream matches on partyDigitalContactId and email only; customerReference is ignored
+      const { partyDigitalContactId, email } = request.payload ?? {}
+      const record = findEmailValidation({ partyDigitalContactId, email })
 
       if (!record) {
-        logger.info(`No email validation record for CRN ${customerReference}`)
-        return h.response().code(404)
+        logger.info(
+          `No email validation record for partyDigitalContactId ${partyDigitalContactId} and email provided`
+        )
+        return jerseyError(request, h, 'Not Found', 404)
       }
 
-      if (record.partyDigitalContactId !== partyDigitalContactId) {
-        logger.info(
-          `partyDigitalContactId mismatch for CRN ${customerReference} (expected ${record.partyDigitalContactId}, received ${partyDigitalContactId})`
-        )
-        return h.response().code(404)
-      }
-
-      if (record.email?.toLowerCase() !== String(email ?? '').toLowerCase()) {
-        logger.info(
-          `email mismatch for CRN ${customerReference} (expected ${record.email}, received ${email})`
-        )
-        return h.response().code(404)
-      }
+      const { customerReference } = record
 
       if (isEmailValidationLinkExpired(record.linkSentDate)) {
         logger.info(
@@ -66,10 +73,7 @@ export const emailValidation = [
         return h.response().code(401)
       }
 
-      markPersonEmailValidated(customerReference)
-      // TODO: assuming this api also deletes the email validation record, but will need to test with actual api
-      // once we have access
-      // TODO: confirm whether this endpoint also updates a users email address
+      markPersonEmailValidated(customerReference, record.email)
       deleteEmailValidation(customerReference)
 
       return h.response().code(200)

@@ -1,9 +1,18 @@
 import Hapi from '@hapi/hapi'
+import { personIdToDigitalContactPartyId } from '../../../../../src/factories/id-lookups.js'
+import { emulateUpstreamErrors } from '../../../../../src/common/helpers/fail-action.js'
 import { retrievePerson } from '../../../../../src/factories/person/person.factory.js'
 import { emailValidation } from '../../../../../src/routes/kits-v1/email-validation.js'
 
 const saveUrl = '/external-auth/email-validation'
 const validateUrl = '/external-auth/email-validation/validate-email'
+
+const notFoundBody = {
+  servlet: 'jersey',
+  message: 'Not Found',
+  url: validateUrl,
+  status: '404'
+}
 
 const validPayload = (overrides = {}) => ({
   customerReference: '1111111100',
@@ -18,6 +27,7 @@ let server
 beforeAll(async () => {
   server = Hapi.server()
   server.route(emailValidation)
+  server.ext('onPreResponse', emulateUpstreamErrors)
   await server.initialize()
 })
 
@@ -35,6 +45,41 @@ describe('POST /external-auth/email-validation', () => {
     expect(statusCode).toBe(200)
   })
 
+  it('returns 200 when no customer exists for the customerReference', async () => {
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: saveUrl,
+      payload: validPayload({ customerReference: '9898989800' })
+    })
+    expect(statusCode).toBe(200)
+  })
+
+  it('returns 200 when no digital contact exists for the partyDigitalContactId', async () => {
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: saveUrl,
+      payload: validPayload({ customerReference: '1818181800', partyDigitalContactId: 999999999 })
+    })
+    expect(statusCode).toBe(200)
+  })
+
+  it('returns 200 when the email does not match that of the partyDigitalContactId', async () => {
+    // person 11111222 owns this digital contact, with a different email address
+    const partyDigitalContactId = personIdToDigitalContactPartyId['11111222']
+    expect(retrievePerson('11111222').email).not.toBe('mismatched@example.com')
+
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: saveUrl,
+      payload: validPayload({
+        customerReference: '1111122200',
+        partyDigitalContactId,
+        email: 'mismatched@example.com'
+      })
+    })
+    expect(statusCode).toBe(200)
+  })
+
   it('returns 200 when replacing an existing record for the same CRN', async () => {
     const payload = validPayload({ customerReference: '3333333300' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
@@ -47,7 +92,43 @@ describe('POST /external-auth/email-validation', () => {
     expect(statusCode).toBe(200)
   })
 
-  it('returns 403 when the email is already associated with a different CRN', async () => {
+  it('returns 500 with a jersey error body when customerReference is missing', async () => {
+    const { customerReference, ...payload } = validPayload({ email: 'no-crn@example.com' })
+
+    const { statusCode, result } = await server.inject({ method: 'POST', url: saveUrl, payload })
+    expect(statusCode).toBe(500)
+    expect(result).toEqual({
+      servlet: 'jersey',
+      message: 'Internal Server Error',
+      url: saveUrl,
+      status: '500'
+    })
+  })
+
+  it.each(['partyDigitalContactId', 'email'])(
+    'returns 500 with an unhandled error body when %s is missing',
+    async (field) => {
+      const { [field]: _omitted, ...payload } = validPayload({ customerReference: '1616161600' })
+
+      const { statusCode, result } = await server.inject({ method: 'POST', url: saveUrl, payload })
+      expect(statusCode).toBe(500)
+      expect(result).toEqual({
+        code: 500,
+        message: expect.stringMatching(
+          /^There was an error processing your request\. It has been logged \(ID [0-9a-f]{16}\)\.$/
+        )
+      })
+    }
+  )
+
+  it('returns 200 when linkSentDate is missing', async () => {
+    const { linkSentDate, ...payload } = validPayload({ customerReference: '1717171700' })
+
+    const { statusCode } = await server.inject({ method: 'POST', url: saveUrl, payload })
+    expect(statusCode).toBe(200)
+  })
+
+  it('returns 200 when the email is already saved for a different CRN', async () => {
     const payload = validPayload({ customerReference: '4444444400', email: 'taken@example.com' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
 
@@ -56,18 +137,48 @@ describe('POST /external-auth/email-validation', () => {
       url: saveUrl,
       payload: { ...payload, customerReference: '5555555500' }
     })
-    expect(statusCode).toBe(403)
+    expect(statusCode).toBe(200)
   })
 })
 
 describe('POST /external-auth/email-validation/validate-email', () => {
-  it('returns 404 when no record exists for the CRN', async () => {
-    const { statusCode } = await server.inject({
+  it('returns 404 when no record matches the partyDigitalContactId and email', async () => {
+    const { statusCode, result } = await server.inject({
       method: 'POST',
       url: validateUrl,
       payload: validPayload({ customerReference: '6666666600' })
     })
     expect(statusCode).toBe(404)
+    expect(result).toEqual(notFoundBody)
+  })
+
+  it('returns 404 when the partyDigitalContactId does not match the saved record', async () => {
+    const payload = validPayload({ customerReference: '1414141400' })
+    await server.inject({ method: 'POST', url: saveUrl, payload })
+
+    const { statusCode, result } = await server.inject({
+      method: 'POST',
+      url: validateUrl,
+      payload: { ...payload, partyDigitalContactId: 654321 }
+    })
+    expect(statusCode).toBe(404)
+    expect(result).toEqual(notFoundBody)
+  })
+
+  it('ignores customerReference when matching, validating the saved record', async () => {
+    // person 11111131 owns the record; the request names a different CRN
+    const payload = validPayload({ customerReference: '1111113100' })
+    await server.inject({ method: 'POST', url: saveUrl, payload })
+
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: validateUrl,
+      payload: { ...payload, customerReference: '1515151500' }
+    })
+    expect(statusCode).toBe(200)
+
+    const second = await server.inject({ method: 'POST', url: validateUrl, payload })
+    expect(second.statusCode).toBe(404)
   })
 
   it('returns 200 when the record matches and the link has not expired', async () => {
@@ -97,6 +208,24 @@ describe('POST /external-auth/email-validation/validate-email', () => {
     expect(retrievePerson('11111121').emailValidated).toBe(true)
   })
 
+  it('updates the person email address to the validated email when it differs', async () => {
+    const payload = validPayload({
+      customerReference: '1111112200',
+      email: 'new-address@example.com'
+    })
+    await server.inject({ method: 'POST', url: saveUrl, payload })
+    expect(retrievePerson('11111122').email).not.toBe('new-address@example.com')
+
+    const { statusCode } = await server.inject({
+      method: 'POST',
+      url: validateUrl,
+      payload
+    })
+    expect(statusCode).toBe(200)
+    expect(retrievePerson('11111122').email).toBe('new-address@example.com')
+    expect(retrievePerson('11111122').emailValidated).toBe(true)
+  })
+
   it('deletes the record once validated, so it cannot be validated again', async () => {
     const payload = validPayload({ customerReference: '1010101000' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
@@ -106,19 +235,6 @@ describe('POST /external-auth/email-validation/validate-email', () => {
 
     const second = await server.inject({ method: 'POST', url: validateUrl, payload })
     expect(second.statusCode).toBe(404)
-  })
-
-  it('releases the email once validated, so another CRN can save it', async () => {
-    const payload = validPayload({ customerReference: '1212121200', email: 'freed@example.com' })
-    await server.inject({ method: 'POST', url: saveUrl, payload })
-    await server.inject({ method: 'POST', url: validateUrl, payload })
-
-    const { statusCode } = await server.inject({
-      method: 'POST',
-      url: saveUrl,
-      payload: { ...payload, customerReference: '1313131300' }
-    })
-    expect(statusCode).toBe(200)
   })
 
   it('returns 401 when the link has expired', async () => {
@@ -140,11 +256,12 @@ describe('POST /external-auth/email-validation/validate-email', () => {
     const payload = validPayload({ customerReference: '9999999900' })
     await server.inject({ method: 'POST', url: saveUrl, payload })
 
-    const { statusCode } = await server.inject({
+    const { statusCode, result } = await server.inject({
       method: 'POST',
       url: validateUrl,
       payload: { ...payload, email: 'wrong@example.com' }
     })
     expect(statusCode).toBe(404)
+    expect(result).toEqual(notFoundBody)
   })
 })

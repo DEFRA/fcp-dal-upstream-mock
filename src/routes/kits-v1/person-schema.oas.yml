@@ -118,7 +118,7 @@ paths:
           description: 'Person does not have any email assigned'
           $ref: '#/components/responses/NotFound'
         '409':
-          description: 'Email address is already verified'
+          description: 'Email address is already verified, either by this person or by another person'
           $ref: '#/components/responses/Conflict'
         '500':
           description: 'Dao exception encountered when retrieving complete person profile'
@@ -151,6 +151,15 @@ paths:
             type: integer
             format: int64
             minimum: 1
+      requestBody:
+        required: true
+        description: 'Email address to send the verification email to, as plain text.'
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: email
+              example: 'person@example.com'
       responses:
         '200':
           description: 'Verification email sent. Returns result inside a CapdResponse'
@@ -167,11 +176,8 @@ paths:
         '403':
           description: A WAF rule has been triggered.
           $ref: '#/components/responses/Forbidden'
-        '404':
-          description: 'No digital contact found for the given digitalContactPartyId'
-          $ref: '#/components/responses/NotFound'
         '500':
-          description: 'Error sending email'
+          description: 'Error sending email, or no email provided in the request body'
           content:
             application/json:
               schema:
@@ -182,7 +188,7 @@ paths:
                     example: 500
                   message:
                     type: string
-                    example: 'There was an error processing your request.'
+                    example: 'HTTP 500 Internal Server Error'
   /person/{personId}/summary:
     get:
       tags:
