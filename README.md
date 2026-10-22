@@ -28,8 +28,9 @@ Core delivery platform Node.js Backend Template.
 
 ### Node.js
 
-Please install [Node.js](http://nodejs.org/) `>= v22` and [npm](https://nodejs.org/) `>= v11`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm), or [`n`](https://github.com/tj/n)
+Please install [Node.js](http://nodejs.org/) `>= v24.22.1` and [npm](https://nodejs.org/) `>= v11`. The exact version
+used by the Docker image and CI is pinned in [`.nvmrc`](.nvmrc). You will find it easier to use the Node Version
+Manager [nvm](https://github.com/creationix/nvm), or [`n`](https://github.com/tj/n)
 
 To use the correct version of Node.js for this application, via `nvm`:
 
