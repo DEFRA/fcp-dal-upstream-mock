@@ -144,22 +144,28 @@ export const updatePerson = (personId, updatesToPerson) => {
   const updatedPerson = applyUpdates(personUpdateSchema, person, updatesToPerson)
 
   // A changed email address invalidates the PartyDigitalContact record - it must be
-  // re-verified via POST /verify-email/{digitalContactPartyId} before it is trusted again.
+  // re-verified via POST /external-auth/email-validation/validate-email before it is trusted again.
   // Matched case-insensitively, consistent with GET /person/{email}/validateEmail.
   if (updatedPerson.email?.toLowerCase() !== person.email?.toLowerCase()) {
     updatedPerson.emailValidated = false
   }
 
-  return (people[personId] = updatedPerson)
+  people[personId] = updatedPerson
+  return updatedPerson
 }
 
-export const markPersonEmailValidated = (crn) => {
+export const markPersonEmailValidated = (crn, email) => {
   const personId = crnToPersonId[crn]
   if (!personId) {
     return
   }
 
-  retrievePerson(personId).emailValidated = true
+  const person = retrievePerson(personId)
+  // Validating an email address also makes it the person's email address
+  if (email) {
+    person.email = email
+  }
+  person.emailValidated = true
 }
 
 export const lockPerson = (personId, locked = true) => {

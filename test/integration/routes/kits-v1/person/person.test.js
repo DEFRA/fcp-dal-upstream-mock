@@ -82,6 +82,7 @@ describe('Person routes', () => {
         url: '/person/11111119/skeleton@the-closet.net/confirm'
       })
       expect(statusCode).toBe(409)
+      expect(result.message).toBe('HTTP 409 Conflict')
       expect(result).toConformToSchema(
         schema.paths['/person/{personId}/{email}/confirm'].get.responses['409'].content[
           'application/json'
@@ -95,6 +96,20 @@ describe('Person routes', () => {
         url: '/person/11111119/SKELETON@the-closet.NET/confirm'
       })
       expect(statusCode).toBe(409)
+    })
+
+    it('should return 409 when the email is verified by another person, regardless of case', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/person/11111121/SKELETON@the-closet.net/confirm'
+      })
+      expect(statusCode).toBe(409)
+      expect(result.message).toBe('HTTP 409 Conflict')
+      expect(result).toConformToSchema(
+        schema.paths['/person/{personId}/{email}/confirm'].get.responses['409'].content[
+          'application/json'
+        ].schema
+      )
     })
 
     it('should not update the person record, and should not report the email as validated when the person has not validated their email', async () => {
@@ -188,7 +203,9 @@ describe('Person routes', () => {
 
       const { result, statusCode } = await server.inject({
         method: 'POST',
-        url: `/verify-email/${digitalContactPartyId}`
+        url: `/verify-email/${digitalContactPartyId}`,
+        headers: { 'content-type': 'text/plain' },
+        payload: 'unvalidated@the-closet.net'
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual({ _data: 'Success' })
@@ -199,13 +216,38 @@ describe('Person routes', () => {
       )
     })
 
-    // TODO: Need to verify this behaviour after calling email-validation api as currently receiving 500 responses
-    it('should return 404 for a well-formed but unknown digitalContactPartyId', async () => {
+    it('should return 200 for a well-formed but unknown digitalContactPartyId', async () => {
       const { statusCode } = await server.inject({
         method: 'POST',
-        url: '/verify-email/999999999'
+        url: '/verify-email/999999999',
+        headers: { 'content-type': 'text/plain' },
+        payload: 'unknown@example.com'
       })
-      expect(statusCode).toBe(404)
+      expect(statusCode).toBe(200)
+    })
+
+    it.each([
+      ['no body', undefined],
+      ['an empty body', '']
+    ])('should return 500 when the request has %s', async (_description, payload) => {
+      const digitalContactPartyId = await getDigitalContactPartyId(
+        11111121,
+        'unvalidated@the-closet.net'
+      )
+
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: `/verify-email/${digitalContactPartyId}`,
+        headers: { 'content-type': 'text/plain' },
+        payload
+      })
+      expect(statusCode).toBe(500)
+      expect(result).toEqual({ code: 500, message: 'HTTP 500 Internal Server Error' })
+      expect(result).toConformToSchema(
+        schema.paths['/verify-email/{digitalContactPartyId}'].post.responses['500'].content[
+          'application/json'
+        ].schema
+      )
     })
 
     it('should return 403 for an invalid digitalContactPartyId', async () => {
