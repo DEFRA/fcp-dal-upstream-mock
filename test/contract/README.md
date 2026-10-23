@@ -47,6 +47,21 @@ in RP Gateway before the run and restore it afterwards. The write operations onl
 phase, in a separate run from the rest of the schema: the coverage, fuzzing and stateful phases would send them other
 IDs, which could lock a real business or link the person to it.
 
+### Person operations that write upstream
+
+The `person` schema's update, lock and unlock operations write to KITS, so they are only checked when you explicitly
+define a person for them to use:
+
+```shell
+export CONTRACT_WRITE_PERSON_ID=[DISPOSABLE TEST PERSON ID]
+test/contract/check-schema.sh person
+```
+
+As for the organisation schema, without it they are reported as skipped, and when set they only get the examples phase.
+The run locks and unlocks that person, and overwrites their details (with the name "Contract Test", clearing any other
+fields), so check their state in RP Gateway before the run and restore it afterwards. The create and deactivate
+operations are never checked against KITS, as every accepted create makes a new person and deactivate cannot be undone.
+
 > NOTE: Only the KITS `upgrade` service is currently considered for testing, but other environments could also be checked by changing the target and providing the according mTLS details.
 
 > NOTE: The script uses [yq](https://github.com/mikefarah/yq) - ensure you have it installed, as it is not a project-level installation

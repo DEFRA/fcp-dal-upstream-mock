@@ -93,6 +93,15 @@ describe('person.factory', () => {
       )
     })
 
+    it('gives the created address a null addressTypeId that the payload cannot set', () => {
+      const person = createAndRetrievePerson({
+        firstName: 'New',
+        address: { city: 'Leeds', addressTypeId: 'injected' }
+      })
+
+      expect(person.address).toHaveProperty('addressTypeId', null)
+    })
+
     it('starts every created person unlocked, active, confirmed and with an unvalidated email', () => {
       const people = Array.from({ length: 20 }, () => createAndRetrievePerson())
 

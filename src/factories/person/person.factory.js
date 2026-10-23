@@ -210,7 +210,13 @@ export const createPerson = (payload = {}) => {
   const generatedPersonId = generateId(startingPersonId, usedPersonIds)
   const generatedCrn = generateId(startingCrn, usedCrns)
 
-  const defaultPerson = defaultObjectFromSchema(personUpdateSchema)
+  const schemaDefaults = defaultObjectFromSchema(personUpdateSchema)
+  // addressTypeId isn't updatable so it's absent from the update schema, but every stored
+  // address must carry it - seed it here so applyUpdates preserves it as null.
+  const defaultPerson = {
+    ...schemaDefaults,
+    address: { ...schemaDefaults.address, addressTypeId: null }
+  }
 
   // Coerced and filtered the same way as updatePerson, so only personUpdateSchema fields are
   // taken from the payload - id and customerReferenceNumber stay as allocated above.
