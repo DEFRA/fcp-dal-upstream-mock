@@ -3,14 +3,24 @@ import { createLogger } from '../../common/helpers/logging/logger.js'
 import { personUpdateSchema } from '../../common/update-schemas.js'
 import {
   crnToPersonId,
+  digitalContactPartyIdToPersonId,
   orgIdLookup,
   orgIdToPersonIds,
   orgIdToSbi,
+  personIdToDigitalContactPartyId,
   personIdToOrgIds,
   staticPersonData
 } from '../../factories/id-lookups.js'
-import { applyUpdates } from '../../utils/applyUpdates.js'
-import { fakeAddress, fakeIds, faker, generateId, normalisePostcode, safeSeed } from '../common.js'
+import { applyUpdates, defaultObjectFromSchema } from '../../utils/applyUpdates.js'
+import {
+  fakeAddress,
+  fakeId,
+  fakeIds,
+  faker,
+  generateId,
+  normalisePostcode,
+  safeSeed
+} from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const logger = createLogger('person.factory')
@@ -149,6 +159,8 @@ export const updatePerson = (personId, updatesToPerson) => {
   // re-verified via POST /external-auth/email-validation/validate-email before it is trusted again.
   // Matched case-insensitively, consistent with GET /person/{email}/validateEmail.
   if (updatedPerson.email?.toLowerCase() !== person.email?.toLowerCase()) {
+    if (updatedPerson.email) ensureDigitalContactPartyId(personId)
+
     updatedPerson.emailValidated = false
   }
 
@@ -198,26 +210,42 @@ export const createPerson = (payload = {}) => {
   const generatedPersonId = generateId(startingPersonId, usedPersonIds)
   const generatedCrn = generateId(startingCrn, usedCrns)
 
+  const defaultPerson = defaultObjectFromSchema(personUpdateSchema)
+
   // Coerced and filtered the same way as updatePerson, so only personUpdateSchema fields are
   // taken from the payload - id and customerReferenceNumber stay as allocated above.
   const person = {
-    ...applyUpdates(
-      personUpdateSchema,
-      generatePerson(generatedPersonId, `${generatedCrn}`),
-      payload
-    ),
+    ...applyUpdates(personUpdateSchema, defaultPerson, payload),
+    id: generatedPersonId,
+    customerReferenceNumber: `${generatedCrn}`,
     emailValidated: false,
     locked: false,
     deactivated: false,
-    confirmed: true
+    confirmed: true,
+    role: null,
+    privileges: [],
+    personalIdentifiers: [],
+    lastUpdatedOn: Date.now()
   }
-  const { id, customerReferenceNumber, ...details } = person
-  people[id] = person
+  const { id, customerReferenceNumber } = person
 
+  people[id] = person
   crnToPersonId[customerReferenceNumber] = `${id}`
   personIdToOrgIds[id] = []
+  staticPersonData[id] = { crn: customerReferenceNumber }
 
-  staticPersonData[id] = { crn: customerReferenceNumber, ...details }
+  if (person.email) {
+    ensureDigitalContactPartyId(id)
+  }
 
   return `${customerReferenceNumber}`
+}
+
+export const ensureDigitalContactPartyId = (personId) => {
+  if (!personIdToDigitalContactPartyId[personId]) {
+    safeSeed([personId, 'partyDigitalContactId'])
+    const digitalContactPartyId = fakeId()
+    personIdToDigitalContactPartyId[personId] = digitalContactPartyId
+    digitalContactPartyIdToPersonId[digitalContactPartyId] = `${personId}`
+  }
 }

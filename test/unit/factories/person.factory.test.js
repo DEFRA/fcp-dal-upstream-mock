@@ -1,12 +1,15 @@
 import {
   crnToPersonId,
+  digitalContactPartyIdToPersonId,
+  personIdToDigitalContactPartyId,
   personIdToOrgIds,
   staticPersonData
 } from '../../../src/factories/id-lookups.js'
 import {
   createPerson,
   retrievePerson,
-  searchPeople
+  searchPeople,
+  updatePerson
 } from '../../../src/factories/person/person.factory.js'
 
 const createAndRetrievePerson = (payload) => retrievePerson(crnToPersonId[createPerson(payload)])
@@ -70,7 +73,24 @@ describe('person.factory', () => {
 
       expect(person.lastName).toBe('123')
       expect(searchPeople('CUSTOMER_NAME', '123')).toContainEqual(person)
-      expect(person.privileges).not.toContain('Injected')
+      expect(person.privileges).toEqual([])
+    })
+
+    it('does not generate random data for fields missing from the payload', () => {
+      const person = createAndRetrievePerson({ firstName: 'New', address: { city: 'Leeds' } })
+
+      expect(person).toEqual(
+        expect.objectContaining({
+          firstName: 'New',
+          lastName: null,
+          email: null,
+          doNotContact: false,
+          address: expect.objectContaining({ city: 'Leeds', postalCode: null })
+        })
+      )
+      expect(person).toEqual(
+        expect.objectContaining({ role: null, privileges: [], personalIdentifiers: [] })
+      )
     })
 
     it('starts every created person unlocked, active, confirmed and with an unvalidated email', () => {
@@ -116,6 +136,49 @@ describe('person.factory', () => {
       expect(person.customerReferenceNumber).toBe(crn)
       expect(searchPeople('CUSTOMER_REFERENCE', crn)).toEqual([person])
       expect(personIdToOrgIds[personId]).toEqual([])
+    })
+
+    it('registers a digital contact party for a person created with an email', () => {
+      const person = createAndRetrievePerson({ email: 'new.person@example.com' })
+      const digitalContactPartyId = personIdToDigitalContactPartyId[person.id]
+
+      expect(digitalContactPartyId).toEqual(expect.any(Number))
+      expect(digitalContactPartyIdToPersonId[digitalContactPartyId]).toBe(`${person.id}`)
+    })
+
+    it('does not register a digital contact party for a person created without an email', () => {
+      const person = createAndRetrievePerson({ email: null })
+
+      expect(personIdToDigitalContactPartyId[person.id]).toBeUndefined()
+    })
+  })
+
+  describe('updatePerson', () => {
+    it('registers a digital contact party when an email is added', () => {
+      const person = createAndRetrievePerson()
+
+      updatePerson(person.id, { email: 'added@example.com' })
+
+      const digitalContactPartyId = personIdToDigitalContactPartyId[person.id]
+      expect(digitalContactPartyId).toEqual(expect.any(Number))
+      expect(digitalContactPartyIdToPersonId[digitalContactPartyId]).toBe(`${person.id}`)
+    })
+
+    it('keeps the same digital contact party when the email changes', () => {
+      const person = createAndRetrievePerson({ email: 'before@example.com' })
+      const digitalContactPartyId = personIdToDigitalContactPartyId[person.id]
+
+      updatePerson(person.id, { email: 'after@example.com' })
+
+      expect(personIdToDigitalContactPartyId[person.id]).toBe(digitalContactPartyId)
+    })
+
+    it('does not register a digital contact party when the email is cleared', () => {
+      const person = createAndRetrievePerson()
+
+      updatePerson(person.id, { email: null })
+
+      expect(personIdToDigitalContactPartyId[person.id]).toBeUndefined()
     })
   })
 })

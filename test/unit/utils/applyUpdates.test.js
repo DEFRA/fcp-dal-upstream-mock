@@ -1,4 +1,4 @@
-import { applyUpdates } from '../../../src/utils/applyUpdates.js'
+import { applyUpdates, defaultObjectFromSchema } from '../../../src/utils/applyUpdates.js'
 
 describe('applyUpdates', () => {
   test('applies updates with coercion', () => {
@@ -59,5 +59,29 @@ describe('applyUpdates', () => {
     const result = applyUpdates(schema, obj, update)
 
     expect(result).toEqual({ name: null })
+  })
+})
+
+describe('defaultObjectFromSchema', () => {
+  test('sets every field to its schema default, recursing into nested schemas', () => {
+    const schema = {
+      name: { type: 'string', default: null },
+      active: { type: 'boolean', default: false },
+      profile: {
+        score: { type: 'number', default: 0 }
+      }
+    }
+
+    expect(defaultObjectFromSchema(schema)).toEqual({
+      name: null,
+      active: false,
+      profile: { score: 0 }
+    })
+  })
+
+  test('treats a nested field called type as part of the schema', () => {
+    const schema = { contact: { type: { type: 'string', default: 'email' } } }
+
+    expect(defaultObjectFromSchema(schema)).toEqual({ contact: { type: 'email' } })
   })
 })
