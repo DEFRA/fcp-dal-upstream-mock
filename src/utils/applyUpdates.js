@@ -42,3 +42,13 @@ export const applyUpdates = (updateSchema, obj, update = {}) => {
     })
   )
 }
+
+// Builds an object with every field of the update schema set to its default,
+// recursing into nested schemas (e.g. address).
+export const defaultObjectFromSchema = (updateSchema) =>
+  Object.fromEntries(
+    Object.entries(updateSchema).map(([key, definition]) => [
+      key,
+      typeof definition.type === 'string' ? definition.default : defaultObjectFromSchema(definition)
+    ])
+  )

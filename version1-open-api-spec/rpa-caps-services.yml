@@ -4757,15 +4757,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PersonWithAddressResponse'
+                $ref: '#/components/schemas/PersonCreatedResponse'
+        '400':
+          description: 'Unable to process JSON.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: 'Caller not authorised.'
+          description: 'Forbidden - Caller not authorised.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '422':
-          description: 'Validation failure.'
+          description: 'Required fields are missing or invalid.'
           content:
             application/json:
               schema:
@@ -6184,6 +6190,9 @@ components:
           type: 'string'
           maxLength: 8
           description: 'Required in manual mode. Validated by custom @PostCode validator (format check).'
+    PersonCreatedResponse:
+      type: 'string'
+      description: 'Person created successfully. Response body contains the crn as a string wrapped in CapdResponse with `_data` key.'
     PersonRequest:
       type: 'object'
       description: 'Person create/update request. Field constraints from PersonImpl.java.'
