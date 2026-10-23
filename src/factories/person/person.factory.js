@@ -3,19 +3,31 @@ import { createLogger } from '../../common/helpers/logging/logger.js'
 import { personUpdateSchema } from '../../common/update-schemas.js'
 import {
   crnToPersonId,
+  digitalContactPartyIdToPersonId,
   orgIdLookup,
   orgIdToPersonIds,
   orgIdToSbi,
+  personIdToDigitalContactPartyId,
   personIdToOrgIds,
   staticPersonData
 } from '../../factories/id-lookups.js'
-import { applyUpdates } from '../../utils/applyUpdates.js'
-import { fakeAddress, fakeIds, faker, normalisePostcode, safeSeed } from '../common.js'
+import { applyUpdates, defaultObjectFromSchema } from '../../utils/applyUpdates.js'
+import {
+  fakeAddress,
+  fakeId,
+  fakeIds,
+  faker,
+  generateId,
+  normalisePostcode,
+  safeSeed
+} from '../common.js'
 import { retrieveOrganisation } from '../organisation/organisation.factory.js'
 
 const logger = createLogger('person.factory')
 
 const people = {}
+const startingPersonId = 11111111
+const startingCrn = 1111111100
 
 const generatePerson = (personId, crn, overrides = {}) => {
   personId = safeSeed(personId)
@@ -147,6 +159,8 @@ export const updatePerson = (personId, updatesToPerson) => {
   // re-verified via POST /external-auth/email-validation/validate-email before it is trusted again.
   // Matched case-insensitively, consistent with GET /person/{email}/validateEmail.
   if (updatedPerson.email?.toLowerCase() !== person.email?.toLowerCase()) {
+    if (updatedPerson.email) ensureDigitalContactPartyId(personId)
+
     updatedPerson.emailValidated = false
   }
 
@@ -184,4 +198,60 @@ export const deactivatePerson = (personId) => {
     throw Boom.notFound(`Person not found`)
   }
   person.deactivated = true
+}
+
+export const createPerson = (payload = {}) => {
+  const usedPersonIds = [...Object.keys(staticPersonData), ...Object.keys(people)].map(Number)
+  const usedCrns = [
+    ...Object.values(staticPersonData).map(({ crn }) => Number(crn)),
+    ...Object.values(people).map(({ customerReferenceNumber }) => Number(customerReferenceNumber))
+  ]
+
+  const generatedPersonId = generateId(startingPersonId, usedPersonIds)
+  const generatedCrn = generateId(startingCrn, usedCrns)
+
+  const schemaDefaults = defaultObjectFromSchema(personUpdateSchema)
+  // addressTypeId isn't updatable so it's absent from the update schema, but every stored
+  // address must carry it - seed it here so applyUpdates preserves it as null.
+  const defaultPerson = {
+    ...schemaDefaults,
+    address: { ...schemaDefaults.address, addressTypeId: null }
+  }
+
+  // Coerced and filtered the same way as updatePerson, so only personUpdateSchema fields are
+  // taken from the payload - id and customerReferenceNumber stay as allocated above.
+  const person = {
+    ...applyUpdates(personUpdateSchema, defaultPerson, payload),
+    id: generatedPersonId,
+    customerReferenceNumber: `${generatedCrn}`,
+    emailValidated: false,
+    locked: false,
+    deactivated: false,
+    confirmed: true,
+    role: null,
+    privileges: [],
+    personalIdentifiers: [],
+    lastUpdatedOn: Date.now()
+  }
+  const { id, customerReferenceNumber } = person
+
+  people[id] = person
+  crnToPersonId[customerReferenceNumber] = `${id}`
+  personIdToOrgIds[id] = []
+  staticPersonData[id] = { crn: customerReferenceNumber }
+
+  if (person.email) {
+    ensureDigitalContactPartyId(id)
+  }
+
+  return `${customerReferenceNumber}`
+}
+
+export const ensureDigitalContactPartyId = (personId) => {
+  if (!personIdToDigitalContactPartyId[personId]) {
+    safeSeed([personId, 'partyDigitalContactId'])
+    const digitalContactPartyId = fakeId()
+    personIdToDigitalContactPartyId[personId] = digitalContactPartyId
+    digitalContactPartyIdToPersonId[digitalContactPartyId] = `${personId}`
+  }
 }

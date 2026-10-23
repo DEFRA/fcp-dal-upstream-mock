@@ -15,6 +15,51 @@ servers:
   - url: 'https://chs-upgrade-api.ruraldev.org.uk:8446/extapi'
     description: The test server for KITS/V1 APIs
 paths:
+  /person/create:
+    post:
+      tags:
+        - 'person'
+      summary: 'Creates a new person'
+      description: 'Creates a new person with the provided details'
+      operationId: 'createPerson'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalUpdateRequest'
+      responses:
+        '200':
+          description: 'Successfully created a new person. Returns result inside a CapdResponse.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    $ref: '#/components/schemas/PersonCreatedResponse'
+                required:
+                  - '_data'
+                additionalProperties: false
+        '400':
+          description: 'Unable to process JSON.'
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Forbidden - caller not authorised.
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          description: 'Required fields are missing or invalid.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 422
+                  message:
+                    type: string
+                    example: 'HTTP 422'
   /person/{email}/validateEmail:
     get:
       tags:
@@ -966,6 +1011,9 @@ components:
         - 'email'
         - 'locked'
         - 'deactivated'
+    PersonCreatedResponse:
+      type: string
+      description: The customer reference number of the created person
     Page:
       type: object
       properties:

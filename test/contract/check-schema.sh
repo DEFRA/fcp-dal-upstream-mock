@@ -37,6 +37,10 @@ usage() {
   echo "  CONTRACT_WRITE_ORG_ID    - orgId to authorise, lock and unlock"
   echo "  CONTRACT_WRITE_PERSON_ID - personId whose authorisation on that org is overwritten"
   echo
+  echo "NOTE: the person schema's operations that write upstream (update, lock and unlock) are only"
+  echo "      checked when a person is explicitly defined in an environment variable:"
+  echo "  CONTRACT_WRITE_PERSON_ID - personId to update, lock and unlock"
+  echo
   echo "NOTE: additionally the following environment variables must be set:"
   echo "  CDP_API_KEY - CDP Platform developer API key "
   echo "  KITS_INTERNAL_URL  - the URL of the KITS API to use (this should be the DAL Mock proxy endpoint, via the ephemeral endpoint)"
@@ -209,9 +213,10 @@ ${person_authorisation}.requestBody.content[\"application/json\"].example = ${au
     schema="kits-v1/person"
     # NOTE: the confirm and verify-email endpoints are on the KITS EXTERNAL gateway, see person-external
     # NOTE: deactivate is left out, as it cannot be undone and generated personIds may be real people
+    # NOTE: create is left out, as every accepted request creates a real person upstream
     mutations='. |
 del(.paths["/person/{personId}/{email}/confirm"], .paths["/verify-email/{digitalContactPartyId}"]) |
-del(.paths["/person/{personId}/deactivate"]) |
+del(.paths["/person/{personId}/deactivate"], .paths["/person/create"]) |
 .paths["/person/{personId}/summary"].get.parameters[0].schema.examples = [5858232,5108985,5108989] |
 .components.schemas.SearchRequestBody.examples[0].primarySearchPhrase = "1105658066" |
 .components.schemas.SearchRequestBody.examples[1].primarySearchPhrase = "1101089857" |
@@ -221,6 +226,23 @@ del(.paths["/person/{personId}/deactivate"]) |
 .components.schemas.SearchRequestBody.examples[5].primarySearchPhrase = "EX14 2XA" |
 .components.schemas.SearchRequestBody.examples[6].primarySearchPhrase = "123456" |
 .components.schemas.SearchRequestBody.examples[7].primarySearchPhrase = "123456"'
+    # These write upstream, so they only get the examples phase, as for the organisation schema
+    write_operations='^(updatePersonDetails|lockPerson|unlockPerson)$'
+    # NOTE: the write operations are only checked when CONTRACT_WRITE_PERSON_ID is set. The run will
+    # lock and unlock that person, and overwrite their details, so use a person that is safe to modify
+    # (use RP Gateway to verify the state of that person before the run, then manually restore that
+    # state).
+    if [ -n "${CONTRACT_WRITE_PERSON_ID}" ]; then
+      update_person='.paths["/person/{personId}"].put'
+      update_person_body='{ "firstName": "Contract", "lastName": "Test" }'
+      mutations="${mutations} |
+.paths[\"/person/{personId}/lock\"].post.parameters[0].schema.examples = [${CONTRACT_WRITE_PERSON_ID}] |
+.paths[\"/person/{personId}/unlock\"].post.parameters[0].schema.examples = [${CONTRACT_WRITE_PERSON_ID}] |
+${update_person}.parameters[0].schema.examples = [${CONTRACT_WRITE_PERSON_ID}] |
+${update_person}.requestBody.content[\"application/json\"].example = ${update_person_body}"
+    else
+      skip_write_operations=true
+    fi
     gateway="kits-internal"
     ;;
   r | rd | reference-data )
@@ -307,8 +329,8 @@ if [ "${gateway}" = "kits-internal" ]; then # KITS internal gateway
     # two passes, so the operations that write upstream only get the examples phase
     result=0
     if [ "${skip_write_operations}" = true ]; then
-      echo "SKIPPED: the operations that write upstream, as CONTRACT_WRITE_ORG_ID and" 1>&2
-      echo "         CONTRACT_WRITE_PERSON_ID are not set (see $0 help)" 1>&2
+      echo "SKIPPED: the operations that write upstream, as the CONTRACT_WRITE_* environment" 1>&2
+      echo "         variables are not set (see $0 help)" 1>&2
     else
       echo "Checking the operations that write upstream (examples phase only)..."
       run_kits_internal writes-vcr.yaml \

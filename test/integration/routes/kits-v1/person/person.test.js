@@ -853,4 +853,161 @@ describe('Person routes', () => {
       }
     )
   })
+
+  describe('Create a new person', () => {
+    const createPerson = (payload) =>
+      server.inject({ method: 'POST', url: '/person/create', payload })
+
+    const findByCrn = async (crn) => {
+      const { result } = await server.inject({
+        method: 'POST',
+        url: '/person/search',
+        payload: { searchFieldType: 'CUSTOMER_REFERENCE', primarySearchPhrase: crn }
+      })
+      return result._data[0]
+    }
+
+    test('should create a person and return the CRN, conforming to the schema', async () => {
+      const { result, statusCode } = await createPerson({ firstName: 'New', lastName: 'Person' })
+
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({ _data: expect.stringMatching(/^\d{10}$/) })
+      expect(result).toConformToSchema(
+        schema.paths['/person/create'].post.responses['200'].content['application/json'].schema
+      )
+    })
+
+    test('should make the created person retrievable by CRN and ID', async () => {
+      const { result } = await createPerson({
+        firstName: 'Findable',
+        lastName: 'Person',
+        email: 'findable.person@example.com'
+      })
+
+      const found = await findByCrn(result._data)
+      expect(found).toEqual(
+        expect.objectContaining({ customerReference: result._data, fullName: 'Findable Person' })
+      )
+
+      const { result: summary, statusCode } = await server.inject({
+        method: 'GET',
+        url: `/person/${found.id}/summary`
+      })
+      expect(statusCode).toBe(200)
+      expect(summary._data).toEqual(
+        expect.objectContaining({
+          id: found.id,
+          customerReferenceNumber: result._data,
+          firstName: 'Findable',
+          lastName: 'Person',
+          email: 'findable.person@example.com'
+        })
+      )
+    })
+
+    test('should allocate a new ID and CRN for each person', async () => {
+      const first = await createPerson({ firstName: 'First', lastName: 'Person' })
+      const second = await createPerson({ firstName: 'Second', lastName: 'Person' })
+
+      expect(second.result._data).not.toBe(first.result._data)
+      expect((await findByCrn(second.result._data)).id).not.toBe(
+        (await findByCrn(first.result._data)).id
+      )
+    })
+
+    test('should ignore id and customerReferenceNumber in the payload', async () => {
+      const { result } = await createPerson({
+        id: 11111111,
+        customerReferenceNumber: '1111111100',
+        firstName: 'Not',
+        lastName: 'Overriding'
+      })
+
+      expect(result._data).not.toBe('1111111100')
+      expect((await findByCrn(result._data)).id).not.toBe(11111111)
+
+      // the existing person is untouched
+      const existing = await findByCrn('1111111100')
+      expect(existing.id).toBe(11111111)
+      expect(existing.fullName).not.toBe('Not Overriding')
+    })
+
+    test('should coerce non-string names so name searches still work', async () => {
+      const { result } = await createPerson({ firstName: 'Numeric', lastName: 98765 })
+
+      const { result: searchResult, statusCode } = await server.inject({
+        method: 'POST',
+        url: '/person/search',
+        payload: { searchFieldType: 'CUSTOMER_NAME', primarySearchPhrase: '98765' }
+      })
+      expect(statusCode).toBe(200)
+      expect(searchResult._data).toEqual([
+        expect.objectContaining({ customerReference: result._data, fullName: 'Numeric 98765' })
+      ])
+    })
+
+    test('should allow the created person to be locked', async () => {
+      const { result } = await createPerson({ firstName: 'Lockable', lastName: 'Person' })
+      const { id } = await findByCrn(result._data)
+
+      const lockRes = await server.inject({
+        method: 'POST',
+        url: `/person/${id}/lock`,
+        payload: { partyNoteType: 'LockPerson', reason: 'Testing lock of a created person' }
+      })
+      expect(lockRes.statusCode).toBe(204)
+
+      const { result: summary } = await server.inject({
+        method: 'GET',
+        url: `/person/${id}/summary`
+      })
+      expect(summary._data.locked).toBe(true)
+    })
+
+    test.each([
+      ['firstName is missing', { lastName: 'Person' }],
+      ['lastName is missing', { firstName: 'New' }],
+      ['firstName is empty', { firstName: '', lastName: 'Person' }]
+    ])('should return 422 when %s', async (_, payload) => {
+      const { statusCode } = await createPerson(payload)
+
+      expect(statusCode).toBe(422)
+    })
+
+    test.each([
+      ['there is no body', undefined, 'source cannot be null'],
+      ['the body is null', 'null', 'source cannot be null'],
+      ['the body is a string', '"New Person"', 'missing or invalid request body'],
+      ['the body is an array', '[]', 'missing or invalid request body']
+    ])('should return 400 when %s', async (_, payload, message) => {
+      const { statusCode, result } = await server.inject({
+        method: 'POST',
+        url: '/person/create',
+        headers: { 'content-type': 'application/json' },
+        payload
+      })
+
+      expect(statusCode).toBe(400)
+      expect(result.message).toBe(message)
+    })
+
+    test('should return a new person as unlocked, active and with an unvalidated email', async () => {
+      const { result } = await createPerson({
+        firstName: 'Fresh',
+        lastName: 'Person',
+        locked: true,
+        deactivated: true,
+        emailValidated: true
+      })
+      const { id } = await findByCrn(result._data)
+
+      const { result: summary } = await server.inject({
+        method: 'GET',
+        url: `/person/${id}/summary`
+      })
+      expect(summary._data).toEqual(
+        expect.objectContaining({ locked: false, deactivated: false, emailValidated: false })
+      )
+    })
+  })
 })
