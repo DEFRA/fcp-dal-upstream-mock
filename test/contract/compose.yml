@@ -13,7 +13,10 @@ services:
           auth_header="email: $${TEST_USER_EMAIL:-testuser01@defra.gov.uk}"
           if [ "$${schema}" = "payments" ]; then auth_header='Authorization: bearer token'; fi
           # NOTE: endpoint-specific check/warning exclusions are configured in schemathesis.toml
+          # NOTE: fixed seed so the same data is generated on every run (i.e. stable PR checks);
+          # override with CONTRACT_TEST_SEED to reproduce or explore other generated data
           schemathesis --config-file /schemathesis.toml run -H "$${auth_header}" \
+            --seed ${CONTRACT_TEST_SEED:-1} \
             --exclude-checks=unsupported_method,not_a_server_error \
             --report-vcr-path /tmp/$${schema}.logs.yaml \
             "http://dal-mock:3100/schemata/$${schema}.yml"
