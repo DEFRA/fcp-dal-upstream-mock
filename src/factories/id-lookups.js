@@ -561,7 +561,7 @@ export const orgIdLookup = {
     }
   },
   // dedicated org for lock, starts unlocked.
-  9200002: {
+  9200003: {
     sbi: 820000003,
     customers: [],
     overrides: {
