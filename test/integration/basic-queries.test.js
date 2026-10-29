@@ -174,19 +174,19 @@ describe('Basic queries for faked routes', () => {
           address: {
             flatName: null,
             buildingNumberRange: null,
-            buildingName: 'BODYCHENAN',
+            buildingName: 'TEST HOUSE',
             street: null,
-            city: 'PWLLHELI',
+            city: 'TESTVILLE',
             county: null,
-            postalCode: 'LL53 8NT',
+            postalCode: 'TE1 2ST',
             country: 'United Kingdom',
-            uprn: '10070366332',
-            dependentLocality: 'LLANGWNADL',
+            uprn: '910000000002',
+            dependentLocality: 'TESTHAM',
             doubleDependentLocality: null
           },
           name: 'test unique 123',
           email: 'test@test.com',
-          landline: '01234613020',
+          landline: '01632960020',
           mobile: '07111222333',
           companiesHouseRegistrationNumber: null,
           charityCommissionRegistrationNumber: '12312312',
@@ -219,14 +219,14 @@ describe('Basic queries for faked routes', () => {
             addressTypeId: null,
             flatName: null,
             buildingNumberRange: null,
-            buildingName: 'BODYCHENAN',
+            buildingName: 'TEST HOUSE',
             street: null,
-            city: 'PWLLHELI',
+            city: 'TESTVILLE',
             county: null,
-            postalCode: 'LL53 8NT',
+            postalCode: 'TE1 2ST',
             country: 'United Kingdom',
-            uprn: '10070366332',
-            dependentLocality: 'LLANGWNADL',
+            uprn: '910000000002',
+            dependentLocality: 'TESTHAM',
             doubleDependentLocality: null,
             pafOrganisationName: null
           },
@@ -236,7 +236,7 @@ describe('Basic queries for faked routes', () => {
           fax: null,
           name: 'test unique 123',
           email: 'test@test.com',
-          landline: '01234613020',
+          landline: '01632960020',
           mobile: '07111222333',
           landConfirmed: null,
           companiesHouseRegistrationNumber: null,
@@ -341,7 +341,7 @@ describe('Basic queries for faked routes', () => {
     test('Should return customers for /authorisation/organisation/{organisationId} for SFD performance-data org', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/5583575'
+        url: '/extapi/authorisation/organisation/8600001'
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)

@@ -357,14 +357,14 @@ describe('POST /bank-change-service/v1/validate', () => {
 
     it('normalises a dashed sort code in the echoed response', async () => {
       const payload = validValidatePayload()
-      payload.account.bank.sortCode = '60-83-71'
+      payload.account.bank.sortCode = '00-00-00'
       const { result, statusCode } = await server.inject({
         method: 'POST',
         url: validateUrl,
         payload
       })
       expect(statusCode).toBe(200)
-      expect(result.account.bank.sortCode).toBe('608371')
+      expect(result.account.bank.sortCode).toBe('000000')
     })
 
     it('echoes iban and swiftCode in the success response when supplied', async () => {

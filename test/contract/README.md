@@ -31,6 +31,19 @@ test/contract/check-schema.sh person
 
 This will perform a bunch of tests to check the specified schema (in this case the `person` schema) correctly describes the KITS endpoints' functionality.
 
+### Example identifiers
+
+The IDs the script uses as examples (orgs, people, CRNs, SBIs, FRNs, sheets/parcels, search phrases) are read from `CONTRACT_*` environment variables, listed by `check-schema.sh help`.
+They default to synthetic values from the mock's own test data, which don't exist upstream, so KITS will mostly return 404s for them.
+To check successful responses, set them to real `upgrade` IDs in your `.env` (which is gitignored, and loaded by `npm run test:contract:local`); lists are comma-separated:
+
+```shell
+CONTRACT_AUTH_CRNS=[CRN],[CRN]
+CONTRACT_ORG_SEARCH_POSTCODE="[POSTCODE]"
+```
+
+> NOTE: Don't commit real customer identifiers to this repository; keep them in your environment only.
+
 ### Organisation operations that write upstream
 
 The `organisation` schema's authorisation, lock and unlock operations write to KITS, so they are only checked when you explicitly define an org, and a person linked to it, for them to use:

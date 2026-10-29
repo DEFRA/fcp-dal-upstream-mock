@@ -259,7 +259,7 @@ components:
       description: OS map sheet identifier
       schema:
         type: string
-        examples: ['SS6627']
+        examples: ['TE0001']
     parcelId:
       name: parcelId
       in: path
@@ -267,7 +267,7 @@ components:
       description: Parcel identifier within the OS sheet
       schema:
         type: string
-        examples: ['5662']
+        examples: ['1001']
 
   securitySchemes:
     mTLS:

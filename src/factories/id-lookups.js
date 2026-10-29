@@ -38,7 +38,7 @@ export const staticPersonData = {
     emailValidated: true,
     confirmed: true,
     mobile: null,
-    landline: '01215 090627',
+    landline: '01632 960627',
     title: null,
     otherTitle: null
   },
@@ -172,13 +172,8 @@ export const staticPersonData = {
     }
   },
 
-  // from dev CRM
-  5302028: { crn: '9800001000' },
-  // from dev CRM, but do not exist on `upgrade`
-  9900002: { crn: '9562286973' },
-  9900003: { crn: '9638563942' },
-  9900004: { crn: '9170633316' },
-  9900005: { crn: '9343571956' },
+  // synthetic replacement for a dev CRM person (real IDs removed)
+  9800001: { crn: '9800001000' },
 
   // midsummer birthdays for testing DoB edge cases - UTC timestamps as millis since the epoch
   9000010: { crn: '9000001000', dateOfBirth: new Date('2000-06-30T00:00:00Z').getTime() },
@@ -261,8 +256,8 @@ export const orgIdLookup = {
           properties: {
             area: '10270.39',
             pendingDigitisation: false,
-            sheetId: 'SS6627',
-            parcelId: '5662'
+            sheetId: 'TE0001',
+            parcelId: '1001'
           },
           geometry: validGeometries[0],
           covers: [
@@ -300,8 +295,8 @@ export const orgIdLookup = {
           properties: {
             area: '10270.39',
             pendingDigitisation: 'false',
-            sheetId: 'SS6828',
-            parcelId: '3818'
+            sheetId: 'TE0002',
+            parcelId: '1002'
           },
           geometry: validGeometries[1],
           uses: [{}]
@@ -453,26 +448,19 @@ export const orgIdLookup = {
   300000403: { sbi: 300000403, customers: [] },
   300000500: { sbi: 300000500, customers: [] },
 
-  // business from dev CRM
-  5565448: {
+  8910001: {
     sbi: 890000001,
     customers: [],
     applications: [{ application_history: [{}] }], // 1 application with 1 transition entry
     cphs: Array.from({ length: 8 }, () => ({})) // 8 CPHs
   },
-  5559799: { sbi: 890000002, customers: [{ personId: 5302028 }] },
-  5560725: {
+  8910002: { sbi: 890000002, customers: [{ personId: 9800001 }] },
+  8910003: {
     sbi: 890000003,
-    customers: [
-      { personId: 5302028 },
-      { personId: 9900000 },
-      { personId: 9900001 },
-      { personId: 9900002 },
-      { personId: 9900003 }
-    ]
+    customers: [{ personId: 9800001 }, { personId: 9900000 }, { personId: 9900001 }]
   },
-  5625145: { sbi: 890000004, customers: [{ personId: 5302028 }, { personId: 5692562 }] },
-  5447505: { sbi: 890000005, customers: [{ personId: 5302028 }] },
+  8910004: { sbi: 890000004, customers: [{ personId: 9800001 }, { personId: 9500568 }] },
+  8910005: { sbi: 890000005, customers: [{ personId: 9800001 }] },
 
   // dedicated org for every /organisation/search searchFieldType
   9100000: {

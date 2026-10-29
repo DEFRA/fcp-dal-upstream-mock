@@ -138,7 +138,7 @@ describe('KITS Proxy router', () => {
         method: 'POST',
         url: '/internal/extapi/person/search',
         headers: { 'content-type': 'application/json' },
-        payload: { primarySearchPhrase: '9111111100', searchFieldType: 'CUSTOMER_REFERENCE' }
+        payload: { primarySearchPhrase: '9800001000', searchFieldType: 'CUSTOMER_REFERENCE' }
       })
 
       expect(mockFetch).toHaveBeenCalledWith(

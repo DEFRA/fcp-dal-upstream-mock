@@ -29,8 +29,8 @@ describe('Land routes', () => {
       expect(result).toEqual(
         expect.arrayContaining([
           // check some of the static data is returned
-          expect.objectContaining({ parcelId: '5662', sheetId: 'SS6627' }),
-          expect.objectContaining({ parcelId: '3818', sheetId: 'SS6828' })
+          expect.objectContaining({ parcelId: '1001', sheetId: 'TE0001' }),
+          expect.objectContaining({ parcelId: '1002', sheetId: 'TE0002' })
         ])
       )
       expect(result.length).toEqual(2)
@@ -110,8 +110,8 @@ describe('Land routes', () => {
       expect(statusCode).toBe(200)
       expect(result).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ parcelId: '5662', sheetId: 'SS6627' }),
-          expect.objectContaining({ parcelId: '3818', sheetId: 'SS6828' })
+          expect.objectContaining({ parcelId: '1001', sheetId: 'TE0001' }),
+          expect.objectContaining({ parcelId: '1002', sheetId: 'TE0002' })
         ])
       )
     })
@@ -137,7 +137,7 @@ describe('Land routes', () => {
     test('should return data with geometries omitted by default', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers'
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual({
@@ -161,7 +161,7 @@ describe('Land routes', () => {
     test('should return data with geometries included when requested', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers?includeGeometries=true'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=true'
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual({
@@ -196,7 +196,7 @@ describe('Land routes', () => {
     test('should return 403 if organisationId is not numeric', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/nonexistent/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers'
+        url: '/lms/organisation/nonexistent/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers'
       })
       expect(statusCode).toBe(403)
     })
@@ -204,7 +204,7 @@ describe('Land routes', () => {
     test('should return 200 even if organisationId overflows a Java Long (upstream never parses it)', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/9223372036854775808/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers'
+        url: '/lms/organisation/9223372036854775808/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers'
       })
       expect(statusCode).toBe(200)
       expect(result.type).toBe('FeatureCollection')
@@ -213,7 +213,7 @@ describe('Land routes', () => {
     test('should return 403 if historicDate is badly formed', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/invalid/land-covers'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/invalid/land-covers'
       })
       expect(statusCode).toBe(403)
     })
@@ -221,7 +221,7 @@ describe('Land routes', () => {
     test('should return 500 if historicDate matches the pattern but cannot be parsed', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/00-AAA-00/land-covers'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/00-AAA-00/land-covers'
       })
       expect(statusCode).toBe(500)
     })
@@ -229,7 +229,7 @@ describe('Land routes', () => {
     test('should treat includeGeometries=null as false', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers?includeGeometries=null'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=null'
       })
       expect(statusCode).toBe(200)
       expect(result.features[0].geometry).toBeNull()
@@ -238,7 +238,7 @@ describe('Land routes', () => {
     test('should treat any unrecognised includeGeometries value as false', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/SS6627/parcel-id/5662/historic/01-Mar-25/land-covers?includeGeometries=foo'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=foo'
       })
       expect(statusCode).toBe(200)
       expect(result.features[0].geometry).toBeNull()
@@ -309,8 +309,8 @@ describe('Land routes', () => {
             id: 7386091,
             type: 'Feature',
             properties: {
-              sheetId: 'SS6627',
-              parcelId: '5662',
+              sheetId: 'TE0001',
+              parcelId: '1001',
               area: '10270.39',
               pendingDigitisation: 'false'
             },

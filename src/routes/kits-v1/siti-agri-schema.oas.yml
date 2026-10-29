@@ -163,8 +163,8 @@ paths:
           schema:
             type: string
             examples:
-              - 'SS6528'
-              - 'SS6529'
+              - 'TE0001'
+              - 'TE0002'
         - name: 'parcel'
           in: path
           description: 'Parcel of the business to retrieve land use for.'
@@ -172,8 +172,8 @@ paths:
           schema:
             type: string
             examples:
-              - '5662'
-              - '5663'
+              - '1001'
+              - '1002'
         - name: 'sbi'
           in: path
           description: 'SBI of the business to retrieve land use for a specific parcel on a specific sheet.'
@@ -556,10 +556,10 @@ components:
           example: '890000001'
         sheet_name:
           type: string
-          example: 'SS6528'
+          example: 'TE0001'
         parcel_name:
           type: string
-          example: '3756'
+          example: '1001'
       required:
         - dt_delete
         - end_date
@@ -607,7 +607,7 @@ components:
           type: [string, 'null']
           examples:
             - 'Farm, Village, Town, County, Postcode'
-            - '350952, 515333 NADDLE FARM, CA10 2RP'
+            - '123456, 654321 EXAMPLE FARM, TE1 2ST'
             # 'x-cord, y-cord Farm-name, Postcode' - not the same as x/y of the CPH below!
         x:
           oneOf:

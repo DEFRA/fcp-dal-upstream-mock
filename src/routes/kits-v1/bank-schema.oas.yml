@@ -325,11 +325,11 @@ paths:
                   submissionDateTime: 02/05/2026 14:12:11
                   account:
                     accountType: UK_BUSINESS
-                    name: Daneka Rodgers
-                    number: '58500627'
+                    name: Jane Doe
+                    number: '12345678'
                     bank:
                       name: Acme Bank
-                      sortCode: '608371'
+                      sortCode: '000000'
                   country:
                     code: GB
                     currency: GBP
@@ -350,7 +350,7 @@ paths:
                     account:
                       bank:
                         name: Acme Bank
-                        sortCode: '608371'
+                        sortCode: '000000'
                 PartialMatch:
                   summary: Details partially matched
                   value:
@@ -360,7 +360,7 @@ paths:
                     account:
                       bank:
                         name: Acme Bank
-                        sortCode: '608371'
+                        sortCode: '000000'
                 Failed:
                   summary: Details did not match
                   value:
@@ -369,7 +369,7 @@ paths:
                     attemptsRemaining: 2
                     account:
                       bank:
-                        sortCode: '608371'
+                        sortCode: '000000'
         '400':
           description: field validation failed
           content:
