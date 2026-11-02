@@ -202,11 +202,15 @@ const validGeometries = JSON.parse(
   // Generated using scripts/generate_geometries.sh
   fs.readFileSync(new URL('./valid-geometries.json', import.meta.url))
 )
+// SBI ranges (all SBIs are 9 digits in the 8xxxxxxxx range):
+// - SFD (sfd-test-data): 850000000-869999999
+// - Generated organisations: from 880000001 upwards
+// - DAL and everything else: any other SBI in the 8xxxxxxxx range
 export const orgIdLookup = {
   ...sfdBusinessLookup,
   ...fcpBusinessLookupPerformance,
   100000000: {
-    sbi: 100000000,
+    sbi: 800000000,
     customers: [], // org with no customers
     agreements: [], // ... no agreements
     applications: [], // ... no applications
@@ -216,7 +220,7 @@ export const orgIdLookup = {
     overrides: {} // any static overrides for this org can go here
   },
   111111111: {
-    sbi: 111111111,
+    sbi: 811111111,
     // Bank-change attempts for this person are locked
     bankLockedPersonIds: [11111119],
     customers: [
@@ -308,7 +312,7 @@ export const orgIdLookup = {
     }
   },
   222222222: {
-    sbi: 222222222,
+    sbi: 822222222,
     // FRN: pinned to match the orgId so bank example payloads stay readable.
     overrides: { businessReference: '2222222222' },
     // Bank details not editable.
@@ -402,7 +406,7 @@ export const orgIdLookup = {
   },
   // Contains user with no first name and no messages
   333333333: {
-    sbi: 333333333,
+    sbi: 833333333,
     bankAccountStatus: { submitted: false, updatedRecently: false, new: true },
     customers: [
       {
@@ -414,7 +418,7 @@ export const orgIdLookup = {
 
   // Contains user with 10 messages, 5 deleted messages
   333333334: {
-    sbi: 333333334,
+    sbi: 833333334,
     customers: [
       {
         personId: 11111141,
@@ -446,10 +450,10 @@ export const orgIdLookup = {
   },
 
   // Orgs that always returns specific status when requested
-  300000206: { sbi: 300000206, customers: [] },
-  300000401: { sbi: 300000401, customers: [] },
-  300000403: { sbi: 300000403, customers: [] },
-  300000500: { sbi: 300000500, customers: [] },
+  300000206: { sbi: 800000206, customers: [] },
+  300000401: { sbi: 800000401, customers: [] },
+  300000403: { sbi: 800000403, customers: [] },
+  300000500: { sbi: 800000500, customers: [] },
 
   8910001: {
     sbi: 890000001,

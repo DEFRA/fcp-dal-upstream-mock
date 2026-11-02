@@ -79,12 +79,12 @@ const CANONICAL_PRIVILEGE_NAMES = new Map(
 
 const organisations = {}
 let startingOrgId = 1000000
-let startingSbi = 100000000
+let startingSbi = 880000000
 
 export const createOrganisation = (personId, payload) => {
   retrievePerson(personId)
-  startingOrgId = generateId(startingOrgId, Object.keys(orgIdToSbi))
-  startingSbi = generateId(startingSbi, Object.keys(sbiToOrgId))
+  startingOrgId = generateId(startingOrgId, Object.keys(orgIdToSbi).map(Number))
+  startingSbi = generateId(startingSbi, Object.keys(sbiToOrgId).map(Number))
   const id = startingOrgId
   const sbi = startingSbi
   const name = payload.name

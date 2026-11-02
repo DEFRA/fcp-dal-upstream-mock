@@ -33,7 +33,7 @@ paths:
                 summary: A bank change request
                 description: Bank change request
                 value:
-                  sbi: '222222222'
+                  sbi: '822222222'
                   frn: '2222222222'
                   crn: '9222222000'
                   submissionDateTime: 02/05/2026 14:12:11
@@ -318,7 +318,7 @@ paths:
               ValidateRequest:
                 summary: A bank validation request
                 value:
-                  sbi: '222222222'
+                  sbi: '822222222'
                   frn: '2222222222'
                   crn: '9222222000'
                   dateOfBirth: 21/04/2000
@@ -481,7 +481,7 @@ components:
       examples:
         - organisationId: '1000000000'
           personId: '1000000000'
-          sbi: '100000000'
+          sbi: '800000000'
           frn: '1000000000'
           crn: '9000000000'
           submissionDateTime: '01/02/2023 14:12:11'
@@ -544,7 +544,7 @@ components:
     ValidateRequest:
       type: object
       examples:
-        - sbi: '100000000'
+        - sbi: '800000000'
           frn: '1000000000'
           crn: '9000000000'
           dateOfBirth: '21/04/2000'

@@ -344,11 +344,11 @@ describe('Person routes', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 111111111,
-          sbi: 111111111
+          sbi: 811111111
         }),
         expect.objectContaining({
           id: 222222222,
-          sbi: 222222222
+          sbi: 822222222
         })
       ])
     )
