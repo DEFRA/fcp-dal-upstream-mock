@@ -20,6 +20,8 @@ describe('person.factory', () => {
       const crn = createPerson()
 
       expect(crn).toEqual(expect.stringMatching(/^\d{10}$/))
+      // 9000000000+ is the range of CRNs that are valid for FCP testing.
+      expect(Number(crn)).toBeGreaterThanOrEqual(9000000000)
     })
 
     it('allocates a person ID and CRN that do not collide with static lookup data', () => {

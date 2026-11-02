@@ -27,7 +27,7 @@ const logger = createLogger('person.factory')
 
 const people = {}
 const startingPersonId = 11111111
-const startingCrn = 9111111100
+const startingCrn = 9900000000
 
 const generatePerson = (personId, crn, overrides = {}) => {
   personId = safeSeed(personId)

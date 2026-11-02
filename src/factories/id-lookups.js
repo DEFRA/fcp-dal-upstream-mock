@@ -6,6 +6,9 @@ import {
 } from './fcp-test-data/performance.js'
 import { sfdBusinessLookup, sfdPersonLookup } from './sfd-test-data/index.js'
 
+// CRN ranges (all CRNs are 10 digits and at least 9000000000):
+// - SFD (sfd-test-data): 9500000000-9699999999
+// - DAL and everything else, including generated people: any other CRN from 9000000000 upwards
 export const staticPersonData = {
   ...sfdPersonLookup,
   ...fcpPersonLookupPerformance,

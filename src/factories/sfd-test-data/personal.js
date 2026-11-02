@@ -942,7 +942,7 @@ const personLookupEntries = {
   3010109: { crn: '9610000109', ...allInvalidPersonBase },
 
   // Person stub for the Business details test user (CRN 9020000000 in defra-id.data.json; orgs 3009000–3009007 in business.js).
-  3009100: { crn: '9020000000', firstName: 'Business', lastName: 'Details Test' },
+  3009100: { crn: '9620000000', firstName: 'Business', lastName: 'Details Test' },
 
   // Permission-level test users (View / Amend) for Business Details.
   // Privilege strings must match fcp-dal-api mapping.

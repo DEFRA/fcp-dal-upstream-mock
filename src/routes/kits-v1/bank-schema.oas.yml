@@ -483,7 +483,7 @@ components:
           personId: '1000000000'
           sbi: '100000000'
           frn: '1000000000'
-          crn: '1000000000'
+          crn: '9000000000'
           submissionDateTime: '01/02/2023 14:12:11'
           account:
             accountType: UK_BUSINESS
@@ -546,7 +546,7 @@ components:
       examples:
         - sbi: '100000000'
           frn: '1000000000'
-          crn: '1000000000'
+          crn: '9000000000'
           dateOfBirth: '21/04/2000'
           submissionDateTime: '01/02/2023 14:12:11'
           account:
