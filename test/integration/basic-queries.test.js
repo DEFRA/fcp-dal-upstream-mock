@@ -338,6 +338,16 @@ describe('Basic queries for faked routes', () => {
       })
     })
 
+    test('Should return customers for /authorisation/organisation/{organisationId} for FCP performance-data org', async () => {
+      const response = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/5900001'
+      })
+      expect(response.statusCode).toBe(200)
+      const json = JSON.parse(response.payload)
+      expect(json._data.map(({ customerReference }) => customerReference)).toContain('9100010101')
+    })
+
     test('Should return customers for /authorisation/organisation/{organisationId} for SFD performance-data org', async () => {
       const response = await mockServer.inject({
         method: 'GET',

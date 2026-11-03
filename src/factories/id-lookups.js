@@ -636,19 +636,14 @@ Object.entries(orgIdLookup).forEach(([orgId, orgDetails]) => {
     frnToOrgId[overrides.businessReference] = orgId
   }
 
-  orgIdToPersonIds[orgId] = customers.map(({ personId }) => {
+  // customers may be raw person-id numbers (e.g. fcp-test-data/performance.js) or { personId }
+  orgIdToPersonIds[orgId] = customers.map((customer) => {
+    const personId = typeof customer === 'number' ? customer : customer.personId
     if (!personIdToOrgIds[personId]) {
       personIdToOrgIds[personId] = []
     }
     personIdToOrgIds[personId].push(Number(orgId))
     return personId
-  })
-
-  if (bankAccountStatus) {
-    bankAccountStatusByOrgId[orgId] = bankAccountStatus
-  }
-  bankLockedPersonIds?.forEach((personId) => {
-    bankLockedPairs.add(`${orgId}:${personId}`)
   })
 
   if (bankAccountStatus) {

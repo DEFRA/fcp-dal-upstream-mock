@@ -76,7 +76,9 @@ export const retrieveMessages = (orgId, personId, page = 1) => {
   }
 
   const { sbi, ...overrides } = orgIdLookup[orgId] ?? {}
-  const staticMessages = overrides.customers?.find((c) => personId === c?.personId)?.messages
+  const staticMessages = overrides.customers?.find(
+    (c) => personId === (typeof c === 'number' ? c : c?.personId)
+  )?.messages
 
   // static messages are the complete list, so they only fill the first page
   if (staticMessages && page > 1) {
