@@ -4,6 +4,7 @@ import {
   createAuthorisation,
   createOrganisation,
   deactivateOrganisation,
+  deleteAuthorisation,
   lockOrganisation,
   reactivateOrganisation,
   retrieveOrganisation,
@@ -291,6 +292,24 @@ export const organisation = [
 
       try {
         updateAuthorisation(orgId, personId, request.payload)
+        return h.response({ data: null, success: true, errorString: null }).code(200)
+      } catch (e) {
+        return authorisationErrorResponse(h, e)
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/SitiAgriApi/authorisation/organisation/{orgId}/authorisation',
+    handler: async (request, h) => {
+      const orgId = checkOrgIdDigits(request)
+      const unrecognised = unrecognisedAuthorisationField(request.payload)
+      if (unrecognised) {
+        return h.response(unrecognised).type('text/plain').code(400)
+      }
+
+      try {
+        deleteAuthorisation(orgId, request.payload)
         return h.response({ data: null, success: true, errorString: null }).code(200)
       } catch (e) {
         return authorisationErrorResponse(h, e)

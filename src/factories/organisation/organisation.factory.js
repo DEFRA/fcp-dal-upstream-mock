@@ -1,14 +1,5 @@
 import Boom from '@hapi/boom'
 import {
-  frnToOrgId,
-  frnToPaymentOverrides,
-  orgIdLookup,
-  orgIdToPersonIds,
-  orgIdToSbi,
-  personIdToOrgIds,
-  sbiToOrgId
-} from '../id-lookups.js'
-import {
   fakeAddress,
   fakeIds,
   faker,
@@ -18,6 +9,15 @@ import {
   nullOrFake,
   safeSeed
 } from '../common.js'
+import {
+  frnToOrgId,
+  frnToPaymentOverrides,
+  orgIdLookup,
+  orgIdToPersonIds,
+  orgIdToSbi,
+  personIdToOrgIds,
+  sbiToOrgId
+} from '../id-lookups.js'
 import { retrievePerson } from '../person/person.factory.js'
 
 // All valid privilege names that can be assigned via create/update authorisation.
@@ -459,6 +459,20 @@ const checkRoles = (personRoles) => {
   }
 }
 
+// The privilege names from every personPrivileges entry in upstream's spelling, each scheme
+// privilege with its "- SA" counterpart
+const privilegeNamesFor = (personPrivileges) => {
+  const privilegeNames = personPrivileges
+    .flatMap(({ privilegeNames }) => privilegeNames ?? [])
+    .map((name) => CANONICAL_PRIVILEGE_NAMES.get(String(name).toLowerCase()))
+  if (privilegeNames.includes(undefined)) {
+    throw new Error('invalid privilege string')
+  }
+  return [
+    ...new Set(privilegeNames.flatMap((name) => [name, schemeCounterpart(name) ?? []].flat()))
+  ]
+}
+
 // Upstream rejects a repeated role for a person, otherwise linking them once per role, each link
 // with the privileges from every entry; with no personRoles entries, the existing roles are kept
 const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileges) => {
@@ -466,19 +480,53 @@ const applyAuthorisation = (orgId, personId, person, personRoles, personPrivileg
   if (new Set(roles).size < roles.length) {
     throw Boom.conflict('Relation already exists')
   }
-  const privilegeNames = personPrivileges
-    .flatMap(({ privilegeNames }) => privilegeNames ?? [])
-    .map((name) => CANONICAL_PRIVILEGE_NAMES.get(String(name).toLowerCase()))
-  if (privilegeNames.includes(undefined)) {
-    throw new Error('invalid privilege string')
-  }
+  const privileges = privilegeNamesFor(personPrivileges)
 
   authorisations[authorisationKey(orgId, personId)] = {
     roles: roles.length ? roles : authorisationFor(orgId, personId, person).roles,
-    privileges: [
-      ...new Set(privilegeNames.flatMap((name) => [name, schemeCounterpart(name) ?? []].flat()))
-    ]
+    privileges
   }
+}
+
+// Removes, for each person named in the entries, the roles and privileges named for them, rejecting
+// a role the person doesn't have on the organisation with a 404 (a person not linked to it has
+// none); removing a person's last role unlinks them from the organisation
+const removeAuthorisation = (orgId, personRoles, personPrivileges) => {
+  const personIds = [
+    ...new Set([...personRoles, ...personPrivileges].map(({ personId }) => String(personId)))
+  ]
+  const changes = personIds.map((personId) => {
+    const person = retrieveExistingPerson(personId)
+    const rolesToRemove = personRoles
+      .filter((entry) => String(entry.personId) === String(personId))
+      .map(({ role }) => role)
+    const privilegesToRemove = privilegeNamesFor(
+      personPrivileges.filter((entry) => String(entry.personId) === String(personId))
+    )
+    const { roles, privileges } = hasAuthorisation(orgId, personId)
+      ? authorisationFor(orgId, personId, person)
+      : { roles: [], privileges: [] }
+
+    const missingRole = rolesToRemove.find((role) => !roles.includes(role))
+    if (missingRole) {
+      throw Boom.notFound(`Role ${missingRole} not found for person with personId ${personId}`, {
+        errorString: 'Entity not found.'
+      })
+    }
+    return {
+      personId,
+      roles: roles.filter((role) => !rolesToRemove.includes(role)),
+      privileges: privileges.filter((name) => !privilegesToRemove.includes(name))
+    }
+  })
+
+  changes.forEach(({ personId, roles, privileges }) => {
+    if (roles.length === 0) {
+      unlinkPerson(orgId, personId)
+    } else {
+      authorisations[authorisationKey(orgId, personId)] = { roles, privileges }
+    }
+  })
 }
 
 /**
@@ -561,6 +609,15 @@ export const updateAuthorisation = (orgId, personId, payload) => {
   if (!hasAuthorisation(orgId, personId)) {
     linkPerson(orgId, personId)
   }
+}
+
+export const deleteAuthorisation = (orgId, payload) => {
+  retrieveExistingOrganisation(orgId)
+  checkAuthorisationPayload(payload, Boom.badRequest)
+
+  const { personRoles, personPrivileges } = payload
+  checkRoles(personRoles)
+  removeAuthorisation(orgId, personRoles, personPrivileges)
 }
 
 export const deactivateOrganisation = (orgId) => {

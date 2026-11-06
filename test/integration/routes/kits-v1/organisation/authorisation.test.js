@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, afterAll, expect } from 'vitest'
+import { describe, it, beforeAll, beforeEach, afterAll, expect } from 'vitest'
 
 describe('Authorisation create & update (Ticket #29)', () => {
   let mockServer
@@ -714,6 +714,210 @@ describe('Authorisation create & update (Ticket #29)', () => {
       expect(await rows(22222228)).toEqual([
         { role: 'Bogus', privileges: ['Amend - land', 'AMEND - LAND - SA'] }
       ])
+    })
+  })
+
+  describe('DELETE', () => {
+    // 22222221 and 22222229 exist but are only customers of org 222222222
+    const url = '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation'
+    const remove = (payload, orgId = 111111111) =>
+      mockServer.inject({
+        method: 'DELETE',
+        url: `/extapi/SitiAgriApi/authorisation/organisation/${orgId}/authorisation`,
+        headers: { authorization: 'Bearer token' },
+        payload
+      })
+    const put = (personId, roles, privilegeNames) =>
+      mockServer.inject({
+        method: 'PUT',
+        url: `${url}/person/${personId}`,
+        headers: { authorization: 'Bearer token' },
+        payload: {
+          personRoles: roles.map((role) => ({ role, personId })),
+          personPrivileges: [{ personId, privilegeNames }]
+        }
+      })
+    // the person's roles and privileges on org 111111111, from its customer rows
+    const authorisation = async (personId) => {
+      const { payload } = await mockServer.inject({
+        method: 'GET',
+        url: '/extapi/authorisation/organisation/111111111'
+      })
+      const rows = JSON.parse(payload)._data.filter(({ id }) => id === personId)
+      return {
+        roles: rows.map(({ role }) => role),
+        privileges: [...new Set(rows.flatMap(({ privileges }) => privileges))]
+      }
+    }
+    const success = { data: null, success: true, errorString: null }
+    const entityNotFound = { data: null, success: false, errorString: 'Entity not found.' }
+    const unlinked = { roles: [], privileges: [] }
+    const initial = {
+      22222221: {
+        roles: ['Agent', 'Business Partner'],
+        privileges: ['Amend - land', 'AMEND - LAND - SA', 'View - business']
+      },
+      22222229: {
+        roles: ['Agent'],
+        privileges: ['View - business', 'Submit - bps', 'SUBMIT - BPS - SA']
+      }
+    }
+
+    beforeEach(async () => {
+      await put(22222221, ['Agent', 'Business Partner'], ['Amend - land', 'View - business'])
+      await put(22222229, ['Agent'], ['View - business', 'Submit - bps'])
+    })
+
+    it('should remove a role, keeping the others and the privileges', async () => {
+      const { statusCode, payload } = await remove({
+        personRoles: [{ role: 'Business Partner', personId: 22222221 }],
+        personPrivileges: []
+      })
+      expect(statusCode).toBe(200)
+      expect(JSON.parse(payload)).toEqual(success)
+      expect(await authorisation(22222221)).toEqual({ ...initial[22222221], roles: ['Agent'] })
+    })
+
+    it('should unlink the person when their last role is removed', async () => {
+      const { statusCode } = await remove({
+        personRoles: [
+          { role: 'Agent', personId: 22222221 },
+          { role: 'Business Partner', personId: 22222221 }
+        ],
+        personPrivileges: []
+      })
+      expect(statusCode).toBe(200)
+      expect(await authorisation(22222221)).toEqual(unlinked)
+    })
+
+    it('should remove only the privileges when personRoles is empty', async () => {
+      const { statusCode } = await remove({
+        personRoles: [],
+        personPrivileges: [{ personId: 22222221, privilegeNames: ['Amend - land'] }]
+      })
+      expect(statusCode).toBe(200)
+      expect(await authorisation(22222221)).toEqual({
+        roles: ['Agent', 'Business Partner'],
+        privileges: ['View - business']
+      })
+    })
+
+    it('should remove different roles and privileges for different people', async () => {
+      const { statusCode } = await remove({
+        personRoles: [
+          { role: 'Agent', personId: 22222221 },
+          { role: 'Agent', personId: 22222229 }
+        ],
+        personPrivileges: [{ personId: 22222221, privilegeNames: ['View - business'] }]
+      })
+      expect(statusCode).toBe(200)
+      expect(await authorisation(22222221)).toEqual({
+        roles: ['Business Partner'],
+        privileges: ['Amend - land', 'AMEND - LAND - SA']
+      })
+      expect(await authorisation(22222229)).toEqual(unlinked)
+    })
+
+    it('should match a personId sent as a string', async () => {
+      const { statusCode } = await remove({
+        personRoles: [{ role: 'Business Partner', personId: '22222221' }],
+        personPrivileges: [{ personId: '22222221', privilegeNames: ['View - business'] }]
+      })
+      expect(statusCode).toBe(200)
+      expect(await authorisation(22222221)).toEqual({
+        roles: ['Agent'],
+        privileges: ['Amend - land', 'AMEND - LAND - SA']
+      })
+    })
+
+    it.each([
+      [
+        'a privilege the person does not hold',
+        [{ personId: 22222221, privilegeNames: ['View - land'] }]
+      ],
+      ['no privileges', []]
+    ])('should succeed and change nothing for %s', async (_, personPrivileges) => {
+      const { statusCode, payload } = await remove({ personRoles: [], personPrivileges })
+      expect(statusCode).toBe(200)
+      expect(JSON.parse(payload)).toEqual(success)
+      expect(await authorisation(22222221)).toEqual(initial[22222221])
+    })
+
+    it('should return 404 and change nothing for a role the person does not have', async () => {
+      const { statusCode, payload } = await remove({
+        personRoles: [{ role: 'Business Partner', personId: 22222229 }],
+        personPrivileges: []
+      })
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual(entityNotFound)
+      expect(await authorisation(22222229)).toEqual(initial[22222229])
+    })
+
+    it('should return 404 and change no one when any person lacks the role', async () => {
+      const { statusCode, payload } = await remove({
+        personRoles: [
+          { role: 'Business Partner', personId: 22222221 },
+          { role: 'Business Partner', personId: 22222229 }
+        ],
+        personPrivileges: [{ personId: 22222221, privilegeNames: ['View - business'] }]
+      })
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual(entityNotFound)
+      expect(await authorisation(22222221)).toEqual(initial[22222221])
+      expect(await authorisation(22222229)).toEqual(initial[22222229])
+    })
+
+    it('should return 404 for a person not linked to the organisation', async () => {
+      await remove({ personRoles: [{ role: 'Agent', personId: 22222229 }], personPrivileges: [] })
+      const { statusCode, payload } = await remove({
+        personRoles: [{ role: 'Agent', personId: 22222229 }],
+        personPrivileges: []
+      })
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual(entityNotFound)
+    })
+
+    it('should return 500 and change nothing for an unknown privilege', async () => {
+      const { statusCode, payload } = await remove({
+        personRoles: [],
+        personPrivileges: [{ personId: 22222221, privilegeNames: ['Not a privilege'] }]
+      })
+      expect(statusCode).toBe(500)
+      expect(JSON.parse(payload)).toEqual(upstreamError)
+      expect(await authorisation(22222221)).toEqual(initial[22222221])
+    })
+
+    it('should return 400 when the arrays are omitted', async () => {
+      const { statusCode, payload } = await remove({})
+      expect(statusCode).toBe(400)
+      expect(JSON.parse(payload)).toEqual(upstreamError)
+      expect(await authorisation(22222221)).toEqual(initial[22222221])
+    })
+
+    it('should return 404 Person not found for an unknown person', async () => {
+      const { statusCode, payload } = await remove({
+        personRoles: [{ role: 'Agent', personId: 999999999 }],
+        personPrivileges: []
+      })
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual({
+        data: null,
+        success: false,
+        errorString: 'Person not found.'
+      })
+    })
+
+    it('should return 404 Organisation not found when the org does not exist', async () => {
+      const { statusCode, payload } = await remove(
+        { personRoles: [{ role: 'Agent', personId: 22222221 }], personPrivileges: [] },
+        0
+      )
+      expect(statusCode).toBe(404)
+      expect(JSON.parse(payload)).toEqual({
+        data: null,
+        success: false,
+        errorString: 'Organisation not found.'
+      })
     })
   })
 })

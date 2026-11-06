@@ -253,7 +253,7 @@ del(.paths["/organisation/{organisationId}/deactivate"], .paths["/organisation/{
     # own boundary IDs, fuzzing sends random ones and stateful sends real orgIds from other
     # responses, none of which is safe against a real KITS env. Running from docker against the
     # mock is unaffected and all phases will run.
-    write_operations='^(createAuthorisation|updateAuthorisation|lockOrganisation|unlockOrganisation)$'
+    write_operations='^(createAuthorisation|updateAuthorisation|removeAuthorisation|lockOrganisation|unlockOrganisation)$'
     # NOTE: the write operations are only checked when CONTRACT_WRITE_ORG_ID and
     # CONTRACT_WRITE_PERSON_ID are set. The run will lock and unlock that org, and overwrite (and
     # may remove) that person's authorisations on it, so use an org/person that is safe to modify (use RP
@@ -263,6 +263,7 @@ del(.paths["/organisation/{organisationId}/deactivate"], .paths["/organisation/{
       require_numeric CONTRACT_WRITE_ORG_ID CONTRACT_WRITE_PERSON_ID
       authorisation='.paths["/SitiAgriApi/authorisation/organisation/{orgId}/authorisation"].post'
       person_authorisation='.paths["/SitiAgriApi/authorisation/organisation/{orgId}/authorisation/person/{personId}"].put'
+      remove_authorisation='.paths["/SitiAgriApi/authorisation/organisation/{orgId}/authorisation"].delete'
       # scheme privileges, to which upstream adds the matching "- SA" ones
       authorisation_body='{
   "personRoles": [{ "role": "Helper", "personId": env(CONTRACT_WRITE_PERSON_ID) }],
@@ -275,7 +276,9 @@ del(.paths["/organisation/{organisationId}/deactivate"], .paths["/organisation/{
 '"${authorisation}"'.requestBody.content["application/json"].example = '"${authorisation_body}"' |
 '"${person_authorisation}"'.parameters[0].schema.examples = [strenv(CONTRACT_WRITE_ORG_ID)] |
 '"${person_authorisation}"'.parameters[1].schema.examples = [env(CONTRACT_WRITE_PERSON_ID)] |
-'"${person_authorisation}"'.requestBody.content["application/json"].example = '"${authorisation_body}"
+'"${person_authorisation}"'.requestBody.content["application/json"].example = '"${authorisation_body}"' |
+'"${remove_authorisation}"'.parameters[0].schema.examples = [strenv(CONTRACT_WRITE_ORG_ID)] |
+'"${remove_authorisation}"'.requestBody.content["application/json"].example = '"${authorisation_body}"
     elif [ -n "${CONTRACT_WRITE_ORG_ID}${CONTRACT_WRITE_PERSON_ID}" ]; then
       echo "ERROR: set both CONTRACT_WRITE_ORG_ID and CONTRACT_WRITE_PERSON_ID, or neither" 1>&2
       usage
