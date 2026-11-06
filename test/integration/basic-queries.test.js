@@ -192,7 +192,7 @@ describe('Basic queries for faked routes', () => {
           charityCommissionRegistrationNumber: '12312312',
           businessReference: '9100000001',
           hasAdditionalBusinessActivities: true,
-          taxRegistrationNumber: '123456789'
+          taxRegistrationNumber: '123456789' // sfd-id-check: allow - tax registration number
         }
       })
       expect(response.statusCode).toBe(200)
@@ -248,7 +248,7 @@ describe('Basic queries for faked routes', () => {
           additionalSbiIds: [],
           additionalBusinessActivities: null,
           hasAdditionalBusinessActivities: true,
-          taxRegistrationNumber: '123456789'
+          taxRegistrationNumber: '123456789' // sfd-id-check: allow - tax registration number
         })
       )
 
@@ -278,7 +278,7 @@ describe('Basic queries for faked routes', () => {
     test('Should return data for /authorisation/organisation/{organisationId}', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
@@ -399,7 +399,7 @@ describe('Basic queries for faked routes', () => {
       })
 
       test('Should return empty results when nothing matches', async () => {
-        const response = await search('/extapi/organisation/search', 'SBI', '999999999')
+        const response = await search('/extapi/organisation/search', 'SBI', '899999999')
         expect(response.statusCode).toBe(200)
         const json = JSON.parse(response.payload)
         expect(json._data).toEqual([])
@@ -427,7 +427,7 @@ describe('Basic queries for faked routes', () => {
     describe('/person/search', () => {
       test.each([
         ['CUSTOMER_REFERENCE', '9100000000'],
-        ['PERSONAL_IDENTIFIER', '910000001'],
+        ['PERSONAL_IDENTIFIER', '910000001'], // sfd-id-check: allow - personal identifier
         ['CUSTOMER_NAME', 'sEArchington'], // partial surname match, ignoring case
         ['CUSTOMER_POSTCODE', 'ab12 3cd'], // full match, ignoring case and whitespace
         ['VENDOR_NUMBER', '123456'], // people of orgs with a matching vendor number
@@ -442,7 +442,7 @@ describe('Basic queries for faked routes', () => {
             id: 9100000,
             fullName: 'Searchable Searchington',
             customerReference: '9100000000',
-            personalIdentifiers: ['910000001'],
+            personalIdentifiers: ['910000001'], // sfd-id-check: allow - personal identifier
             primaryAddress: expect.objectContaining({ postalCode: 'AB12 3CD' })
           })
         )
@@ -472,7 +472,7 @@ describe('Basic queries for faked routes', () => {
       })
 
       test('Should reject a too-short primarySearchPhrase', async () => {
-        const response = await search('/extapi/person/search', 'CUSTOMER_REFERENCE', '123456789')
+        const response = await search('/extapi/person/search', 'CUSTOMER_REFERENCE', '123456789') // sfd-id-check: allow - deliberately too short to be a CRN
         expect(response.statusCode).toBe(400)
       })
     })
@@ -516,7 +516,7 @@ describe('Basic queries for faked routes', () => {
     test('Should return data for /notifications', async () => {
       const response = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/notifications?personId=11111111&organisationId=111111111'
+        url: '/extapi/notifications?personId=11111111&organisationId=111111111' // sfd-id-check: allow - organisation ID
       })
       expect(response.statusCode).toBe(200)
       const json = JSON.parse(response.payload)
@@ -531,7 +531,7 @@ describe('Basic queries for faked routes', () => {
       const getPageIds = async (page) => {
         const response = await mockServer.inject({
           method: 'GET',
-          url: `/extapi/notifications?personId=11111111&organisationId=111111111&page=${page}`
+          url: `/extapi/notifications?personId=11111111&organisationId=111111111&page=${page}` // sfd-id-check: allow - organisation ID
         })
         return JSON.parse(response.payload).notifications.map(({ id }) => id)
       }
@@ -549,7 +549,7 @@ describe('Basic queries for faked routes', () => {
       const getPageCount = async (page) => {
         const response = await mockServer.inject({
           method: 'GET',
-          url: `/extapi/notifications?personId=11111141&organisationId=333333334&page=${page}`
+          url: `/extapi/notifications?personId=11111141&organisationId=333333334&page=${page}` // sfd-id-check: allow - organisation ID
         })
         return JSON.parse(response.payload).notifications.length
       }

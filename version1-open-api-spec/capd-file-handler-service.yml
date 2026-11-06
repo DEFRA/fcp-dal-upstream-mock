@@ -274,7 +274,7 @@ paths:
 
         5. **Cleanup**: Temp documents are deleted from TEMP_DOCUMENT after all uploads.
 
-        **HTTP 200**: All files uploaded. `id` = UOSR (e.g. `111111111_1700000000`).
+        **HTTP 200**: All files uploaded. `id` = UOSR (e.g. `811111111_1700000000`). <!-- sfd-id-check: allow - Unix timestamp -->
         **HTTP 422**: One or more uploads failed (code 30 = FAILED_TO_UPLOAD_ALL_FILES).
                       `id` may still be present in the response if the UOSR was generated.
         **HTTP 500**: Azure container not found or unexpected error.
@@ -290,14 +290,14 @@ paths:
               landChange:
                 summary: Land change submission with two files
                 value:
-                  personId: 123456789
-                  organisationId: 987654321
+                  personId: 123456789 # sfd-id-check: allow - person ID
+                  organisationId: 987654321 # sfd-id-check: allow - organisation ID
                   fileNames:
                     - cover-letter.pdf
                     - map-evidence.jpg
-                  singleBusinessIdentifier: 111111111
-                  firmReferenceNumber: 222222222
-                  customerReferenceNumber: 333333333
+                  singleBusinessIdentifier: 811111111
+                  firmReferenceNumber: 822222222
+                  customerReferenceNumber: 9333333333
                   parcels:
                     - parcelId: P123
                       sheetId: SH12
@@ -320,7 +320,7 @@ paths:
               examples:
                 success:
                   value:
-                    id: '111111111_1700000000'
+                    id: '811111111_1700000000' # sfd-id-check: allow - Unix timestamp
         '422':
           description: |
             One or more files could not be uploaded (code 30 = FAILED_TO_UPLOAD_ALL_FILES),
@@ -340,7 +340,7 @@ paths:
                 uploadFailed:
                   summary: Upload failed
                   value:
-                    id: '111111111_1700000000'
+                    id: '811111111_1700000000' # sfd-id-check: allow - Unix timestamp
                     errors:
                       - code: 30
                         description: Failed to upload all files

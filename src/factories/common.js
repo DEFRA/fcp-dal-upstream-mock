@@ -9,7 +9,7 @@ faker.setDefaultRefDate(new Date('2025-01-01'))
 // faker.seed only accepts numbers, so non-numeric seeds (e.g. permission
 // function names) are hashed to a stable integer.
 const hashString = (str) =>
-  [...str].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) % 2147483647, 7)
+  [...str].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) % 2147483647, 7) // sfd-id-check: allow - hash modulus
 
 const intOrHash = (value) => {
   const integer = Number.parseInt(value, 10)

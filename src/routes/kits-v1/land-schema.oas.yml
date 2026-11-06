@@ -236,7 +236,7 @@ components:
       schema:
         type: integer
         format: int64
-        examples: [1111111111]
+        examples: [1111111111] # sfd-id-check: allow - organisation ID
     historicDate:
       name: historicDate
       in: path

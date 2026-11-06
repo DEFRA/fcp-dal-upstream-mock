@@ -33,9 +33,9 @@ paths:
             format: int64
             minimum: 1
             examples:
-              - 1000000000
-              - 1111111111
-              - 2222222222
+              - 1000000000 # sfd-id-check: allow - organisation ID
+              - 1111111111 # sfd-id-check: allow - organisation ID
+              - 2222222222 # sfd-id-check: allow - organisation ID
               - 850000001
               - 850000002
               - 850000003
@@ -73,9 +73,9 @@ paths:
             format: int64
             minimum: 1
             examples:
-              - 1000000000
-              - 1111111111
-              - 2222222222
+              - 1000000000 # sfd-id-check: allow - organisation ID
+              - 1111111111 # sfd-id-check: allow - organisation ID
+              - 2222222222 # sfd-id-check: allow - organisation ID
               - 850000001
               - 850000002
               - 850000003
@@ -111,9 +111,9 @@ paths:
             format: int64
             minimum: 1
             examples:
-              - 1000000000
-              - 1111111111
-              - 2222222222
+              - 1000000000 # sfd-id-check: allow - organisation ID
+              - 1111111111 # sfd-id-check: allow - organisation ID
+              - 2222222222 # sfd-id-check: allow - organisation ID
               - 850000001
               - 850000002
               - 850000003
@@ -183,9 +183,9 @@ paths:
             format: int64
             minimum: 1
             examples:
-              - 1000000000
-              - 1111111111
-              - 2222222222
+              - 1000000000 # sfd-id-check: allow - organisation ID
+              - 1111111111 # sfd-id-check: allow - organisation ID
+              - 2222222222 # sfd-id-check: allow - organisation ID
               - 850000001
               - 850000002
               - 850000003

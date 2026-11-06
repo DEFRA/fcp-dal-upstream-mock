@@ -32,10 +32,10 @@ describe('Authorisation create & update (Ticket #29)', () => {
   }
 
   it('POST should create an authorisation when the person is not already linked', async () => {
-    // 22222220 exists but is only a customer of org 222222222
+    // 22222220 exists but is only a customer of org 222222222 (sfd-id-check: allow)
     const { statusCode, payload } = await mockServer.inject({
       method: 'POST',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation', // sfd-id-check: allow - organisation ID
       headers: { authorization: 'Bearer token' },
       payload: createPayload
     })
@@ -47,7 +47,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
   it('POST should return 409 when the person is already authorised on the organisation', async () => {
     const { statusCode, payload } = await mockServer.inject({
       method: 'POST',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation', // sfd-id-check: allow - organisation ID
       headers: { authorization: 'Bearer token' },
       payload: {
         personRoles: [
@@ -87,7 +87,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
   it('PUT should update an existing authorisation when called without email header', async () => {
     const { statusCode, payload } = await mockServer.inject({
       method: 'PUT',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111', // sfd-id-check: allow - organisation ID
       headers: { authorization: 'Bearer token' },
       payload: updatePayload
     })
@@ -97,7 +97,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
   })
 
   it('PUT should succeed and be idempotent when the same payload is submitted again', async () => {
-    // 22222222 is NOT initially linked to org 111111111 — guaranteed clean start
+    // 22222222 is NOT initially linked to org 111111111 — guaranteed clean start (sfd-id-check: allow)
     const payload = {
       personRoles: [{ role: 'Agent', personId: 22222222 }],
       personPrivileges: [
@@ -108,7 +108,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     // Create the initial link via POST
     const create = await mockServer.inject({
       method: 'POST',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation', // sfd-id-check: allow - organisation ID
       headers: { authorization: 'Bearer token' },
       payload
     })
@@ -117,7 +117,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     // PUT with the same payload succeeds (idempotent)
     const first = await mockServer.inject({
       method: 'PUT',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222222',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222222', // sfd-id-check: allow - organisation ID
       headers: { authorization: 'Bearer token' },
       payload
     })
@@ -127,7 +127,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     // Second identical PUT also succeeds
     const second = await mockServer.inject({
       method: 'PUT',
-      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222222',
+      url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222222', // sfd-id-check: allow - organisation ID
       headers: { authorization: 'Bearer token' },
       payload
     })
@@ -163,10 +163,10 @@ describe('Authorisation create & update (Ticket #29)', () => {
     )
 
     it('POST should ignore leading zeros in orgId', async () => {
-      // as upstream, 0111111111 is org 111111111, on which 11111111 is already authorised
+      // as upstream, 0111111111 is org 111111111, on which 11111111 is already authorised (sfd-id-check: allow)
       const { statusCode, payload } = await mockServer.inject({
         method: 'POST',
-        url: '/extapi/SitiAgriApi/authorisation/organisation/0111111111/authorisation',
+        url: '/extapi/SitiAgriApi/authorisation/organisation/0111111111/authorisation', // sfd-id-check: allow - organisation ID
         headers: { authorization: 'Bearer token' },
         payload: {
           personRoles: [{ role: 'Agent', personId: 11111111 }],
@@ -189,7 +189,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
           }
         })
       expect(
-        (await authorise('POST', '0111111111/authorisation', ['View - business'])).statusCode
+        (await authorise('POST', '0111111111/authorisation', ['View - business'])).statusCode // sfd-id-check: allow - organisation ID
       ).toBe(200)
       expect(
         (await authorise('PUT', '00111111111/authorisation/person/22222225', ['Amend - business']))
@@ -198,7 +198,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
 
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       const rows = JSON.parse(payload)
         ._data.filter(({ id }) => id === 22222225)
@@ -222,7 +222,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
       async (personId) => {
         const { statusCode, headers, payload } = await mockServer.inject({
           method: 'PUT',
-          url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${encodeURIComponent(personId)}`,
+          url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${encodeURIComponent(personId)}`, // sfd-id-check: allow - person ID
           headers: { authorization: 'Bearer token' },
           payload: updatePayload
         })
@@ -232,12 +232,12 @@ describe('Authorisation create & update (Ticket #29)', () => {
       }
     )
 
-    it.each(['+11111111', '0011111111'])(
+    /* sfd-id-check: allow - person ID */ it.each(['+11111111', '0011111111'])(
       'PUT should ignore leading zeros and plus sign in person id (personId %s)',
       async (personId) => {
         const { statusCode } = await mockServer.inject({
           method: 'PUT',
-          url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${encodeURIComponent(personId)}`,
+          url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${encodeURIComponent(personId)}`, // sfd-id-check: allow - person ID
           headers: { authorization: 'Bearer token' },
           payload: updatePayload
         })
@@ -248,7 +248,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     it.each(['-1', '0'])('PUT should return 404 when personId is %s', async (personId) => {
       const { statusCode } = await mockServer.inject({
         method: 'PUT',
-        url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${personId}`,
+        url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/${personId}`, // sfd-id-check: allow - person ID
         headers: { authorization: 'Bearer token' },
         payload: updatePayload
       })
@@ -266,18 +266,18 @@ describe('Authorisation create & update (Ticket #29)', () => {
       })
 
     it.each([
-      ['personRoles', { ...updatePayload, personRoles: [{ role: 'Agent', personId: 999999999 }] }],
+      ['personRoles', { ...updatePayload, personRoles: [{ role: 'Agent', personId: 999999999 }] }], // sfd-id-check: allow - person ID
       [
         'personPrivileges',
         {
           ...updatePayload,
-          personPrivileges: [{ personId: 999999999, privilegeNames: ['Amend - land'] }]
+          personPrivileges: [{ personId: 999999999, privilegeNames: ['Amend - land'] }] // sfd-id-check: allow - person ID
         }
       ]
     ])(
       'should return 404 Person not found when the %s personId differs from the path',
       async (_, payload) => {
-        const { statusCode, payload: body } = await put(111111111, 11111111, payload)
+        const { statusCode, payload: body } = await put(111111111, 11111111, payload) // sfd-id-check: allow - organisation ID
         expect(statusCode).toBe(404)
         expect(JSON.parse(body)).toEqual({
           data: null,
@@ -301,9 +301,9 @@ describe('Authorisation create & update (Ticket #29)', () => {
   const upstreamError = { data: null, success: false, errorString: 'An error has occurred.' }
 
   describe('PUT links and unlinks', () => {
-    // 22222223 exists but is only a customer of org 222222222
+    // 22222223 exists but is only a customer of org 222222222 (sfd-id-check: allow)
     const url =
-      '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222223'
+      '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/22222223' // sfd-id-check: allow - organisation ID
     const linkPayload = {
       personRoles: [{ role: 'Agent', personId: 22222223 }],
       personPrivileges: [{ personId: 22222223, privilegeNames: ['Amend - land'] }]
@@ -313,7 +313,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const customerIds = async () => {
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111',
+        url: '/extapi/authorisation/organisation/111111111', // sfd-id-check: allow - organisation ID
         headers: { email: 'test@defra.gov.uk' }
       })
       return JSON.parse(payload)._data.map(({ id }) => Number(id))
@@ -349,8 +349,8 @@ describe('Authorisation create & update (Ticket #29)', () => {
         headers: { authorization: 'Bearer token' },
         payload
       })
-    const putUrl = '111111111/authorisation/person/11111111'
-    const postUrl = '111111111/authorisation'
+    const putUrl = '111111111/authorisation/person/11111111' // sfd-id-check: allow - organisation ID
+    const postUrl = '111111111/authorisation' // sfd-id-check: allow - organisation ID
 
     it.each([
       ['PUT', putUrl, undefined],
@@ -377,7 +377,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     )
 
     it('PUT should check the person exists before the payload', async () => {
-      const { statusCode, payload } = await inject('PUT', '111111111/authorisation/person/1', {})
+      const { statusCode, payload } = await inject('PUT', '111111111/authorisation/person/1', {}) // sfd-id-check: allow - organisation ID
       expect(statusCode).toBe(404)
       expect(JSON.parse(payload).errorString).toBe('Person not found.')
     })
@@ -385,13 +385,13 @@ describe('Authorisation create & update (Ticket #29)', () => {
 
   describe('PUT with multiple entries', () => {
     const url =
-      '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111'
+      '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111' // sfd-id-check: allow - organisation ID
     const put = (payload) =>
       mockServer.inject({ method: 'PUT', url, headers: { authorization: 'Bearer token' }, payload })
     const rows = async () => {
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       return JSON.parse(payload)
         ._data.filter(({ id }) => id === 11111111)
@@ -480,12 +480,12 @@ describe('Authorisation create & update (Ticket #29)', () => {
     })
 
     it('should return 409 when personRoles repeats an entry', async () => {
-      const { statusCode } = await post(111111111, bodyForPerson(22222224, ['Agent', 'Agent'], []))
+      const { statusCode } = await post(111111111, bodyForPerson(22222224, ['Agent', 'Agent'], [])) // sfd-id-check: allow - organisation ID
       expect(statusCode).toBe(409)
     })
 
     it('should link the person once per role, each with the combined privileges', async () => {
-      const { statusCode } = await post(111111111, {
+      /* sfd-id-check: allow - organisation ID */ const { statusCode } = await post(111111111, {
         ...bodyForPerson(22222224, ['Agent', 'Helper'], ['Amend - land']),
         personPrivileges: [
           { personId: 22222224, privilegeNames: ['Amend - land'] },
@@ -495,7 +495,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
       expect(statusCode).toBe(200)
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       const rows = JSON.parse(payload)
         ._data.filter(({ id }) => id === 22222224)
@@ -538,8 +538,8 @@ describe('Authorisation create & update (Ticket #29)', () => {
 
   describe('unrecognised fields', () => {
     const urls = {
-      POST: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation',
-      PUT: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111'
+      POST: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation', // sfd-id-check: allow - organisation ID
+      PUT: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111' // sfd-id-check: allow - organisation ID
     }
     const role = { role: 'Agent', personId: 11111111 }
     const privilege = { personId: 11111111, privilegeNames: ['Amend - land'] }
@@ -582,7 +582,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const put = (privilegeNames) =>
       mockServer.inject({
         method: 'PUT',
-        url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111',
+        url: '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation/person/11111111', // sfd-id-check: allow - organisation ID
         headers: { authorization: 'Bearer token' },
         payload: {
           personRoles: [{ role: 'Agent', personId: 11111111 }],
@@ -592,7 +592,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const privileges = async () => {
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       return JSON.parse(payload)._data.find(({ id }) => id === 11111111).privileges
     }
@@ -653,7 +653,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const authorise = (method, path, personId, roleEntry) =>
       mockServer.inject({
         method,
-        url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/${path}`,
+        url: `/extapi/SitiAgriApi/authorisation/organisation/111111111/${path}`, // sfd-id-check: allow - organisation ID
         headers: { authorization: 'Bearer token' },
         payload: {
           personRoles: [{ personId, ...roleEntry }],
@@ -663,7 +663,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     const rows = async (personId) => {
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       return JSON.parse(payload)
         ._data.filter(({ id }) => id === personId)
@@ -678,7 +678,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
     it.each(missingRoles)(
       'POST should return 500 and not link the person when the role is %s',
       async (_, roleEntry) => {
-        // 22222226 exists but is only a customer of org 222222222
+        // 22222226 exists but is only a customer of org 222222222 (sfd-id-check: allow)
         const { statusCode, payload } = await authorise(
           'POST',
           'authorisation',
@@ -718,9 +718,12 @@ describe('Authorisation create & update (Ticket #29)', () => {
   })
 
   describe('DELETE', () => {
-    // 22222221 and 22222229 exist but are only customers of org 222222222
-    const url = '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation'
-    const remove = (payload, orgId = 111111111) =>
+    // 22222221 and 22222229 exist but are only customers of org 222222222 (sfd-id-check: allow)
+    const url = '/extapi/SitiAgriApi/authorisation/organisation/111111111/authorisation' // sfd-id-check: allow - organisation ID
+    const remove = (
+      payload,
+      orgId = 111111111 // sfd-id-check: allow - organisation ID
+    ) =>
       mockServer.inject({
         method: 'DELETE',
         url: `/extapi/SitiAgriApi/authorisation/organisation/${orgId}/authorisation`,
@@ -737,11 +740,11 @@ describe('Authorisation create & update (Ticket #29)', () => {
           personPrivileges: [{ personId, privilegeNames }]
         }
       })
-    // the person's roles and privileges on org 111111111, from its customer rows
+    // the person's roles and privileges on org 111111111, from its customer rows (sfd-id-check: allow)
     const authorisation = async (personId) => {
       const { payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/authorisation/organisation/111111111'
+        url: '/extapi/authorisation/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       const rows = JSON.parse(payload)._data.filter(({ id }) => id === personId)
       return {
@@ -896,7 +899,7 @@ describe('Authorisation create & update (Ticket #29)', () => {
 
     it('should return 404 Person not found for an unknown person', async () => {
       const { statusCode, payload } = await remove({
-        personRoles: [{ role: 'Agent', personId: 999999999 }],
+        personRoles: [{ role: 'Agent', personId: 999999999 }], // sfd-id-check: allow - person ID
         personPrivileges: []
       })
       expect(statusCode).toBe(404)

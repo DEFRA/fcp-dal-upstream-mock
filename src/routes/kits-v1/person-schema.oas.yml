@@ -630,7 +630,7 @@ components:
                   minLength: 10
                 - type: integer
                   format: int64
-                  minimum: 1000000000
+                  minimum: 1000000000 # sfd-id-check: allow - validation minimum
           required:
             - 'searchFieldType'
             - 'primarySearchPhrase'
@@ -646,7 +646,7 @@ components:
                   minLength: 9
                 - type: integer
                   format: int64
-                  minimum: 100000000
+                  minimum: 100000000 # sfd-id-check: allow - validation minimum
           required:
             - 'searchFieldType'
             - 'primarySearchPhrase'
@@ -711,7 +711,7 @@ components:
         - searchFieldType: 'CUSTOMER_REFERENCE'
           primarySearchPhrase: '9111111100'
         - searchFieldType: 'PERSONAL_IDENTIFIER'
-          primarySearchPhrase: '910000001'
+          primarySearchPhrase: '910000001' # sfd-id-check: allow - personal identifier
         - searchFieldType: 'CUSTOMER_NAME'
           primarySearchPhrase: 'Smith'
         - searchFieldType: 'CUSTOMER_POSTCODE'

@@ -31,7 +31,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [100000000, 111111111, 222222222]
+            examples: [100000000, 111111111, 222222222] # sfd-id-check: allow - organisation ID
       responses:
         '200':
           description: 'Returns full organisation details.'
@@ -144,7 +144,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [100000000, 111111111, 222222222]
+            examples: [100000000, 111111111, 222222222] # sfd-id-check: allow - organisation ID
       requestBody:
         required: true
         content:
@@ -202,7 +202,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [100000000, 111111111, 222222222]
+            examples: [100000000, 111111111, 222222222] # sfd-id-check: allow - organisation ID
       requestBody:
         required: true
         content:
@@ -265,7 +265,7 @@ paths:
           schema:
             type: string
             pattern: '^[0-9]{1,20}$'
-            examples: ['111111111']
+            examples: ['111111111'] # sfd-id-check: allow - organisation ID
       requestBody:
         required: true
         content:
@@ -381,7 +381,7 @@ paths:
           schema:
             type: string
             pattern: '^[0-9]{1,20}$'
-            examples: ['111111111']
+            examples: ['111111111'] # sfd-id-check: allow - organisation ID
       requestBody:
         required: true
         content:
@@ -491,7 +491,7 @@ paths:
           schema:
             type: string
             pattern: '^[0-9]{1,20}$'
-            examples: ['111111111']
+            examples: ['111111111'] # sfd-id-check: allow - organisation ID
         - name: 'personId'
           in: 'path'
           required: true
@@ -612,7 +612,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [1000000000, 1111111111, 2222222222]
+            examples: [1000000000, 1111111111, 2222222222] # sfd-id-check: allow - organisation ID
       requestBody:
         required: true
         content:
@@ -673,7 +673,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            examples: [1000000000, 1111111111, 2222222222]
+            examples: [1000000000, 1111111111, 2222222222] # sfd-id-check: allow - organisation ID
       requestBody:
         required: true
         content:
@@ -733,7 +733,7 @@ components:
                 - type: string
                   minLength: 9
                 - type: integer
-                  minimum: 100000000
+                  minimum: 100000000 # sfd-id-check: allow - validation minimum
                   description: 'If the SBI is a number it must have at least 9 digits.'
                   # This is because the upstream checks the character length of the number.
                   # Unfortunately the upstream accepts any `number`, but this is the closest we can

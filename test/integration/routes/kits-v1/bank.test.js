@@ -7,10 +7,10 @@ const validateUrl = '/bank-change-service/v1/validate'
 const knownSbi = 822222222
 
 const validPayload = () => ({
-  organisationId: '222222222',
+  organisationId: '222222222', // sfd-id-check: allow - organisation ID
   personId: '22222220',
   sbi: String(knownSbi),
-  frn: '222222222',
+  frn: '822222222',
   crn: '9222222000',
   submissionDateTime: '02/05/2026 14:12:11',
   account: {
@@ -171,7 +171,7 @@ describe('POST /bank-change-service/v1/submit', () => {
       {
         name: 'SBI is not found',
         mutate: (p) => {
-          p.sbi = '999999999'
+          p.sbi = '899999999'
         },
         expected: /Organisation not found/
       },
@@ -225,7 +225,7 @@ describe('GET /bank-change-service/v1/locked-status/{organisationId}/{personId}'
   it('returns locked:false for an org/person pair that has no recent failures', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/locked-status/111111111/11111111'
+      url: '/bank-change-service/v1/locked-status/111111111/11111111' // sfd-id-check: allow - organisation ID
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({ locked: false })
@@ -234,7 +234,7 @@ describe('GET /bank-change-service/v1/locked-status/{organisationId}/{personId}'
   it('returns locked:true', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/locked-status/111111111/11111119'
+      url: '/bank-change-service/v1/locked-status/111111111/11111119' // sfd-id-check: allow - organisation ID
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({ locked: true })
@@ -245,7 +245,7 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
   it('returns editable:true for an organisation with no overrides', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/account-status/111111111'
+      url: '/bank-change-service/v1/account-status/111111111' // sfd-id-check: allow - organisation ID
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -259,7 +259,7 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
   it('returns editable:false when the org was recently submitted', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/account-status/222222222'
+      url: '/bank-change-service/v1/account-status/222222222' // sfd-id-check: allow - organisation ID
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -273,7 +273,7 @@ describe('GET /bank-change-service/v1/account-status/{organisationId}', () => {
   it('returns editable:false when the org is new', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/account-status/333333333'
+      url: '/bank-change-service/v1/account-status/333333333' // sfd-id-check: allow - organisation ID
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -303,7 +303,7 @@ describe('GET /bank-change-service/v1/existing-accounts/{frn}', () => {
   it('returns the accounts held in DAX for a known FRN', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/bank-change-service/v1/existing-accounts/2222222222'
+      url: '/bank-change-service/v1/existing-accounts/2222222222' // sfd-id-check: allow - FRN
     })
     expect(statusCode).toBe(200)
     expect(result).toEqual({
@@ -447,7 +447,7 @@ describe('POST /bank-change-service/v1/validate', () => {
 
     it('returns 400 when the SBI is not found', async () => {
       const payload = validValidatePayload()
-      payload.sbi = '999999999'
+      payload.sbi = '899999999'
       const { result, statusCode } = await server.inject({
         method: 'POST',
         url: validateUrl,

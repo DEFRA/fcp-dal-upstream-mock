@@ -97,8 +97,8 @@ paths:
               ukAccount:
                 summary: UK personal account validation
                 value:
-                  organisationId: '987654321'
-                  personId: '123456789'
+                  organisationId: '987654321' # sfd-id-check: allow - organisation ID
+                  personId: '123456789' # sfd-id-check: allow - person ID
                   account:
                     accountType: UK_PERSONAL
                     name: John Doe
@@ -111,8 +111,8 @@ paths:
               euAccount:
                 summary: EU IBAN account validation
                 value:
-                  organisationId: '987654321'
-                  personId: '123456789'
+                  organisationId: '987654321' # sfd-id-check: allow - organisation ID
+                  personId: '123456789' # sfd-id-check: allow - person ID
                   account:
                     accountType: EU
                     name: Jane Smith
@@ -211,11 +211,11 @@ paths:
               ukPersonal:
                 summary: UK personal bank account submission
                 value:
-                  organisationId: '987654321'
-                  personId: '123456789'
-                  sbi: '123456789'
-                  frn: '123456789'
-                  crn: '123456789'
+                  organisationId: '987654321' # sfd-id-check: allow - organisation ID
+                  personId: '123456789' # sfd-id-check: allow - person ID
+                  sbi: '823456789'
+                  frn: '123456789' # sfd-id-check: allow - FRN
+                  crn: '9123456789'
                   submissionDateTime: '01/02/2023 14:12:11'
                   account:
                     accountType: UK_PERSONAL

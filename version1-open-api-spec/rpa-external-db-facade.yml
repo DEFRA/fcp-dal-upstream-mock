@@ -74,7 +74,7 @@ paths:
               type: integer
           style: form
           explode: true
-          example: 123456789
+          example: 123456789 # sfd-id-check: allow - organisation ID
       responses:
         '200':
           description: |

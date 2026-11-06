@@ -80,7 +80,7 @@ components:
                     - type: boolean
                     - type: 'null'
                   examples:
-                    - '2222222222'
+                    - '9222222222'
                     - '9791344361'
                     - '9581665877'
                     - '9672045241'
@@ -152,7 +152,7 @@ components:
                 - requestedSystem: 'a22c6ad7-ae80-4f5a-a705-7fa63f6e8d0e'
                   requesterId: 'case.worker@defra.gov.uk'
                   userIP: '192.168.1.1'
-                  resourceId: '1234567890'
+                  resourceId: '1234567890' # sfd-id-check: allow - resource ID
                   correlationId: '3a6538ac904b3a2bdf3c4985f85c29c7'
                 - requestedSystem: ''
                   requesterId: ''

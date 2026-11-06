@@ -34,7 +34,7 @@ paths:
                 description: Bank change request
                 value:
                   sbi: '822222222'
-                  frn: '2222222222'
+                  frn: '9222222222'
                   crn: '9222222000'
                   submissionDateTime: 02/05/2026 14:12:11
                   account:
@@ -50,7 +50,7 @@ paths:
                   country:
                     code: IRL
                     currency: EUR
-                  organisationId: '2222222222'
+                  organisationId: '2222222222' # sfd-id-check: allow - organisation ID
                   personId: '22222220'
       responses:
         '200':
@@ -319,7 +319,7 @@ paths:
                 summary: A bank validation request
                 value:
                   sbi: '822222222'
-                  frn: '2222222222'
+                  frn: '9222222222'
                   crn: '9222222000'
                   dateOfBirth: 21/04/2000
                   submissionDateTime: 02/05/2026 14:12:11
@@ -479,10 +479,10 @@ components:
     SubmissionRequest:
       type: object
       examples:
-        - organisationId: '1000000000'
-          personId: '1000000000'
+        - organisationId: '1000000000' # sfd-id-check: allow - organisation ID
+          personId: '1000000000' # sfd-id-check: allow - person ID
           sbi: '800000000'
-          frn: '1000000000'
+          frn: '9000000000'
           crn: '9000000000'
           submissionDateTime: '01/02/2023 14:12:11'
           account:
@@ -545,7 +545,7 @@ components:
       type: object
       examples:
         - sbi: '800000000'
-          frn: '1000000000'
+          frn: '9000000000'
           crn: '9000000000'
           dateOfBirth: '21/04/2000'
           submissionDateTime: '01/02/2023 14:12:11'

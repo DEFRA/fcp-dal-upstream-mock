@@ -26,7 +26,7 @@ import { createPayloadValidator } from '../../utils/validatePayload.js'
 
 // `primarySearchPhrase` constraints for each searchFieldType
 const searchFieldTypes = {
-  SBI: { minLength: 9, minNumber: 100000000 },
+  SBI: { minLength: 9, minNumber: 100000000 }, // sfd-id-check: allow - validation minimum
   BUSINESS_NAME: { minLength: 2, minNumber: 10 },
   BUSINESS_POSTCODE: { minLength: 5, minNumber: 10000 }
 }

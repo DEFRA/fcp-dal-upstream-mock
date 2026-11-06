@@ -116,7 +116,7 @@ paths:
                   changeType: LANDCOVER_CHANGE
                   organisationId: 123
                   personId: 567
-                  sbi: 123456789
+                  sbi: 823456789
                   frn: 99998888
                   crn: 654321
                   parcels:

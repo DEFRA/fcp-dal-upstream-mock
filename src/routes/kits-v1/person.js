@@ -21,8 +21,8 @@ const logger = createLogger('person.route')
 
 // `primarySearchPhrase` constraints for each searchFieldType
 const searchFieldTypes = {
-  CUSTOMER_REFERENCE: { minLength: 10, minNumber: 1000000000 },
-  PERSONAL_IDENTIFIER: { minLength: 9, minNumber: 100000000 },
+  CUSTOMER_REFERENCE: { minLength: 10, minNumber: 1000000000 }, // sfd-id-check: allow - validation minimum
+  PERSONAL_IDENTIFIER: { minLength: 9, minNumber: 100000000 }, // sfd-id-check: allow - validation minimum
   CUSTOMER_NAME: { minLength: 1, allowBoolean: true },
   CUSTOMER_POSTCODE: { minLength: 5, minNumber: 10000 },
   VENDOR_NUMBER: { minLength: 6, minNumber: 100000 },

@@ -219,7 +219,7 @@ describe('Person routes', () => {
     it('should return 200 for a well-formed but unknown digitalContactPartyId', async () => {
       const { statusCode } = await server.inject({
         method: 'POST',
-        url: '/verify-email/999999999',
+        url: '/verify-email/999999999', // sfd-id-check: allow - digital contact ID
         headers: { 'content-type': 'text/plain' },
         payload: 'unknown@example.com'
       })
@@ -343,11 +343,11 @@ describe('Person routes', () => {
       // snippets only, to indicate the 2 organisations this user belongs to
       expect.arrayContaining([
         expect.objectContaining({
-          id: 111111111,
+          id: 111111111, // sfd-id-check: allow - organisation ID
           sbi: 811111111
         }),
         expect.objectContaining({
-          id: 222222222,
+          id: 222222222, // sfd-id-check: allow - organisation ID
           sbi: 822222222
         })
       ])
@@ -823,10 +823,10 @@ describe('Person routes', () => {
     })
 
     test.each([
-      [1735689600, 1735689600, 'positive number'],
-      [-1735689600, -1735689600, 'negative number'],
-      ['1735689600', 1735689600, 'positive string'],
-      ['-1735689600', -1735689600, 'negative string']
+      [1735689600, 1735689600, 'positive number'], // sfd-id-check: allow - Unix timestamp
+      [-1735689600, -1735689600, 'negative number'], // sfd-id-check: allow - Unix timestamp
+      ['1735689600', 1735689600, 'positive string'], // sfd-id-check: allow - Unix timestamp
+      ['-1735689600', -1735689600, 'negative string'] // sfd-id-check: allow - Unix timestamp
     ])(
       'should store dateOfBirth as milliseconds without conversion on PUT (%s)',
       async (input, expected) => {

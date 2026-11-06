@@ -58,7 +58,7 @@ describe('POST /external-auth/email-validation', () => {
     const { statusCode } = await server.inject({
       method: 'POST',
       url: saveUrl,
-      payload: validPayload({ customerReference: '9818181800', partyDigitalContactId: 999999999 })
+      payload: validPayload({ customerReference: '9818181800', partyDigitalContactId: 999999999 }) // sfd-id-check: allow - digital contact ID
     })
     expect(statusCode).toBe(200)
   })

@@ -23,7 +23,7 @@ describe('Organisation Deactivate/Reactivate', () => {
       expect(statusCode).toBe(204)
     })
     it('should throw an error when deactivating an organisation if neither reason nor partyNoteType is provided', async () => {
-      const organisationId = 100000000
+      const organisationId = 100000000 // sfd-id-check: allow - organisation ID
       const { statusCode } = await server.inject({
         method: 'POST',
         url: `/organisation/${organisationId}/deactivate`,
@@ -37,7 +37,7 @@ describe('Organisation Deactivate/Reactivate', () => {
     })
 
     it('should accept a deactivate payload with a note and no reason', async () => {
-      const organisationId = 100000000
+      const organisationId = 100000000 // sfd-id-check: allow - organisation ID
       const { statusCode } = await server.inject({
         method: 'POST',
         url: `/organisation/${organisationId}/deactivate`,
@@ -65,7 +65,7 @@ describe('Organisation Deactivate/Reactivate', () => {
     })
 
     it('should throw an error when deactivating an organisation if the organisation is not in locked state', async () => {
-      const organisationId = 100000000
+      const organisationId = 100000000 // sfd-id-check: allow - organisation ID
       const { statusCode } = await server.inject({
         method: 'POST',
         url: `/organisation/${organisationId}/deactivate`,
@@ -105,7 +105,7 @@ describe('Organisation Deactivate/Reactivate', () => {
 
     it('should throw an error when reactivating an organisation that is not deactivated', async () => {
       // arrange
-      const organisationId = 100000000
+      const organisationId = 100000000 // sfd-id-check: allow - organisation ID
 
       // act
       const { statusCode } = await server.inject({
@@ -123,7 +123,7 @@ describe('Organisation Deactivate/Reactivate', () => {
 
     it('should throw an error when reactivating an organisation that does not exist', async () => {
       // arrange
-      const organisationId = 999999999
+      const organisationId = 999999999 // sfd-id-check: allow - organisation ID
 
       // act
       const { statusCode } = await server.inject({
@@ -141,7 +141,7 @@ describe('Organisation Deactivate/Reactivate', () => {
 
     it('should throw an error when reactivating an organisation if neither reason nor note is provided', async () => {
       // arrange
-      const organisationId = 100000000
+      const organisationId = 100000000 // sfd-id-check: allow - organisation ID
 
       // act
       const { statusCode } = await server.inject({
@@ -160,7 +160,7 @@ describe('Organisation Deactivate/Reactivate', () => {
 
     it('should throw an error when reactivating an organisation with a different partyNoteType', async () => {
       // arrange
-      const organisationId = 100000000
+      const organisationId = 100000000 // sfd-id-check: allow - organisation ID
 
       // act
       const { statusCode } = await server.inject({

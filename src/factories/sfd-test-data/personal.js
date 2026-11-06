@@ -413,7 +413,7 @@ const personLookupEntries = {
     firstName: 'Invalid',
     lastName: 'phone',
     landline: null,
-    mobile: '123456789'
+    mobile: '123456789' // sfd-id-check: allow - phone number
   },
   3010072: {
     crn: '9610000072',
@@ -433,7 +433,7 @@ const personLookupEntries = {
     crn: '9610000074',
     firstName: 'Invalid',
     lastName: 'phone',
-    landline: '123456789',
+    landline: '123456789', // sfd-id-check: allow - phone number
     mobile: null
   },
   3010075: {

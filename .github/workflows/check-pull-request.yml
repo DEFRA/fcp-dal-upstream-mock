@@ -33,6 +33,9 @@ jobs:
           npm run lint
           npm t
 
+      - name: Check for real-looking CRNs and SBIs
+        uses: DEFRA/fcp-sfd-core/.github/actions/check-synthetic-ids@95f58ade56b2d0dd0f15bdcba6a5f37a54bcc939 # main
+
       - name: Docker build, Contract test
         run: |
           mkdir -p test/contract/logs && chmod 777 test/contract/logs

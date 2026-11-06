@@ -22,7 +22,8 @@
     "test:contract": "docker compose -f compose.yml -f test/contract/compose.yml run --quiet-pull --pull always --build --rm contract-tests",
     "verify:schemata": "redocly lint src/routes/**/*-schema*.yml",
     "test:contract:local": "dotenv -- ./test/contract/check-schema.sh",
-    "generate:defraid-token": "dotenv -e .env -- node scripts/get-defra-id-token.js"
+    "generate:defraid-token": "dotenv -e .env -- node scripts/get-defra-id-token.js",
+    "check:synthetic-ids": "sfd-id-check --staged"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
@@ -54,7 +55,8 @@
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
     "tough-cookie": "^6.0.2",
-    "vitest": "4.1.12"
+    "vitest": "4.1.12",
+    "fcp-sfd-core": "github:DEFRA/fcp-sfd-core#95f58ade56b2d0dd0f15bdcba6a5f37a54bcc939"
   },
   "overrides": {
     "js-yaml": "^4.2.0",

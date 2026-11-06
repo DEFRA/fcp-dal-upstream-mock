@@ -42,7 +42,7 @@ describe('Changes to organisation data', () => {
       charityCommissionRegistrationNumber: '12312312',
       businessReference: '9100000001',
       hasAdditionalBusinessActivities: true,
-      taxRegistrationNumber: '123456789'
+      taxRegistrationNumber: '123456789' // sfd-id-check: allow - tax registration number
     }
 
     it('should create a new organisation from data provided', async () => {
@@ -136,14 +136,14 @@ describe('Changes to organisation data', () => {
     it('should update all the additional details of an organisation', async () => {
       let { statusCode, payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/organisation/111111111'
+        url: '/extapi/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       const org = JSON.parse(payload)._data
 
       ;({ statusCode, payload } = await mockServer.inject({
         method: 'PUT',
-        url: '/extapi/organisation/111111111/additional-business-details',
+        url: '/extapi/organisation/111111111/additional-business-details', // sfd-id-check: allow - organisation ID
         payload: {
           legalStatus: { id: 101, type: 'some new value' },
           businessType: { id: 201, type: 'some new value' },
@@ -156,7 +156,7 @@ describe('Changes to organisation data', () => {
       expect(payload).toBe('')
       ;({ statusCode, payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/organisation/111111111'
+        url: '/extapi/organisation/111111111' // sfd-id-check: allow - organisation ID
       }))
       expect(statusCode).toBe(200)
       expect(JSON.parse(payload)._data).toEqual({
@@ -172,21 +172,21 @@ describe('Changes to organisation data', () => {
     it('should partially update the additional details of an organisation', async () => {
       let { statusCode, payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/organisation/111111111'
+        url: '/extapi/organisation/111111111' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       const org = JSON.parse(payload)._data
 
       ;({ statusCode, payload } = await mockServer.inject({
         method: 'PUT',
-        url: '/extapi/organisation/111111111/additional-business-details',
+        url: '/extapi/organisation/111111111/additional-business-details', // sfd-id-check: allow - organisation ID
         payload: { legalStatus: { id: 101 }, businessType: { id: 201 } }
       }))
       expect(statusCode).toBe(204)
       expect(payload).toBe('')
       ;({ statusCode, payload } = await mockServer.inject({
         method: 'GET',
-        url: '/extapi/organisation/111111111'
+        url: '/extapi/organisation/111111111' // sfd-id-check: allow - organisation ID
       }))
       expect(statusCode).toBe(200)
       expect(JSON.parse(payload)._data).toEqual({

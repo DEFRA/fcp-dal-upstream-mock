@@ -17,7 +17,7 @@ describe('Fake Payments', () => {
   describe('factory', () => {
     it('should generate payments array matching the schema', () => {
       const { PaymentsData } = schema.components.schemas
-      const paymentsResponse = retrievePayments('2222222222')
+      const paymentsResponse = retrievePayments('2222222222') // sfd-id-check: allow - FRN
       expect({
         ...paymentsResponse,
         // add dummy values for fields calculated JIT in the route
@@ -40,7 +40,7 @@ describe('Fake Payments', () => {
         headers,
         payload: {
           request: {
-            payment: { SupplierAccount: '2222222222' },
+            payment: { SupplierAccount: '2222222222' }, // sfd-id-check: allow - FRN
             audit: {}
           }
         }
@@ -59,7 +59,7 @@ describe('Fake Payments', () => {
         payload: {
           request: {
             payment: {
-              SupplierAccount: '2222222222',
+              SupplierAccount: '2222222222', // sfd-id-check: allow - FRN
               FromDate: new Date().toISOString() // filter out all dates
             },
             audit: {}
@@ -79,7 +79,7 @@ describe('Fake Payments', () => {
         payload: {
           request: {
             payment: {
-              SupplierAccount: '2222222222',
+              SupplierAccount: '2222222222', // sfd-id-check: allow - FRN
               // filter out all dates (as payments are more recent)
               ToDate: new Date('2000-01-01').toISOString()
             },
@@ -100,7 +100,7 @@ describe('Fake Payments', () => {
         payload: {
           request: {
             payment: {
-              SupplierAccount: '2222222222',
+              SupplierAccount: '2222222222', // sfd-id-check: allow - FRN
               // include all dates (as payments are recent but not made in the future)
               FromDate: new Date('2000-01-01').toISOString(),
               ToDate: new Date().toISOString()

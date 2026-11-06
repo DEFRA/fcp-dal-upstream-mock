@@ -13,7 +13,7 @@ export const staticPersonData = {
   ...sfdPersonLookup,
   ...fcpPersonLookupPerformance,
 
-  // people in org 111111111 only
+  // people in org 111111111 only (sfd-id-check: allow)
   11111111: { crn: '9111111100' },
   11111112: { crn: '9111111200' },
   11111113: { crn: '9111111300' },
@@ -55,7 +55,7 @@ export const staticPersonData = {
     emailValidated: false,
     confirmed: true
   },
-  // Person in org 333333333
+  // Person in org 333333333 (sfd-id-check: allow)
   11111120: {
     crn: '9111111901',
     title: 'Lady',
@@ -65,7 +65,7 @@ export const staticPersonData = {
     lastName: 'Grey',
     privileges: []
   },
-  // Person in org 333333334
+  // Person in org 333333334 (sfd-id-check: allow)
   11111141: {
     crn: '9111111902',
     title: 'Mr',
@@ -74,14 +74,14 @@ export const staticPersonData = {
     middleName: '',
     lastName: 'Forsyth'
   },
-  // people in org 111111111 and 222222222
+  // people in org 111111111 and 222222222 (sfd-id-check: allow)
   11111122: { crn: '9111112200' },
   11111222: { crn: '9111122200' },
   11112222: { crn: '9111222200' },
   11122222: { crn: '9112222200' },
   11222222: { crn: '9122222200' },
   12222222: { crn: '9222222200' },
-  // people in org 222222222 only
+  // people in org 222222222 only (sfd-id-check: allow)
   22222220: { crn: '9222222000' },
   22222221: { crn: '9222222100' },
   22222222: { crn: '9222222201' },
@@ -152,7 +152,7 @@ export const staticPersonData = {
     crn: '9100000000',
     firstName: 'Searchable',
     lastName: 'Searchington',
-    personalIdentifiers: ['910000001'],
+    personalIdentifiers: ['910000001'], // sfd-id-check: allow - personal identifier
     address: {
       address1: '1 Search Lane',
       address2: null,
@@ -209,7 +209,7 @@ const validGeometries = JSON.parse(
 export const orgIdLookup = {
   ...sfdBusinessLookup,
   ...fcpBusinessLookupPerformance,
-  100000000: {
+  /* sfd-id-check: allow - organisation ID */ 100000000: {
     sbi: 800000000,
     customers: [], // org with no customers
     agreements: [], // ... no agreements
@@ -219,7 +219,7 @@ export const orgIdLookup = {
     payments: { parmPayments: [] }, // ... no payments
     overrides: {} // any static overrides for this org can go here
   },
-  111111111: {
+  /* sfd-id-check: allow - organisation ID */ 111111111: {
     sbi: 811111111,
     // Bank-change attempts for this person are locked
     bankLockedPersonIds: [11111119],
@@ -242,16 +242,16 @@ export const orgIdLookup = {
     ],
     agreements: [
       {
-        contract_id: '111111111',
-        payment_schedules: [111111111, 111111112, 111111113]
+        contract_id: '111111111', // sfd-id-check: allow - agreement IDs
+        payment_schedules: [111111111, 111111112, 111111113] // sfd-id-check: allow - agreement IDs
       },
       {
-        contract_id: '111111112',
-        payment_schedules: [111111121, 111111122, 111111123]
+        contract_id: '111111112', // sfd-id-check: allow - agreement IDs
+        payment_schedules: [111111121, 111111122, 111111123] // sfd-id-check: allow - agreement IDs
       },
       {
-        contract_id: '111111113',
-        payment_schedules: [111111131, 111111132, 111111133]
+        contract_id: '111111113', // sfd-id-check: allow - agreement IDs
+        payment_schedules: [111111131, 111111132, 111111133] // sfd-id-check: allow - agreement IDs
       }
     ],
     applications: [{ application_history: [{}] }],
@@ -311,10 +311,10 @@ export const orgIdLookup = {
       ]
     }
   },
-  222222222: {
+  /* sfd-id-check: allow - organisation ID */ 222222222: {
     sbi: 822222222,
     // FRN: pinned to match the orgId so bank example payloads stay readable.
-    overrides: { businessReference: '2222222222' },
+    overrides: { businessReference: '2222222222' }, // sfd-id-check: allow - FRN
     // Bank details not editable.
     bankAccountStatus: { submitted: true, updatedRecently: true, new: false },
     existingAccounts: [
@@ -391,21 +391,21 @@ export const orgIdLookup = {
     ],
     agreements: [
       {
-        contract_id: '222222222',
-        payment_schedules: [2222222212, 2222222213, 2222222214]
+        contract_id: '222222222', // sfd-id-check: allow - agreement IDs
+        payment_schedules: [2222222212, 2222222213, 2222222214] // sfd-id-check: allow - agreement IDs
       },
       {
-        contract_id: '222222223',
-        payment_schedules: [222222222, 222222223, 222222224]
+        contract_id: '222222223', // sfd-id-check: allow - agreement IDs
+        payment_schedules: [222222222, 222222223, 222222224] // sfd-id-check: allow - agreement IDs
       },
       {
-        contract_id: '222222224',
-        payment_schedules: [222222232, 222222233, 222222234]
+        contract_id: '222222224', // sfd-id-check: allow - agreement IDs
+        payment_schedules: [222222232, 222222233, 222222234] // sfd-id-check: allow - agreement IDs
       }
     ]
   },
   // Contains user with no first name and no messages
-  333333333: {
+  /* sfd-id-check: allow - organisation ID */ 333333333: {
     sbi: 833333333,
     bankAccountStatus: { submitted: false, updatedRecently: false, new: true },
     customers: [
@@ -417,7 +417,7 @@ export const orgIdLookup = {
   },
 
   // Contains user with 10 messages, 5 deleted messages
-  333333334: {
+  /* sfd-id-check: allow - organisation ID */ 333333334: {
     sbi: 833333334,
     customers: [
       {
@@ -450,10 +450,10 @@ export const orgIdLookup = {
   },
 
   // Orgs that always returns specific status when requested
-  300000206: { sbi: 800000206, customers: [] },
-  300000401: { sbi: 800000401, customers: [] },
-  300000403: { sbi: 800000403, customers: [] },
-  300000500: { sbi: 800000500, customers: [] },
+  300000206: { sbi: 800000206, customers: [] }, // sfd-id-check: allow - organisation ID
+  300000401: { sbi: 800000401, customers: [] }, // sfd-id-check: allow - organisation ID
+  300000403: { sbi: 800000403, customers: [] }, // sfd-id-check: allow - organisation ID
+  300000500: { sbi: 800000500, customers: [] }, // sfd-id-check: allow - organisation ID
 
   8910001: {
     sbi: 890000001,

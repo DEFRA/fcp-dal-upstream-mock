@@ -19,7 +19,7 @@ describe('Land routes', () => {
     test('should return static data when defined in id-lookups for the organisation', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcels/historic/01-Jan-25'
+        url: '/lms/organisation/111111111/parcels/historic/01-Jan-25' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toConformToSchema(
@@ -39,7 +39,7 @@ describe('Land routes', () => {
     test('should return faked data when NOT defined in id-lookups for the organisation', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/222222222/parcels/historic/01-Jan-25'
+        url: '/lms/organisation/222222222/parcels/historic/01-Jan-25' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toConformToSchema(
@@ -69,7 +69,7 @@ describe('Land routes', () => {
     test('should return 403 if supplied historicDate is badly formed', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcels/historic/invalid'
+        url: '/lms/organisation/111111111/parcels/historic/invalid' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(403)
     })
@@ -79,7 +79,7 @@ describe('Land routes', () => {
       async (historicDate) => {
         const { result, statusCode } = await server.inject({
           method: 'GET',
-          url: `/lms/organisation/111111111/parcels/historic/${historicDate}`
+          url: `/lms/organisation/111111111/parcels/historic/${historicDate}` // sfd-id-check: allow - organisation ID
         })
         expect(statusCode).toBe(500)
         expect(result).toEqual({
@@ -94,7 +94,7 @@ describe('Land routes', () => {
     test('should not return data where land is defined AND empty in id-lookups for the organisation', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/100000000/parcels/historic/01-Jan-25'
+        url: '/lms/organisation/100000000/parcels/historic/01-Jan-25' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual([])
@@ -105,7 +105,7 @@ describe('Land routes', () => {
     test('should return data for valid request', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel-details/historic/01-Jan-25'
+        url: '/lms/organisation/111111111/parcel-details/historic/01-Jan-25' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual(
@@ -127,7 +127,7 @@ describe('Land routes', () => {
     test('should return 403 if historicDate is invalid', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel-details/historic/invalid'
+        url: '/lms/organisation/111111111/parcel-details/historic/invalid' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(403)
     })
@@ -137,7 +137,7 @@ describe('Land routes', () => {
     test('should return data with geometries omitted by default', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual({
@@ -161,7 +161,7 @@ describe('Land routes', () => {
     test('should return data with geometries included when requested', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=true'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=true' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual({
@@ -213,7 +213,7 @@ describe('Land routes', () => {
     test('should return 403 if historicDate is badly formed', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/invalid/land-covers'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/invalid/land-covers' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(403)
     })
@@ -221,7 +221,7 @@ describe('Land routes', () => {
     test('should return 500 if historicDate matches the pattern but cannot be parsed', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/00-AAA-00/land-covers'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/00-AAA-00/land-covers' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(500)
     })
@@ -229,7 +229,7 @@ describe('Land routes', () => {
     test('should treat includeGeometries=null as false', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=null'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=null' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result.features[0].geometry).toBeNull()
@@ -238,7 +238,7 @@ describe('Land routes', () => {
     test('should treat any unrecognised includeGeometries value as false', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=foo'
+        url: '/lms/organisation/111111111/parcel/sheet-id/TE0001/parcel-id/1001/historic/01-Mar-25/land-covers?includeGeometries=foo' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result.features[0].geometry).toBeNull()
@@ -249,7 +249,7 @@ describe('Land routes', () => {
     test('should return data', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/covers-summary/historic/01-Jan-25'
+        url: '/lms/organisation/111111111/covers-summary/historic/01-Jan-25' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual([
@@ -274,7 +274,7 @@ describe('Land routes', () => {
     test('should throw error if org does not exist', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/999999999/covers-summary/historic/01-Jan-25'
+        url: '/lms/organisation/999999999/covers-summary/historic/01-Jan-25' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(500)
     })
@@ -290,7 +290,7 @@ describe('Land routes', () => {
     test('should return 403 if historicDate is invalid', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/covers-summary/historic/invalid'
+        url: '/lms/organisation/111111111/covers-summary/historic/invalid' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(403)
     })
@@ -300,7 +300,7 @@ describe('Land routes', () => {
     test('should return data', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/geometries?bbox=0,0,0,0'
+        url: '/lms/organisation/111111111/geometries?bbox=0,0,0,0' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
       expect(result).toEqual({
@@ -343,7 +343,7 @@ describe('Land routes', () => {
     test('should return 400 if bounding box is missing', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/geometries'
+        url: '/lms/organisation/111111111/geometries' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(400)
     })
@@ -351,7 +351,7 @@ describe('Land routes', () => {
     test('should return 400 if bounding box is empty', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/geometries?bbox='
+        url: '/lms/organisation/111111111/geometries?bbox=' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(400)
     })
@@ -363,7 +363,7 @@ describe('Land routes', () => {
     ])('should return 404 if bounding box has %s (%s)', async (_description, bbox) => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: `/lms/organisation/111111111/geometries?bbox=${bbox}`
+        url: `/lms/organisation/111111111/geometries?bbox=${bbox}` // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(404)
     })
@@ -371,7 +371,7 @@ describe('Land routes', () => {
     test('should return data if bounding box contains signed/leading-zero coordinates', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/lms/organisation/111111111/geometries?bbox=-1.5,%2B2.0,1,00.1'
+        url: '/lms/organisation/111111111/geometries?bbox=-1.5,%2B2.0,1,00.1' // sfd-id-check: allow - organisation ID
       })
       expect(statusCode).toBe(200)
     })
