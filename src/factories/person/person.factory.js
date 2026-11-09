@@ -151,6 +151,56 @@ const personMatchers = {
 export const searchPeople = (searchFieldType, searchPhrase) =>
   personMatchers[searchFieldType](searchPhrase)
 
+const normaliseName = (name) => `${name ?? ''}`.trim().toLowerCase()
+const toDateOnly = (dateOrMillis) => {
+  const date = new Date(dateOrMillis)
+  return !['number', 'string'].includes(typeof dateOrMillis) || Number.isNaN(date.getTime())
+    ? null
+    : date.toISOString().slice(0, 10)
+}
+
+/**
+ * Find an existing person matching the supplied details, for POST /person/check/duplicates.
+ * A match requires the same first name, last name (both case-insensitive), date of birth
+ * (same calendar day), mobile and landline (both exact). A missing date of birth or phone number
+ * only matches a person who has none. The person with the supplied id, if any, is never matched against itself,
+ * and deactivated people are never matched.
+ * @param {object} details
+ * @param {number} [details.id] - id of the person being checked
+ * @param {string} details.firstName
+ * @param {string} details.lastName
+ * @param {number|string} details.dateOfBirth - epoch millis or date-time string
+ * @param {string} [details.mobile]
+ * @param {string} [details.landline]
+ * @returns the matching person, or undefined if there is no match
+ */
+export const findDuplicatePerson = ({
+  id,
+  firstName,
+  lastName,
+  dateOfBirth,
+  mobile = null,
+  landline = null
+} = {}) => {
+  const first = normaliseName(firstName)
+  const last = normaliseName(lastName)
+  const dob = toDateOnly(dateOfBirth)
+  if (!first || !last || (dateOfBirth != null && !dob)) {
+    return undefined
+  }
+
+  return allPeople().find(
+    (person) =>
+      `${person.id}` !== `${id}` &&
+      !person.deactivated &&
+      normaliseName(person.firstName) === first &&
+      normaliseName(person.lastName) === last &&
+      toDateOnly(person.dateOfBirth) === dob &&
+      (person.mobile ?? null) === mobile &&
+      (person.landline ?? null) === landline
+  )
+}
+
 export const updatePerson = (personId, updatesToPerson) => {
   const person = retrievePerson(personId)
   const updatedPerson = applyUpdates(personUpdateSchema, person, updatesToPerson)

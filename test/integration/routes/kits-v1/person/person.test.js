@@ -1,5 +1,6 @@
 import Hapi from '@hapi/hapi'
 import { config } from '../../../../../src/config.js'
+import { crnToPersonId } from '../../../../../src/factories/id-lookups.js'
 import { person } from '../../../../../src/routes/kits-v1/person.js'
 import { loadSchema } from '../../../../../src/utils/validatePayload.js'
 
@@ -352,6 +353,214 @@ describe('Person routes', () => {
         })
       ])
     )
+  })
+
+  describe('POST /person/check/duplicates', () => {
+    const checkDuplicates = (payload) =>
+      server.inject({ method: 'POST', url: '/person/check/duplicates', payload })
+
+    const responseSchema = () =>
+      schema.paths['/person/check/duplicates'].post.responses['200'].content['application/json']
+        .schema
+
+    // a person created here, as the static fixtures may be deactivated
+    const dupe = {
+      firstName: 'Dupe',
+      lastName: 'Check',
+      dateOfBirth: 1065270380449,
+      landline: '01215 090627',
+      mobile: null
+    }
+    let dupeCrn, dupeId
+
+    beforeAll(async () => {
+      const { result } = await server.inject({
+        method: 'POST',
+        url: '/person/create',
+        payload: dupe
+      })
+      dupeCrn = result._data
+      dupeId = Number(crnToPersonId[dupeCrn])
+    })
+
+    test('should return the matching person, conforming to the schema', async () => {
+      const { result, statusCode } = await checkDuplicates(dupe)
+
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({
+        _data: {
+          customerReferenceNumber: dupeCrn,
+          firstName: 'Dupe',
+          lastName: 'Check',
+          landline: '01215 090627',
+          mobile: null,
+          dateOfBirth: 1065270380449,
+          id: dupeId
+        }
+      })
+      expect(result).toConformToSchema(responseSchema())
+    })
+
+    test('should match names case-insensitively and dateOfBirth on the same day', async () => {
+      const { result } = await checkDuplicates({
+        ...dupe,
+        firstName: ' DUPE ',
+        lastName: 'check',
+        dateOfBirth: Date.UTC(2003, 9, 4) // a different time on the same day
+      })
+
+      expect(result._data.id).toBe(dupeId)
+    })
+
+    test('should not match a deactivated person', async () => {
+      const details = {
+        firstName: 'Soon',
+        lastName: 'Deactivated',
+        dateOfBirth: 946684800000,
+        landline: '01632 960001',
+        mobile: '07700 900001'
+      }
+      await server.inject({ method: 'POST', url: '/person/create', payload: details })
+      const before = await checkDuplicates(details)
+      expect(before.result._data).toMatchObject(details)
+
+      await server.inject({
+        method: 'POST',
+        url: `/person/${before.result._data.id}/deactivate`,
+        payload: { partyNoteType: 'DeactivatePerson', reason: 'a reason', note: 'a note' }
+      })
+      const { result } = await checkDuplicates(details)
+
+      expect(result).toEqual({ _data: null })
+    })
+
+    test.each([
+      ['a date-time string', '2003-10-04T12:26:20.449Z'],
+      ['a date-time string at a different time on the same day', '2003-10-04T00:00:00Z']
+    ])('should match a dateOfBirth given as %s', async (_, dateOfBirth) => {
+      const { result } = await checkDuplicates({ ...dupe, dateOfBirth })
+
+      expect(result._data.id).toBe(dupeId)
+    })
+
+    test('should return dateOfBirth as epoch millis when matched with a date-time string', async () => {
+      const { result } = await checkDuplicates({ ...dupe, dateOfBirth: '2003-10-04T00:00:00Z' })
+
+      expect(result._data.dateOfBirth).toBe(1065270380449)
+    })
+
+    describe('for a person with no dateOfBirth', () => {
+      const noDob = {
+        firstName: 'No',
+        lastName: 'Birthday',
+        dateOfBirth: null,
+        landline: '01632 960002',
+        mobile: null
+      }
+      let noDobId
+
+      beforeAll(async () => {
+        const { result } = await server.inject({
+          method: 'POST',
+          url: '/person/create',
+          payload: noDob
+        })
+        noDobId = Number(crnToPersonId[result._data])
+      })
+
+      test('should match a null dateOfBirth', async () => {
+        const { result } = await checkDuplicates(noDob)
+
+        expect(result._data).toMatchObject({ id: noDobId, dateOfBirth: null })
+      })
+
+      test('should match a missing dateOfBirth', async () => {
+        const { dateOfBirth, ...withoutDob } = noDob
+        const { result } = await checkDuplicates(withoutDob)
+
+        expect(result._data.id).toBe(noDobId)
+      })
+
+      test('should not match when a dateOfBirth is given', async () => {
+        const { result } = await checkDuplicates({ ...noDob, dateOfBirth: 1065270380449 })
+
+        expect(result).toEqual({ _data: null })
+      })
+    })
+
+    test('should not match a person with a dateOfBirth when none is given', async () => {
+      const { result } = await checkDuplicates({ ...dupe, dateOfBirth: null })
+
+      expect(result).toEqual({ _data: null })
+    })
+
+    test('should treat a missing mobile as none', async () => {
+      const { mobile, ...withoutMobile } = dupe
+      const { result } = await checkDuplicates(withoutMobile)
+
+      expect(result._data.id).toBe(dupeId)
+    })
+
+    test.each([
+      ['a different landline', { landline: '01215 090628' }],
+      ['a landline with different whitespace', { landline: '01215090627' }],
+      ['a missing landline', { landline: undefined }],
+      ['a mobile the person does not have', { mobile: '07700 900000' }]
+    ])('should return null data for %s', async (_, overrides) => {
+      const { result } = await checkDuplicates({ ...dupe, ...overrides })
+
+      expect(result).toEqual({ _data: null })
+    })
+
+    test('should return null data when no match is found, conforming to the schema', async () => {
+      const { result, statusCode } = await checkDuplicates({ ...dupe, firstName: 'Other' })
+
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({ _data: null })
+      expect(result).toConformToSchema(responseSchema())
+    })
+
+    test('should not match the person against itself', async () => {
+      const { result } = await checkDuplicates({ ...dupe, id: dupeId })
+
+      expect(result).toEqual({ _data: null })
+    })
+
+    test('should return a 500 when no body is supplied', async () => {
+      const { statusCode } = await checkDuplicates(undefined)
+
+      expect(statusCode).toBe(500)
+    })
+
+    test.each([
+      ['invalid JSON', '{"firstName": "Big",', 'application/json'],
+      ['a JSON array', '[]', 'application/json'],
+      ['a JSON string', '"Big Skeleton"', 'application/json'],
+      ['plain text', 'Big Skeleton', 'text/plain'],
+      ['binary data', 'Big Skeleton', 'application/octet-stream']
+    ])('should return a 400 when the payload is %s', async (_, payload, contentType) => {
+      const { result, statusCode } = await server.inject({
+        method: 'POST',
+        url: '/person/check/duplicates',
+        payload,
+        headers: { 'content-type': contentType }
+      })
+
+      expect(statusCode).toBe(400)
+      expect(result).toEqual({ code: 400, message: 'Unable to process JSON' })
+    })
+
+    test.each([
+      ['an empty object', {}],
+      ['no dateOfBirth', { firstName: 'Dupe', lastName: 'Check' }],
+      ['an invalid dateOfBirth', { ...dupe, dateOfBirth: 'not a date' }],
+      ['an out of range dateOfBirth', { ...dupe, dateOfBirth: 1e20 }]
+    ])('should return null data for %s', async (_, payload) => {
+      const { result, statusCode } = await checkDuplicates(payload)
+
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({ _data: null })
+    })
   })
 
   describe('POST /person/{personId}/lock', () => {

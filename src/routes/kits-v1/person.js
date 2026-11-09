@@ -7,6 +7,7 @@ import {
   allPeople,
   createPerson,
   deactivatePerson,
+  findDuplicatePerson,
   lockPerson,
   retrievePerson,
   retrievePersonOrgs,
@@ -61,6 +62,16 @@ const mapPersonToPartyDigitalContact = ({ id, emailValidated }, requestEmail) =>
   validated: emailValidated // Returns whether the persons existing email is validated, not the one in the request!
 })
 
+const mapPersonToDuplicate = ({
+  customerReferenceNumber,
+  firstName,
+  lastName,
+  landline,
+  mobile,
+  dateOfBirth,
+  id
+}) => ({ customerReferenceNumber, firstName, lastName, landline, mobile, dateOfBirth, id })
+
 const validateUpdatePersonPayload = await createPayloadValidator(
   'routes/kits-v1/person-schema.oas.yml',
   (schema) => schema.paths['/person/{personId}'].put.requestBody.content['application/json'].schema
@@ -109,6 +120,10 @@ const checkPathId = (request, paramName) => {
 
   return id
 }
+
+// Not thrown as a Boom error, as emulateUpstreamErrors would replace this body
+const unableToProcessJson = (h) =>
+  h.response({ code: 400, message: 'Unable to process JSON' }).code(400)
 
 const checkPersonId = (request) => checkPathId(request, 'personId')
 const checkDigitalContactPartyId = (request) => checkPathId(request, 'digitalContactPartyId')
@@ -175,6 +190,30 @@ export const person = [
 
       // Upstream does not check the digital contact exists - an unknown id still succeeds
       return h.response({ _data: 'Success' })
+    }
+  },
+  {
+    method: 'POST',
+    path: '/person/check/duplicates',
+    options: {
+      payload: {
+        failAction: (_request, h) => unableToProcessJson(h).takeover()
+      }
+    },
+    handler: async (request, h) => {
+      const { payload } = request
+      if (payload == null || payload === '' || (Buffer.isBuffer(payload) && !payload.length)) {
+        throw Boom.internal('missing request body', request)
+      }
+
+      // Upstream returns this for any body it can't read as an object, including `[]`
+      if (typeof payload !== 'object' || Array.isArray(payload) || Buffer.isBuffer(payload)) {
+        logger.info('check duplicates: payload is not a JSON object')
+        return unableToProcessJson(h)
+      }
+
+      const duplicate = findDuplicatePerson(payload)
+      return h.response({ _data: duplicate ? mapPersonToDuplicate(duplicate) : null })
     }
   },
   {

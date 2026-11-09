@@ -324,6 +324,68 @@ paths:
                     type: string
                     example: >
                       There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
+  /person/check/duplicates:
+    post:
+      tags:
+        - 'person'
+      summary: 'Check for a duplicate person'
+      description: >
+        Checks whether a person matching the supplied details already exists. The mock matches on
+        first name, last name (case-insensitive), date of birth (same day), mobile and landline
+        (exact), where a missing date of birth or phone number only matches a person who has none,
+        ignoring the person with the supplied `id` and any deactivated people. A missing request body returns a 500, and a body that isn't a JSON
+        object returns a 400.
+      operationId: 'checkPersonDuplicates'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonDuplicateRequest'
+      responses:
+        '200':
+          description: >
+            The matching person, or `_data: null` if no match is found. Returns result inside a
+            CapdResponse.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _data:
+                    oneOf:
+                      - $ref: '#/components/schemas/PersonDuplicateResponse'
+                      - type: 'null'
+                required:
+                  - '_data'
+                additionalProperties: false
+        '400':
+          description: 'The request body is not a JSON object.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: 'Unable to process JSON'
+        '500':
+          description: 'No request body was provided.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: >
+                      There was an error processing your request. It has been logged (ID 704b9f3b19536a35).
   /person/{personId}/lock:
     post:
       tags:
@@ -861,6 +923,27 @@ components:
                 - type: string
                 - type: 'null'
           required: ['partyNoteType', 'note']
+    PersonDuplicateRequest:
+      type: object
+      properties:
+        id:
+          type: [integer, 'null']
+          format: int64
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        dateOfBirth:
+          oneOf:
+            - type: integer
+              description: 'Epoch milliseconds'
+            - type: string
+              format: date-time
+            - type: 'null'
+        landline:
+          type: [string, 'null']
+        mobile:
+          type: [string, 'null']
     PersonalUpdateRequest:
       type: 'object'
       properties:
@@ -1011,6 +1094,32 @@ components:
         - 'email'
         - 'locked'
         - 'deactivated'
+    PersonDuplicateResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        customerReferenceNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        landline:
+          type: [string, 'null']
+        mobile:
+          type: [string, 'null']
+        dateOfBirth:
+          type: [integer, 'null']
+        id:
+          type: integer
+      required:
+        - 'customerReferenceNumber'
+        - 'firstName'
+        - 'lastName'
+        - 'landline'
+        - 'mobile'
+        - 'dateOfBirth'
+        - 'id'
     PersonCreatedResponse:
       type: string
       description: The customer reference number of the created person
